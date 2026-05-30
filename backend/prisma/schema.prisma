@@ -1,0 +1,301 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ======================== 用户 ========================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("USER")       // ADMIN / USER
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions  Session[]
+  projects  Project[]
+  tasks     Task[]           @relation("Assignee")
+  customers Customer[]
+  searchResults  SearchResult[]
+  savedResearch  SavedResearch[]
+  notifications  Notification[]
+  conversations  Conversation[]
+  memories       UserMemory[]
+  goals          Goal[]
+  timeEntries    TimeEntry[]
+  communications Communication[]
+  insights       AiInsight[]
+}
+
+// ======================== 会话 ========================
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  device    String   @default("unknown")   // 设备类型（User-Agent 解析）
+  ip        String   @default("unknown")   // 登录 IP 地址
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ======================== 项目 ========================
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("ACTIVE")   // ACTIVE / COMPLETED / ARCHIVED
+  startDate   DateTime
+  endDate     DateTime?
+  budget      Int?                          // 项目预算（分），用 Int 存储避免浮点精度问题，前端 ÷100 显示元
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  owner       User     @relation(fields: [ownerId], references: [id])
+  tasks       Task[]
+  costRecords CostRecord[]
+  timeEntries TimeEntry[]
+  communications Communication[]
+
+  @@index([ownerId, status])
+}
+
+// ======================== 任务 ========================
+model Task {
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  status         String   @default("TODO")     // TODO / IN_PROGRESS / DONE / BLOCKED
+  priority       String   @default("MEDIUM")   // URGENT / HIGH / MEDIUM / LOW
+  estimatedHours Float
+  actualHours    Float?
+  startDate      DateTime?
+  dueDate        DateTime?
+  completedAt    DateTime?
+  projectId      String
+  assigneeId     String?
+  parentId       String?                    // 父任务 ID，null=顶层任务
+  progress       Float    @default(0)       // 完成进度 0~100，有子任务时自动计算
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee       User?    @relation("Assignee", fields: [assigneeId], references: [id])
+  parent         Task?    @relation("Subtasks", fields: [parentId], references: [id], onDelete: Cascade)
+  children       Task[]   @relation("Subtasks")
+  costRecords    CostRecord[]
+  timeEntries    TimeEntry[]
+
+  @@index([projectId, status])
+  @@index([assigneeId, status])
+  @@index([dueDate])
+  @@index([parentId])
+}
+
+// ======================== 成本记录 ========================
+model CostRecord {
+  id          String   @id @default(cuid())
+  amount      Int                          // 金额（分），用 Int 存储避免浮点精度问题，前端 ÷100 显示元
+  category    String                       // LABOR / MATERIAL / OVERHEAD / OTHER
+  description String
+  date        DateTime
+  projectId   String
+  taskId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([projectId, category])
+}
+
+// ======================== 客户 ========================
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  company   String?
+  address   String?
+  notes     String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user          User            @relation(fields: [userId], references: [id])
+  communications Communication[]
+}
+
+// ======================== 搜索结果 ========================
+model SearchResult {
+  id        String   @id @default(cuid())
+  query     String
+  source    String
+  title     String
+  content   String
+  url       String?
+  relevance Float
+  saved     Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  savedResearch SavedResearch[]
+}
+
+// ======================== 已收藏研究 ========================
+model SavedResearch {
+  id             String   @id @default(cuid())
+  title          String
+  summary        String
+  content        String
+  tags           String                        // JSON 数组字符串，如 ["前端","性能"]
+  userId         String
+  searchResultId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User          @relation(fields: [userId], references: [id])
+  searchResult   SearchResult? @relation(fields: [searchResultId], references: [id], onDelete: SetNull)
+}
+
+// ======================== AI 对话记录 ========================
+model Conversation {
+  id          String   @id @default(cuid())
+  userId      String
+  sessionId   String          // 会话 ID，同一组对话共享
+  role        String          // user / assistant / system / tool
+  content     String
+  contextType String?
+  contextId   String?
+  tokenCount  Int?
+  toolName    String?         // Function Calling 时记录工具名
+  toolResult  String?         // Function Calling 时记录工具返回
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sessionId])  // 按用户+会话查询
+}
+
+// ======================== 用户长期记忆 ========================
+model UserMemory {
+  id            String   @id @default(cuid())
+  userId        String
+  category      String              // PREFERENCE / HABIT / FINANCE / PROJECT / SUMMARY
+  key           String
+  value         String              // 精简的知识点，一句话
+  confidence    Float    @default(0.5)  // 置信度 0~1，多次确认后提升
+  source        String   @default("auto")  // auto(对话提炼) / user(用户主动说) / weekly(n8n总结)
+  lastAccessedAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+}
+
+// ======================== 系统配置 ========================
+model Setting {
+  id        String   @id @default(cuid())
+  userId    String   @default("system")  // "system" = 全局配置，否则为用户级配置
+  category  String                       // AI / NOTIFY / GENERAL 等
+  key       String
+  value     String
+  encrypted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, category, key])
+}
+
+// ======================== 目标管理 ========================
+model Goal {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  type        String             // MONTHLY / QUARTERLY / YEARLY
+  targetValue Float?
+  currentValue Float   @default(0)
+  unit        String?            // "元" / "个" / "%"
+  status      String   @default("ACTIVE")  // ACTIVE / COMPLETED / ABANDONED
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ======================== 工时记录 ========================
+model TimeEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  taskId      String?
+  projectId   String?
+  hours       Float                        // 工时数（小时），保留 Float 因为 2.5h 等小数合理
+  description String?
+  date        DateTime
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task        Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+}
+
+// ======================== 沟通记录 ========================
+model Communication {
+  id          String   @id @default(cuid())
+  userId      String
+  customerId  String?
+  projectId   String?
+  type        String             // EMAIL / PHONE / MEETING / CHAT / OTHER
+  content     String
+  summary     String?
+  nextFollowAt DateTime?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, customerId])
+}
+
+// ======================== AI 洞察 ========================
+model AiInsight {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String             // TASK / PROJECT / CUSTOMER / FINANCE / TIME / DECISION
+  title       String
+  content     String
+  severity    String   @default("INFO")  // INFO / WARNING / CRITICAL
+  actionable  Boolean  @default(false)
+  actionTaken Boolean  @default(false)
+  relatedId   String?            // 关联的业务 ID
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([userId, severity])
+}
+
+// ======================== 通知 ========================
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String             // TASK_DUE / COST_ALERT / PROJECT_CHANGE / AI_REPORT / SYSTEM
+  title       String
+  content     String
+  read        Boolean  @default(false)
+  relatedId   String?            // 关联的业务 ID（任务/项目等）
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
