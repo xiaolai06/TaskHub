@@ -1,0 +1,286 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import {
+  Loader2, AlertTriangle, CheckSquare, Plus, LayoutList, Columns3,
+  CalendarDays, X, Search, FolderKanban,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useTaskList, useCreateTask, useUpdateTask, useUpdateTaskStatus, useDeleteTask } from '@/hooks/useTasks';
+import { useProjectList } from '@/hooks/useProjects';
+import { TaskBoard } from '@/components/features/tasks/TaskBoard';
+import { TaskList } from '@/components/features/tasks/TaskList';
+import { TaskForm } from '@/components/features/tasks/TaskForm';
+import { TaskDetailSheet } from '@/components/features/tasks/TaskDetailSheet';
+import type { Task, CreateTaskInput, TaskQueryParams } from '@/hooks/useTasks';
+
+type ViewMode = 'board' | 'list';
+
+const statusFilters = [
+  { key: '', label: '全部' },
+  { key: 'TODO', label: '待办' },
+  { key: 'IN_PROGRESS', label: '进行中' },
+  { key: 'DONE', label: '已完成' },
+  { key: 'BLOCKED', label: '阻塞' },
+];
+
+const priorityFilters = [
+  { key: '', label: '全部' },
+  { key: 'URGENT', label: '紧急' },
+  { key: 'HIGH', label: '高' },
+  { key: 'MEDIUM', label: '中' },
+  { key: 'LOW', label: '低' },
+];
+
+export default function TasksPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // 从 URL 读取初始筛选状态
+  const [viewMode, setViewMode] = useState<ViewMode>((searchParams.get('view') as ViewMode) || 'board');
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
+  const [priorityFilter, setPriorityFilter] = useState(searchParams.get('priority') || '');
+  const [dateFrom, setDateFrom] = useState(searchParams.get('dateFrom') || '');
+  const [dateTo, setDateTo] = useState(searchParams.get('dateTo') || '');
+  const [search, setSearch] = useState(searchParams.get('search') || '');
+  const [projectFilter, setProjectFilter] = useState(searchParams.get('projectId') || '');
+  const [showForm, setShowForm] = useState(false);
+  const [editTask, setEditTask] = useState<Task | null>(null);
+  const [detailTask, setDetailTask] = useState<Task | null>(null);
+
+  // 同步筛选状态到 URL
+  useEffect(() => {
+    const sp = new URLSearchParams();
+    if (viewMode !== 'board') sp.set('view', viewMode);
+    if (statusFilter) sp.set('status', statusFilter);
+    if (priorityFilter) sp.set('priority', priorityFilter);
+    if (dateFrom) sp.set('dateFrom', dateFrom);
+    if (dateTo) sp.set('dateTo', dateTo);
+    if (search) sp.set('search', search);
+    if (projectFilter) sp.set('projectId', projectFilter);
+    const qs = sp.toString();
+    router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
+  }, [viewMode, statusFilter, priorityFilter, dateFrom, dateTo, search, projectFilter, pathname, router]);
+
+  // 构建后端查询参数（全部交给后端筛选）
+  const queryParams: TaskQueryParams = {
+    status: statusFilter || undefined,
+    priority: priorityFilter || undefined,
+    projectId: projectFilter || undefined,
+    search: search || undefined,
+    dueDateFrom: dateFrom || undefined,
+    dueDateTo: dateTo || undefined,
+    limit: 200,
+  };
+
+  // 数据
+  const { data, isLoading, error } = useTaskList(queryParams);
+  const { data: projects } = useProjectList({ limit: 100 });
+
+  // 操作
+  const createMutation = useCreateTask();
+  const updateMutation = useUpdateTask();
+  const updateStatusMutation = useUpdateTaskStatus();
+  const deleteMutation = useDeleteTask();
+
+  const tasks = data?.data || [];
+  const taskCount = tasks.length;
+  const hasActiveFilters = statusFilter || priorityFilter || dateFrom || dateTo || search || projectFilter;
+
+  // ========== 操作 ==========
+
+  function handleCreate(input: CreateTaskInput) {
+    createMutation.mutate(input, {
+      onSuccess: () => { setShowForm(false); setEditTask(null); },
+    });
+  }
+
+  function handleUpdate(input: CreateTaskInput) {
+    if (!editTask) return;
+    updateMutation.mutate(
+      { id: editTask.id, data: input },
+      { onSuccess: () => { setShowForm(false); setEditTask(null); } },
+    );
+  }
+
+  function handleEdit(task: Task) {
+    setEditTask(task);
+    setShowForm(true);
+  }
+
+  function handleDelete(id: string) {
+    deleteMutation.mutate(id);
+    setDetailTask(null);
+  }
+
+  function handleStatusChange(taskId: string, newStatus: string) {
+    updateStatusMutation.mutate({ id: taskId, status: newStatus });
+  }
+
+  function handleCardClick(task: Task) {
+    setDetailTask(task);
+  }
+
+  function clearFilters() {
+    setStatusFilter(''); setPriorityFilter(''); setDateFrom(''); setDateTo('');
+    setSearch(''); setProjectFilter('');
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* 工具栏 */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* 视图切换 */}
+          <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5">
+            <button onClick={() => setViewMode('board')}
+              className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+                viewMode === 'board' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+              <Columns3 className="h-3.5 w-3.5" />看板
+            </button>
+            <button onClick={() => setViewMode('list')}
+              className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+                viewMode === 'list' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+              <LayoutList className="h-3.5 w-3.5" />列表
+            </button>
+          </div>
+
+          {/* 搜索框 */}
+          <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5">
+            <Search className="h-3.5 w-3.5 text-slate-400" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="搜索任务..."
+              className="w-32 border-none bg-transparent text-xs text-slate-600 outline-none placeholder:text-slate-400"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="text-slate-300 hover:text-slate-500">
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+
+          {/* 项目筛选 */}
+          <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5">
+            <FolderKanban className="h-3.5 w-3.5 text-slate-400" />
+            <select
+              value={projectFilter}
+              onChange={(e) => setProjectFilter(e.target.value)}
+              className="border-none bg-transparent text-xs text-slate-600 outline-none"
+            >
+              <option value="">全部项目</option>
+              {projects?.data?.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* 状态筛选 */}
+          <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5">
+            {statusFilters.map((f) => (
+              <button key={f.key} onClick={() => setStatusFilter(f.key)}
+                className={cn('rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-all',
+                  statusFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 优先级筛选 */}
+          <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5">
+            {priorityFilters.map((f) => (
+              <button key={f.key} onClick={() => setPriorityFilter(f.key)}
+                className={cn('rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-all',
+                  priorityFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 日期范围 */}
+          <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-1.5">
+            <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
+            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+              className="border-none bg-transparent text-[11px] text-slate-600 outline-none" />
+            <span className="text-[11px] text-slate-300">—</span>
+            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+              className="border-none bg-transparent text-[11px] text-slate-600 outline-none" />
+          </div>
+
+          {/* 清除 */}
+          {hasActiveFilters && (
+            <button onClick={clearFilters}
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+              <X className="h-3 w-3" />清除
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          {!isLoading && !error && (
+            <span className="text-xs text-slate-400">{taskCount} 个任务</span>
+          )}
+          <button onClick={() => { setEditTask(null); setShowForm(true); }}
+            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95">
+            <Plus className="h-4 w-4" />新建任务
+          </button>
+        </div>
+      </div>
+
+      {/* 内容区 */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-24">
+          <AlertTriangle className="h-10 w-10 text-red-300" />
+          <p className="mt-4 text-sm text-red-500">加载任务失败</p>
+          <button onClick={() => window.location.reload()} className="mt-3 text-sm font-medium text-indigo-600 hover:underline">重试</button>
+        </div>
+      ) : taskCount === 0 && !hasActiveFilters ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-24 shadow-sm">
+          <CheckSquare className="mb-3 h-12 w-12 text-slate-200" />
+          <p className="text-sm font-medium text-slate-500">暂无任务</p>
+          <p className="mt-1 text-xs text-slate-400">点击「新建任务」开始创建</p>
+          <button onClick={() => { setEditTask(null); setShowForm(true); }}
+            className="mt-4 text-sm font-medium text-indigo-600 hover:underline">创建第一个任务</button>
+        </div>
+      ) : taskCount === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-20">
+          <CheckSquare className="mb-3 h-10 w-10 text-slate-200" />
+          <p className="text-sm text-slate-400">没有匹配的任务</p>
+          <button onClick={clearFilters} className="mt-3 text-sm font-medium text-indigo-600 hover:underline">清除筛选</button>
+        </div>
+      ) : viewMode === 'board' ? (
+        <TaskBoard tasks={tasks} onStatusChange={handleStatusChange} onEdit={handleEdit} onDelete={handleDelete} onClick={handleCardClick} />
+      ) : (
+        <TaskList tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} onStatusChange={handleStatusChange} />
+      )}
+
+      {/* 新建/编辑表单 */}
+      <TaskForm
+        open={showForm}
+        onClose={() => { setShowForm(false); setEditTask(null); }}
+        onSubmit={editTask ? handleUpdate : handleCreate}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+        editTask={editTask}
+        projects={projects?.data || []}
+      />
+
+      {/* 详情抽屉 */}
+      <TaskDetailSheet
+        task={detailTask}
+        open={!!detailTask}
+        onClose={() => setDetailTask(null)}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onStatusChange={handleStatusChange}
+      />
+    </div>
+  );
+}

@@ -28,10 +28,35 @@ model User {
   notifications  Notification[]
   conversations  Conversation[]
   memories       UserMemory[]
+  greetings      Greeting[]
+  profile        Profile?
+  preferences    UserPreference?
   goals          Goal[]
+  goalProgressLogs GoalProgressLog[]
   timeEntries    TimeEntry[]
   communications Communication[]
   insights       AiInsight[]
+}
+
+// ======================== 个人资料 ========================
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  bio         String?                       // 个人简介
+  birthday    DateTime?                     // 生日
+  zodiac      String?                       // 星座
+  mbti        String?                       // MBTI 类型
+  phone       String?                       // 手机号
+  location    String?                       // 所在地
+  company     String?                       // 公司/组织
+  title       String?                       // 职位头衔
+  website     String?                       // 个人网站
+  tags        String?                       // 趣味标签（JSON 数组）
+  avatarType  String   @default("color")    // color / image
+  avatarValue String?                       // 颜色值或图片URL
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ======================== 会话 ========================
@@ -54,17 +79,24 @@ model Project {
   status      String   @default("ACTIVE")   // ACTIVE / COMPLETED / ARCHIVED
   startDate   DateTime
   endDate     DateTime?
-  budget      Int?                          // 项目预算（分），用 Int 存储避免浮点精度问题，前端 ÷100 显示元
-  ownerId     String
+  budget       Int?                          // 项目预算（分），用 Int 存储避免浮点精度问题，前端 ÷100 显示元
+  expenseNote  String?                       // 支出说明
+  rewardNote   String?                       // 报酬说明
+  type         String?                       // 项目类型标签（如：开发/设计/运营/咨询）
+  ownerId      String
+  customerId   String?                       // 归属客户
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   owner       User     @relation(fields: [ownerId], references: [id])
+  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   tasks       Task[]
   costRecords CostRecord[]
   timeEntries TimeEntry[]
   communications Communication[]
+  goals       Goal[]
 
   @@index([ownerId, status])
+  @@index([customerId])
 }
 
 // ======================== 任务 ========================
@@ -76,6 +108,9 @@ model Task {
   priority       String   @default("MEDIUM")   // URGENT / HIGH / MEDIUM / LOW
   estimatedHours Float
   actualHours    Float?
+  cost           Int      @default(0)          // 任务花销（分），自动从 CostRecord 聚合
+  costNote       String?                       // 花销说明（自动从 CostRecord 汇总）
+  blockedReason  String?                       // 阻塞原因（status=BLOCKED 时填写）
   startDate      DateTime?
   dueDate        DateTime?
   completedAt    DateTime?
@@ -124,12 +159,34 @@ model Customer {
   phone     String?
   company   String?
   address   String?
+  industry  String?                          // 所属行业
+  status    String   @default("ACTIVE")      // ACTIVE / VIP / INACTIVE / LEAD
   notes     String?
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user          User            @relation(fields: [userId], references: [id])
+  projects      Project[]
   communications Communication[]
+  goals         Goal[]
+
+  @@index([userId, status])
+}
+
+// ======================== 祝福语 ========================
+model Greeting {
+  id        String   @id @default(cuid())
+  content   String                        // 语录内容
+  hourStart Int      @default(0)          // 生效起始小时 0-23
+  hourEnd   Int      @default(23)         // 生效结束小时 0-23
+  isActive  Boolean  @default(true)
+  source    String   @default("custom")   // custom / ai / system
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, isActive])
 }
 
 // ======================== 搜索结果 ========================
@@ -198,6 +255,31 @@ model UserMemory {
   @@unique([userId, key])
 }
 
+// ======================== 用户偏好 ========================
+model UserPreference {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  theme           String   @default("system")     // light / dark / system
+  language        String   @default("zh-CN")
+  timezone        String   @default("Asia/Shanghai")
+  dateFormat      String   @default("YYYY-MM-DD")
+  startPage       String   @default("/main/dashboard")
+  taskReminder    Boolean  @default(true)
+  reminderDays    Int      @default(1)
+  projectNotify   Boolean  @default(true)
+  systemNotify    Boolean  @default(true)
+  emailNotify     Boolean  @default(false)
+  dndStart        String?
+  dndEnd          String?
+  sidebarCollapsed Boolean @default(false)
+  pageSize        Int      @default(20)
+  defaultView     String   @default("list")
+  showStats       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 // ======================== 系统配置 ========================
 model Setting {
   id        String   @id @default(cuid())
@@ -214,20 +296,65 @@ model Setting {
 
 // ======================== 目标管理 ========================
 model Goal {
+  id            String   @id @default(cuid())
+  userId        String
+  title         String
+  description   String?
+  type          String             // MONTHLY / QUARTERLY / YEARLY
+  metricType    String   @default("MILESTONE")  // REVENUE / PROJECT_COUNT / CLIENT_COUNT / HOURS / PERCENTAGE / MILESTONE
+  targetValue   Float?                          // 目标值（可为空，MILESTONE 类型不需要）
+  currentValue  Float    @default(0)            // 当前进度值
+  unit          String?                         // "元" / "个" / "%" / "小时" / null（MILESTONE 类型）
+  progressMode  String   @default("AUTO")       // AUTO（自动计算）/ MANUAL（手动记录）/ MILESTONE（里程碑驱动）
+  status        String   @default("ACTIVE")     // ACTIVE / COMPLETED / ABANDONED / AT_RISK
+  startDate     DateTime
+  endDate       DateTime
+  projectId     String?                         // 关联项目（可选）
+  customerId    String?                         // 关联客户（可选）
+  reviewNote    String?                         // 复盘：未达标原因
+  nextAction    String?                         // 复盘：改进措施
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project       Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  milestones    GoalMilestone[]
+  progressLogs  GoalProgressLog[]
+
+  @@index([userId, status])
+  @@index([userId, type])
+  @@index([userId, startDate, endDate])
+  @@index([projectId])
+  @@index([customerId])
+}
+
+// 目标进度日记 - 记录每次进度变化
+model GoalProgressLog {
   id          String   @id @default(cuid())
+  goalId      String
   userId      String
-  title       String
-  description String?
-  type        String             // MONTHLY / QUARTERLY / YEARLY
-  targetValue Float?
-  currentValue Float   @default(0)
-  unit        String?            // "元" / "个" / "%"
-  status      String   @default("ACTIVE")  // ACTIVE / COMPLETED / ABANDONED
-  startDate   DateTime
-  endDate     DateTime
+  value       Float                          // 本次进度值（增量）
+  note        String?                        // 备注说明（如：收到项目A回款）
+  date        DateTime                       // 记录日期
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
+  @@index([userId, date])
+}
+
+model GoalMilestone {
+  id          String    @id @default(cuid())
+  goalId      String
+  title       String
+  targetValue Float
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  sortOrder   Int       @default(0)
+  goal        Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([goalId])
 }
 
 // ======================== 工时记录 ========================

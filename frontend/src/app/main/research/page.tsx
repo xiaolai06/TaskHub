@@ -1,9 +1,8 @@
 export default function ResearchPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900">业务研究</h1>
-      <p className="mt-2 text-gray-500">搜索行业资讯与研究</p>
-      <div className="mt-6 text-center text-gray-400">
+    <div className="mx-auto max-w-[1400px] space-y-5">
+      <h1 className="text-lg font-bold text-slate-800">业务研究</h1>
+      <div className="rounded-xl border border-slate-200/60 bg-white px-6 py-16 text-center text-sm text-slate-400 shadow-sm">
         研究功能开发中...
       </div>
     </div>

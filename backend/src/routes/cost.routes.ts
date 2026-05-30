@@ -1,13 +1,37 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
+import * as costService from '../services/cost.service';
+import { success } from '../utils/response';
 
 const router = Router();
 
-// TODO: GET / - 成本列表
-// TODO: POST / - 创建成本记录
-// TODO: GET /:id - 成本详情
-// TODO: PUT /:id - 更新成本
-// TODO: DELETE /:id - 删除成本
-// TODO: GET /project/:projectId - 项目成本汇总
-// TODO: GET /project/:projectId/summary - 按类别汇总
+router.get('/project/:projectId', async (req: Request, res: Response, next) => {
+  try {
+    const result = await costService.findAll(String(req.params.projectId), req.query as any);
+    success(res, result);
+  } catch (err) { next(err); }
+});
+
+router.get('/project/:projectId/summary', async (req: Request, res: Response, next) => {
+  try { const result = await costService.getSummaryByProject(String(req.params.projectId)); success(res, result); }
+  catch (err) { next(err); }
+});
+
+router.post('/project/:projectId', async (req: Request, res: Response, next) => {
+  try { const result = await costService.create(String(req.params.projectId), req.body); success(res, result, '创建成功', 201); }
+  catch (err) { next(err); }
+});
+
+router.delete('/:id', async (req: Request, res: Response, next) => {
+  try { await costService.remove(String(req.params.id)); success(res, null, '删除成功'); }
+  catch (err) { next(err); }
+});
+
+router.get('/summary', async (req: Request, res: Response, next) => {
+  try {
+    const month = typeof req.query.month === 'string' ? req.query.month : undefined;
+    const result = await costService.getMonthlySummary(req.userId!, month);
+    success(res, result);
+  } catch (err) { next(err); }
+});
 
 export default router;

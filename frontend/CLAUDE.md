@@ -105,3 +105,136 @@ xl: 1280px  - 桌面
 ### 浏览器验证
 - 使用 playwright MCP 打开页面截图，检查实际渲染效果
 - 测试响应式：320px / 768px / 1024px / 1440px 四个断点
+
+## 并行开发规范
+
+### 前置条件
+- `routes/index.ts` 已预注册所有模块（后端）
+- 所有页面骨架已创建（前端）
+- `api.ts` / `useAuth.ts` / `lib/utils.ts` 已就绪
+- shadcn/ui 组件库完整（19 个组件可用）
+
+### 标准页面开发流程（3 步）
+
+每开发一个新模块页面，严格按以下顺序：
+
+```
+1. hooks/useXxx.ts           ← React Query 封装 API 调用
+2. components/features/xxx/  ← 业务组件（表单/列表/卡片）
+3. app/main/xxx/page.tsx     ← 页面组装
+```
+
+### 前端 Hook 模板
+
+```typescript
+// hooks/useXxx.ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+
+const QUERY_KEY = 'projects';
+
+interface XxxParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+}
+
+export function useXxxList(params?: XxxParams) {
+  return useQuery({
+    queryKey: [QUERY_KEY, 'list', params],
+    queryFn: () => api.get('/projects', params),
+  });
+}
+
+export function useXxxDetail(id: string) {
+  return useQuery({
+    queryKey: [QUERY_KEY, 'detail', id],
+    queryFn: () => api.get(`/projects/${id}`),
+    enabled: !!id,
+  });
+}
+
+export function useCreateXxx() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: unknown) => api.post('/projects', data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [QUERY_KEY] }),
+  });
+}
+
+export function useUpdateXxx() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: unknown }) =>
+      api.put(`/projects/${id}`, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [QUERY_KEY] }),
+  });
+}
+
+export function useDeleteXxx() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/projects/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [QUERY_KEY] }),
+  });
+}
+```
+
+### 页面必须处理的三种状态
+
+每个页面都必须正确实现以下三种状态：
+
+```typescript
+// ========== 加载态 ==========
+if (isLoading) {
+  return (
+    <div className="flex items-center justify-center py-32">
+      <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+    </div>
+  );
+}
+
+// ========== 错误态 ==========
+if (error) {
+  const message = error instanceof ApiError ? error.message : '加载失败';
+  return (
+    <div className="flex flex-col items-center justify-center py-32">
+      <AlertTriangle className="h-10 w-10 text-red-300" />
+      <p className="mt-4 text-sm text-red-500">{message}</p>
+    </div>
+  );
+}
+
+// ========== 空状态 ==========
+if (!data || data.length === 0) {
+  return (
+    <div className="flex flex-col items-center justify-center py-32">
+      <FolderIcon className="h-12 w-12 text-slate-200" />
+      <p className="mt-4 text-sm font-medium text-slate-500">暂无数据</p>
+      <p className="mt-1 text-xs text-slate-400">点击按钮创建第一条记录</p>
+      <Button className="mt-4">新建</Button>
+    </div>
+  );
+}
+```
+
+### 新页面开发检查清单
+- [ ] `hooks/useXxx.ts` — React Query 封装完整
+- [ ] `components/features/xxx/` — 表单/列表/卡片组件
+- [ ] `app/main/xxx/page.tsx` — loading / empty / error 三态完整
+- [ ] 交互状态：hover / active / focus / loading / disabled
+- [ ] 删除操作有确认弹窗
+- [ ] 列表为空有空状态提示
+- [ ] 数据请求失败有错误提示
+- [ ] 成功/失败有 toast 通知
+- [ ] `npx tsc --noEmit` 零错误
+
+### 颜色实际使用（以仪表盘为参考）
+主界面交互元素使用 **indigo-600** 作为强调色：
+```
+按钮主色: bg-indigo-600 hover:bg-indigo-700
+链接: text-indigo-600 hover:text-indigo-500
+选中态: bg-indigo-50 text-indigo-600 border-l-indigo-500
+图标: text-indigo-500
+```
+语义色用于状态标识（Badge、标签），不做大面积背景色。

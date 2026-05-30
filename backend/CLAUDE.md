@@ -141,3 +141,145 @@ export type CreateXxxInput = z.infer<typeof createXxxSchema>;
 ### 复杂问题推理
 - 使用 sequential-thinking MCP 做链式推理
 - 适用场景：多表联查优化、复杂业务逻辑拆解、架构决策分析
+
+## 并行开发规范
+
+### 前置条件
+`routes/index.ts` 中所有模块已完成预注册，**开发新模块时不得修改此文件**。
+
+### 标准服务层模板（Prisma + 数据隔离）
+
+```typescript
+import { prisma } from '../server';
+import { AppError } from '../utils/errors';
+
+// 所有查询必须有 ownerId 进行数据隔离
+export async function findAll(userId: string, filters?: {
+  page?: number; limit?: number; status?: string;
+}) {
+  const { page = 1, limit = 20, status } = filters || {};
+  const where: Record<string, unknown> = { ownerId: userId };
+  if (status) where.status = status;
+
+  const [data, total] = await Promise.all([
+    prisma.xxx.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { updatedAt: 'desc' },
+    }),
+    prisma.xxx.count({ where }),
+  ]);
+
+  return { data, total, page, limit };
+}
+
+export async function findById(userId: string, id: string) {
+  const record = await prisma.xxx.findUnique({ where: { id } });
+  if (!record || record.ownerId !== userId) {
+    throw new AppError('资源不存在', 404, 'NOT_FOUND');
+  }
+  return record;
+}
+
+export async function create(userId: string, data: CreateInput) {
+  return prisma.xxx.create({
+    data: { ...data, ownerId: userId },
+  });
+}
+
+export async function update(userId: string, id: string, data: UpdateInput) {
+  const existing = await findById(userId, id);
+  return prisma.xxx.update({
+    where: { id: existing.id },
+    data,
+  });
+}
+
+export async function remove(userId: string, id: string) {
+  await findById(userId, id);
+  return prisma.xxx.delete({ where: { id } });
+}
+```
+
+### 标准路由模板
+
+```typescript
+import { Router, Request, Response } from 'express';
+import { validate } from '../middleware/validate';
+import { createXxxSchema, updateXxxSchema } from '../validators/xxx.schema';
+import * as xxxService from '../services/xxx.service';
+import { success } from '../utils/response';
+
+const router = Router();
+
+router.get('/', async (req: Request, res: Response, next) => {
+  try {
+    const result = await xxxService.findAll(req.userId!, req.query);
+    success(res, result);
+  } catch (err) { next(err); }
+});
+
+router.post('/', validate(createXxxSchema), async (req: Request, res: Response, next) => {
+  try {
+    const data = await xxxService.create(req.userId!, req.body);
+    success(res, data, '创建成功', 201);
+  } catch (err) { next(err); }
+});
+
+router.get('/:id', async (req: Request, res: Response, next) => {
+  try {
+    const data = await xxxService.findById(req.userId!, req.params.id);
+    success(res, data);
+  } catch (err) { next(err); }
+});
+
+router.put('/:id', validate(updateXxxSchema), async (req: Request, res: Response, next) => {
+  try {
+    const data = await xxxService.update(req.userId!, req.params.id, req.body);
+    success(res, data, '更新成功');
+  } catch (err) { next(err); }
+});
+
+router.delete('/:id', async (req: Request, res: Response, next) => {
+  try {
+    await xxxService.remove(req.userId!, req.params.id);
+    success(res, null, '删除成功');
+  } catch (err) { next(err); }
+});
+
+export default router;
+```
+
+### 标准 Validator 模板
+
+```typescript
+import { z } from 'zod';
+
+export const createXxxSchema = z.object({
+  name: z.string().min(1, '名称不能为空'),
+  description: z.string().optional(),
+  status: z.enum(['ACTIVE', 'COMPLETED', 'ARCHIVED']).optional(),
+  startDate: z.string().refine(d => !isNaN(Date.parse(d)), '日期格式无效'),
+  endDate: z.string().optional(),
+});
+
+export const updateXxxSchema = createXxxSchema.partial();
+
+export type CreateXxxInput = z.infer<typeof createXxxSchema>;
+export type UpdateXxxInput = z.infer<typeof updateXxxSchema>;
+```
+
+### 开发检查清单
+- [ ] `validators/xxx.schema.ts` — Zod 校验，中文错误提示
+- [ ] `services/xxx.service.ts` — 所有查询加 ownerId 过滤
+- [ ] `routes/xxx.routes.ts` — auth + validate + try-catch + next(err)
+- [ ] API 测试：正常 / 参数错误 / 未登录 / 重复创建 / 操作他人数据
+- [ ] `npx tsc --noEmit` 零错误
+
+### 记住
+- `prisma` 从 `../server` 导入，不要 new PrismaClient()
+- 金额字段用 **Int（分）**，不是 Float
+- 所有查询必须过滤 `ownerId`，不能看别人的数据
+- 异步路由 try-catch 后必须 `next(err)`
+- `routes/index.ts` 已预注册完毕，不要再改

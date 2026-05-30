@@ -30,6 +30,19 @@ async function main() {
   console.log('✅ 用户: 2 条（admin@taskflow.com / user@taskflow.com，密码都是 123456）');
 
   // ========== 2. 项目 ==========
+  const customer1 = await prisma.customer.create({
+    data: { name: '张三', email: 'zhangsan@example.com', phone: '13800138001', company: '阿里巴巴', industry: '互联网', status: 'VIP', notes: '重要客户，决策人是技术总监李总，对交付质量要求高', userId: admin.id },
+  });
+  const customer2 = await prisma.customer.create({
+    data: { name: '李四', email: 'lisi@example.com', phone: '13800138002', company: '腾讯科技', industry: '互联网', status: 'ACTIVE', notes: '长期合作伙伴，按季度结算', userId: admin.id },
+  });
+  const customer3 = await prisma.customer.create({
+    data: { name: '王五', email: 'wangwu@example.com', phone: '13800138003', company: '字节跳动', industry: '互联网', status: 'LEAD', userId: user.id },
+  });
+
+  console.log('✅ 客户: 3 条');
+
+  // ========== 2. 项目 ==========
   const project1 = await prisma.project.create({
     data: {
       name: 'TaskFlow+ 开发',
@@ -38,7 +51,11 @@ async function main() {
       startDate: new Date('2026-05-01'),
       endDate: new Date('2026-08-31'),
       budget: 5000000, // 50000.00 元
+      rewardNote: '一次性支付 5 万，上线后付尾款 2 万',
+      expenseNote: '外包设计费 1.2 万 + 服务器 3 千',
+      type: '开发',
       ownerId: admin.id,
+      customerId: customer1.id,
     },
   });
 
@@ -50,7 +67,11 @@ async function main() {
       startDate: new Date('2026-06-01'),
       endDate: new Date('2026-09-30'),
       budget: 3000000, // 30000.00 元
+      rewardNote: '按月付费 1 万/月，共 3 个月',
+      expenseNote: '人工成本为主',
+      type: '咨询',
       ownerId: user.id,
+      customerId: customer2.id,
     },
   });
 
@@ -159,16 +180,18 @@ async function main() {
 
   console.log('✅ 成本记录: 5 条');
 
-  // ========== 5. 客户 ==========
-  await prisma.customer.createMany({
+  // ========== 5. 沟通记录 ==========
+  await prisma.communication.createMany({
     data: [
-      { name: '张三', email: 'zhangsan@example.com', phone: '13800138001', company: '阿里巴巴', userId: admin.id },
-      { name: '李四', email: 'lisi@example.com', phone: '13800138002', company: '腾讯科技', userId: admin.id },
-      { name: '王五', email: 'wangwu@example.com', phone: '13800138003', company: '字节跳动', userId: user.id },
+      { userId: admin.id, customerId: customer1.id, projectId: project1.id, type: 'PHONE', content: '确认需求范围和交付时间', summary: '需求确认', nextFollowAt: new Date('2026-06-05') },
+      { userId: admin.id, customerId: customer1.id, projectId: project1.id, type: 'MEETING', content: '中期汇报，展示进度', summary: '中期汇报' },
+      { userId: admin.id, customerId: customer1.id, type: 'EMAIL', content: '发送报价单', summary: '报价沟通' },
+      { userId: admin.id, customerId: customer2.id, projectId: project2.id, type: 'CHAT', content: '讨论数据迁移方案', summary: '方案讨论', nextFollowAt: new Date('2026-06-10') },
+      { userId: admin.id, customerId: customer2.id, type: 'PHONE', content: '确认月度付款节点', summary: '付款确认' },
     ],
   });
 
-  console.log('✅ 客户: 3 条');
+  console.log('✅ 沟通记录: 5 条');
 
   // ========== 6. 目标 ==========
   await prisma.goal.createMany({

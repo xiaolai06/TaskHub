@@ -1,9 +1,8 @@
 export default function ReportsPage() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900">报表分析</h1>
-      <p className="mt-2 text-gray-500">项目进度与成本分析</p>
-      <div className="mt-6 text-center text-gray-400">
+    <div className="mx-auto max-w-[1400px] space-y-5">
+      <h1 className="text-lg font-bold text-slate-800">报表分析</h1>
+      <div className="rounded-xl border border-slate-200/60 bg-white px-6 py-16 text-center text-sm text-slate-400 shadow-sm">
         报表开发中...
       </div>
     </div>

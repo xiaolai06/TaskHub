@@ -1,4 +1,8 @@
 import { z } from 'zod';
 
-// TODO: chatSchema - AI 对话校验
-// TODO: parseTaskSchema - 任务解析校验
+export const chatSchema = z.object({
+  message: z.string().min(1, '消息不能为空').max(2000, '消息不能超过 2000 字'),
+  sessionId: z.string().optional().default('default'),
+});
+
+export type ChatInput = z.infer<typeof chatSchema>;

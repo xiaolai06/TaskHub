@@ -8,7 +8,11 @@ interface User {
   email: string;
   name: string;
   role: string;
-  avatar?: string;
+  avatar?: string | null;
+}
+
+interface AuthResponse {
+  user: User;
 }
 
 interface AuthState {
@@ -28,24 +32,30 @@ export const useAuth = create<AuthState>((set) => ({
   setUser: (user) => set({ user, isLoading: false }),
 
   login: async (email, password) => {
-    const user = await api.post<User>('/auth/login', { email, password });
-    set({ user });
+    // 后端返回 { success: true, data: { user: {...} } }
+    // api.post 解包后得到 { user: {...} }
+    const data = await api.post<AuthResponse>('/auth/login', { email, password });
+    set({ user: data.user });
   },
 
   register: async (email, password, name) => {
-    const user = await api.post<User>('/auth/register', { email, password, name });
-    set({ user });
+    const data = await api.post<AuthResponse>('/auth/register', { email, password, name });
+    set({ user: data.user });
   },
 
   logout: async () => {
-    await api.post('/auth/logout');
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // 即使登出接口失败也清除本地状态
+    }
     set({ user: null });
   },
 
   fetchUser: async () => {
     try {
-      const user = await api.get<User>('/auth/me');
-      set({ user, isLoading: false });
+      const data = await api.get<AuthResponse>('/auth/me');
+      set({ user: data.user, isLoading: false });
     } catch {
       set({ user: null, isLoading: false });
     }

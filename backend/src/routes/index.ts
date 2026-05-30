@@ -17,6 +17,9 @@ import llmRoutes from './llm.routes';
 import notificationRoutes from './notification.routes';
 import settingRoutes from './setting.routes';
 import webhookRoutes from './webhook.routes';
+import greetingRoutes from './greeting.routes';
+import profileRoutes from './profile.routes';
+import preferenceRoutes from './preference.routes';
 
 // 导入认证中间件（需要登录才能访问的接口加这个）
 import { auth } from '../middleware/auth';
@@ -45,5 +48,8 @@ router.use('/research', auth, researchRoutes);      // /api/research/*
 router.use('/llm', auth, llmRoutes);                // /api/llm/*
 router.use('/notifications', auth, notificationRoutes);  // /api/notifications/*
 router.use('/settings', auth, settingRoutes);       // /api/settings/*
+router.use('/greetings', auth, greetingRoutes);    // /api/greetings/*
+router.use('/profile', auth, profileRoutes);      // /api/profile/*
+router.use('/preferences', auth, preferenceRoutes); // /api/preferences/*
 
 export default router;
