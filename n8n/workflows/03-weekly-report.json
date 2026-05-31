@@ -1,0 +1,91 @@
+{
+  "name": "自动周报",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1"
+            }
+          ]
+        }
+      },
+      "name": "每周一9点触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:3001/api/llm/conversations/weekly",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.TASKFLOW_JWT }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "获取本周对话",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3001/api/webhooks/notify",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"userId\": \"cmps8qwcj0000u8jog0if8n58\",\n  \"type\": \"AI_REPORT\",\n  \"title\": \"本周工作周报\",\n  \"content\": \"📊 周报生成完成\\n\\n本周对话: {{ $json.data.summary.totalMessages }} 条\\n用户提问: {{ $json.data.summary.userMessages }} 次\\nAI回复: {{ $json.data.summary.assistantMessages }} 次\\n会话次数: {{ $json.data.summary.sessions }} 次\\n\\n时间: {{ $now.format('yyyy-MM-dd HH:mm') }}\"\n}",
+        "options": {}
+      },
+      "name": "创建周报通知",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0]
+    }
+  ],
+  "connections": {
+    "每周一9点触发": {
+      "main": [
+        [
+          {
+            "node": "获取本周对话",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取本周对话": {
+      "main": [
+        [
+          {
+            "node": "创建周报通知",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

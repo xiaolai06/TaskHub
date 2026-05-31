@@ -1,0 +1,65 @@
+{
+  "name": "智能排期建议",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "llm-schedule",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "llm-schedule"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst projectId = body.projectId || 'unknown';\nconst tasks = body.tasks || [];\n\n// 简单排期逻辑\nconst DAILY_HOURS = 8;\nlet currentDate = new Date();\nconst suggestions = tasks.map(task => {\n  const daysNeeded = Math.ceil((task.estimatedHours || 4) / DAILY_HOURS);\n  const startDate = new Date(currentDate);\n  currentDate = new Date(currentDate.getTime() + daysNeeded * 24 * 60 * 60 * 1000);\n  return {\n    taskId: task.id,\n    title: task.title,\n    priority: task.priority || 'MEDIUM',\n    estimatedHours: task.estimatedHours || 4,\n    suggestedStart: startDate.toISOString().split('T')[0],\n    suggestedEnd: currentDate.toISOString().split('T')[0],\n    daysNeeded,\n  };\n});\n\nreturn [{\n  json: {\n    projectId,\n    suggestions,\n    totalDays: Math.ceil(tasks.reduce((sum, t) => sum + (t.estimatedHours || 4), 0) / DAILY_HOURS),\n    message: `已为 ${tasks.length} 个任务生成排期建议`,\n  }\n}];"
+      },
+      "name": "生成排期",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, data: $input.first().json }) }}",
+        "options": {}
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [440, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "生成排期",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "生成排期": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

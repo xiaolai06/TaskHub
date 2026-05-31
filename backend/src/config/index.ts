@@ -45,7 +45,7 @@ export const config = {
 
   // ===== n8n =====
   n8n: {
-    baseUrl: optionalEnv('N8N_BASE_URL', 'http://localhost:5678'),
+    baseUrl: optionalEnv('N8N_BASE_URL', 'http://localhost:4011'),
     webhookSecret: optionalEnv('N8N_WEBHOOK_SECRET'),
   },
 

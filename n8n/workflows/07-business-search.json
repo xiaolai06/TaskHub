@@ -1,0 +1,65 @@
+{
+  "name": "业务搜索",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "business-search",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "business-search"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst query = body.query || '';\nconst userId = body.userId || 'unknown';\n\n// 模拟搜索结果（实际应调用搜索 API）\nconst results = [\n  {\n    title: `关于「${query}」的行业报告`,\n    content: `这是一份关于${query}的详细分析报告，包含市场趋势、竞争格局和发展建议。`,\n    source: '行业报告',\n    relevance: 0.95,\n  },\n  {\n    title: `${query}最佳实践指南`,\n    content: `总结了${query}领域的最佳实践，包括技术选型、架构设计和团队协作。`,\n    source: '技术博客',\n    relevance: 0.82,\n  },\n  {\n    title: `${query}案例分析`,\n    content: `分析了多个成功案例，总结了关键成功因素和常见陷阱。`,\n    source: '案例库',\n    relevance: 0.75,\n  },\n];\n\nreturn [{\n  json: {\n    query,\n    userId,\n    results,\n    total: results.length,\n    message: `找到 ${results.length} 条相关结果`,\n  }\n}];"
+      },
+      "name": "执行搜索",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, data: $input.first().json }) }}",
+        "options": {}
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [440, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "执行搜索",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "执行搜索": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
