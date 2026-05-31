@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
   Loader2, CheckCircle, AlertCircle, Bot, Link, Shield, Database,
-  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search,
+  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search, Plus,
 } from 'lucide-react';
 
 // ========== 类型 ==========
@@ -36,8 +36,21 @@ const providers = [
 
 // ========== AI 配置 ==========
 
+// ========== 常量 ==========
+
+interface ProviderInfo {
+  name: string;
+  label: string;
+  baseUrl: string;
+  apiKey: string;
+}
+
+// ========== AI 配置 ==========
+
 function AIConfig() {
-  const [provider, setProvider] = useState('deepseek');
+  // 供应商管理
+  const [providers, setProviders] = useState<ProviderInfo[]>([]);
+  const [selectedProvider, setSelectedProvider] = useState('deepseek');
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
   const [defaultModel, setDefaultModel] = useState('');
@@ -45,17 +58,36 @@ function AIConfig() {
   const [models, setModels] = useState<AIModel[]>([]);
   const [showKey, setShowKey] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string; modelCount?: number } | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [fetchingModels, setFetchingModels] = useState(false);
   const [fetchMsg, setFetchMsg] = useState('');
 
-  // 加载配置
+  // 自定义供应商弹窗
+  const [addProviderOpen, setAddProviderOpen] = useState(false);
+  const [newPName, setNewPName] = useState('');
+  const [newPLabel, setNewPLabel] = useState('');
+  const [newPUrl, setNewPUrl] = useState('');
+  const [newPKey, setNewPKey] = useState('');
+
+  // 加载供应商列表
+  useEffect(() => {
+    api.get<ProviderInfo[]>('/settings/ai/providers')
+      .then(providers => {
+        setProviders(providers);
+        // 自动选中第一个已配置的
+        const configured = providers.find(p => p.apiKey);
+        if (configured) setSelectedProvider(configured.name);
+      })
+      .catch(() => {});
+  }, []);
+
+  // 加载当前配置
   useEffect(() => {
     api.get<Record<string, string>>('/settings/ai')
       .then((res) => {
-        if (res.provider) setProvider(res.provider);
+        if (res.provider) setSelectedProvider(res.provider);
         if (res.base_url) setBaseUrl(res.base_url);
         if (res.default_model) setDefaultModel(res.default_model);
         if (res.powerful_model) setPowerfulModel(res.powerful_model);
@@ -64,38 +96,34 @@ function AIConfig() {
       .catch(() => {});
   }, []);
 
-  // 切换供应商时加载模型列表
+  // 切换供应商时自动填充 baseUrl
   useEffect(() => {
-    api.get<{ models: AIModel[]; baseUrl: string }>(`/settings/ai/models?provider=${provider}`)
-      .then((res) => {
-        setModels(res.models);
-        if (!baseUrl || Object.values(res.baseUrl).length) setBaseUrl(res.baseUrl);
-        if (res.models.length > 0 && !defaultModel) setDefaultModel(res.models[0].id);
-        if (res.models.length > 1 && !powerfulModel) setPowerfulModel(res.models[1].id);
-      })
-      .catch(() => {});
-  }, [provider]);
+    const p = providers.find(p => p.name === selectedProvider);
+    if (p) {
+      if (!baseUrl) setBaseUrl(p.baseUrl);
+      if (p.apiKey && p.apiKey !== '***' && !apiKey) setApiKey(p.apiKey);
+    }
+  }, [selectedProvider, providers]);
 
   async function handleTest() {
     setTesting(true);
     setTestResult(null);
     try {
-      const res = await api.post<{ success: boolean; message: string }>('/settings/ai/test', { provider, apiKey, baseUrl });
+      const res = await api.post<{ success: boolean; message: string; modelCount?: number; url?: string }>(
+        '/settings/ai/test', { provider: selectedProvider, apiKey, baseUrl },
+      );
       setTestResult(res);
     } catch {
       setTestResult({ success: false, message: '测试失败' });
-    } finally {
-      setTesting(false);
-    }
+    } finally { setTesting(false); }
   }
 
-  /** 从官方 API 动态获取模型列表 */
   async function handleFetchModels() {
     setFetchingModels(true);
     setFetchMsg('');
     try {
-      const res = await api.post<{ models: AIModel[]; error?: string }>(
-        '/settings/ai/fetch-models', { provider, apiKey, baseUrl },
+      const res = await api.post<{ models: AIModel[]; error?: string; note?: string }>(
+        '/settings/ai/fetch-models', { provider: selectedProvider, apiKey, baseUrl },
       );
       if (res.models && res.models.length > 0) {
         setModels(res.models);
@@ -104,9 +132,9 @@ function AIConfig() {
           const powerful = res.models.find(m => m.tier === 'powerful' || m.tier === 'balanced') || res.models[0];
           setPowerfulModel(powerful.id);
         }
-        setFetchMsg(res.error ? `已获取 ${res.models.length} 个模型（含 fallback）` : `已从官方获取 ${res.models.length} 个模型`);
+        setFetchMsg(`✅ 已获取 ${res.models.length} 个模型`);
       } else {
-        setFetchMsg(res.error || '未获取到模型');
+        setFetchMsg(res.note || res.error || '该供应商不支持模型列表API');
       }
     } catch {
       setFetchMsg('获取失败');
@@ -119,7 +147,7 @@ function AIConfig() {
     try {
       await api.post('/settings/batch', {
         settings: [
-          { category: 'AI', key: 'provider', value: provider },
+          { category: 'AI', key: 'provider', value: selectedProvider },
           { category: 'AI', key: 'api_key', value: apiKey, encrypted: true },
           { category: 'AI', key: 'base_url', value: baseUrl },
           { category: 'AI', key: 'default_model', value: defaultModel },
@@ -131,104 +159,202 @@ function AIConfig() {
     } catch {} finally { setSaving(false); }
   }
 
-  const inputCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
-  const selectCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  async function handleAddProvider() {
+    try {
+      await api.post('/settings/ai/providers', {
+        name: newPName, label: newPLabel, baseUrl: newPUrl, apiKey: newPKey,
+      });
+      // 刷新供应商列表
+      const pList = await api.get<ProviderInfo[]>('/settings/ai/providers');
+      setProviders(pList);
+      setAddProviderOpen(false);
+      setNewPName(''); setNewPLabel(''); setNewPUrl(''); setNewPKey('');
+      setSelectedProvider(newPName);
+    } catch {}
+  }
+
+  const inputCls = 'w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  const selectCls = 'w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 bg-white';
+
+  const selectedP = providers.find(p => p.name === selectedProvider);
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">AI 供应商</label>
-          <select value={provider} onChange={(e) => setProvider(e.target.value)} className={selectCls}>
-            {providers.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+      {/* 供应商选择 + 自定义 */}
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <label className="mb-1 block text-xs font-medium text-slate-600">AI 供应商</label>
+          <select value={selectedProvider} onChange={(e) => setSelectedProvider(e.target.value)} className={selectCls}>
+            {providers.map(p => (
+              <option key={p.name} value={p.name}>{p.label}{p.apiKey ? ' ✓' : ''}</option>
+            ))}
           </select>
         </div>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">API 地址</label>
-          <input type="text" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="自动填充" className={inputCls} />
-        </div>
-      </div>
-
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-700">API Key</label>
-        <div className="relative">
-          <input type={showKey ? 'text' : 'password'} value={apiKey} onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-xxxx" className={cn(inputCls, 'pr-10')} />
-          <button onClick={() => setShowKey(!showKey)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-            {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        <div className="flex items-end">
+          <button onClick={() => setAddProviderOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 transition-colors hover:border-indigo-300 hover:text-indigo-500"
+            title="添加自定义供应商">
+            <Plus className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">默认模型</label>
-          <div className="flex gap-2">
-            <select value={defaultModel} onChange={(e) => setDefaultModel(e.target.value)} className={selectCls}>
-              {models.map((m) => <option key={m.id} value={m.id}>{m.name} ({m.tier})</option>)}
-            </select>
-            <button onClick={handleFetchModels} disabled={fetchingModels || !apiKey}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50"
-              title="从官方 API 获取模型列表">
-              {fetchingModels ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            </button>
-          </div>
-          {fetchMsg && <p className={cn('mt-1 text-[11px]', fetchMsg.includes('已获取') ? 'text-emerald-500' : 'text-amber-500')}>{fetchMsg}</p>}
+          <label className="mb-1 block text-xs font-medium text-slate-600">API 地址</label>
+          <input type="text" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)}
+            placeholder={selectedP?.baseUrl || '自动填充'} className={inputCls} />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">复杂任务模型</label>
-          <select value={powerfulModel} onChange={(e) => setPowerfulModel(e.target.value)} className={selectCls}>
-            {models.map((m) => <option key={m.id} value={m.id}>{m.name} ({m.tier})</option>)}
-          </select>
+          <label className="mb-1 block text-xs font-medium text-slate-600">API Key</label>
+          <div className="relative">
+            <input type={showKey ? 'text' : 'password'} value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+              placeholder="sk-xxxx" className={cn(inputCls, 'pr-8')} />
+            <button onClick={() => setShowKey(!showKey)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 模型选择 */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">默认模型</label>
+          <div className="flex gap-2">
+            {models.length > 0 ? (
+              <select value={defaultModel} onChange={(e) => setDefaultModel(e.target.value)} className={selectCls}>
+                {models.map((m) => <option key={m.id} value={m.id}>{m.name} ({m.tier})</option>)}
+              </select>
+            ) : (
+              <input type="text" value={defaultModel} onChange={(e) => setDefaultModel(e.target.value)}
+                placeholder="手动输入模型名" className={inputCls} />
+            )}
+            <button onClick={handleFetchModels} disabled={fetchingModels || !apiKey}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition-all hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50"
+              title="从官方 API 获取模型列表">
+              {fetchingModels ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+          {fetchMsg && <p className={cn('mt-1 text-[11px]', fetchMsg.startsWith('✅') ? 'text-emerald-500' : 'text-amber-500')}>{fetchMsg}</p>}
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">复杂任务模型</label>
+          {models.length > 0 ? (
+            <select value={powerfulModel} onChange={(e) => setPowerfulModel(e.target.value)} className={selectCls}>
+              {models.map((m) => <option key={m.id} value={m.id}>{m.name} ({m.tier})</option>)}
+            </select>
+          ) : (
+            <input type="text" value={powerfulModel} onChange={(e) => setPowerfulModel(e.target.value)}
+              placeholder="手动输入" className={inputCls} />
+          )}
         </div>
       </div>
 
       {/* 测试结果 */}
       {testResult && (
-        <div className={cn('flex items-center gap-2 rounded-lg px-3 py-2 text-sm',
+        <div className={cn('flex items-center gap-2 rounded-lg px-3 py-2 text-xs',
           testResult.success ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600')}>
-          {testResult.success ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
+          {testResult.success ? <CheckCircle className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
           {testResult.message}
         </div>
       )}
 
       {saved && (
-        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-600">
-          <CheckCircle className="h-4 w-4" />配置已保存
+        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-600">
+          <CheckCircle className="h-3.5 w-3.5" />配置已保存
         </div>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <button onClick={handleTest} disabled={testing || !apiKey}
-          className="flex h-10 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-50">
-          {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wifi className="h-4 w-4" />}
+          className="flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 text-xs font-medium text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-50">
+          {testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wifi className="h-3.5 w-3.5" />}
           测试连接
         </button>
         <button onClick={handleSave} disabled={saving}
-          className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+          className="flex h-9 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 text-xs font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50">
+          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
           保存配置
         </button>
       </div>
+
+      {/* 自定义供应商弹窗 */}
+      {addProviderOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={() => setAddProviderOpen(false)}>
+          <div className="mx-4 w-full max-w-sm rounded-xl border border-slate-200 bg-white p-5 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="mb-3 text-sm font-semibold text-slate-800">添加 AI 供应商</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1 block text-[11px] text-slate-500">标识 (英文)</label>
+                <input value={newPName} onChange={e => setNewPName(e.target.value)} placeholder="xiaomi / custom" className={inputCls} />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] text-slate-500">显示名</label>
+                <input value={newPLabel} onChange={e => setNewPLabel(e.target.value)} placeholder="小米 MiMo" className={inputCls} />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] text-slate-500">API 地址</label>
+                <input value={newPUrl} onChange={e => setNewPUrl(e.target.value)} placeholder="https://api.xxx.com/v1" className={inputCls} />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] text-slate-500">API Key</label>
+                <input type="password" value={newPKey} onChange={e => setNewPKey(e.target.value)} placeholder="sk-xxx" className={inputCls} />
+              </div>
+              <button onClick={handleAddProvider} disabled={!newPName || !newPUrl}
+                className="w-full rounded-lg bg-indigo-600 py-2 text-xs font-medium text-white transition-all hover:bg-indigo-700 disabled:opacity-50">
+                添加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 // ========== 搜索配置 ==========
 
+interface SearchConfig {
+  topic?: string;
+  depth?: string;
+  maxResults?: number;
+  timeRange?: string;
+  startDate?: string;
+  endDate?: string;
+  includeRaw?: string;
+  chunksPerSource?: number;
+  country?: string;
+  includeDomains?: string;
+  excludeDomains?: string;
+}
+
 function SearchConfig() {
   const [provider, setProvider] = useState('none');
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
+  const [phToken, setPhToken] = useState('');
+  const [showPh, setShowPh] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // 搜索高级参数
+  const [cfg, setCfg] = useState<SearchConfig>({
+    topic: 'general', depth: 'basic', maxResults: 5,
+    timeRange: 'none', includeRaw: 'none', chunksPerSource: 3,
+    country: 'none', includeDomains: '', excludeDomains: '',
+  });
 
   useEffect(() => {
     api.get<Record<string, string>>('/settings/search')
       .then((res) => {
         if (res.provider) setProvider(res.provider);
         if (res.api_key && res.api_key !== '***') setApiKey(res.api_key);
+        if (res.producthunt_token && res.producthunt_token !== '***') setPhToken(res.producthunt_token);
+        if (res.config) {
+          try { setCfg(prev => ({ ...prev, ...JSON.parse(res.config) })); } catch {}
+        }
       })
       .catch(() => {});
   }, []);
@@ -240,6 +366,8 @@ function SearchConfig() {
         settings: [
           { category: 'SEARCH', key: 'provider', value: provider },
           { category: 'SEARCH', key: 'api_key', value: apiKey || '', encrypted: true },
+          { category: 'SEARCH', key: 'config', value: JSON.stringify(cfg) },
+          { category: 'SEARCH', key: 'producthunt_token', value: phToken || '', encrypted: true },
         ],
       });
       setSaved(true);
@@ -247,37 +375,134 @@ function SearchConfig() {
     } catch {} finally { setSaving(false); }
   }
 
-  const inputCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
-  const selectCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  const inputCls = 'w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  const selectCls = 'w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 bg-white';
 
   return (
     <div className="space-y-5">
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-slate-700">搜索供应商</label>
-        <select value={provider} onChange={(e) => setProvider(e.target.value)} className={selectCls}>
-          <option value="none">不使用联网搜索</option>
-          <option value="tavily">Tavily (推荐，有免费额度)</option>
-          <option value="serpapi">SerpAPI (Google 搜索)</option>
-        </select>
-        <p className="mt-1 text-[11px] text-slate-400">AI 联网搜索外部资料时使用，如查行业行情、技术趋势等</p>
+      {/* 供应商 + Key */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">搜索供应商</label>
+          <select value={provider} onChange={(e) => setProvider(e.target.value)} className={selectCls}>
+            <option value="none">不使用联网搜索</option>
+            <option value="tavily">Tavily (推荐)</option>
+            <option value="serpapi">SerpAPI (Google)</option>
+          </select>
+        </div>
+        {provider !== 'none' && (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-slate-600">API Key</label>
+            <div className="relative">
+              <input type={showKey ? 'text' : 'password'} value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+                placeholder={provider === 'tavily' ? 'tvly-xxxx' : 'serpapi key'} className={cn(inputCls, 'pr-8')} />
+              <button onClick={() => setShowKey(!showKey)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {provider !== 'none' && (
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">搜索 API Key</label>
-          <div className="relative">
-            <input type={showKey ? 'text' : 'password'} value={apiKey} onChange={(e) => setApiKey(e.target.value)}
-              placeholder={provider === 'tavily' ? 'tvly-xxxx' : 'serpapi key'} className={cn(inputCls, 'pr-10')} />
-            <button onClick={() => setShowKey(!showKey)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-              {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+        <>
+          {/* 分隔 */}
+          <div className="border-t border-slate-100 pt-4">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">搜索参数</h3>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">搜索主题</label>
+                <select value={cfg.topic || 'general'} onChange={e => setCfg(p => ({ ...p, topic: e.target.value }))} className={selectCls}>
+                  <option value="general">通用</option>
+                  <option value="news">新闻</option>
+                  <option value="finance">财经</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">搜索深度</label>
+                <select value={cfg.depth || 'basic'} onChange={e => setCfg(p => ({ ...p, depth: e.target.value }))} className={selectCls}>
+                  <option value="basic">基础</option>
+                  <option value="advanced">高级</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">最大结果数</label>
+                <select value={cfg.maxResults || 5} onChange={e => setCfg(p => ({ ...p, maxResults: +e.target.value }))} className={selectCls}>
+                  {[3, 5, 8, 10, 14, 20].map(n => <option key={n} value={n}>{n} 条</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-3 gap-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">时间范围</label>
+                <select value={cfg.timeRange || 'none'} onChange={e => setCfg(p => ({ ...p, timeRange: e.target.value }))} className={selectCls}>
+                  <option value="none">不限</option>
+                  <option value="day">24小时</option>
+                  <option value="week">一周</option>
+                  <option value="month">一月</option>
+                  <option value="year">一年</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">国家/地区</label>
+                <select value={cfg.country || 'none'} onChange={e => setCfg(p => ({ ...p, country: e.target.value }))} className={selectCls}>
+                  <option value="none">不限</option>
+                  <option value="cn">中国</option>
+                  <option value="us">美国</option>
+                  <option value="jp">日本</option>
+                  <option value="sg">新加坡</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">原始内容</label>
+                <select value={cfg.includeRaw || 'none'} onChange={e => setCfg(p => ({ ...p, includeRaw: e.target.value }))} className={selectCls}>
+                  <option value="none">不包含</option>
+                  <option value="text">纯文本</option>
+                  <option value="markdown">Markdown</option>
+                  <option value="html">HTML</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">包含域名（每行一个）</label>
+                <textarea rows={2} value={cfg.includeDomains || ''} onChange={e => setCfg(p => ({ ...p, includeDomains: e.target.value }))}
+                  placeholder="github.com&#10;zhihu.com" className={cn(inputCls, 'text-[11px]')} />
+                <p className="mt-0.5 text-[10px] text-slate-400">搜索结果仅限于这些网站</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">排除域名（每行一个）</label>
+                <textarea rows={2} value={cfg.excludeDomains || ''} onChange={e => setCfg(p => ({ ...p, excludeDomains: e.target.value }))}
+                  placeholder="zhihu.com&#10;csdn.net" className={cn(inputCls, 'text-[11px]')} />
+                <p className="mt-0.5 text-[10px] text-slate-400">搜索结果中排除这些网站</p>
+              </div>
+            </div>
           </div>
-          <p className="mt-1 text-[11px] text-slate-400">
-            {provider === 'tavily' ? '在 tavily.com 注册获取' : '在 serpapi.com 注册获取'}
-          </p>
-        </div>
+        </>
       )}
+
+      {/* Product Hunt Token */}
+      <div className="border-t border-slate-100 pt-4">
+        <label className="mb-1 block text-xs font-medium text-slate-600">
+          Product Hunt Token
+          <span className="ml-1 font-normal text-slate-400">（可选，免费申请）</span>
+        </label>
+        <div className="relative mt-1">
+          <input type={showPh ? 'text' : 'password'} value={phToken} onChange={e => setPhToken(e.target.value)}
+            placeholder="ph_xxxxxxxxxx" className={cn(inputCls, 'pr-8')} />
+          <button onClick={() => setShowPh(!showPh)}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            {showPh ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+        <p className="mt-0.5 text-[10px] text-slate-400">
+          在 producthunt.com → Settings → API 免费申请，每天 100 次请求
+        </p>
+      </div>
 
       {saved && (
         <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-600">

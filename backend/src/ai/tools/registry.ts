@@ -11,6 +11,12 @@ import { createProjectTool, updateProjectTool } from './create-project';
 import { createCustomerTool, updateCustomerTool, getClientFollowUpTool, getClientInsightsTool, logCommunicationTool, getClientRankingTool } from './get-client-follow-up';
 import { getGoalProgressTool, getWeeklyReviewTool, suggestWeeklyPlanTool, getBusinessHealthTool } from './get-goal-progress';
 import { searchWebTool } from './search-web';
+import { githubTrendingTool } from './github-trending';
+import { hackerNewsTool } from './hacker-news';
+import { npmSearchTool } from './npm-search';
+import { exchangeRateTool } from './exchange-rate';
+import { devToTool } from './dev-to';
+import { productHuntTool } from './product-hunt';
 
 const allTools: ToolDefinition[] = [
   // 💰 finance
@@ -23,7 +29,8 @@ const allTools: ToolDefinition[] = [
   // 🎯 goal
   getGoalProgressTool, getWeeklyReviewTool, suggestWeeklyPlanTool, getBusinessHealthTool,
   // 🔍 search
-  searchWebTool,
+  searchWebTool, githubTrendingTool, hackerNewsTool, npmSearchTool,
+  exchangeRateTool, devToTool, productHuntTool,
 ];
 
 const toolMap = new Map<string, ToolDefinition>();

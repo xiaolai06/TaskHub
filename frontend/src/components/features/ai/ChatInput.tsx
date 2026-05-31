@@ -1,2 +1,134 @@
-// TODO: AI 对话输入组件
-export function ChatInput() { return null; }
+'use client';
+
+import { useRef } from 'react';
+import { Send, Square, Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface ChatInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSend: () => void;
+  onStop: () => void;
+  isLoading: boolean;
+  /** 模型切换提示，显示后自动消失 */
+  toastMessage?: string | null;
+}
+
+/** 根据时间返回 3 个快捷建议 */
+function getTimeChips(): { icon: string; text: string }[] {
+  const hour = new Date().getHours();
+
+  if (hour >= 6 && hour < 10) {
+    return [
+      { icon: '🌅', text: '今日简报' },
+      { icon: '📋', text: '查看任务' },
+      { icon: '⚠️', text: '风险扫描' },
+    ];
+  }
+  if (hour >= 10 && hour < 17) {
+    return [
+      { icon: '📝', text: '创建任务' },
+      { icon: '⏱', text: '记录工时' },
+      { icon: '📞', text: '客户跟进' },
+    ];
+  }
+  if (hour >= 17 && hour < 22) {
+    return [
+      { icon: '🌙', text: '今日总结' },
+      { icon: '📅', text: '明日计划' },
+      { icon: '💰', text: '财务概览' },
+    ];
+  }
+  return [
+    { icon: '🌅', text: '今日简报' },
+    { icon: '📊', text: '项目进度' },
+    { icon: '👤', text: '客户分析' },
+  ];
+}
+
+export function ChatInput({
+  value,
+  onChange,
+  onSend,
+  onStop,
+  isLoading,
+  toastMessage,
+}: ChatInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const chips = getTimeChips();
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isLoading && value.trim()) onSend();
+    }
+  }
+
+  function handleChipClick(text: string) {
+    onChange(text);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
+  return (
+    <div className="shrink-0 border-t bg-white px-3 pb-3 pt-2.5">
+      {/* 模型切换 toast — 2s 自动消失 */}
+      {toastMessage && (
+        <div className="mb-2 flex items-center gap-1.5 rounded-md bg-emerald-50/70 px-2.5 py-1.5 text-[10px] text-emerald-700 animate-in fade-in slide-in-from-left-2">
+          <Check className="h-3 w-3" />
+          {toastMessage}
+        </div>
+      )}
+
+      {/* 快捷建议 — 在输入框上方 */}
+      <div className="mb-2 flex items-center gap-1.5">
+        {chips.map((chip) => (
+          <button
+            key={chip.text}
+            onClick={() => handleChipClick(chip.text)}
+            disabled={isLoading}
+            className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-400 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-40"
+          >
+            {chip.icon} {chip.text}
+          </button>
+        ))}
+      </div>
+
+      {/* 输入行 */}
+      <div className="flex items-center gap-2">
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={isLoading ? 'AI 正在思考...' : '输入你的问题...'}
+          disabled={isLoading}
+          className="h-[40px] flex-1 rounded-xl border border-slate-200 bg-white px-4 text-[13px] text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+        />
+
+        {isLoading ? (
+          <button
+            onClick={onStop}
+            className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-xl bg-red-500 text-white transition-all hover:bg-red-600 active:scale-95"
+            title="停止生成"
+          >
+            <Square className="h-4 w-4" />
+          </button>
+        ) : (
+          <button
+            onClick={onSend}
+            disabled={!value.trim()}
+            className={cn(
+              'flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-xl transition-all duration-150 active:scale-95',
+              value.trim()
+                ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm'
+                : 'bg-slate-100 text-slate-400',
+            )}
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

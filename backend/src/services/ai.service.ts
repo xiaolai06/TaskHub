@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import { prisma } from '../server';
 import { decrypt } from './encryption.service';
+import { getBaseUrl as getDynamicBaseUrl } from './setting.service';
 import type { ToolDefinition } from '../ai/tools/types';
 
 // ═══ 类型 ═══
@@ -18,22 +19,6 @@ interface AIConfig {
   model: string;
   powerfulModel: string;
 }
-
-// ═══ 供应商配置 ═══
-
-const PROVIDER_BASE_URLS: Record<string, string> = {
-  deepseek: 'https://api.deepseek.com',
-  openai: 'https://api.openai.com/v1',
-  claude: 'https://api.anthropic.com/v1',
-  ollama: 'http://localhost:11434/v1',
-};
-
-const PROVIDER_DEFAULT_MODELS: Record<string, string> = {
-  deepseek: 'deepseek-chat',
-  openai: 'gpt-4o-mini',
-  claude: 'claude-sonnet-4-20250514',
-  ollama: 'llama3',
-};
 
 // ═══ Token 估算 ═══
 
@@ -94,11 +79,17 @@ export class AIService {
     let apiKey: string;
     try { apiKey = decrypt(apiKeyEnc); } catch { return false; }
 
+    // 动态获取 baseUrl（从用户配置的 AI_PROVIDER 或预置列表）
+    let baseUrl = get('base_url');
+    if (!baseUrl) {
+      baseUrl = await getDynamicBaseUrl(this.userId, provider);
+    }
+
     this.config = {
       provider,
       apiKey,
-      baseUrl: PROVIDER_BASE_URLS[provider] || PROVIDER_BASE_URLS.deepseek,
-      model: get('default_model') || PROVIDER_DEFAULT_MODELS[provider] || 'deepseek-chat',
+      baseUrl,
+      model: get('default_model') || 'deepseek-chat',
       powerfulModel: get('powerful_model') || get('default_model') || 'deepseek-chat',
     };
 

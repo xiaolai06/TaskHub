@@ -124,26 +124,50 @@ export function MarkdownRenderer({ content }: { content: string }) {
 
 /** 行内渲染：加粗、斜体、代码、链接 */
 function renderInline(text: string): React.ReactNode {
-  const parts: React.ReactNode[] = [];
+  // 简化处理：使用安全的文本渲染，不注入 HTML
+  const parts: Array<{ type: 'text' | 'strong' | 'em' | 'code' | 'link'; text: string; url?: string }> = [];
   let remaining = text;
-  let key = 0;
 
-  // 粗体 **text**
-  const boldRegex = /\*\*(.+?)\*\*/g;
-  // 斜体 *text*
-  const italicRegex = /\*(.+?)\*/g;
-  // 行内代码 `code`
-  const codeRegex = /`([^`]+)`/g;
-  // 链接 [text](url)
-  const linkRegex = /\[(.+?)\]\((.+?)\)/g;
+  // 逐个提取 token
+  while (remaining.length > 0) {
+    const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
+    const italicMatch = remaining.match(/^\*(.+?)\*/);
+    const codeMatch = remaining.match(/^`([^`]+)`/);
+    const linkMatch = remaining.match(/^\[(.+?)\]\((.+?)\)/);
 
-  // 简化处理：逐个替换
-  remaining = remaining
-    .replace(linkRegex, (_, text, url) => `<a href="${url}" class="text-indigo-500 underline">${text}</a>`)
-    .replace(boldRegex, (_, text) => `<strong class="font-semibold text-slate-800">${text}</strong>`)
-    .replace(italicRegex, (_, text) => `<em class="italic">${text}</em>`)
-    .replace(codeRegex, (_, text) => `<code class="rounded bg-slate-100 px-1 py-0.5 text-xs text-rose-600 font-mono">${text}</code>`);
+    const matches = [
+      { m: boldMatch, type: 'strong' as const },
+      { m: italicMatch, type: 'em' as const },
+      { m: codeMatch, type: 'code' as const },
+      { m: linkMatch, type: 'link' as const },
+    ].filter(x => x.m);
 
-  // 渲染为 HTML
-  return <span dangerouslySetInnerHTML={{ __html: remaining }} />;
+    if (matches.length > 0) {
+      const earliest = matches.reduce((best, cur) =>
+        (cur.m!.index ?? Infinity) < (best.m!.index ?? Infinity) ? cur : best
+      );
+      const m = earliest.m!;
+      const prefix = remaining.substring(0, m.index);
+      if (prefix) parts.push({ type: 'text', text: prefix });
+      if (earliest.type === 'link') {
+        parts.push({ type: 'link', text: m[1], url: m[2] });
+      } else {
+        parts.push({ type: earliest.type, text: m[1] });
+      }
+      remaining = remaining.substring((m.index ?? 0) + m[0].length);
+    } else {
+      parts.push({ type: 'text', text: remaining });
+      remaining = '';
+    }
+  }
+
+  return <>{parts.map((p, i) => {
+    switch (p.type) {
+      case 'strong': return <strong key={i} className="font-semibold text-slate-800">{p.text}</strong>;
+      case 'em': return <em key={i} className="italic">{p.text}</em>;
+      case 'code': return <code key={i} className="rounded bg-slate-100 px-1 py-0.5 text-xs text-rose-600 font-mono">{p.text}</code>;
+      case 'link': return <a key={i} href={p.url} className="text-indigo-500 underline" target="_blank" rel="noreferrer">{p.text}</a>;
+      default: return <span key={i}>{p.text}</span>;
+    }
+  })}</>;
 }

@@ -43,6 +43,16 @@ interface HeaderProps {
   onOpenAi?: () => void;
 }
 
+function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return '刚刚';
+  if (mins < 60) return `${mins} 分钟前`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} 小时前`;
+  return `${Math.floor(hours / 24)} 天前`;
+}
+
 /** 时钟 */
 function LiveClock() {
   const [time, setTime] = useState('');
@@ -149,12 +159,24 @@ export function Header({ onOpenAi }: HeaderProps) {
   const roleLabel = user?.role === 'ADMIN' ? '管理员' : '成员';
   const urgentCount = quickTasks.filter((t) => t.priority === 'URGENT' || t.priority === 'HIGH').length;
 
-  const infoItems: InfoItem[] = [
-    { id: '1', type: 'alert', title: '逾期任务提醒', desc: '有 2 个任务已超过截止日期', time: '10 分钟前', read: false },
-    { id: '2', type: 'project', title: '项目进度更新', desc: '"官网重构" 完成率达到 75%', time: '1 小时前', read: false },
-    { id: '3', type: 'task', title: '新任务分配', desc: '你被分配到 "API 接口优化"', time: '2 小时前', read: true },
-    { id: '4', type: 'system', title: '系统通知', desc: '本周报表已自动生成', time: '3 小时前', read: true },
-  ];
+  const [infoItems, setInfoItems] = useState<InfoItem[]>([]);
+
+  useEffect(() => {
+    // 从 Notification 表加载近期 5 条通知
+    api.get<Array<{ id: string; type: string; title: string; content: string; read: boolean; createdAt: string }>>('/notifications?limit=5')
+      .then((res) => {
+        const items: InfoItem[] = (Array.isArray(res) ? res : (res as any)?.data || []).map((n: any) => ({
+          id: n.id,
+          type: n.type === 'TASK_DUE' ? 'alert' : n.type === 'PROJECT_CHANGE' ? 'project' : n.type === 'AI_REPORT' ? 'system' : 'system',
+          title: n.title,
+          desc: n.content || '',
+          time: formatRelativeTime(n.createdAt),
+          read: n.read,
+        }));
+        setInfoItems(items);
+      })
+      .catch(() => {});
+  }, []);
   const unreadInfo = infoItems.filter((i) => !i.read).length;
 
   const infoIcon = (type: InfoItem['type']) => {

@@ -13,7 +13,7 @@ const router = Router();
 // ═══ POST /chat/stream — SSE 流式对话 ═══
 router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Response) => {
   try {
-    const { message, sessionId } = req.body;
+    const { message, sessionId, model } = req.body;
 
     // SSE 响应头
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
@@ -56,7 +56,7 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
 
     // 流式对话
     let fullText = '';
-    for await (const event of ai.chat({ messages })) {
+    for await (const event of ai.chat({ messages, model })) {
       send(event);
       if (event.type === 'text') fullText += event.content;
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
@@ -15,14 +15,14 @@ const WRITE_TOOL_CACHE_MAP: Record<string, string[]> = {
   log_communication: ['customers'],
 };
 
-interface ToolCallEvent {
+export interface ToolCallEvent {
   name: string;
   args: Record<string, unknown>;
   result?: unknown;
   status: 'calling' | 'done' | 'error';
 }
 
-interface ChatMessage {
+export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -30,10 +30,11 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-interface ChatSession {
+export interface ChatSession {
   sessionId: string;
   messageCount: number;
   lastMessage: Date;
+  title?: string;
 }
 
 export function useAiChat() {
@@ -41,8 +42,16 @@ export function useAiChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentToolCalls, setCurrentToolCalls] = useState<ToolCallEvent[]>([]);
+  const abortRef = useRef<AbortController | null>(null);
 
-  const sendMessage = useCallback(async (message: string, sessionId: string = 'default'): Promise<void> => {
+  const sendMessage = useCallback(async (
+    message: string,
+    sessionId: string = 'default',
+    model?: string,
+  ): Promise<void> => {
+    // 如果有正在进行的请求，先中断
+    abortRef.current?.abort();
+
     setIsLoading(true);
     setCurrentToolCalls([]);
 
@@ -55,12 +64,16 @@ export function useAiChat() {
     const aiMsg: ChatMessage = { id: aiId, role: 'assistant', content: '', toolCalls: [], timestamp: new Date() };
     setMessages(prev => [...prev, aiMsg]);
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       const res = await fetch('http://localhost:3001/api/llm/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ message, sessionId }),
+        body: JSON.stringify({ message, sessionId, model }),
+        signal: controller.signal,
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -120,11 +133,20 @@ export function useAiChat() {
       }
       setIsLoading(false);
       setCurrentToolCalls([]);
-    } catch (err) {
-      setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: `错误: ${err instanceof Error ? err.message : '通信失败'}` } : m));
+    } catch (err: any) {
+      // 如果是主动中断，不显示错误
+      if (err?.name === 'AbortError') {
+        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: m.content + '\n\n_已停止生成_' } : m));
+      } else {
+        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: `错误: ${err instanceof Error ? err.message : '通信失败'}` } : m));
+      }
       setIsLoading(false);
       setCurrentToolCalls([]);
     }
+  }, [qc]);
+
+  const stopGeneration = useCallback(() => {
+    abortRef.current?.abort();
   }, []);
 
   const loadHistory = useCallback(async (sessionId: string) => {
@@ -142,5 +164,9 @@ export function useAiChat() {
     await api.delete(`/llm/conversations/${sessionId}`);
   }, []);
 
-  return { messages, isLoading, currentToolCalls, sendMessage, loadHistory, getSessions, deleteSession, setMessages };
+  return {
+    messages, isLoading, currentToolCalls,
+    sendMessage, stopGeneration,
+    loadHistory, getSessions, deleteSession, setMessages,
+  };
 }

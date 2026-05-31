@@ -249,25 +249,25 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                 >
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger
-                        className="flex items-center gap-2 min-w-0 cursor-default"
-                      >
-                        {task.isDelayed && (
-                          <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
-                        )}
-                        <span
-                          className={`text-xs truncate ${
-                            task.isDelayed ? 'text-red-600 font-medium' : 'text-slate-700'
-                          }`}
-                        >
-                          {task.title}
+                      <TooltipTrigger>
+                        <span className="flex items-center gap-2 min-w-0 cursor-default">
+                          {task.isDelayed && (
+                            <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
+                          )}
+                          <span
+                            className={`text-xs truncate ${
+                              task.isDelayed ? 'text-red-600 font-medium' : 'text-slate-700'
+                            }`}
+                          >
+                            {task.title}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] px-1 py-0 flex-shrink-0 ${colors.text} ${colors.border}`}
+                          >
+                            {PRIORITY_LABELS[task.priority] ?? task.priority}
+                          </Badge>
                         </span>
-                        <Badge
-                          variant="outline"
-                          className={`text-[10px] px-1 py-0 flex-shrink-0 ${colors.text} ${colors.border}`}
-                        >
-                          {PRIORITY_LABELS[task.priority] ?? task.priority}
-                        </Badge>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="text-xs">
                         <p className="font-medium">{task.title}</p>
@@ -280,9 +280,9 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                           </p>
                         )}
                       </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
 
                 {/* 甘特条 */}
                 <div

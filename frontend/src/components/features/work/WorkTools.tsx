@@ -20,7 +20,7 @@ interface TodayTodoItem {
 }
 
 interface TaskOption {
-  id: string; title: string; project: { name: string };
+  id: string; title: string; project: { name: string }; actualHours?: number | null; estimatedHours?: number;
 }
 
 // ========== 计时器卡片 ==========
@@ -82,8 +82,10 @@ function TimerPanel({ onClose }: { onClose: () => void }) {
   }, []);
 
   useEffect(() => {
-    api.get<{ data: TaskOption[] }>('/tasks?status=TODO,IN_PROGRESS&limit=100')
-      .then((res) => setTasks(res.data || [])).catch(() => {});
+    // 加载全部未完成任务供绑定选择
+    api.get<{ data: TaskOption[] }>('/tasks?limit=200')
+      .then((res) => setTasks((res.data || []).filter((t: TaskOption) => t.title)))
+      .catch(() => {});
   }, []);
 
   async function handleStart() {
@@ -131,7 +133,10 @@ function TimerPanel({ onClose }: { onClose: () => void }) {
           className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
           <option value="">不绑定任务</option>
           {tasks.map((t) => (
-            <option key={t.id} value={t.id}>{t.project?.name || ''} · {t.title}</option>
+            <option key={t.id} value={t.id}>
+              {t.project?.name || ''} · {t.title}
+              {t.actualHours != null ? ` [已记录 ${t.actualHours}h]` : t.estimatedHours ? ` [预估 ${t.estimatedHours}h]` : ''}
+            </option>
           ))}
         </select>
 
