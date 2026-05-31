@@ -77,19 +77,24 @@ export default function SchedulePage() {
   const { data: allTasks, isLoading } = useQuery<TaskItem[]>({
     queryKey: ['schedule', 'all-tasks'],
     queryFn: async () => {
-      const tasks: TaskItem[] = [];
       const projects = projectList?.data || [];
-      for (const p of projects) {
-        try {
-          const res = await api.get<any>(`/tasks?projectId=${p.id}&limit=100`);
-          const items = res?.data || res?.tasks || [];
-          for (const t of items) {
-            if (t.status !== 'DONE') {
-              tasks.push({ ...t, projectName: p.name, projectId: p.id });
-            }
+      if (projects.length === 0) return [];
+
+      // 并行获取所有项目的任务（替代顺序 for 循环的 N+1 请求）
+      const results = await Promise.allSettled(
+        projects.map(p => api.get<{ data?: TaskItem[]; tasks?: TaskItem[] }>(`/tasks?projectId=${p.id}&limit=100`)),
+      );
+
+      const tasks: TaskItem[] = [];
+      results.forEach((result, i) => {
+        if (result.status === 'rejected') return; // 单个项目失败不阻断其他项目
+        const items = result.value?.data || result.value?.tasks || [];
+        for (const t of items) {
+          if (t.status !== 'DONE') {
+            tasks.push({ ...t, projectName: projects[i].name, projectId: projects[i].id } as TaskItem);
           }
-        } catch {}
-      }
+        }
+      });
       return tasks;
     },
     enabled: !!(projectList?.data?.length),

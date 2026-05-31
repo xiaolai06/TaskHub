@@ -6,7 +6,15 @@ import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 import * as dashboardService from '../services/dashboard.service';
 
-const PROMPT = fs.readFileSync(path.resolve(__dirname, '../prompts/health-check.txt'), 'utf-8');
+function loadPrompt(filename: string, fallback: string): string {
+  try {
+    return fs.readFileSync(path.resolve(__dirname, `../prompts/${filename}`), 'utf-8');
+  } catch {
+    console.warn(`[health-check] Prompt file ${filename} not found, using fallback`);
+    return fallback;
+  }
+}
+const PROMPT = loadPrompt('health-check.txt', '你是项目健康度检查助手，请分析项目状态。');
 
 cron.schedule('0 10 * * 0', async () => {
   console.log('[health-check] 开始...');

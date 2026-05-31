@@ -62,17 +62,34 @@ export async function getOverview(userId: string, period?: string, type?: string
 export async function getProjectRanking(userId: string, period?: string, type?: string) {
   const { start, end } = parseRange(period, (type as 'day' | 'month' | 'year') || 'month');
   const projects = await prisma.project.findMany({ where: { ownerId: userId }, select: { id: true, name: true, budget: true } });
-  const ranking = await Promise.all(projects.map(async (p) => {
-    const [c, t] = await Promise.all([
-      prisma.costRecord.aggregate({ where: { projectId: p.id, date: { gte: start, lte: end } }, _sum: { amount: true } }),
-      prisma.task.aggregate({ where: { projectId: p.id, cost: { gt: 0 } }, _sum: { cost: true } }),
-    ]);
-    const cost = (c._sum.amount ?? 0) + (t._sum.cost ?? 0);
+
+  // 批量聚合（2 次查询替代 2N 次）
+  const projectIds = projects.map(p => p.id);
+  const [costAggs, taskAggs] = projectIds.length > 0
+    ? await Promise.all([
+        prisma.costRecord.groupBy({
+          by: ['projectId'],
+          where: { projectId: { in: projectIds }, date: { gte: start, lte: end } },
+          _sum: { amount: true },
+        }),
+        prisma.task.groupBy({
+          by: ['projectId'],
+          where: { projectId: { in: projectIds }, cost: { gt: 0 } },
+          _sum: { cost: true },
+        }),
+      ])
+    : [[] as { projectId: string; _sum: { amount: number | null } }[], [] as { projectId: string; _sum: { cost: number | null } }[]];
+
+  const costMap = new Map(costAggs.map(r => [r.projectId, r._sum.amount ?? 0]));
+  const taskCostMap = new Map(taskAggs.map(r => [r.projectId, r._sum.cost ?? 0]));
+
+  const ranking = projects.map(p => {
+    const cost = (costMap.get(p.id) ?? 0) + (taskCostMap.get(p.id) ?? 0);
     const budget = p.budget ?? 0;
     const profit = budget - cost;
     const margin = budget > 0 ? Math.round((profit / budget) * 1000) / 10 : 0;
     return { id: p.id, name: p.name, budget, cost, profit, margin };
-  }));
+  });
   return ranking.sort((a, b) => b.margin - a.margin);
 }
 

@@ -6,7 +6,15 @@ import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 import * as dashboardService from '../services/dashboard.service';
 
-const PROMPT = fs.readFileSync(path.resolve(__dirname, '../prompts/weekly-report.txt'), 'utf-8');
+function loadPrompt(filename: string, fallback: string): string {
+  try {
+    return fs.readFileSync(path.resolve(__dirname, `../prompts/${filename}`), 'utf-8');
+  } catch {
+    console.warn(`[weekly-report] Prompt file ${filename} not found, using fallback`);
+    return fallback;
+  }
+}
+const PROMPT = loadPrompt('weekly-report.txt', '你是项目管理助手，请生成周报。');
 
 cron.schedule('0 9 * * 1', async () => {
   console.log('[weekly-report] 开始...');

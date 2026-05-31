@@ -5,7 +5,15 @@ import { prisma } from '../server';
 import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 
-const PROMPT = fs.readFileSync(path.resolve(__dirname, '../prompts/system-client-radar.txt'), 'utf-8');
+function loadPrompt(filename: string, fallback: string): string {
+  try {
+    return fs.readFileSync(path.resolve(__dirname, `../prompts/${filename}`), 'utf-8');
+  } catch {
+    console.warn(`[client-radar] Prompt file ${filename} not found, using fallback`);
+    return fallback;
+  }
+}
+const PROMPT = loadPrompt('system-client-radar.txt', '你是客户关系管理助手，请分析客户动态。');
 
 cron.schedule('0 9 * * *', async () => {
   console.log('[client-radar] 开始...');

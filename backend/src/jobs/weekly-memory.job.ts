@@ -5,7 +5,15 @@ import { prisma } from '../server';
 import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 
-const PROMPT = fs.readFileSync(path.resolve(__dirname, '../prompts/memory-extract.txt'), 'utf-8');
+function loadPrompt(filename: string, fallback: string): string {
+  try {
+    return fs.readFileSync(path.resolve(__dirname, `../prompts/${filename}`), 'utf-8');
+  } catch {
+    console.warn(`[weekly-memory] Prompt file ${filename} not found, using fallback`);
+    return fallback;
+  }
+}
+const PROMPT = loadPrompt('memory-extract.txt', '从以下对话中提取关键信息。');
 
 function parseJSONSafely(text: string): any[] {
   try { return JSON.parse(text); } catch {}

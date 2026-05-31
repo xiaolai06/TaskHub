@@ -5,6 +5,15 @@ import { error } from '../utils/response';
 // 简单的内存限频器（生产环境建议用 Redis）
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
 
+// 定期清理过期记录，防止长期运行时内存泄漏
+const CLEANUP_INTERVAL = 10 * 60 * 1000; // 10 分钟
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, record] of requestCounts) {
+    if (now > record.resetTime) requestCounts.delete(key);
+  }
+}, CLEANUP_INTERVAL);
+
 interface RateLimitOptions {
   windowMs: number;   // 时间窗口（毫秒）
   max: number;        // 最大请求数

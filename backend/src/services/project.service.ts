@@ -29,18 +29,30 @@ export async function findAll(userId: string, filters: {
     prisma.project.count({ where }),
   ]);
 
-  const data = await Promise.all(
-    projects.map(async (p) => {
-      const [costAgg, taskCostAgg] = await Promise.all([
-        prisma.costRecord.aggregate({ where: { projectId: p.id }, _sum: { amount: true } }),
-        prisma.task.aggregate({ where: { projectId: p.id }, _sum: { cost: true } }),
-      ]);
-      return {
-        ...p,
-        usedBudget: (costAgg._sum.amount ?? 0) + (taskCostAgg._sum.cost ?? 0),
-      };
-    }),
-  );
+  // 批量聚合项目预算使用情况（2 次查询替代 2N 次）
+  const projectIds = projects.map(p => p.id);
+  const [costAggs, taskCostAggs] = projectIds.length > 0
+    ? await Promise.all([
+        prisma.costRecord.groupBy({
+          by: ['projectId'],
+          where: { projectId: { in: projectIds } },
+          _sum: { amount: true },
+        }),
+        prisma.task.groupBy({
+          by: ['projectId'],
+          where: { projectId: { in: projectIds } },
+          _sum: { cost: true },
+        }),
+      ])
+    : [[] as { projectId: string; _sum: { amount: number | null } }[], [] as { projectId: string; _sum: { cost: number | null } }[]];
+
+  const costMap = new Map(costAggs.map(r => [r.projectId, r._sum.amount ?? 0]));
+  const taskCostMap = new Map(taskCostAggs.map(r => [r.projectId, r._sum.cost ?? 0]));
+
+  const data = projects.map(p => ({
+    ...p,
+    usedBudget: (costMap.get(p.id) ?? 0) + (taskCostMap.get(p.id) ?? 0),
+  }));
 
   return { data, total, page, limit };
 }

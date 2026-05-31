@@ -1,11 +1,37 @@
 import { prisma } from '../server';
+import { AppError } from '../utils/errors';
 
 export type CostCategory = 'LABOR' | 'MATERIAL' | 'OVERHEAD' | 'OTHER';
 
+/** 验证项目归属权 */
+async function verifyProjectOwnership(userId: string, projectId: string) {
+  const project = await prisma.project.findFirst({
+    where: { id: projectId, ownerId: userId },
+    select: { id: true },
+  });
+  if (!project) {
+    throw new AppError('项目不存在或无权访问', 404, 'NOT_FOUND');
+  }
+  return project;
+}
+
+/** 验证成本记录归属权 */
+async function verifyCostOwnership(userId: string, costId: string) {
+  const record = await prisma.costRecord.findFirst({
+    where: { id: costId, project: { ownerId: userId } },
+    select: { id: true, projectId: true },
+  });
+  if (!record) {
+    throw new AppError('成本记录不存在或无权访问', 404, 'NOT_FOUND');
+  }
+  return record;
+}
+
 /** 获取成本列表 */
-export async function findAll(projectId: string, filters?: {
+export async function findAll(userId: string, projectId: string, filters?: {
   page?: number; limit?: number; category?: string;
 }) {
+  await verifyProjectOwnership(userId, projectId);
   const { page = 1, limit = 20, category } = filters || {};
   const where: Record<string, unknown> = { projectId };
   if (category) where.category = category;
@@ -20,7 +46,8 @@ export async function findAll(projectId: string, filters?: {
 }
 
 /** 按类别汇总项目成本 */
-export async function getSummaryByProject(projectId: string) {
+export async function getSummaryByProject(userId: string, projectId: string) {
+  await verifyProjectOwnership(userId, projectId);
   const byCategory = await prisma.costRecord.groupBy({
     by: ['category'], where: { projectId },
     _sum: { amount: true }, _count: true,
@@ -36,12 +63,14 @@ export async function getSummaryByProject(projectId: string) {
 }
 
 /** 创建成本 */
-export async function create(projectId: string, data: { amount: number; category: string; description: string; date: string; taskId?: string }) {
+export async function create(userId: string, projectId: string, data: { amount: number; category: string; description: string; date: string; taskId?: string }) {
+  await verifyProjectOwnership(userId, projectId);
   return prisma.costRecord.create({ data: { ...data, projectId, date: new Date(data.date) } });
 }
 
 /** 删除成本 */
-export async function remove(id: string) {
+export async function remove(userId: string, id: string) {
+  await verifyCostOwnership(userId, id);
   return prisma.costRecord.delete({ where: { id } });
 }
 

@@ -5,7 +5,15 @@ import { prisma } from '../server';
 import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 
-const PROMPT = fs.readFileSync(path.resolve(__dirname, '../prompts/system-finance-pulse.txt'), 'utf-8');
+function loadPrompt(filename: string, fallback: string): string {
+  try {
+    return fs.readFileSync(path.resolve(__dirname, `../prompts/${filename}`), 'utf-8');
+  } catch {
+    console.warn(`[finance-pulse] Prompt file ${filename} not found, using fallback`);
+    return fallback;
+  }
+}
+const PROMPT = loadPrompt('system-finance-pulse.txt', '你是财务分析助手，请分析财务数据。');
 
 cron.schedule('0 10 * * *', async () => {
   console.log('[finance-pulse] 开始...');

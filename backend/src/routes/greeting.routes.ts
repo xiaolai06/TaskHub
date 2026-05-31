@@ -1,34 +1,32 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import * as greetingService from '../services/greeting.service';
 import { success, error } from '../utils/response';
 
 const router = Router();
 
 // GET / - 获取当前时段祝福语
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const hour = req.query.hour ? Number(req.query.hour) : undefined;
     const greetings = await greetingService.getActive(req.userId!, hour);
     success(res, greetings);
   } catch (err) {
-    console.error('获取祝福语失败:', err);
-    error(res, 'INTERNAL_ERROR', '获取祝福语失败', 500);
+    next(err);
   }
 });
 
 // GET /all - 获取所有祝福语
-router.get('/all', async (req: Request, res: Response) => {
+router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const greetings = await greetingService.getAll(req.userId!);
     success(res, greetings);
   } catch (err) {
-    console.error('获取祝福语失败:', err);
-    error(res, 'INTERNAL_ERROR', '获取祝福语失败', 500);
+    next(err);
   }
 });
 
 // POST / - 添加自定义祝福语
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { content, hourStart, hourEnd } = req.body;
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
@@ -43,13 +41,12 @@ router.post('/', async (req: Request, res: Response) => {
     });
     success(res, greeting, undefined, 201);
   } catch (err) {
-    console.error('添加祝福语失败:', err);
-    error(res, 'INTERNAL_ERROR', '添加祝福语失败', 500);
+    next(err);
   }
 });
 
 // PUT /:id - 更新祝福语
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = String(req.params.id);
     const greeting = await greetingService.update(req.userId!, id, req.body);
@@ -59,20 +56,18 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
     success(res, greeting);
   } catch (err) {
-    console.error('更新祝福语失败:', err);
-    error(res, 'INTERNAL_ERROR', '更新祝福语失败', 500);
+    next(err);
   }
 });
 
 // DELETE /:id - 删除祝福语
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = String(req.params.id);
     await greetingService.remove(req.userId!, id);
     success(res, { deleted: true });
   } catch (err) {
-    console.error('删除祝福语失败:', err);
-    error(res, 'INTERNAL_ERROR', '删除祝福语失败', 500);
+    next(err);
   }
 });
 

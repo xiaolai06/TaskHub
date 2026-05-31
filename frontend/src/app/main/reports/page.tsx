@@ -81,7 +81,9 @@ export default function ReportsPage() {
   async function handleAiInsight() {
     setAiLoading(true);
     try {
-      const res = await fetch('http://localhost:3001/api/llm/chat/stream', {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// ...
+const res = await fetch(`${API_BASE}/llm/chat/stream`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({
           message: '用中文简短分析当前' + (viewMode === 'day' ? '今日' : viewMode === 'year' ? '年度' : '本月') + '经营数据（150字以内）。收入' + (overview ? fmtYuan(overview.income) : '?') + '，支出' + (overview ? fmtYuan(overview.expense) : '?') + '，利润率' + (overview?.margin ?? 0) + '%。项目排行：' + ranking.map(r => r.name + ' 利润率' + r.margin + '%').join('，') + '。使用Markdown格式，尽量短。',

@@ -3,7 +3,7 @@ import path from 'path';
 
 const PROMPT_DIR = path.resolve(__dirname, '../../prompts');
 
-type PromptKey = 'default' | 'create' | 'analyze' | 'schedule';
+type PromptKey = 'default' | 'create' | 'analyze' | 'schedule' | 'search';
 
 const promptCache = new Map<string, string>();
 

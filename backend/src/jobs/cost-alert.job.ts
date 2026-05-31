@@ -18,7 +18,7 @@ cron.schedule('0 10 * * *', async () => {
         const projects = await prisma.project.findMany({ where: { ownerId: user.id, status: 'ACTIVE', budget: { gt: 0 } }, select: { id: true, name: true, budget: true } });
         const alerts: string[] = [];
         for (const p of projects) {
-          const summary = await costService.getSummaryByProject(p.id);
+          const summary = await costService.getSummaryByProject(user.id, p.id);
           if (p.budget && summary.total / p.budget >= 0.8) {
             alerts.push(`- ${p.name}: ${formatFen(summary.total)} / ${formatFen(p.budget)}（${Math.round(summary.total / p.budget * 100)}%）`);
           }
