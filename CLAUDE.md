@@ -150,6 +150,141 @@ HTTP 请求
 其余模块按需推进
 ```
 
+## 并行开发规范
+
+### 前置条件（已完成）
+以下准备工作已就绪，**无需重复操作**：
+- `routes/index.ts` 中所有 16 个模块的 import + router.use 已预注册
+- 前端所有骨架页面已创建（空占位，可直接替换）
+- 数据库 Schema 已定稿（开发过程中一般不新增表）
+
+### 三轨道并行分工
+
+```
+轨道 A（核心业务）:
+  模块: projects → costs → reports
+  依赖: 仅需 User（✅已完成）
+  起点: 先做 projects，costs 和 reports 可后续跟进
+
+轨道 B（任务客户）:
+  模块: tasks → customers → goals
+  依赖: User（✅已完成）+ Project（⚠️ 测试时需要 projects API 已就绪）
+  策略: 代码可与 A 并行写，联调等 A 完成 Project 后
+
+轨道 C（智能辅助）:
+  模块: settings → search/research → scheduler → llm → webhooks
+  依赖: 仅需 User（✅已完成），完全独立
+  起点: 任意顺序，互不阻塞
+```
+
+### 文件冲突规则
+
+**唯一共享文件**：`backend/src/routes/index.ts` — 已预注册完毕，开发过程中**不得修改**。
+
+**每个模块的独占文件清单**（以 projects 为例）：
+```
+backend/src/validators/project.schema.ts   ← 不与他模块共享
+backend/src/services/project.service.ts    ← 不与他模块共享
+backend/src/routes/project.routes.ts       ← 不与他模块共享
+frontend/src/hooks/useProjects.ts          ← 不与他模块共享
+frontend/src/components/features/projects/ ← 不与他模块共享
+frontend/src/app/main/projects/            ← 不与他模块共享
+```
+
+> 这意味着**三个人同时开发三个不同模块，不会有任何文件冲突**。
+
+### 模块标准开发流程（后端 4 步 + 前端 3 步）
+
+每开发一个新模块，严格按以下顺序：
+
+```
+后端:
+  1. validators/xxx.schema.ts  ← 定义 createXxxSchema / updateXxxSchema
+  2. services/xxx.service.ts   ← 实现 CRUD 方法（findAll / findById / create / update / delete）
+  3. routes/xxx.routes.ts      ← 定义 GET/POST/PUT/DELETE，挂 validate 中间件
+  4. curl 测试每个接口 ← 正常返回 / 参数错误 / 未授权 / 重复创建
+
+前端:
+  5. hooks/useXxx.ts           ← React Query hooks（useQuery / useMutation）
+  6. components/features/xxx/  ← 业务组件（XxxForm / XxxList / XxxCard）
+  7. app/main/xxx/page.tsx     ← 页面组装，必须处理三种状态：
+       - 加载态: Skeleton / Spinner
+       - 空状态: 图标 + 提示文字 + 引导按钮
+       - 错误态: 错误提示，不静默失败
+```
+
+### 后端 Service 模板
+
+```typescript
+import { prisma } from '../server';
+
+export async function findAll(userId: string, filters: {
+  page?: number; limit?: number; status?: string;
+}) {
+  const { page = 1, limit = 20, status } = filters;
+  const where = { ownerId: userId, ...(status ? { status } : {}) };
+
+  const [data, total] = await Promise.all([
+    prisma.xxx.findMany({ where, skip: (page - 1) * limit, take: limit }),
+    prisma.xxx.count({ where }),
+  ]);
+
+  return { data, total, page, limit };
+}
+
+export async function findById(userId: string, id: string) {
+  return prisma.xxx.findFirst({ where: { id, ownerId: userId } });
+}
+
+export async function create(userId: string, data: CreateInput) {
+  return prisma.xxx.create({ data: { ...data, ownerId: userId } });
+}
+
+export async function update(userId: string, id: string, data: UpdateInput) {
+  return prisma.xxx.updateMany({ where: { id, ownerId: userId }, data });
+}
+
+export async function remove(userId: string, id: string) {
+  return prisma.xxx.deleteMany({ where: { id, ownerId: userId } });
+}
+```
+
+### 前端 Hook 模板
+
+```typescript
+// hooks/useXxx.ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+
+const QUERY_KEY = 'xxx';
+
+export function useXxxList(params?: Record<string, unknown>) {
+  return useQuery({
+    queryKey: [QUERY_KEY, params],
+    queryFn: () => api.get('/xxx', params),
+  });
+}
+
+export function useCreateXxx() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: unknown) => api.post('/xxx', data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [QUERY_KEY] }),
+  });
+}
+```
+
+### 新模块加入检查清单
+
+- [ ] 后端 `validators/xxx.schema.ts` — Zod 校验完善，中文错误提示
+- [ ] 后端 `services/xxx.service.ts` — 所有数据查询加 `ownerId` 过滤
+- [ ] 后端 `routes/xxx.routes.ts` — auth 中间件 + validate 中间件 + try-catch
+- [ ] 后端 API 测试通过（curl 至少 4 条：正常/异常/未登录/重复）
+- [ ] 前端 `hooks/useXxx.ts` — React Query 封装
+- [ ] 前端 `components/features/xxx/` — 组件实现
+- [ ] 前端 `app/main/xxx/page.tsx` — loading / empty / error 三态完整
+- [ ] TypeScript 编译零错误（`npx tsc --noEmit`）
+
 ## 数据库说明
 
 ### 当前状态

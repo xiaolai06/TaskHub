@@ -1,107 +1,121 @@
-import { Router } from 'express';
-import { z } from 'zod';
-import { validate } from '../middleware/validate';
+import { Router, Request, Response } from 'express';
 import * as settingService from '../services/setting.service';
-import { success } from '../utils/response';
+import { success, error } from '../utils/response';
 
 const router = Router();
 
-// GET / - 获取所有配置
-router.get('/', async (req, res, next) => {
+// GET /ai/models?provider=deepseek — 获取供应商模型列表（静态 fallback）
+router.get('/ai/models', async (req: Request, res: Response) => {
   try {
-    const settings = await settingService.getAll(req.userId);
-    success(res, settings);
-  } catch (err) { next(err); }
-});
-
-// GET /:category - 按类别获取配置
-router.get('/:category', async (req, res, next) => {
-  try {
-    const settings = await settingService.getByCategory(req.params.category, req.userId);
-    success(res, settings);
-  } catch (err) { next(err); }
-});
-
-// PUT /:category/:key - 更新单个配置
-const updateSchema = z.object({
-  value: z.string().min(1, '值不能为空'),
-  encrypted: z.boolean().optional(),
-});
-
-router.put('/:category/:key', validate(updateSchema), async (req, res, next) => {
-  try {
-    const category = req.params.category as string;
-    const key = req.params.key as string;
-    const result = await settingService.set(
-      category,
-      key,
-      req.body.value,
-      { encrypted: req.body.encrypted, userId: req.userId },
-    );
-    success(res, result);
-  } catch (err) { next(err); }
-});
-
-// POST /test-ai - 测试 AI 连接
-const testAiSchema = z.object({
-  provider: z.string().optional(),
-  apiKey: z.string().optional(),
-  baseUrl: z.string().optional(),
-});
-
-router.post('/test-ai', validate(testAiSchema), async (req, res, next) => {
-  try {
-    const { provider, apiKey, baseUrl } = req.body;
-    const aiConfig = await settingService.getAiConfig(provider);
-
-    // 使用提供的参数或默认配置
-    const testConfig = {
-      provider: provider || aiConfig.provider,
-      apiKey: apiKey || aiConfig.apiKey,
-      baseUrl: baseUrl || aiConfig.baseUrl,
-    };
-
-    // 简单测试：尝试调用 API
-    const response = await fetch(`${testConfig.baseUrl}/models`, {
-      headers: { Authorization: `Bearer ${testConfig.apiKey}` },
-    });
-
-    if (response.ok) {
-      success(res, { connected: true, provider: testConfig.provider });
-    } else {
-      success(res, { connected: false, error: `HTTP ${response.status}` });
-    }
+    const provider = typeof req.query.provider === 'string' ? req.query.provider : 'deepseek';
+    const models = settingService.getModels(provider);
+    const baseUrl = settingService.getBaseUrl(provider);
+    success(res, { models, baseUrl });
   } catch (err) {
-    success(res, { connected: false, error: String(err) });
+    console.error('获取模型列表失败:', err);
+    error(res, 'INTERNAL_ERROR', '获取模型列表失败', 500);
   }
 });
 
-// POST /test-channel - 测试通知渠道连通
-const testChannelSchema = z.object({
-  channel: z.string().min(1, '渠道不能为空'),
-});
-
-router.post('/test-channel', validate(testChannelSchema), async (req, res, next) => {
+// POST /ai/fetch-models — 从官方 API 动态获取模型列表
+router.post('/ai/fetch-models', async (req: Request, res: Response) => {
   try {
-    const result = await settingService.testChannel(req.body.channel);
-    success(res, result);
-  } catch (err) { next(err); }
-});
-
-// POST /test-all-channels - 测试所有已启用渠道
-router.post('/test-all-channels', async (req, res, next) => {
-  try {
-    const channels = await settingService.getNotifyChannels();
-    const results: Record<string, unknown> = {};
-
-    for (const [channel, config] of Object.entries(channels)) {
-      if (config.enabled) {
-        results[channel] = await settingService.testChannel(channel);
-      }
+    const { provider, apiKey, baseUrl } = req.body;
+    if (!provider || !apiKey) {
+      error(res, 'VALIDATION_ERROR', '请选择供应商并填写 API Key', 400);
+      return;
     }
+    const result = await settingService.fetchModelsFromProvider(provider, apiKey, baseUrl);
+    success(res, result);
+  } catch (err) {
+    console.error('获取模型列表失败:', err);
+    error(res, 'INTERNAL_ERROR', '获取模型列表失败', 500);
+  }
+});
 
-    success(res, results);
-  } catch (err) { next(err); }
+// POST /ai/test — 测试 AI 连接
+router.post('/ai/test', async (req: Request, res: Response) => {
+  try {
+    const { provider, apiKey, baseUrl } = req.body;
+    if (!provider || !apiKey) {
+      error(res, 'VALIDATION_ERROR', '请填写供应商和 API Key', 400);
+      return;
+    }
+    const result = await settingService.testAiConnection(provider, apiKey, baseUrl);
+    success(res, result);
+  } catch (err) {
+    console.error('测试连接失败:', err);
+    error(res, 'INTERNAL_ERROR', '测试连接失败', 500);
+  }
+});
+
+// GET /sessions — 获取登录设备列表
+router.get('/sessions', async (req: Request, res: Response) => {
+  try {
+    const sessions = await settingService.getSessions(req.userId!);
+    success(res, sessions);
+  } catch (err) {
+    console.error('获取设备列表失败:', err);
+    error(res, 'INTERNAL_ERROR', '获取设备列表失败', 500);
+  }
+});
+
+// DELETE /sessions/:id — 踢出设备
+router.delete('/sessions/:id', async (req: Request, res: Response) => {
+  try {
+    const id = String(req.params.id);
+    await settingService.deleteSession(req.userId!, id);
+    success(res, { deleted: true });
+  } catch (err) {
+    console.error('踢出设备失败:', err);
+    error(res, 'INTERNAL_ERROR', '踢出设备失败', 500);
+  }
+});
+
+// GET /:category — 获取某分类配置
+router.get('/:category', async (req: Request, res: Response) => {
+  try {
+    const category = String(req.params.category).toUpperCase();
+    const settings = await settingService.getByCategory(req.userId!, category);
+    success(res, settings);
+  } catch (err) {
+    console.error('获取配置失败:', err);
+    error(res, 'INTERNAL_ERROR', '获取配置失败', 500);
+  }
+});
+
+// PUT /:category/:key — 更新单个配置
+router.put('/:category/:key', async (req: Request, res: Response) => {
+  try {
+    const category = String(req.params.category).toUpperCase();
+    const key = String(req.params.key);
+    const { value, encrypted } = req.body;
+    if (value === undefined) {
+      error(res, 'VALIDATION_ERROR', '请提供配置值', 400);
+      return;
+    }
+    const setting = await settingService.set(req.userId!, category, key, String(value), encrypted);
+    success(res, setting);
+  } catch (err) {
+    console.error('更新配置失败:', err);
+    error(res, 'INTERNAL_ERROR', '更新配置失败', 500);
+  }
+});
+
+// POST /batch — 批量更新配置
+router.post('/batch', async (req: Request, res: Response) => {
+  try {
+    const { settings } = req.body;
+    if (!Array.isArray(settings) || settings.length === 0) {
+      error(res, 'VALIDATION_ERROR', '请提供配置列表', 400);
+      return;
+    }
+    await settingService.batchSet(req.userId!, settings);
+    success(res, null, '配置已保存');
+  } catch (err) {
+    console.error('批量更新失败:', err);
+    error(res, 'INTERNAL_ERROR', '批量更新失败', 500);
+  }
 });
 
 export default router;

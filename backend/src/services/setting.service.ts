@@ -1,172 +1,167 @@
-import { PrismaClient } from '@prisma/client';
-import { config } from '../config';
-import { EncryptionService } from './encryption.service';
-import { ValidationError } from '../utils/errors';
+import { prisma } from '../server';
+import { encrypt, decrypt } from './encryption.service';
 
-const prisma = new PrismaClient();
+// ═══ 写死的默认模型列表（仅做 fallback 用） ═══
+const AI_MODELS_FALLBACK: Record<string, { id: string; name: string; tier: string }[]> = {
+  deepseek: [
+    { id: 'deepseek-chat', name: 'DeepSeek Chat', tier: 'fast' },
+    { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', tier: 'powerful' },
+  ],
+  openai: [
+    { id: 'gpt-4o-mini', name: 'GPT-4o Mini', tier: 'fast' },
+    { id: 'gpt-4o', name: 'GPT-4o', tier: 'powerful' },
+  ],
+  ollama: [
+    { id: 'llama3', name: 'Llama 3', tier: 'fast' },
+    { id: 'qwen2', name: 'Qwen 2', tier: 'fast' },
+  ],
+};
 
-// ======================== 读取配置 ========================
+const AI_BASE_URLS: Record<string, string> = {
+  deepseek: 'https://api.deepseek.com',
+  openai: 'https://api.openai.com/v1',
+  ollama: 'http://localhost:11434/v1',
+};
 
-/** 获取所有配置（按类别分组） */
-export async function getAll(userId = 'system') {
-  const settings = await prisma.setting.findMany({
-    where: { userId },
-    orderBy: [{ category: 'asc' }, { key: 'asc' }],
-  });
-
-  // 解密敏感字段
-  return settings.map((s: { encrypted: boolean; value: string }) => ({
-    ...s,
-    value: s.encrypted ? EncryptionService.decrypt(s.value) : s.value,
-  }));
+// ═══ AI 厂商官方预置 baseURL（用户也可自定义） ═══
+export function getBaseUrl(provider: string): string {
+  return AI_BASE_URLS[provider] || '';
 }
 
-/** 按类别获取配置 */
-export async function getByCategory(category: string, userId = 'system') {
-  return prisma.setting.findMany({
-    where: { userId, category },
-    orderBy: { key: 'asc' },
+/** 获取模型列表：优先从官方 API 动态获取，失败则退回写死的列表 */
+export function getModels(provider: string) {
+  return AI_MODELS_FALLBACK[provider] || [];
+}
+
+/**
+ * 从官方 API 动态获取模型列表
+ * DeepSeek/OpenAI/Ollama 都暴露 GET /models 端点
+ */
+export async function fetchModelsFromProvider(provider: string, apiKey: string, baseUrl?: string): Promise<{
+  models: { id: string; name: string; tier: string }[];
+  error?: string;
+}> {
+  const url = (baseUrl || AI_BASE_URLS[provider] || '') + '/models';
+  if (!url.startsWith('http')) return { models: [], error: '未知供应商' };
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      // API 不可达 → 退回写死的列表
+      return { models: getModels(provider), error: `API 返回 ${res.status}` };
+    }
+
+    const data = (await res.json()) as Record<string, unknown>;
+    const rawModels: unknown[] = (data?.data as unknown[]) || [];
+
+    // 过滤：只保留 chat 模型
+    const chatModels = rawModels
+      .map((m: unknown) => {
+        const model = m as Record<string, unknown>;
+        return { id: String(model.id || ''), name: String(model.id || '') };
+      })
+      .filter(m => m.id.length > 0 && !m.id.includes('embed') && !m.id.includes('moderation') && !m.id.includes('audio') && !m.id.includes('whisper') && !m.id.includes('dall-e') && !m.id.includes('tts'))
+      .filter((m, i, arr) => arr.findIndex(x => x.id === m.id) === i); // 去重
+
+    if (chatModels.length === 0) return { models: getModels(provider), error: '未找到可用的 chat 模型' };
+
+    return {
+      models: chatModels.map(m => {
+        let tier = 'fast';
+        if (m.id.includes('reasoner') || m.id.includes('gpt-4o') || m.id.includes('r1')) tier = 'powerful';
+        else if (m.id.includes('4') || m.id.includes('opus') || m.id.includes('sonnet')) tier = 'balanced';
+        return { ...m, tier, name: m.id };
+      }),
+    };
+  } catch (err) {
+    // 网络错误 → 退回写死的列表
+    return { models: getModels(provider), error: err instanceof Error ? err.message : '获取失败' };
+  }
+}
+
+/** 获取某分类所有配置 */
+export async function getByCategory(userId: string, category: string) {
+  const settings = await prisma.setting.findMany({
+    where: { OR: [{ userId }, { userId: 'system' }], category },
   });
+  const result: Record<string, string> = {};
+  for (const s of settings) {
+    if (s.encrypted) {
+      try { result[s.key] = decrypt(s.value); } catch { result[s.key] = '***'; }
+    } else {
+      result[s.key] = s.value;
+    }
+  }
+  return result;
 }
 
 /** 获取单个配置 */
-export async function get(category: string, key: string, userId = 'system') {
-  const setting = await prisma.setting.findUnique({
-    where: {
-      userId_category_key: { userId, category, key },
-    },
+export async function get(userId: string, category: string, key: string) {
+  const setting = await prisma.setting.findFirst({
+    where: { OR: [{ userId }, { userId: 'system' }], category, key },
   });
-
-  if (!setting) return null;
-
-  return {
-    ...setting,
-    value: setting.encrypted ? EncryptionService.decrypt(setting.value) : setting.value,
-  };
+  return setting?.value ?? null;
 }
 
-// ======================== 写入配置 ========================
-
 /** 设置单个配置 */
-export async function set(
-  category: string,
-  key: string,
-  value: string,
-  options: { encrypted?: boolean; userId?: string } = {},
-) {
-  const { encrypted = false, userId = 'system' } = options;
-  const storeValue = encrypted ? EncryptionService.encrypt(value) : value;
-
+export async function set(userId: string, category: string, key: string, value: string, encrypted = false) {
+  const storedValue = encrypted ? encrypt(value) : value;
   return prisma.setting.upsert({
-    where: {
-      userId_category_key: { userId, category, key },
-    },
-    update: { value: storeValue, encrypted },
-    create: { userId, category, key, value: storeValue, encrypted },
+    where: { userId_category_key: { userId, category, key } },
+    create: { userId, category, key, value: storedValue, encrypted },
+    update: { value: storedValue, encrypted },
   });
 }
 
 /** 批量设置 */
-export async function batchSet(
-  settings: Array<{ category: string; key: string; value: string; encrypted?: boolean }>,
-  userId = 'system',
-) {
-  const operations = settings.map((s) =>
-    set(s.category, s.key, s.value, { encrypted: s.encrypted, userId }),
+export async function batchSet(userId: string, settings: Array<{ category: string; key: string; value: string; encrypted?: boolean }>) {
+  return prisma.$transaction(
+    settings.map((s) => {
+      const storedValue = s.encrypted ? encrypt(s.value) : s.value;
+      return prisma.setting.upsert({
+        where: { userId_category_key: { userId, category: s.category, key: s.key } },
+        create: { userId, category: s.category, key: s.key, value: storedValue, encrypted: s.encrypted ?? false },
+        update: { value: storedValue, encrypted: s.encrypted ?? false },
+      });
+    }),
   );
-  return Promise.all(operations);
 }
 
-// ======================== n8n 配置 ========================
-
-/** 获取 n8n 配置 */
-export async function getN8nConfig() {
-  const baseUrl = await get('N8N', 'BASE_URL');
-  const webhookSecret = await get('N8N', 'WEBHOOK_SECRET');
-  return {
-    baseUrl: baseUrl?.value || config.n8n.baseUrl,
-    webhookSecret: webhookSecret?.value || config.n8n.webhookSecret,
-  };
-}
-
-/** 保存 n8n 配置 */
-export async function setN8nConfig(data: { baseUrl?: string; webhookSecret?: string }) {
-  const operations: Promise<unknown>[] = [];
-  if (data.baseUrl !== undefined) {
-    operations.push(set('N8N', 'BASE_URL', data.baseUrl));
-  }
-  if (data.webhookSecret !== undefined) {
-    operations.push(set('N8N', 'WEBHOOK_SECRET', data.webhookSecret, { encrypted: true }));
-  }
-  return Promise.all(operations);
-}
-
-// ======================== AI 配置 ========================
-
-/** 获取 AI 配置（按供应商） */
-export async function getAiConfig(provider?: string) {
-  const targetProvider = provider || config.ai.provider;
-  const apiKey = await get('AI', `${targetProvider}_API_KEY`);
-  const baseUrl = await get('AI', `${targetProvider}_BASE_URL`);
-  const model = await get('AI', `${targetProvider}_MODEL`);
-
-  return {
-    provider: targetProvider,
-    apiKey: apiKey?.value || config.ai.apiKey,
-    baseUrl: baseUrl?.value || config.ai.baseUrl,
-    model: model?.value || config.ai.model,
-  };
-}
-
-// ======================== 通知渠道配置 ========================
-
-/** 获取所有通知渠道配置 */
-export async function getNotifyChannels() {
-  const settings = await prisma.setting.findMany({
-    where: { userId: 'system', category: 'NOTIFY' },
+/** 获取登录设备列表 */
+export async function getSessions(userId: string) {
+  return prisma.session.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, device: true, ip: true, createdAt: true, expiresAt: true },
   });
-
-  const channels: Record<string, { enabled: boolean; webhookUrl?: string }> = {};
-  for (const s of settings) {
-    const channel = s.key.replace('_WEBHOOK', '').toLowerCase();
-    if (!channels[channel]) channels[channel] = { enabled: false };
-    if (s.key.endsWith('_WEBHOOK')) {
-      channels[channel].webhookUrl = s.encrypted ? EncryptionService.decrypt(s.value) : s.value;
-    }
-    if (s.key.endsWith('_ENABLED')) {
-      channels[channel].enabled = s.value === 'true';
-    }
-  }
-
-  return channels;
 }
 
-/** 测试通知渠道连通 */
-export async function testChannel(channel: string) {
-  const channels = await getNotifyChannels();
-  const channelConfig = channels[channel];
+/** 踢出设备 */
+export async function deleteSession(userId: string, sessionId: string) {
+  await prisma.session.deleteMany({ where: { id: sessionId, userId } });
+  return { deleted: true };
+}
 
-  if (!channelConfig?.webhookUrl) {
-    return { success: false, message: `${channel} Webhook URL 未配置` };
-  }
-
+/** 测试 AI 连接 */
+export async function testAiConnection(provider: string, apiKey: string, baseUrl?: string) {
+  const url = baseUrl || AI_BASE_URLS[provider];
+  if (!url) return { success: false, message: '未知供应商' };
+  const models = AI_MODELS_FALLBACK[provider] || [];
+  if (models.length === 0) return { success: false, message: '不支持的供应商' };
   try {
-    const testPayload: Record<string, unknown> = {
-      msgtype: 'text',
-      text: { content: '🧪 TaskFlow+ 通知测试 - 连通性验证成功' },
-    };
-
-    const response = await fetch(channelConfig.webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(testPayload),
-    });
-
-    if (response.ok) {
-      return { success: true, message: `${channel} 连通测试成功` };
-    }
-    return { success: false, message: `${channel} 返回 ${response.status}` };
-  } catch (err) {
-    return { success: false, message: `${channel} 连接失败: ${String(err)}` };
+    const { default: OpenAI } = await import('openai');
+    const client = new OpenAI({ apiKey, baseURL: url });
+    await client.chat.completions.create({ model: models[0].id, messages: [{ role: 'user', content: 'hi' }], max_tokens: 5 });
+    return { success: true, message: `连接成功 (${models[0].id})` };
+  } catch (err: unknown) {
+    return { success: false, message: err instanceof Error ? err.message : '连接失败' };
   }
 }
