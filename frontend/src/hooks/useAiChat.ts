@@ -1,7 +1,19 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+
+/** AI 写操作工具执行后需失效的缓存 key */
+const WRITE_TOOL_CACHE_MAP: Record<string, string[]> = {
+  create_project: ['projects'],
+  update_project: ['projects'],
+  create_task: ['tasks', 'projects'],
+  update_task_status: ['tasks', 'projects'],
+  delete_task: ['tasks', 'projects'],
+  log_time: ['projects'],
+  log_communication: ['customers'],
+};
 
 interface ToolCallEvent {
   name: string;
@@ -25,6 +37,7 @@ interface ChatSession {
 }
 
 export function useAiChat() {
+  const qc = useQueryClient();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentToolCalls, setCurrentToolCalls] = useState<ToolCallEvent[]>([]);
@@ -93,6 +106,11 @@ export function useAiChat() {
                 setMessages(prev => prev.map(m => m.id === aiId ? { ...m, toolCalls: [...tools] } : m));
                 break;
               case 'done':
+                // 写操作工具完成后失效缓存，列表实时刷新
+                for (const t of tools) {
+                  const keys = WRITE_TOOL_CACHE_MAP[t.name];
+                  if (keys) keys.forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+                }
                 setIsLoading(false);
                 setCurrentToolCalls([]);
                 return;

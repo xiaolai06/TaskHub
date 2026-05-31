@@ -5,12 +5,12 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
   Loader2, CheckCircle, AlertCircle, Bot, Link, Shield, Database,
-  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone,
+  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search,
 } from 'lucide-react';
 
 // ========== 类型 ==========
 
-type TabKey = 'ai' | 'integration' | 'security' | 'data';
+type TabKey = 'ai' | 'search' | 'integration' | 'security' | 'data';
 
 interface Session {
   id: string;
@@ -215,6 +215,85 @@ function AIConfig() {
   );
 }
 
+// ========== 搜索配置 ==========
+
+function SearchConfig() {
+  const [provider, setProvider] = useState('none');
+  const [apiKey, setApiKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.get<Record<string, string>>('/settings/search')
+      .then((res) => {
+        if (res.provider) setProvider(res.provider);
+        if (res.api_key && res.api_key !== '***') setApiKey(res.api_key);
+      })
+      .catch(() => {});
+  }, []);
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await api.post('/settings/batch', {
+        settings: [
+          { category: 'SEARCH', key: 'provider', value: provider },
+          { category: 'SEARCH', key: 'api_key', value: apiKey || '', encrypted: true },
+        ],
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch {} finally { setSaving(false); }
+  }
+
+  const inputCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  const selectCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-slate-700">搜索供应商</label>
+        <select value={provider} onChange={(e) => setProvider(e.target.value)} className={selectCls}>
+          <option value="none">不使用联网搜索</option>
+          <option value="tavily">Tavily (推荐，有免费额度)</option>
+          <option value="serpapi">SerpAPI (Google 搜索)</option>
+        </select>
+        <p className="mt-1 text-[11px] text-slate-400">AI 联网搜索外部资料时使用，如查行业行情、技术趋势等</p>
+      </div>
+
+      {provider !== 'none' && (
+        <div>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700">搜索 API Key</label>
+          <div className="relative">
+            <input type={showKey ? 'text' : 'password'} value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+              placeholder={provider === 'tavily' ? 'tvly-xxxx' : 'serpapi key'} className={cn(inputCls, 'pr-10')} />
+            <button onClick={() => setShowKey(!showKey)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          <p className="mt-1 text-[11px] text-slate-400">
+            {provider === 'tavily' ? '在 tavily.com 注册获取' : '在 serpapi.com 注册获取'}
+          </p>
+        </div>
+      )}
+
+      {saved && (
+        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-600">
+          <CheckCircle className="h-4 w-4" />配置已保存
+        </div>
+      )}
+
+      <button onClick={handleSave} disabled={saving}
+        className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50">
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+        保存配置
+      </button>
+    </div>
+  );
+}
+
 // ========== 集成管理 ==========
 
 function IntegrationConfig() {
@@ -376,6 +455,7 @@ export default function SettingsPage() {
 
   const tabs: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { key: 'ai', label: 'AI 配置', icon: Bot },
+    { key: 'search', label: '搜索配置', icon: Search },
     { key: 'integration', label: '集成管理', icon: Link },
     { key: 'security', label: '安全设置', icon: Shield },
     { key: 'data', label: '数据管理', icon: Database },
@@ -399,6 +479,7 @@ export default function SettingsPage() {
       {/* 内容区 */}
       <div className="rounded-xl border border-slate-200/60 bg-white p-6 shadow-sm">
         {activeTab === 'ai' && <AIConfig />}
+        {activeTab === 'search' && <SearchConfig />}
         {activeTab === 'integration' && <IntegrationConfig />}
         {activeTab === 'security' && <SecuritySettings />}
         {activeTab === 'data' && <DataManagement />}

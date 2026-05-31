@@ -1,0 +1,65 @@
+{
+  "name": "AI 任务解析",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "llm-parse",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "llm-parse"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.body?.text || $input.first().json.text || '';\n\n// 简单的中文 NLP 解析（模拟 AI）\nconst tasks = [];\nconst lines = text.split(/[，,；;。！!\\n]+/).filter(l => l.trim());\n\nfor (const line of lines) {\n  const title = line.trim();\n  if (!title) continue;\n\n  // 检测优先级\n  let priority = 'MEDIUM';\n  if (/紧急|urgent|加急/i.test(title)) priority = 'URGENT';\n  else if (/重要|high/i.test(title)) priority = 'HIGH';\n  else if (/低优先|low/i.test(title)) priority = 'LOW';\n\n  // 检测工时\n  let estimatedHours = 4;\n  const hourMatch = title.match(/(\\d+)\\s*[小时天h]/);\n  if (hourMatch) estimatedHours = parseInt(hourMatch[1]);\n\n  tasks.push({\n    title: title.replace(/\\d+\\s*[小时天h]/g, '').replace(/紧急|重要|低优先/g, '').trim(),\n    estimatedHours,\n    priority,\n    description: line,\n  });\n}\n\nreturn tasks.map(t => ({ json: t }));"
+      },
+      "name": "解析任务",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, data: $input.all().map(item => item.json) }) }}",
+        "options": {}
+      },
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [440, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "解析任务",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析任务": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

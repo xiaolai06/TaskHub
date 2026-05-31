@@ -20,6 +20,7 @@ import {
   Newspaper, TrendingUp, AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { WorkTools } from '@/components/features/work/WorkTools';
 
 interface QuickTask {
   id: string;
@@ -183,6 +184,9 @@ export function Header({ onOpenAi }: HeaderProps) {
 
       {/* 右侧：操作按钮组 */}
       <div className="flex shrink-0 items-center gap-2">
+        {/* 计时 + 任务 */}
+        <WorkTools />
+
         {/* 新建 */}
         <DropdownMenu>
           <DropdownMenuTrigger className={navBtn}>
@@ -190,9 +194,15 @@ export function Header({ onOpenAi }: HeaderProps) {
             新建
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem><FolderKanban className="mr-2 h-4 w-4 text-indigo-500" />新建项目</DropdownMenuItem>
-            <DropdownMenuItem><CheckSquare className="mr-2 h-4 w-4 text-blue-500" />新建任务</DropdownMenuItem>
-            <DropdownMenuItem><Users className="mr-2 h-4 w-4 text-emerald-500" />新建客户</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/main/projects')}>
+              <FolderKanban className="mr-2 h-4 w-4 text-indigo-500" />新建项目
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/main/tasks')}>
+              <CheckSquare className="mr-2 h-4 w-4 text-blue-500" />新建任务
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/main/customers')}>
+              <Users className="mr-2 h-4 w-4 text-emerald-500" />新建客户
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -326,7 +336,7 @@ export function Header({ onOpenAi }: HeaderProps) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
-              <LogOut className="mr-2 h-4 w-4" />退出登录
+  	            <LogOut className="mr-2 h-4 w-4" />退出登录
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

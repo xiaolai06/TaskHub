@@ -20,6 +20,8 @@ import webhookRoutes from './webhook.routes';
 import greetingRoutes from './greeting.routes';
 import profileRoutes from './profile.routes';
 import preferenceRoutes from './preference.routes';
+import cronJobRoutes from './cron-job.routes';
+import workRoutes from './work.routes';
 
 // 导入认证中间件（需要登录才能访问的接口加这个）
 import { auth } from '../middleware/auth';
@@ -51,5 +53,7 @@ router.use('/settings', auth, settingRoutes);       // /api/settings/*
 router.use('/greetings', auth, greetingRoutes);    // /api/greetings/*
 router.use('/profile', auth, profileRoutes);      // /api/profile/*
 router.use('/preferences', auth, preferenceRoutes); // /api/preferences/*
+router.use('/cron-jobs', auth, cronJobRoutes);      // /api/cron-jobs/*
+router.use('/work', auth, workRoutes);            // /api/work/*
 
 export default router;

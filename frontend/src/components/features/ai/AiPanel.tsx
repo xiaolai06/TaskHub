@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { useAiChat } from '@/hooks/useAiChat';
 import { useProjectList } from '@/hooks/useProjects';
 import { api } from '@/lib/api';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 // ═══ 工具调用展示图标 ═══
 
@@ -316,7 +317,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
                       {msg.content && (
                         <div className={cn('max-w-[85%] rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed',
                           msg.role === 'assistant' ? 'rounded-tl-sm bg-slate-100 text-slate-700' : 'rounded-tr-sm bg-indigo-600 text-white')}>
-                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                          <MarkdownRenderer content={msg.content} />
                         </div>
                       )}
                     </div>

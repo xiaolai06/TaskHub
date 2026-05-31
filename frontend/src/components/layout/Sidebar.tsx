@@ -45,6 +45,12 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    label: 'AI',
+    items: [
+      { href: '/main/ai', label: 'AI 工作台', icon: Sparkles },
+    ],
+  },
+  {
     label: '洞察',
     items: [
       { href: '/main/reports', label: '报表分析', icon: BarChart3 },

@@ -1,0 +1,82 @@
+{
+  "name": "每日到期提醒",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "name": "每天8点触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://host.docker.internal:3001/api/health",
+        "options": {}
+      },
+      "name": "检查后端连通",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3001/api/webhooks/notify",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"userId\": \"cmps8qwcj0000u8jog0if8n58\",\n  \"type\": \"SYSTEM\",\n  \"title\": \"每日到期提醒\",\n  \"content\": \"✅ 到期任务检查完成 - {{ $now.format('yyyy-MM-dd HH:mm') }}\"\n}",
+        "options": {}
+      },
+      "name": "创建通知",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [440, 0]
+    }
+  ],
+  "connections": {
+    "每天8点触发": {
+      "main": [
+        [
+          {
+            "node": "检查后端连通",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "检查后端连通": {
+      "main": [
+        [
+          {
+            "node": "创建通知",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

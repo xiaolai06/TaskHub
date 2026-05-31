@@ -17,4 +17,7 @@ export const config = {
 
   // 限频
   limitEnabled: process.env.LIMIT_ENABLED !== 'false',
+
+  // 定时任务（替代 n8n）
+  cronEnabled: process.env.CRON_ENABLED !== 'false',
 } as const;

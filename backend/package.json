@@ -25,6 +25,7 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.3",
     "openai": "^4.104.0",
     "zod": "^3.25.23"
@@ -36,6 +37,7 @@
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.21",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
     "prisma": "^6.9.0",
     "ts-node": "^10.9.2",

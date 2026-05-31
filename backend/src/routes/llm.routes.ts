@@ -4,8 +4,8 @@ import { validate } from '../middleware/validate';
 import { chatSchema } from '../validators/llm.schema';
 import { AIService } from '../services/ai.service';
 import { success } from '../utils/response';
-import { getAllTools, getTool } from '../ai/tools/registry';
-import { decrypt } from '../services/encryption.service';
+import { getAllTools, TOTAL_TOOLS } from '../ai/tools/registry';
+import { selectSystemPrompt } from '../ai/prompt-selector';
 import OpenAI from 'openai';
 
 const router = Router();
@@ -23,7 +23,17 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
     // 初始化 AI
     const ai = new AIService(req.userId!);
     const initialized = await ai.init();
-    ai.registerTools(getAllTools());
+    const tools = getAllTools();
+    ai.registerTools(tools);
+
+    // 系统提示（根据用户消息自动选择）
+    const basePrompt = selectSystemPrompt(message, initialized);
+    const toolListHint = tools.map(t => `- \`${t.name}\`: ${t.description}`).join('\n');
+    const systemPrompt = basePrompt + `\n\n## 可用工具（${tools.length}个）\n${toolListHint}`;
+
+    // 构建 messages 数组
+    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
+    messages.push({ role: 'system', content: systemPrompt });
 
     // 获取或创建会话
     const sid = sessionId || 'default';
@@ -31,15 +41,6 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
       where: { userId: req.userId!, sessionId: sid },
       orderBy: { createdAt: 'desc' }, take: 6,
     });
-
-    // 构建 messages
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
-
-    // 系统提示
-    const systemPrompt = initialized
-      ? `你是 TaskFlow+ 智能助手，帮助一人公司老板管理项目、任务、客户和财务。\n规则：\n1. 用户问到具体数据时，先调用工具查询\n2. 执行写操作前先确认\n3. 回复简洁，用中文\n4. 数据用具体数字，有风险主动提醒`
-      : `你是 TaskFlow+ 智能助手。当前未配置 AI API Key，使用 Mock 模式。`;
-    messages.push({ role: 'system', content: systemPrompt });
 
     // 历史对话
     for (const h of conv.reverse()) {
@@ -74,14 +75,14 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
   }
 });
 
-// ═══ POST /chat — 非流式对话（简化版，用于测试） ═══
+// ═══ POST /chat — 非流式对话 ═══
 router.post('/chat', validate(chatSchema), async (req: Request, res: Response, next) => {
   try {
     const ai = new AIService(req.userId!);
-    await ai.init();
+    const initialized = await ai.init();
     ai.registerTools(getAllTools());
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
-      { role: 'system', content: '你是 TaskFlow+ 智能助手。回复简洁，用中文。' },
+      { role: 'system', content: selectSystemPrompt(req.body.message, initialized) },
       { role: 'user', content: req.body.message },
     ];
     let fullText = '';
@@ -96,31 +97,21 @@ router.post('/chat', validate(chatSchema), async (req: Request, res: Response, n
 router.get('/conversations', async (req: Request, res: Response, next) => {
   try {
     const sessions = await prisma.conversation.groupBy({
-      by: ['sessionId'],
-      where: { userId: req.userId! },
-      _count: true,
-      _min: { createdAt: true },
-      _max: { createdAt: true },
+      by: ['sessionId'], where: { userId: req.userId! }, _count: true,
+      _min: { createdAt: true }, _max: { createdAt: true },
     });
-    const result = sessions.map(s => ({
-      sessionId: s.sessionId,
-      messageCount: s._count,
-      createdAt: s._min.createdAt,
-      lastMessage: s._max.createdAt,
-    }));
-    success(res, result);
+    success(res, sessions.map(s => ({ sessionId: s.sessionId, messageCount: s._count, lastMessage: s._max.createdAt })));
   } catch (err) { next(err); }
 });
 
 // ═══ GET /conversations/:sessionId — 会话消息 ═══
 router.get('/conversations/:sessionId', async (req: Request, res: Response, next) => {
   try {
-    const messages = await prisma.conversation.findMany({
+    const msgs = await prisma.conversation.findMany({
       where: { userId: req.userId!, sessionId: String(req.params.sessionId) },
-      orderBy: { createdAt: 'asc' },
-      select: { id: true, role: true, content: true, createdAt: true },
+      orderBy: { createdAt: 'asc' }, select: { id: true, role: true, content: true, createdAt: true },
     });
-    success(res, messages);
+    success(res, msgs);
   } catch (err) { next(err); }
 });
 
@@ -132,10 +123,10 @@ router.delete('/conversations/:sessionId', async (req: Request, res: Response, n
   } catch (err) { next(err); }
 });
 
-// ═══ GET /tools — 获取工具列表（调试用） ═══
+// ═══ GET /tools — 获取工具列表 ═══
 router.get('/tools', async (_req: Request, res: Response) => {
   const tools = getAllTools().map(t => ({ name: t.name, description: t.description, category: t.category, access: t.access }));
-  success(res, tools);
+  success(res, { total: tools.length, tools });
 });
 
 export default router;
