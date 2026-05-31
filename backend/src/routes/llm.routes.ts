@@ -112,6 +112,41 @@ router.get('/conversations', async (req: Request, res: Response, next) => {
   } catch (err) { next(err); }
 });
 
+// ═══ GET /conversations/weekly — 本周对话（n8n 周报/记忆总结用） ═══
+router.get('/conversations/weekly', async (req: Request, res: Response, next) => {
+  try {
+    const weeksAgo = parseInt(req.query.weeksAgo as string) || 0;
+    const now = new Date();
+    const dayOfWeek = now.getDay() || 7;
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - dayOfWeek + 1 - weeksAgo * 7);
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const conversations = await prisma.conversation.findMany({
+      where: {
+        userId: req.userId!,
+        createdAt: { gte: startOfWeek, lte: endOfWeek },
+      },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, role: true, content: true, sessionId: true, createdAt: true },
+    });
+
+    success(res, {
+      conversations,
+      period: { start: startOfWeek.toISOString(), end: endOfWeek.toISOString() },
+      summary: {
+        totalMessages: conversations.length,
+        userMessages: conversations.filter(c => c.role === 'user').length,
+        assistantMessages: conversations.filter(c => c.role === 'assistant').length,
+        sessions: [...new Set(conversations.map(c => c.sessionId))].length,
+      },
+    });
+  } catch (err) { next(err); }
+});
+
 // ═══ GET /conversations/:sessionId — 会话消息 ═══
 router.get('/conversations/:sessionId', async (req: Request, res: Response, next) => {
   try {
