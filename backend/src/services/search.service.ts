@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../server';
 
 /** 执行业务搜索（保存搜索记录） */
 export async function search(userId: string, query: string, source = 'manual') {

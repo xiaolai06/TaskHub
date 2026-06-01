@@ -36,6 +36,9 @@ model User {
   timeEntries    TimeEntry[]
   communications Communication[]
   insights       AiInsight[]
+  cronJobs       CronJob[]
+  workTimers     WorkTimer[]
+  todayTodos     TodayTodo[]
 }
 
 // ======================== 个人资料 ========================
@@ -374,6 +377,33 @@ model TimeEntry {
   @@index([userId, date])
 }
 
+// ======================== 工作时间计时器 ========================
+model WorkTimer {
+  id           String   @id @default(cuid())
+  userId       String
+  description  String?
+  taskId       String?
+  projectId    String?
+  startedAt    DateTime
+  endedAt      DateTime?
+  totalMinutes Float    @default(0)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ======================== 今日待办 ========================
+model TodayTodo {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String
+  completed Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completed])
+}
+
 // ======================== 沟通记录 ========================
 model Communication {
   id          String   @id @default(cuid())
@@ -425,4 +455,26 @@ model Notification {
 
   @@index([userId, read])
   @@index([userId, createdAt])
+}
+
+// ======================== 定时任务 ========================
+model CronJob {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String                       // 任务名称
+  cronExpr   String                       // Cron 表达式，如 "0 8 * * *"
+  timezone   String    @default("Asia/Shanghai")
+  action     String                       // NOTIFY / AI_ANALYSIS / WEBHOOK
+  config     String    @default("{}")     // JSON 配置
+  enabled    Boolean   @default(true)
+  isSystem   Boolean   @default(false)    // 系统预置任务不可删除
+  lastRunAt  DateTime?
+  lastStatus String?                      // success / error
+  lastResult String?                      // 上次执行结果摘要
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, enabled])
+  @@index([userId, action])
 }

@@ -20,9 +20,12 @@ import webhookRoutes from './webhook.routes';
 import greetingRoutes from './greeting.routes';
 import profileRoutes from './profile.routes';
 import preferenceRoutes from './preference.routes';
+import cronJobRoutes from './cron-job.routes';
+import workRoutes from './work.routes';
 
 // 导入认证中间件（需要登录才能访问的接口加这个）
 import { auth } from '../middleware/auth';
+import { apiLimit } from '../middleware/rateLimit';
 
 const router = Router();
 
@@ -34,22 +37,24 @@ router.get('/health', (_req: Request, res: Response) => {
 router.use('/auth', authRoutes);          // /api/auth/*（登录/注册是公开的）
 router.use('/webhooks', webhookRoutes);   // /api/webhooks/*（n8n 回调是公开的）
 
-// ============ 需要登录的接口 ============
-router.use('/projects', auth, projectRoutes);      // /api/projects/*
-router.use('/tasks', auth, taskRoutes);             // /api/tasks/*
-router.use('/costs', auth, costRoutes);             // /api/costs/*
-router.use('/customers', auth, customerRoutes);     // /api/customers/*
-router.use('/goals', auth, goalRoutes);             // /api/goals/*
-router.use('/scheduler', auth, schedulerRoutes);    // /api/scheduler/*
-router.use('/dashboard', auth, dashboardRoutes);    // /api/dashboard/*
-router.use('/reports', auth, reportRoutes);         // /api/reports/*
-router.use('/search', auth, searchRoutes);          // /api/search/*
-router.use('/research', auth, researchRoutes);      // /api/research/*
-router.use('/llm', auth, llmRoutes);                // /api/llm/*
-router.use('/notifications', auth, notificationRoutes);  // /api/notifications/*
-router.use('/settings', auth, settingRoutes);       // /api/settings/*
-router.use('/greetings', auth, greetingRoutes);    // /api/greetings/*
-router.use('/profile', auth, profileRoutes);      // /api/profile/*
-router.use('/preferences', auth, preferenceRoutes); // /api/preferences/*
+// ============ 需要登录的接口（含限频保护） ============
+router.use('/projects', auth, apiLimit, projectRoutes);      // /api/projects/*
+router.use('/tasks', auth, apiLimit, taskRoutes);             // /api/tasks/*
+router.use('/costs', auth, apiLimit, costRoutes);             // /api/costs/*
+router.use('/customers', auth, apiLimit, customerRoutes);     // /api/customers/*
+router.use('/goals', auth, apiLimit, goalRoutes);             // /api/goals/*
+router.use('/scheduler', auth, apiLimit, schedulerRoutes);    // /api/scheduler/*
+router.use('/dashboard', auth, apiLimit, dashboardRoutes);    // /api/dashboard/*
+router.use('/reports', auth, apiLimit, reportRoutes);         // /api/reports/*
+router.use('/search', auth, apiLimit, searchRoutes);          // /api/search/*
+router.use('/research', auth, apiLimit, researchRoutes);      // /api/research/*
+router.use('/llm', auth, apiLimit, llmRoutes);                // /api/llm/*
+router.use('/notifications', auth, apiLimit, notificationRoutes);  // /api/notifications/*
+router.use('/settings', auth, apiLimit, settingRoutes);       // /api/settings/*
+router.use('/greetings', auth, apiLimit, greetingRoutes);    // /api/greetings/*
+router.use('/profile', auth, apiLimit, profileRoutes);      // /api/profile/*
+router.use('/preferences', auth, apiLimit, preferenceRoutes); // /api/preferences/*
+router.use('/cron-jobs', auth, apiLimit, cronJobRoutes);      // /api/cron-jobs/*
+router.use('/work', auth, apiLimit, workRoutes);            // /api/work/*
 
 export default router;

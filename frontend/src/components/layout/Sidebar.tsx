@@ -41,14 +41,20 @@ const navGroups: NavGroup[] = [
       { href: '/main/tasks', label: '任务看板', icon: CheckSquare },
       { href: '/main/customers', label: '客户管理', icon: Users },
       { href: '/main/goals', label: '目标管理', icon: Target },
-      { href: '/main/projects/detail/schedule', label: '排期视图', icon: Calendar },
+      { href: '/main/schedule', label: '排期视图', icon: Calendar },
+    ],
+  },
+  {
+    label: 'AI',
+    items: [
+      { href: '/main/ai', label: 'AI 工作台', icon: Sparkles },
     ],
   },
   {
     label: '洞察',
     items: [
-      { href: '/main/reports', label: '报表分析', icon: BarChart3 },
-      { href: '/main/research', label: '业务研究', icon: Search },
+      { href: '/main/reports', label: '经营看板', icon: BarChart3 },
+      { href: '/main/research', label: '行业洞察', icon: Search },
     ],
   },
   {

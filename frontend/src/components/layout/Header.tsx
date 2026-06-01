@@ -20,6 +20,7 @@ import {
   Newspaper, TrendingUp, AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { WorkTools } from '@/components/features/work/WorkTools';
 
 interface QuickTask {
   id: string;
@@ -40,6 +41,16 @@ interface InfoItem {
 
 interface HeaderProps {
   onOpenAi?: () => void;
+}
+
+function formatRelativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return '刚刚';
+  if (mins < 60) return `${mins} 分钟前`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} 小时前`;
+  return `${Math.floor(hours / 24)} 天前`;
 }
 
 /** 时钟 */
@@ -148,12 +159,24 @@ export function Header({ onOpenAi }: HeaderProps) {
   const roleLabel = user?.role === 'ADMIN' ? '管理员' : '成员';
   const urgentCount = quickTasks.filter((t) => t.priority === 'URGENT' || t.priority === 'HIGH').length;
 
-  const infoItems: InfoItem[] = [
-    { id: '1', type: 'alert', title: '逾期任务提醒', desc: '有 2 个任务已超过截止日期', time: '10 分钟前', read: false },
-    { id: '2', type: 'project', title: '项目进度更新', desc: '"官网重构" 完成率达到 75%', time: '1 小时前', read: false },
-    { id: '3', type: 'task', title: '新任务分配', desc: '你被分配到 "API 接口优化"', time: '2 小时前', read: true },
-    { id: '4', type: 'system', title: '系统通知', desc: '本周报表已自动生成', time: '3 小时前', read: true },
-  ];
+  const [infoItems, setInfoItems] = useState<InfoItem[]>([]);
+
+  useEffect(() => {
+    // 从 Notification 表加载近期 5 条通知
+    api.get<Array<{ id: string; type: string; title: string; content: string; read: boolean; createdAt: string }>>('/notifications?limit=5')
+      .then((res) => {
+        const items: InfoItem[] = (Array.isArray(res) ? res : (res as any)?.data || []).map((n: any) => ({
+          id: n.id,
+          type: n.type === 'TASK_DUE' ? 'alert' : n.type === 'PROJECT_CHANGE' ? 'project' : n.type === 'AI_REPORT' ? 'system' : 'system',
+          title: n.title,
+          desc: n.content || '',
+          time: formatRelativeTime(n.createdAt),
+          read: n.read,
+        }));
+        setInfoItems(items);
+      })
+      .catch(() => {});
+  }, []);
   const unreadInfo = infoItems.filter((i) => !i.read).length;
 
   const infoIcon = (type: InfoItem['type']) => {
@@ -183,6 +206,9 @@ export function Header({ onOpenAi }: HeaderProps) {
 
       {/* 右侧：操作按钮组 */}
       <div className="flex shrink-0 items-center gap-2">
+        {/* 计时 + 任务 */}
+        <WorkTools />
+
         {/* 新建 */}
         <DropdownMenu>
           <DropdownMenuTrigger className={navBtn}>
@@ -190,9 +216,15 @@ export function Header({ onOpenAi }: HeaderProps) {
             新建
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem><FolderKanban className="mr-2 h-4 w-4 text-indigo-500" />新建项目</DropdownMenuItem>
-            <DropdownMenuItem><CheckSquare className="mr-2 h-4 w-4 text-blue-500" />新建任务</DropdownMenuItem>
-            <DropdownMenuItem><Users className="mr-2 h-4 w-4 text-emerald-500" />新建客户</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/main/projects')}>
+              <FolderKanban className="mr-2 h-4 w-4 text-indigo-500" />新建项目
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/main/tasks')}>
+              <CheckSquare className="mr-2 h-4 w-4 text-blue-500" />新建任务
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/main/customers')}>
+              <Users className="mr-2 h-4 w-4 text-emerald-500" />新建客户
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -326,7 +358,7 @@ export function Header({ onOpenAi }: HeaderProps) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600">
-              <LogOut className="mr-2 h-4 w-4" />退出登录
+  	            <LogOut className="mr-2 h-4 w-4" />退出登录
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

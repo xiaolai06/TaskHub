@@ -96,24 +96,25 @@ export async function getByProject(userId: string, projectId: string) {
     },
   });
 
-  // 聚合每个任务的花销
-  return Promise.all(
-    tasks.map(async (t) => {
-      const costAgg = await prisma.costRecord.aggregate({
-        where: { taskId: t.id },
+  // 批量聚合每个任务的花销（1次查询替代 N 次）
+  const taskIds = tasks.map(t => t.id);
+  const childIds = tasks.flatMap(t => t.children.map(c => c.id));
+  const allIds = [...taskIds, ...childIds];
+
+  const aggResults = allIds.length > 0
+    ? await prisma.costRecord.groupBy({
+        by: ['taskId'],
+        where: { taskId: { in: allIds } },
         _sum: { amount: true },
-      });
-      const childCostAgg = await prisma.costRecord.aggregate({
-        where: { taskId: { in: t.children.map((c) => c.id) } },
-        _sum: { amount: true },
-      });
-      return {
-        ...t,
-        taskCost: costAgg._sum.amount ?? 0,
-        childrenCost: childCostAgg._sum.amount ?? 0,
-      };
-    }),
-  );
+      })
+    : [];
+  const costMap = new Map(aggResults.map(r => [r.taskId, r._sum.amount ?? 0]));
+
+  return tasks.map(t => ({
+    ...t,
+    taskCost: costMap.get(t.id) ?? 0,
+    childrenCost: t.children.reduce((sum, c) => sum + (costMap.get(c.id) ?? 0), 0),
+  }));
 }
 
 export async function create(userId: string, data: CreateTaskInput) {

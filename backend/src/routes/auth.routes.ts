@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { validate } from '../middleware/validate';
 import { auth } from '../middleware/auth';
+import { loginLimit } from '../middleware/rateLimit';
 import { registerSchema, loginSchema } from '../validators/auth.schema';
 import * as authService from '../services/auth.service';
 import { success, error } from '../utils/response';
@@ -48,8 +49,8 @@ router.post('/register', validate(registerSchema), async (req: Request, res: Res
   }
 });
 
-/** POST /login — 用户登录 */
-router.post('/login', validate(loginSchema), async (req: Request, res: Response, next) => {
+/** POST /login — 用户登录（限频：5次/分钟） */
+router.post('/login', loginLimit, validate(loginSchema), async (req: Request, res: Response, next) => {
   try {
     const { email, password } = req.body;
     const result = await authService.login(email, password, req);

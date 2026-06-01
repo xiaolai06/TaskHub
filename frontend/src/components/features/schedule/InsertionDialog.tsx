@@ -121,7 +121,7 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>优先级</Label>
-                <Select value={priority} onValueChange={(v) => setPriority(v ?? 'MEDIUM')}>
+                <Select value={priority} onValueChange={(v) => setPriority(v || 'MEDIUM')}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
