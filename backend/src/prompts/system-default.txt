@@ -28,3 +28,10 @@
 - create_project: name(必填), description, type(类型标签), budget(元), startDate, endDate(截止日期), customerName, expenseNote, rewardNote
 - create_task: title(必填), description, priority, estimatedHours, startDate, dueDate(截止日期), projectName, assigneeName, parentTitle, cost, costNote
 - create_customer: name(必填), email, phone, company, address, industry, status, notes
+
+排期相关工具：
+- assess_complexity: 评估项目复杂度，修正工时预估
+- evaluate_insertion: 评估新任务插入对现有排期的影响
+- suggest_rebalance: 检测排期问题（延期/冲突），给出调整建议
+- get_schedule_advice: 回答排期问题（能完成吗/先做哪个/什么时候有空）
+- get_historical_accuracy: 分析历史工时准确度，学习预估偏差模式

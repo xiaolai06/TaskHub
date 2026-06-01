@@ -28,6 +28,11 @@
 - `get_today_focus` — 今日焦点
 - `get_overdue_tasks` — 延期任务
 - `suggest_weekly_plan` — 周计划建议
+- `assess_complexity` — 评估项目/任务复杂度，修正工时预估
+- `evaluate_insertion` — 评估新任务插入对现有排期的影响
+- `suggest_rebalance` — 检测排期问题，给出调整建议
+- `get_schedule_advice` — 回答排期相关问题，给出优先级建议
+- `get_historical_accuracy` — 分析历史工时准确度，学习预估偏差模式
 
 ### 回复风格
 - 按时间先后组织信息

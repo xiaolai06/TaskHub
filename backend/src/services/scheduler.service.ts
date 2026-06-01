@@ -156,7 +156,25 @@ export async function calculateSchedule(
     dueDate: t.dueDate ? toDateStr(t.dueDate) : null,
   }));
 
-  return buildSchedule(tasks, dailyHourLimit);
+  // 默认跳过周末
+  return buildSchedule(tasks, dailyHourLimit, true);
+}
+
+// ======================== 日期工具函数 ========================
+
+/** 检查是否是周末 */
+function isWeekend(date: Date): boolean {
+  const day = date.getDay();
+  return day === 0 || day === 6; // 周日=0, 周六=6
+}
+
+/** 跳到下一个工作日 */
+function skipToNextWorkday(date: Date): Date {
+  const result = new Date(date);
+  while (isWeekend(result)) {
+    result.setDate(result.getDate() + 1);
+  }
+  return result;
 }
 
 // ======================== 排期引擎（纯算法，可复用） ========================
@@ -164,6 +182,7 @@ export async function calculateSchedule(
 function buildSchedule(
   tasks: TaskInput[],
   dailyHourLimit: number,
+  skipWeekends: boolean = true,
 ): ScheduleResult {
   const sorted = sortByPriorityAndDueDate(tasks);
   const today = new Date();
@@ -171,11 +190,10 @@ function buildSchedule(
 
   const scheduled: ScheduledTask[] = [];
   const workloadMap = new Map<string, { hours: number; tasks: string[] }>();
-  const cursorDate = new Date(today);
+  let cursorDate = skipWeekends ? skipToNextWorkday(new Date(today)) : new Date(today);
 
   for (const task of sorted) {
     const remaining = task.estimatedHours;
-    const taskStart = new Date(cursorDate);
     let firstDay: Date | null = null;
     let lastDay: Date | null = null;
     let left = remaining;
@@ -184,12 +202,18 @@ function buildSchedule(
     if (task.startDate) {
       const taskStartHint = new Date(task.startDate);
       if (taskStartHint > cursorDate) {
-        cursorDate.setTime(taskStartHint.getTime());
+        cursorDate = skipWeekends ? skipToNextWorkday(taskStartHint) : new Date(taskStartHint);
       }
     }
 
     // 按天分配工时
     while (left > 0) {
+      // 跳过周末
+      if (skipWeekends && isWeekend(cursorDate)) {
+        cursorDate.setDate(cursorDate.getDate() + 1);
+        continue;
+      }
+
       const dateStr = toDateStr(cursorDate);
       const day = workloadMap.get(dateStr) ?? { hours: 0, tasks: [] };
       const available = dailyHourLimit - day.hours;
