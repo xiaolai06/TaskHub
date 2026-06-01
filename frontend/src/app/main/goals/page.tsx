@@ -64,11 +64,8 @@ export default function GoalsPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-slate-800">目标管理</h1>
-          <p className="mt-0.5 text-xs text-slate-400">设定月度/季度目标，追踪进度</p>
-        </div>
+      <div className="mb-4 flex items-center justify-between">
+        <GoalOverview data={overview} isLoading={false} />
         <button
           onClick={() => { setEditGoal(null); setShowForm(true); }}
           className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-indigo-700 active:scale-95"
@@ -76,9 +73,6 @@ export default function GoalsPage() {
           <Plus className="h-4 w-4" />新建目标
         </button>
       </div>
-
-      {/* 总览 — 紧凑横条 */}
-      <GoalOverview data={overview} isLoading={false} />
 
       {/* 筛选 + 列表 */}
       <div className="mt-4 space-y-3">

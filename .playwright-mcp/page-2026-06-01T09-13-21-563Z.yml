@@ -1,0 +1,222 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e6]: T
+        - generic [ref=e7]:
+          - heading "TaskFlow+" [level=1] [ref=e8]
+          - paragraph [ref=e9]: 智能项目管理
+      - navigation [ref=e10]:
+        - generic [ref=e11]:
+          - button "概览" [expanded] [ref=e12]:
+            - generic [ref=e13]: 概览
+            - img [ref=e14]
+          - link "仪表盘" [ref=e17] [cursor=pointer]:
+            - /url: /main/dashboard
+            - img [ref=e18]
+            - text: 仪表盘
+        - generic [ref=e23]:
+          - button "工作" [expanded] [ref=e24]:
+            - generic [ref=e25]: 工作
+            - img [ref=e26]
+          - generic [ref=e28]:
+            - link "项目管理" [ref=e29] [cursor=pointer]:
+              - /url: /main/projects
+              - img [ref=e30]
+              - text: 项目管理
+            - link "任务看板" [ref=e32] [cursor=pointer]:
+              - /url: /main/tasks
+              - img [ref=e33]
+              - text: 任务看板
+            - link "客户管理" [ref=e36] [cursor=pointer]:
+              - /url: /main/customers
+              - img [ref=e37]
+              - text: 客户管理
+            - link "目标管理" [ref=e42] [cursor=pointer]:
+              - /url: /main/goals
+              - img [ref=e43]
+              - text: 目标管理
+            - link "排期视图" [ref=e47] [cursor=pointer]:
+              - /url: /main/schedule
+              - img [ref=e48]
+              - text: 排期视图
+        - generic [ref=e50]:
+          - button "AI" [expanded] [ref=e51]:
+            - generic [ref=e52]: AI
+            - img [ref=e53]
+          - link "AI 工作台" [ref=e56] [cursor=pointer]:
+            - /url: /main/ai
+            - img [ref=e57]
+            - text: AI 工作台
+        - generic [ref=e60]:
+          - button "洞察" [expanded] [ref=e61]:
+            - generic [ref=e62]: 洞察
+            - img [ref=e63]
+          - generic [ref=e65]:
+            - link "经营看板" [ref=e66] [cursor=pointer]:
+              - /url: /main/reports
+              - img [ref=e67]
+              - text: 经营看板
+            - link "行业洞察" [ref=e69] [cursor=pointer]:
+              - /url: /main/research
+              - img [ref=e70]
+              - text: 行业洞察
+        - generic [ref=e73]:
+          - button "设置" [expanded] [ref=e74]:
+            - generic [ref=e75]: 设置
+            - img [ref=e76]
+          - link "系统设置" [ref=e79] [cursor=pointer]:
+            - /url: /main/settings
+            - img [ref=e80]
+            - text: 系统设置
+      - button "AI 助手 ⌘J 展开对话" [ref=e84]:
+        - img [ref=e86]
+        - generic [ref=e89]:
+          - paragraph [ref=e90]: AI 助手
+          - paragraph [ref=e91]: ⌘J 展开对话
+    - generic [ref=e92]:
+      - banner [ref=e93]:
+        - generic [ref=e94]:
+          - img [ref=e96]
+          - generic [ref=e100]: 欢迎使用 TaskFlow+
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - button "计时" [ref=e103]:
+              - img [ref=e104]
+              - text: 计时
+            - button "任务" [ref=e107]:
+              - img [ref=e108]
+              - text: 任务
+          - button "新建" [ref=e111]:
+            - img [ref=e112]
+            - text: 新建
+          - button "资讯" [ref=e114]:
+            - img [ref=e115]
+            - text: 资讯
+          - button "待办" [ref=e119]:
+            - img [ref=e120]
+            - text: 待办
+          - button "AI" [ref=e123]:
+            - img [ref=e124]
+            - text: AI
+          - button "U 未登录 成员" [ref=e128]:
+            - generic [ref=e130]: U
+            - generic [ref=e131]:
+              - paragraph [ref=e132]: 未登录
+              - paragraph [ref=e133]: 成员
+            - img [ref=e134]
+      - main [ref=e136]:
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - generic [ref=e141]:
+              - img [ref=e143]
+              - generic [ref=e150]:
+                - paragraph [ref=e151]: 全部任务
+                - paragraph [ref=e152]: "0"
+            - generic [ref=e154]:
+              - img [ref=e156]
+              - generic [ref=e158]:
+                - paragraph [ref=e159]: 已逾期
+                - paragraph [ref=e160]: "0"
+            - generic [ref=e162]:
+              - img [ref=e164]
+              - generic [ref=e166]:
+                - paragraph [ref=e167]: 今天
+                - paragraph [ref=e168]: "0"
+            - generic [ref=e170]:
+              - img [ref=e172]
+              - generic [ref=e174]:
+                - paragraph [ref=e175]: 本周内
+                - paragraph [ref=e176]: "0"
+          - generic [ref=e177]:
+            - generic [ref=e178]:
+              - button "时间线" [ref=e179]:
+                - img [ref=e180]
+                - text: 时间线
+              - button "优先级" [ref=e183]:
+                - img [ref=e184]
+                - text: 优先级
+              - button "按项目" [ref=e186]:
+                - img [ref=e187]
+                - text: 按项目
+            - combobox [ref=e190]:
+              - option "按优先级" [selected]
+              - option "按截止日期"
+              - option "按工时"
+              - option "按项目"
+            - button "升序" [ref=e191]:
+              - img [ref=e192]
+            - combobox [ref=e195]:
+              - option "全部状态" [selected]
+              - option "待办"
+              - option "进行中"
+              - option "阻塞"
+              - option "审查中"
+            - paragraph [ref=e196]: 0 个任务
+          - generic [ref=e198]:
+            - img [ref=e199]
+            - paragraph [ref=e202]: 所有任务已完成 🎉
+            - paragraph [ref=e203]: 没有待处理的任务了
+    - generic [ref=e204]:
+      - generic [ref=e205]:
+        - generic [ref=e206]:
+          - img [ref=e208]
+          - generic [ref=e210]: AI 助手
+        - generic [ref=e211]:
+          - button "新对话 (⌘N)" [ref=e212]:
+            - img [ref=e213]
+          - button [ref=e214]:
+            - img [ref=e215]
+      - generic [ref=e218]:
+        - generic [ref=e219]:
+          - generic [ref=e220]:
+            - button "概览" [ref=e221]:
+              - img [ref=e222]
+              - text: 概览
+            - button "客户" [ref=e230]:
+              - img [ref=e231]
+              - text: 客户
+            - button "历史" [ref=e236]:
+              - img [ref=e237]
+              - text: 历史
+          - generic [ref=e241]:
+            - generic [ref=e247]:
+              - paragraph [ref=e248]: 快捷提问
+              - button "🌅 今日简报" [ref=e249]:
+                - generic [ref=e250]: 🌅
+                - generic [ref=e251]: 今日简报
+                - img [ref=e252]
+              - button "⚠️ 风险扫描" [ref=e254]:
+                - generic [ref=e255]: ⚠️
+                - generic [ref=e256]: 风险扫描
+                - img [ref=e257]
+              - button "📅 周计划" [ref=e259]:
+                - generic [ref=e260]: 📅
+                - generic [ref=e261]: 周计划
+                - img [ref=e262]
+            - paragraph [ref=e266]: 暂无活跃项目
+          - button "默认模型" [ref=e268]:
+            - img [ref=e269]
+            - paragraph [ref=e272]: 默认模型
+            - img [ref=e273]
+        - generic [ref=e275]:
+          - generic [ref=e277]:
+            - img [ref=e279]
+            - paragraph [ref=e281]: 下午好，朋友
+            - paragraph [ref=e282]: 我是你的 AI 工作助手 👋
+            - paragraph [ref=e283]:
+              - text: 可以帮你查看项目进度、分析财务数据、
+              - text: 管理任务、跟进客户。
+            - paragraph [ref=e284]: 在下方输入你的问题，或点击快捷提问开始 👇
+          - generic [ref=e285]:
+            - generic [ref=e286]:
+              - button "🌙 今日总结" [ref=e287]
+              - button "📅 明日计划" [ref=e288]
+              - button "💰 财务概览" [ref=e289]
+            - generic [ref=e290]:
+              - textbox "输入你的问题..." [ref=e291]
+              - button [disabled] [ref=e292]:
+                - img [ref=e293]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e301] [cursor=pointer]:
+    - img [ref=e302]

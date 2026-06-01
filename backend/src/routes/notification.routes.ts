@@ -8,7 +8,8 @@ const router = Router();
 
 router.get('/', validate(notificationFiltersSchema, 'query'), async (req: Request, res: Response, next) => {
   try {
-    const result = await notificationService.findAll(req.userId!, req.query as any);
+    const filters = (req as any).validated?.query || req.query;
+    const result = await notificationService.findAll(req.userId!, filters as any);
     success(res, result);
   } catch (err) { next(err); }
 });

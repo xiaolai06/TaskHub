@@ -189,14 +189,6 @@ export default function SchedulePage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      {/* 标题栏 */}
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-slate-800">排期视图</h1>
-          <p className="mt-0.5 text-xs text-slate-400">按优先级和截止日排列所有项目中的任务</p>
-        </div>
-      </div>
-
       {/* 统计卡片 */}
       <div className="mb-5 grid grid-cols-4 gap-3">
         <StatCard icon={<GripVertical className="h-4 w-4" />} label="全部任务" value={stats.total} color="slate" />

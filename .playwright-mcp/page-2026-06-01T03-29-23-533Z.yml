@@ -1,0 +1,212 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e6]: T
+        - generic [ref=e7]:
+          - heading "TaskFlow+" [level=1] [ref=e8]
+          - paragraph [ref=e9]: 智能项目管理
+      - navigation [ref=e10]:
+        - generic [ref=e11]:
+          - button "概览" [expanded] [ref=e12]:
+            - generic [ref=e13]: 概览
+            - img [ref=e14]
+          - link "仪表盘" [ref=e17] [cursor=pointer]:
+            - /url: /main/dashboard
+            - img [ref=e18]
+            - text: 仪表盘
+        - generic [ref=e23]:
+          - button "工作" [expanded] [ref=e24]:
+            - generic [ref=e25]: 工作
+            - img [ref=e26]
+          - generic [ref=e28]:
+            - link "项目管理" [ref=e29] [cursor=pointer]:
+              - /url: /main/projects
+              - img [ref=e30]
+              - text: 项目管理
+            - link "任务看板" [ref=e32] [cursor=pointer]:
+              - /url: /main/tasks
+              - img [ref=e33]
+              - text: 任务看板
+            - link "客户管理" [ref=e36] [cursor=pointer]:
+              - /url: /main/customers
+              - img [ref=e37]
+              - text: 客户管理
+            - link "目标管理" [ref=e42] [cursor=pointer]:
+              - /url: /main/goals
+              - img [ref=e43]
+              - text: 目标管理
+            - link "排期视图" [ref=e47] [cursor=pointer]:
+              - /url: /main/schedule
+              - img [ref=e48]
+              - text: 排期视图
+        - generic [ref=e50]:
+          - button "AI" [expanded] [ref=e51]:
+            - generic [ref=e52]: AI
+            - img [ref=e53]
+          - link "AI 工作台" [ref=e56] [cursor=pointer]:
+            - /url: /main/ai
+            - img [ref=e57]
+            - text: AI 工作台
+        - generic [ref=e60]:
+          - button "洞察" [expanded] [ref=e61]:
+            - generic [ref=e62]: 洞察
+            - img [ref=e63]
+          - generic [ref=e65]:
+            - link "经营看板" [ref=e66] [cursor=pointer]:
+              - /url: /main/reports
+              - img [ref=e67]
+              - text: 经营看板
+            - link "行业洞察" [ref=e69] [cursor=pointer]:
+              - /url: /main/research
+              - img [ref=e70]
+              - text: 行业洞察
+        - generic [ref=e73]:
+          - button "设置" [expanded] [ref=e74]:
+            - generic [ref=e75]: 设置
+            - img [ref=e76]
+          - link "系统设置" [ref=e79] [cursor=pointer]:
+            - /url: /main/settings
+            - img [ref=e80]
+            - text: 系统设置
+      - button "AI 助手 ⌘J 展开对话" [ref=e84]:
+        - img [ref=e86]
+        - generic [ref=e89]:
+          - paragraph [ref=e90]: AI 助手
+          - paragraph [ref=e91]: ⌘J 展开对话
+    - generic [ref=e92]:
+      - banner [ref=e93]:
+        - generic [ref=e94]:
+          - img [ref=e96]
+          - generic [ref=e100]: 欢迎使用 TaskFlow+
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - button "计时" [ref=e103]:
+              - img [ref=e104]
+              - text: 计时
+            - button "任务" [ref=e107]:
+              - img [ref=e108]
+              - text: 任务
+          - button "新建" [ref=e111]:
+            - img [ref=e112]
+            - text: 新建
+          - button "资讯" [ref=e114]:
+            - img [ref=e115]
+            - text: 资讯
+          - button "待办" [ref=e119]:
+            - img [ref=e120]
+            - text: 待办
+          - button "AI" [ref=e123]:
+            - img [ref=e124]
+            - text: AI
+          - button "U 未登录 成员" [ref=e128]:
+            - generic [ref=e130]: U
+            - generic [ref=e131]:
+              - paragraph [ref=e132]: 未登录
+              - paragraph [ref=e133]: 成员
+            - img [ref=e134]
+      - main [ref=e136]:
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - generic [ref=e140]:
+              - img [ref=e142]
+              - generic [ref=e147]:
+                - paragraph [ref=e148]: "0"
+                - paragraph [ref=e149]: 总客户
+            - generic [ref=e150]:
+              - img [ref=e152]
+              - generic [ref=e154]:
+                - paragraph [ref=e155]: "0"
+                - paragraph [ref=e156]: 合作中
+            - generic [ref=e157]:
+              - img [ref=e159]
+              - generic [ref=e161]:
+                - paragraph [ref=e162]: "0"
+                - paragraph [ref=e163]: 重点客户
+            - generic [ref=e164]:
+              - img [ref=e166]
+              - generic [ref=e170]:
+                - paragraph [ref=e171]: "0"
+                - paragraph [ref=e172]: 待跟进
+          - generic [ref=e173]:
+            - generic [ref=e174]:
+              - button "全部" [ref=e175]
+              - button "合作中" [ref=e176]
+              - button "重点客户" [ref=e177]
+              - button "待跟进" [ref=e178]
+              - button "已暂停" [ref=e179]
+            - generic [ref=e180]:
+              - img [ref=e181]
+              - textbox [ref=e183]
+              - generic [ref=e184]: 至
+              - textbox [ref=e185]
+            - generic [ref=e186]:
+              - img [ref=e187]
+              - textbox "搜索客户..." [ref=e190]
+            - button "添加客户" [ref=e191]:
+              - img [ref=e192]
+              - text: 添加客户
+            - generic [ref=e193]: 共 0 个客户
+    - generic [ref=e196]:
+      - generic [ref=e197]:
+        - generic [ref=e198]:
+          - img [ref=e200]
+          - generic [ref=e202]: AI 助手
+        - generic [ref=e203]:
+          - button "新对话 (⌘N)" [ref=e204]:
+            - img [ref=e205]
+          - button [ref=e206]:
+            - img [ref=e207]
+      - generic [ref=e210]:
+        - generic [ref=e211]:
+          - generic [ref=e212]:
+            - button "概览" [ref=e213]:
+              - img [ref=e214]
+              - text: 概览
+            - button "客户" [ref=e222]:
+              - img [ref=e223]
+              - text: 客户
+            - button "历史" [ref=e228]:
+              - img [ref=e229]
+              - text: 历史
+          - generic [ref=e233]:
+            - generic [ref=e239]:
+              - paragraph [ref=e240]: 快捷提问
+              - button "🌅 今日简报" [ref=e241]:
+                - generic [ref=e242]: 🌅
+                - generic [ref=e243]: 今日简报
+                - img [ref=e244]
+              - button "⚠️ 风险扫描" [ref=e246]:
+                - generic [ref=e247]: ⚠️
+                - generic [ref=e248]: 风险扫描
+                - img [ref=e249]
+              - button "📅 周计划" [ref=e251]:
+                - generic [ref=e252]: 📅
+                - generic [ref=e253]: 周计划
+                - img [ref=e254]
+            - paragraph [ref=e258]: 暂无活跃项目
+          - button "默认模型" [ref=e260]:
+            - img [ref=e261]
+            - paragraph [ref=e264]: 默认模型
+            - img [ref=e265]
+        - generic [ref=e267]:
+          - generic [ref=e269]:
+            - img [ref=e271]
+            - paragraph [ref=e273]: 早上好，朋友
+            - paragraph [ref=e274]: 我是你的 AI 工作助手 👋
+            - paragraph [ref=e275]:
+              - text: 可以帮你查看项目进度、分析财务数据、
+              - text: 管理任务、跟进客户。
+            - paragraph [ref=e276]: 在下方输入你的问题，或点击快捷提问开始 👇
+          - generic [ref=e277]:
+            - generic [ref=e278]:
+              - button "📝 创建任务" [ref=e279]
+              - button "⏱ 记录工时" [ref=e280]
+              - button "📞 客户跟进" [ref=e281]
+            - generic [ref=e282]:
+              - textbox "输入你的问题..." [ref=e283]
+              - button [disabled] [ref=e284]:
+                - img [ref=e285]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e293] [cursor=pointer]:
+    - img [ref=e294]

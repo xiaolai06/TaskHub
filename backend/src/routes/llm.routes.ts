@@ -29,29 +29,17 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
     // 系统提示（根据用户消息自动选择）
     const basePrompt = selectSystemPrompt(message, initialized);
     const toolListHint = tools.map(t => `- \`${t.name}\`: ${t.description}`).join('\n');
-    const systemPrompt = basePrompt + `\n\n## 可用工具（${tools.length}个）\n${toolListHint}`;
+    const systemPrompt = `${basePrompt}\n\n## 可用工具（${tools.length}个）\n${toolListHint}\n\n## 时间说明\n当用户提到"今天"、"明天"、"下周"等相对时间时，必须先调用 get_current_time 工具获取准确日期，再进行计算。不要猜测日期。`;
 
-    // 构建 messages 数组
+    // 构建 messages 数组（不加载历史，避免对话聚合）
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
     messages.push({ role: 'system', content: systemPrompt });
-
-    // 获取或创建会话
-    const sid = sessionId || 'default';
-    const conv = await prisma.conversation.findMany({
-      where: { userId: req.userId!, sessionId: sid },
-      orderBy: { createdAt: 'desc' }, take: 6,
-    });
-
-    // 历史对话
-    for (const h of conv.reverse()) {
-      if (h.role === 'user') messages.push({ role: 'user', content: h.content });
-      else if (h.role === 'assistant') messages.push({ role: 'assistant', content: h.content });
-    }
 
     // 新消息
     messages.push({ role: 'user', content: message });
 
     // 保存用户消息
+    const sid = sessionId || 'default';
     await prisma.conversation.create({ data: { userId: req.userId!, sessionId: sid, role: 'user', content: message } });
 
     // 流式对话

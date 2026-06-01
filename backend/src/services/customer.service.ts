@@ -14,18 +14,20 @@ interface ListFilters {
 async function batchProjectStats(projectIds: string[]) {
   if (projectIds.length === 0) return { costMap: new Map(), completedMap: new Map() };
   const [costAggs, completedCounts] = await Promise.all([
-    prisma.$queryRaw<{ projectId: string; total: number }[]>`
-      SELECT "projectId", COALESCE(SUM("amount"), 0) as total
-      FROM "CostRecord" WHERE "projectId" IN (${projectIds})
-      GROUP BY "projectId"`,
-    prisma.$queryRaw<{ projectId: string; cnt: number }[]>`
-      SELECT "projectId", COUNT(*) as cnt
-      FROM "Task" WHERE "projectId" IN (${projectIds}) AND "status" = 'DONE'
-      GROUP BY "projectId"`,
+    prisma.costRecord.groupBy({
+      by: ['projectId'],
+      where: { projectId: { in: projectIds } },
+      _sum: { amount: true },
+    }),
+    prisma.task.groupBy({
+      by: ['projectId'],
+      where: { projectId: { in: projectIds }, status: 'DONE' },
+      _count: { _all: true },
+    }),
   ]);
   return {
-    costMap: new Map(costAggs.map((r) => [r.projectId, Number(r.total)])),
-    completedMap: new Map(completedCounts.map((r) => [r.projectId, Number(r.cnt)])),
+    costMap: new Map(costAggs.map((r) => [r.projectId, r._sum.amount ?? 0])),
+    completedMap: new Map(completedCounts.map((r) => [r.projectId, r._count._all])),
   };
 }
 

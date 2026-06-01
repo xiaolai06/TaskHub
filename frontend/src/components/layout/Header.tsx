@@ -191,7 +191,7 @@ export function Header({ onOpenAi }: HeaderProps) {
   const navBtn = 'inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-600 transition-all duration-100 hover:border-slate-300 hover:bg-slate-50 active:scale-95 active:bg-slate-100';
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur-md">
+    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur-md">
       {/* 左侧：时间 + 祝福语 */}
       <div className="flex items-center gap-3">
         <div className="flex shrink-0 items-center gap-1.5 font-mono text-sm text-slate-500 tabular-nums">
@@ -259,7 +259,7 @@ export function Header({ onOpenAi }: HeaderProps) {
                 ))}
               </div>
               <div className="border-t px-4 py-2">
-                <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部消息 →</button>
+                <button onClick={() => { setShowInfo(false); router.push('/main/settings'); }} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部消息 →</button>
               </div>
             </div>
           )}
@@ -305,7 +305,7 @@ export function Header({ onOpenAi }: HeaderProps) {
                 </div>
               )}
               <div className="border-t px-4 py-2">
-                <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部任务 →</button>
+                <button onClick={() => { setShowTasks(false); router.push('/main/tasks'); }} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部任务 →</button>
               </div>
             </div>
           )}

@@ -1,12 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { AiPanel } from '@/components/features/ai/AiPanel';
+import { useAuth } from '@/hooks/useAuth';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [aiOpen, setAiOpen] = useState(false);
+  const fetchUser = useAuth((s) => s.fetchUser);
+
+  useEffect(() => { fetchUser(); }, [fetchUser]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">

@@ -24,7 +24,7 @@ export function GoalOverview({ data, isLoading }: Props) {
   const { summary } = data;
 
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
+    <div className="flex items-center gap-4 shrink-0 rounded-xl border border-slate-200 bg-white px-4 py-3">
       <Target className="h-4 w-4 text-indigo-400 shrink-0" />
       <span className="text-xs font-medium text-slate-600">
         {summary.total} 个目标

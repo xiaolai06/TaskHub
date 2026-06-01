@@ -8,8 +8,13 @@ export function validate(schema: ZodSchema, part: RequestPart = 'body') {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const result = schema.parse(req[part]);
-      // 将校验后的数据替换回去（Zod 可能做了类型转换）
-      (req as any)[part] = result;
+      // query/params 在 Express 5 中是只读 getter，挂到 validated 自定义属性
+      if (part === 'body') {
+        (req as any)[part] = result;
+      } else {
+        (req as any).validated = (req as any).validated || {};
+        (req as any).validated[part] = result;
+      }
       next();
     } catch (err) {
       if (err instanceof ZodError) {

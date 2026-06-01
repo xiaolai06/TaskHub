@@ -17,6 +17,7 @@ import { npmSearchTool } from './npm-search';
 import { exchangeRateTool } from './exchange-rate';
 import { devToTool } from './dev-to';
 import { productHuntTool } from './product-hunt';
+import { getCurrentTimeTool } from './get-current-time';
 
 const allTools: ToolDefinition[] = [
   // 💰 finance
@@ -31,6 +32,8 @@ const allTools: ToolDefinition[] = [
   // 🔍 search
   searchWebTool, githubTrendingTool, hackerNewsTool, npmSearchTool,
   exchangeRateTool, devToTool, productHuntTool,
+  // 🕐 system
+  getCurrentTimeTool,
 ];
 
 const toolMap = new Map<string, ToolDefinition>();
