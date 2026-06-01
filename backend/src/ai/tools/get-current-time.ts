@@ -3,9 +3,10 @@ import { ToolDefinition } from './types';
 export const getCurrentTimeTool: ToolDefinition = {
   name: 'get_current_time',
   description: '获取当前日期和时间。用户问"今天几号"、"现在几点"、"今天星期几"、"当前时间"时调用。创建任务/项目时如果用户说"今天"、"明天"、"下周"，也先调用此工具获取准确日期再计算。',
-  category: 'system',
+  category: 'work',
   access: 'read',
   requiresConfirmation: false,
+  preferredModel: 'fast',
   parameters: {
     type: 'object',
     properties: {},
