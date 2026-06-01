@@ -12,7 +12,7 @@ import { EmptyState } from './EmptyState';
 import { LoadingIndicator } from './LoadingIndicator';
 import { ChatInput } from './ChatInput';
 
-type TabKey = 'overview' | 'customers' | 'history';
+type TabKey = 'overview' | 'customers' | 'history' | 'schedule';
 
 // ═══ 消息列表（memo，避免输入时重渲染） ═══
 

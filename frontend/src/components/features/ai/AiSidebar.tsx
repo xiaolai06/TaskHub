@@ -1,6 +1,6 @@
 'use client';
 
-import { Brain, Users, Clock } from 'lucide-react';
+import { Brain, Users, Clock, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SmartDigest } from './SmartDigest';
 import { QuickActions } from './QuickActions';
@@ -8,8 +8,9 @@ import { ProjectMiniList } from './ProjectMiniList';
 import { CustomerTab } from './CustomerTab';
 import { HistoryTab } from './HistoryTab';
 import { ModelSwitcher } from './ModelSwitcher';
+import { ScheduleQuickActions } from './ScheduleQuickActions';
 
-type TabKey = 'overview' | 'customers' | 'history';
+type TabKey = 'overview' | 'customers' | 'history' | 'schedule';
 
 interface AiSidebarProps {
   activeTab: TabKey;
@@ -38,6 +39,7 @@ interface AiSidebarProps {
 const tabs: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { key: 'overview', label: '概览', icon: Brain },
   { key: 'customers', label: '客户', icon: Users },
+  { key: 'schedule', label: '排期', icon: Calendar },
   { key: 'history', label: '历史', icon: Clock },
 ];
 
@@ -92,6 +94,10 @@ export function AiSidebar({
 
         {activeTab === 'customers' && (
           <CustomerTab onCustomerClick={onCustomerClick} open={open} />
+        )}
+
+        {activeTab === 'schedule' && (
+          <ScheduleQuickActions onAction={onQuickAction} />
         )}
 
         {activeTab === 'history' && (
