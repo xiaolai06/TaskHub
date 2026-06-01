@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { prisma } from '../server';
-import { hashPassword, comparePassword } from '../utils/hash';
+import { hashPassword, comparePassword, hashToken } from '../utils/hash';
 import { generateToken } from '../utils/jwt';
 import { AppError } from '../utils/errors';
 
@@ -9,7 +9,7 @@ const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * 内部工具：签发 JWT + 写入 Session 记录
- * 每个设备独立签发 Token，Session 表记录登录设备信息
+ * Session 表只存 Token 的 SHA-256 哈希，不存明文 JWT
  */
 async function createSession(userId: string, email: string, role: string, req: Request): Promise<string> {
   const token = generateToken({ userId, email, role });
@@ -17,12 +17,17 @@ async function createSession(userId: string, email: string, role: string, req: R
   await prisma.session.create({
     data: {
       userId,
-      token,
+      token: hashToken(token), // 只存哈希，数据库泄露也无法伪造 Token
       expiresAt: new Date(Date.now() + SESSION_DURATION_MS),
       device: req.headers['user-agent']?.slice(0, 255) || 'unknown',
       ip: req.ip || req.socket.remoteAddress || 'unknown',
     },
   });
+
+  // 清理过期 Session（每次新登录时触发，避免独立 cron）
+  prisma.session.deleteMany({
+    where: { expiresAt: { lt: new Date() } },
+  }).catch(() => { /* 静默清理，不阻塞登录流程 */ });
 
   return token;
 }
@@ -86,13 +91,13 @@ export async function login(email: string, password: string, req: Request) {
 
 /**
  * 用户登出
- * 根据 Token 删除 Session 记录
+ * 根据 Token 的 SHA-256 哈希删除 Session 记录
  */
 export async function logout(token: string): Promise<void> {
   if (!token) return;
 
   await prisma.session.deleteMany({
-    where: { token },
+    where: { token: hashToken(token) },
   });
 }
 

@@ -1,17 +1,25 @@
 import { prisma } from '../server';
 
+/**
+ * 获取当前时段活跃的问候语
+ * 正确处理跨夜时间段（如 22:00 ~ 06:00）
+ */
 export async function getActive(userId: string, hour?: number) {
   const h = hour ?? new Date().getHours();
-  return prisma.greeting.findMany({
-    where: {
-      userId,
-      isActive: true,
-      OR: [
-        { hourStart: { lte: h }, hourEnd: { gte: h } },
-        { hourStart: { gt: h }, hourEnd: { lt: h } }, // 跨夜场景
-      ],
-    },
+
+  // 先查出所有活跃问候语，在内存中过滤（问候语通常很少，不会超过几十条）
+  const all = await prisma.greeting.findMany({
+    where: { userId, isActive: true },
     orderBy: { createdAt: 'desc' },
+  });
+
+  return all.filter((g) => {
+    if (g.hourStart <= g.hourEnd) {
+      // 正常范围: start <= h <= end
+      return g.hourStart <= h && h <= g.hourEnd;
+    }
+    // 跨夜范围: start > end，匹配 h >= start 或 h <= end
+    return h >= g.hourStart || h <= g.hourEnd;
   });
 }
 

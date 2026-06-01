@@ -2,8 +2,6 @@ import { prisma } from '../server';
 import { NotFoundError } from '../utils/errors';
 import type { CreateCronJobInput, UpdateCronJobInput } from '../validators/cron-job.schema';
 
-// ═══ 系统预置的 6 个定时任务定义 ═══
-
 export const SYSTEM_JOBS = [
   {
     name: '到期提醒',
@@ -11,7 +9,7 @@ export const SYSTEM_JOBS = [
     action: 'NOTIFY',
     config: JSON.stringify({
       type: 'due_reminder',
-      description: '检查逾期任务，发送到期提醒通知',
+      description: '检查逾期任务并发送到期提醒',
       dataQueries: ['detectDelays'],
     }),
   },
@@ -21,79 +19,77 @@ export const SYSTEM_JOBS = [
     action: 'NOTIFY',
     config: JSON.stringify({
       type: 'cost_alert',
-      description: '检查项目成本是否超过预算的80%，发送预警通知',
+      description: '检查订单成本是否超过报价的 80%，发送预警通知',
       dataQueries: ['costSummary'],
     }),
   },
   {
-    name: '☀️ 晨间简报',
+    name: '晨间简报',
     cronExpr: '0 8 * * *',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
       type: 'morning',
-      description: '每日早间分析项目/任务/客户数据，AI 提供行动建议',
+      description: '每日早间分析项目、任务和客户数据，生成行动建议',
       aiPrompt: 'system-morning.txt',
       dataQueries: ['getStats', 'detectDelays', 'recentConversations'],
     }),
   },
   {
-    name: '📡 客户雷达',
+    name: '客户雷达',
     cronExpr: '0 9 * * *',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
       type: 'client_radar',
-      description: '扫描客户沟通间隔，AI 分析需要联系的客户',
+      description: '扫描客户沟通间隔，提示需要跟进的客户',
       aiPrompt: 'system-client-radar.txt',
       dataQueries: ['customerList', 'communications', 'projectStatus'],
     }),
   },
   {
-    name: '💰 财务脉搏',
+    name: '订单利润简报',
     cronExpr: '0 10 * * *',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
       type: 'finance_pulse',
-      description: '分析成本/利润/预算，AI 给出财务建议',
+      description: '分析报价、成本、利润和月入款，生成经营建议',
       aiPrompt: 'system-finance-pulse.txt',
       dataQueries: ['costSummary', 'profitAnalysis', 'cashflow'],
     }),
   },
   {
-    name: '📊 自动周报',
+    name: '自动周报',
     cronExpr: '0 9 * * 1',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
       type: 'weekly_report',
-      description: '每周一 AI 自动生成上周工作周报',
+      description: '每周一自动生成上周工作周报',
       aiPrompt: 'weekly-report.txt',
       dataQueries: ['dashboardStats', 'weeklyTasks', 'weeklyCosts', 'conversations'],
     }),
   },
   {
-    name: '🧠 记忆沉淀',
+    name: '记忆沉淀',
     cronExpr: '0 20 * * 0',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
       type: 'memory_keeper',
-      description: '从本周对话中 AI 提取偏好/决策/信息，沉淀到记忆库',
+      description: '从本周对话中提取偏好、决策和重要信息',
       aiPrompt: 'memory-extract.txt',
       dataQueries: ['weeklyConversations'],
     }),
   },
   {
-    name: '🫀 业务体检',
+    name: '业务体检',
     cronExpr: '0 10 * * 0',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
       type: 'health_check',
-      description: '从财务/客户/项目/目标四维度评估业务健康度',
+      description: '从订单利润、客户、项目和目标四个维度评估业务健康度',
       aiPrompt: 'health-check.txt',
       dataQueries: ['dashboardStats', 'goals', 'customers', 'finances'],
     }),
   },
 ] as const;
-
-// ═══ CRUD ═══
 
 export async function findAll(userId: string, filters?: { enabled?: boolean }) {
   const where: Record<string, unknown> = { userId };
@@ -112,7 +108,15 @@ export async function findById(userId: string, id: string) {
 
 export async function create(userId: string, data: CreateCronJobInput) {
   return prisma.cronJob.create({
-    data: { ...data, userId, isSystem: false },
+    data: {
+      name: data.name,
+      cronExpr: data.cronExpr,
+      timezone: data.timezone,
+      action: data.action,
+      config: data.config,
+      isSystem: false,
+      user: { connect: { id: userId } },
+    },
   });
 }
 
@@ -123,23 +127,24 @@ export async function update(userId: string, id: string, data: UpdateCronJobInpu
 
 export async function remove(userId: string, id: string) {
   const existing = await findById(userId, id);
-  if (existing.isSystem) {
-    throw new Error('系统预置任务不可删除');
-  }
+  if (existing.isSystem) throw new Error('系统预置任务不可删除');
   return prisma.cronJob.delete({ where: { id } });
 }
-
-// ═══ 初始化系统预置任务 ═══
 
 export async function ensureSystemJobs(userId: string) {
   let created = 0;
   for (const job of SYSTEM_JOBS) {
-    const existing = await prisma.cronJob.findFirst({
-      where: { userId, name: job.name, isSystem: true },
-    });
+    const existing = await prisma.cronJob.findFirst({ where: { userId, name: job.name, isSystem: true } });
     if (!existing) {
       await prisma.cronJob.create({
-        data: { ...job, userId, isSystem: true },
+        data: {
+          name: job.name,
+          cronExpr: job.cronExpr,
+          action: job.action,
+          config: job.config,
+          isSystem: true,
+          user: { connect: { id: userId } },
+        },
       });
       created++;
     }

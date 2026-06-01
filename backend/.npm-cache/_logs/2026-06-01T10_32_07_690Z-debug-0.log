@@ -1,0 +1,1699 @@
+0 verbose cli E:\node.exe E:\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.11.0
+2 info using node@v24.14.1
+3 silly config load:file:E:\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\LENOVO\Desktop\TaskFlow+\backend\.npmrc
+5 silly config load:file:C:\Users\LENOVO\.npmrc
+6 silly config load:file:C:\Users\LENOVO\AppData\Roaming\npm\etc\npmrc
+7 verbose title npm install
+8 verbose argv "install" "--cache" ".npm-cache"
+9 verbose logfile logs-max:10 dir:C:\Users\LENOVO\Desktop\TaskFlow+\backend\.npm-cache\_logs\2026-06-01T10_32_07_690Z-
+10 verbose logfile C:\Users\LENOVO\Desktop\TaskFlow+\backend\.npm-cache\_logs\2026-06-01T10_32_07_690Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 http fetch GET https://registry.npmmirror.com/npm attempt 1 failed with EACCES
+14 silly idealTree buildDeps
+15 silly reify mark retired [
+15 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\abort-controller'
+15 silly reify ]
+16 silly reify mark retired [
+16 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\acorn'
+16 silly reify ]
+17 silly reify mark retired [
+17 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\accepts'
+17 silly reify ]
+18 silly reify mark retired [
+18 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\agentkeepalive'
+18 silly reify ]
+19 silly reify mark retired [
+19 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\buffer-equal-constant-time'
+19 silly reify ]
+20 silly reify mark retired [
+20 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\body-parser'
+20 silly reify ]
+21 silly reify mark retired [
+21 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\assertion-error'
+21 silly reify ]
+22 silly reify mark retired [
+22 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\asynckit'
+22 silly reify ]
+23 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\arg' ]
+24 silly reify mark retired [
+24 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\acorn-walk'
+24 silly reify ]
+25 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cac' ]
+26 silly reify mark retired [
+26 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\bytes'
+26 silly reify ]
+27 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\c12' ]
+28 silly reify mark retired [
+28 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\call-bound'
+28 silly reify ]
+29 silly reify mark retired [
+29 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\bcryptjs'
+29 silly reify ]
+30 silly reify mark retired [
+30 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\chokidar'
+30 silly reify ]
+31 silly reify mark retired [
+31 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\check-error'
+31 silly reify ]
+32 silly reify mark retired [
+32 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\call-bind-apply-helpers'
+32 silly reify ]
+33 silly reify mark retired [
+33 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\chai'
+33 silly reify ]
+34 silly reify mark retired [
+34 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\combined-stream'
+34 silly reify ]
+35 silly reify mark retired [
+35 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\content-disposition'
+35 silly reify ]
+36 silly reify mark retired [
+36 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\citty'
+36 silly reify ]
+37 silly reify mark retired [
+37 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\content-type'
+37 silly reify ]
+38 silly reify mark retired [
+38 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cookie-parser'
+38 silly reify ]
+39 silly reify mark retired [
+39 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\consola'
+39 silly reify ]
+40 silly reify mark retired [
+40 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\confbox'
+40 silly reify ]
+41 silly reify mark retired [
+41 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\debug'
+41 silly reify ]
+42 silly reify mark retired [
+42 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cookie'
+42 silly reify ]
+43 silly reify mark retired [
+43 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\create-require'
+43 silly reify ]
+44 silly reify mark retired [
+44 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cookie-signature'
+44 silly reify ]
+45 silly reify mark retired [
+45 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\deep-eql'
+45 silly reify ]
+46 silly reify mark retired [
+46 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cors'
+46 silly reify ]
+47 silly reify mark retired [
+47 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\deepmerge-ts'
+47 silly reify ]
+48 silly reify mark retired [
+48 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\defu'
+48 silly reify ]
+49 silly reify mark retired [
+49 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\delayed-stream'
+49 silly reify ]
+50 silly reify mark retired [
+50 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\depd'
+50 silly reify ]
+51 silly reify mark retired [
+51 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\destr'
+51 silly reify ]
+52 silly reify mark retired [
+52 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\dunder-proto'
+52 silly reify ]
+53 silly reify mark retired [
+53 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\dotenv'
+53 silly reify ]
+54 silly reify mark retired [
+54 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\diff'
+54 silly reify ]
+55 silly reify mark retired [
+55 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ecdsa-sig-formatter'
+55 silly reify ]
+56 silly reify mark retired [
+56 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\effect'
+56 silly reify ]
+57 silly reify mark retired [
+57 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\empathic'
+57 silly reify ]
+58 silly reify mark retired [
+58 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\encodeurl'
+58 silly reify ]
+59 silly reify mark retired [
+59 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ee-first'
+59 silly reify ]
+60 silly reify mark retired [
+60 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-errors'
+60 silly reify ]
+61 silly reify mark retired [
+61 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-define-property'
+61 silly reify ]
+62 silly reify mark retired [
+62 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-object-atoms'
+62 silly reify ]
+63 silly reify mark retired [
+63 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-set-tostringtag'
+63 silly reify ]
+64 silly reify mark retired [
+64 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\escape-html'
+64 silly reify ]
+65 silly reify mark retired [
+65 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-module-lexer'
+65 silly reify ]
+66 silly reify mark retired [
+66 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\esbuild'
+66 silly reify ]
+67 silly reify mark retired [
+67 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\estree-walker'
+67 silly reify ]
+68 silly reify mark retired [
+68 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\etag'
+68 silly reify ]
+69 silly reify mark retired [
+69 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\exsolve'
+69 silly reify ]
+70 silly reify mark retired [
+70 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\event-target-shim'
+70 silly reify ]
+71 silly reify mark retired [
+71 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\fdir'
+71 silly reify ]
+72 silly reify mark retired [
+72 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\fast-check'
+72 silly reify ]
+73 silly reify mark retired [
+73 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\express'
+73 silly reify ]
+74 silly reify mark retired [
+74 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\finalhandler'
+74 silly reify ]
+75 silly reify mark retired [
+75 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\form-data'
+75 silly reify ]
+76 silly reify mark retired [
+76 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\expect-type'
+76 silly reify ]
+77 silly reify mark retired [
+77 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\form-data-encoder'
+77 silly reify ]
+78 silly reify mark retired [
+78 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\formdata-node'
+78 silly reify ]
+79 silly reify mark retired [
+79 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\forwarded'
+79 silly reify ]
+80 silly reify mark retired [
+80 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\fresh'
+80 silly reify ]
+81 silly reify mark retired [
+81 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\function-bind'
+81 silly reify ]
+82 silly reify mark retired [
+82 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\get-intrinsic'
+82 silly reify ]
+83 silly reify mark retired [
+83 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\get-proto'
+83 silly reify ]
+84 silly reify mark retired [
+84 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\giget'
+84 silly reify ]
+85 silly reify mark retired [
+85 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\has-symbols'
+85 silly reify ]
+86 silly reify mark retired [
+86 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\hasown'
+86 silly reify ]
+87 silly reify mark retired [
+87 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\has-tostringtag'
+87 silly reify ]
+88 silly reify mark retired [
+88 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\gopd'
+88 silly reify ]
+89 silly reify mark retired [
+89 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\http-errors'
+89 silly reify ]
+90 silly reify mark retired [
+90 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\humanize-ms'
+90 silly reify ]
+91 silly reify mark retired [
+91 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\inherits'
+91 silly reify ]
+92 silly reify mark retired [
+92 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\iconv-lite'
+92 silly reify ]
+93 silly reify mark retired [
+93 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\is-promise'
+93 silly reify ]
+94 silly reify mark retired [
+94 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ipaddr.js'
+94 silly reify ]
+95 silly reify mark retired [
+95 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\jiti'
+95 silly reify ]
+96 silly reify mark retired [
+96 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\js-tokens'
+96 silly reify ]
+97 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\jwa' ]
+98 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\jws' ]
+99 silly reify mark retired [
+99 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\jsonwebtoken'
+99 silly reify ]
+100 silly reify mark retired [
+100 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.includes'
+100 silly reify ]
+101 silly reify mark retired [
+101 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isinteger'
+101 silly reify ]
+102 silly reify mark retired [
+102 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isboolean'
+102 silly reify ]
+103 silly reify mark retired [
+103 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isnumber'
+103 silly reify ]
+104 silly reify mark retired [
+104 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isstring'
+104 silly reify ]
+105 silly reify mark retired [
+105 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.once'
+105 silly reify ]
+106 silly reify mark retired [
+106 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\loupe'
+106 silly reify ]
+107 silly reify mark retired [
+107 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isplainobject'
+107 silly reify ]
+108 silly reify mark retired [
+108 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\magic-string'
+108 silly reify ]
+109 silly reify mark retired [
+109 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\make-error'
+109 silly reify ]
+110 silly reify mark retired [
+110 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\merge-descriptors'
+110 silly reify ]
+111 silly reify mark retired [
+111 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\media-typer'
+111 silly reify ]
+112 silly reify mark retired [
+112 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\math-intrinsics'
+112 silly reify ]
+113 silly reify mark retired [
+113 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\mime-types'
+113 silly reify ]
+114 silly reify mark retired [
+114 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\negotiator'
+114 silly reify ]
+115 silly reify mark retired [
+115 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\mime-db'
+115 silly reify ]
+116 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ms' ]
+117 silly reify mark retired [
+117 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\nanoid'
+117 silly reify ]
+118 silly reify mark retired [
+118 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\node-cron'
+118 silly reify ]
+119 silly reify mark retired [
+119 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\node-fetch'
+119 silly reify ]
+120 silly reify mark retired [
+120 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\node-fetch-native'
+120 silly reify ]
+121 silly reify mark retired [
+121 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\nypm'
+121 silly reify ]
+122 silly reify mark retired [
+122 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\nodemailer'
+122 silly reify ]
+123 silly reify mark retired [
+123 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\node-domexception'
+123 silly reify ]
+124 silly reify mark retired [
+124 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\object-inspect'
+124 silly reify ]
+125 silly reify mark retired [
+125 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\object-assign'
+125 silly reify ]
+126 silly reify mark retired [
+126 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\openai'
+126 silly reify ]
+127 silly reify mark retired [
+127 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ohash'
+127 silly reify ]
+128 silly reify mark retired [
+128 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\on-finished'
+128 silly reify ]
+129 silly reify mark retired [
+129 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\pathval'
+129 silly reify ]
+130 silly reify mark retired [
+130 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\pathe'
+130 silly reify ]
+131 silly reify mark retired [
+131 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\path-to-regexp'
+131 silly reify ]
+132 silly reify mark retired [
+132 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\parseurl'
+132 silly reify ]
+133 silly reify mark retired [
+133 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\perfect-debounce'
+133 silly reify ]
+134 silly reify mark retired [
+134 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\picocolors'
+134 silly reify ]
+135 silly reify mark retired [
+135 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\once'
+135 silly reify ]
+136 silly reify mark retired [
+136 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\pkg-types'
+136 silly reify ]
+137 silly reify mark retired [
+137 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\picomatch'
+137 silly reify ]
+138 silly reify mark retired [
+138 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\prisma'
+138 silly reify ]
+139 silly reify mark retired [
+139 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\pure-rand'
+139 silly reify ]
+140 silly reify mark retired [
+140 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\proxy-addr'
+140 silly reify ]
+141 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\qs' ]
+142 silly reify mark retired [
+142 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\raw-body'
+142 silly reify ]
+143 silly reify mark retired [
+143 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\range-parser'
+143 silly reify ]
+144 silly reify mark retired [
+144 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\postcss'
+144 silly reify ]
+145 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\rc9' ]
+146 silly reify mark retired [
+146 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\readdirp'
+146 silly reify ]
+147 silly reify mark retired [
+147 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\rollup'
+147 silly reify ]
+148 silly reify mark retired [
+148 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\safer-buffer'
+148 silly reify ]
+149 silly reify mark retired [
+149 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\router'
+149 silly reify ]
+150 silly reify mark retired [
+150 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\safe-buffer'
+150 silly reify ]
+151 silly reify mark retired [
+151 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\semver'
+151 silly reify ]
+152 silly reify mark retired [
+152 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\serve-static'
+152 silly reify ]
+153 silly reify mark retired [
+153 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\send'
+153 silly reify ]
+154 silly reify mark retired [
+154 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\setprototypeof'
+154 silly reify ]
+155 silly reify mark retired [
+155 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\side-channel'
+155 silly reify ]
+156 silly reify mark retired [
+156 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\side-channel-map'
+156 silly reify ]
+157 silly reify mark retired [
+157 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\side-channel-list'
+157 silly reify ]
+158 silly reify mark retired [
+158 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\siginfo'
+158 silly reify ]
+159 silly reify mark retired [
+159 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\side-channel-weakmap'
+159 silly reify ]
+160 silly reify mark retired [
+160 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\source-map-js'
+160 silly reify ]
+161 silly reify mark retired [
+161 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\stackback'
+161 silly reify ]
+162 silly reify mark retired [
+162 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\std-env'
+162 silly reify ]
+163 silly reify mark retired [
+163 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\strip-literal'
+163 silly reify ]
+164 silly reify mark retired [
+164 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\statuses'
+164 silly reify ]
+165 silly reify mark retired [
+165 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinybench'
+165 silly reify ]
+166 silly reify mark retired [
+166 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinyexec'
+166 silly reify ]
+167 silly reify mark retired [
+167 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinyglobby'
+167 silly reify ]
+168 silly reify mark retired [
+168 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinypool'
+168 silly reify ]
+169 silly reify mark retired [
+169 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinyrainbow'
+169 silly reify ]
+170 silly reify mark retired [
+170 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinyspy'
+170 silly reify ]
+171 silly reify mark retired [
+171 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tr46'
+171 silly reify ]
+172 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tsx' ]
+173 silly reify mark retired [
+173 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\toidentifier'
+173 silly reify ]
+174 silly reify mark retired [
+174 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\type-is'
+174 silly reify ]
+175 silly reify mark retired [
+175 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ts-node'
+175 silly reify ]
+176 silly reify mark retired [
+176 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\unpipe'
+176 silly reify ]
+177 silly reify mark retired [
+177 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\undici-types'
+177 silly reify ]
+178 silly reify mark retired [
+178 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\vary'
+178 silly reify ]
+179 silly reify mark retired [
+179 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\typescript'
+179 silly reify ]
+180 silly reify mark retired [
+180 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\vite'
+180 silly reify ]
+181 silly reify mark retired [
+181 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\vitest'
+181 silly reify ]
+182 silly reify mark retired [
+182 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\v8-compile-cache-lib'
+182 silly reify ]
+183 silly reify mark retired [
+183 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\why-is-node-running'
+183 silly reify ]
+184 silly reify mark retired [
+184 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\web-streams-polyfill'
+184 silly reify ]
+185 silly reify mark retired [
+185 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\wrappy'
+185 silly reify ]
+186 silly reify mark retired [
+186 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\vite-node'
+186 silly reify ]
+187 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\yn' ]
+188 silly reify mark retired [
+188 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\whatwg-url'
+188 silly reify ]
+189 silly reify mark retired [ 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\zod' ]
+190 silly reify mark retired [
+190 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\webidl-conversions'
+190 silly reify ]
+191 silly reify mark retired [
+191 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\client'
+191 silly reify ]
+192 silly reify mark retired [
+192 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\config'
+192 silly reify ]
+193 silly reify mark retired [
+193 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\engines'
+193 silly reify ]
+194 silly reify mark retired [
+194 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\engines-version'
+194 silly reify ]
+195 silly reify mark retired [
+195 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\debug'
+195 silly reify ]
+196 silly reify mark retired [
+196 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\fetch-engine'
+196 silly reify ]
+197 silly reify mark retired [
+197 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@cspotcode\\source-map-support'
+197 silly reify ]
+198 silly reify mark retired [
+198 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@esbuild\\win32-x64'
+198 silly reify ]
+199 silly reify mark retired [
+199 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\get-platform'
+199 silly reify ]
+200 silly reify mark retired [
+200 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\resolve-uri'
+200 silly reify ]
+201 silly reify mark retired [
+201 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@rollup\\rollup-win32-x64-msvc'
+201 silly reify ]
+202 silly reify mark retired [
+202 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\trace-mapping'
+202 silly reify ]
+203 silly reify mark retired [
+203 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@standard-schema\\spec'
+203 silly reify ]
+204 silly reify mark retired [
+204 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@rollup\\rollup-win32-x64-gnu'
+204 silly reify ]
+205 silly reify mark retired [
+205 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\node12'
+205 silly reify ]
+206 silly reify mark retired [
+206 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\sourcemap-codec'
+206 silly reify ]
+207 silly reify mark retired [
+207 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\node16'
+207 silly reify ]
+208 silly reify mark retired [
+208 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\bcryptjs'
+208 silly reify ]
+209 silly reify mark retired [
+209 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\node14'
+209 silly reify ]
+210 silly reify mark retired [
+210 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\body-parser'
+210 silly reify ]
+211 silly reify mark retired [
+211 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\cookie-parser'
+211 silly reify ]
+212 silly reify mark retired [
+212 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\chai'
+212 silly reify ]
+213 silly reify mark retired [
+213 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\cors'
+213 silly reify ]
+214 silly reify mark retired [
+214 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\connect'
+214 silly reify ]
+215 silly reify mark retired [
+215 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\node10'
+215 silly reify ]
+216 silly reify mark retired [
+216 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\estree'
+216 silly reify ]
+217 silly reify mark retired [
+217 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\http-errors'
+217 silly reify ]
+218 silly reify mark retired [
+218 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\deep-eql'
+218 silly reify ]
+219 silly reify mark retired [
+219 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\jsonwebtoken'
+219 silly reify ]
+220 silly reify mark retired [
+220 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\express'
+220 silly reify ]
+221 silly reify mark retired [
+221 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\ms'
+221 silly reify ]
+222 silly reify mark retired [
+222 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\node'
+222 silly reify ]
+223 silly reify mark retired [
+223 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\node-cron'
+223 silly reify ]
+224 silly reify mark retired [
+224 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\node-fetch'
+224 silly reify ]
+225 silly reify mark retired [
+225 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\qs'
+225 silly reify ]
+226 silly reify mark retired [
+226 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\nodemailer'
+226 silly reify ]
+227 silly reify mark retired [
+227 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\express-serve-static-core'
+227 silly reify ]
+228 silly reify mark retired [
+228 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\range-parser'
+228 silly reify ]
+229 silly reify mark retired [
+229 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\send'
+229 silly reify ]
+230 silly reify mark retired [
+230 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\pretty-format'
+230 silly reify ]
+231 silly reify mark retired [
+231 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\expect'
+231 silly reify ]
+232 silly reify mark retired [
+232 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\mocker'
+232 silly reify ]
+233 silly reify mark retired [
+233 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\serve-static'
+233 silly reify ]
+234 silly reify mark retired [
+234 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\snapshot'
+234 silly reify ]
+235 silly reify mark retired [
+235 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\runner'
+235 silly reify ]
+236 silly reify mark retired [
+236 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\spy'
+236 silly reify ]
+237 silly reify mark retired [
+237 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\utils'
+237 silly reify ]
+238 silly reify moves {
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\abort-controller': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.abort-controller-xnl4xaUB',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\acorn': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.acorn-AHF2ew41',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\accepts': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.accepts-5NgW5MTT',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\agentkeepalive': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.agentkeepalive-NtIRqA4o',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\buffer-equal-constant-time': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.buffer-equal-constant-time-ZPDtwRRe',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\body-parser': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.body-parser-NasHMF6J',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\assertion-error': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.assertion-error-RL5gzLd1',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\asynckit': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.asynckit-PTzTJX0S',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\arg': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.arg-4h5geBuT',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\acorn-walk': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.acorn-walk-ZICdvAGV',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cac': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.cac-ZzScK9Wa',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\bytes': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.bytes-ThUAVc9o',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\c12': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.c12-yA5ujXcW',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\call-bound': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.call-bound-pKH1b8QF',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\bcryptjs': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.bcryptjs-6hIP230d',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\chokidar': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.chokidar-yPCyJxOW',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\check-error': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.check-error-yNzHwieH',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\call-bind-apply-helpers': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.call-bind-apply-helpers-6OYqb4iG',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\chai': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.chai-UGfRfea0',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\combined-stream': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.combined-stream-J9jfHre7',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\content-disposition': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.content-disposition-hSKY35Fw',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\citty': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.citty-D0lQbXxN',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\content-type': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.content-type-eIoEpsx9',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cookie-parser': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.cookie-parser-Hy5gPBMT',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\consola': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.consola-2tJnCVV5',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\confbox': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.confbox-HI3eW5XG',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\debug': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.debug-K051WXf0',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cookie': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.cookie-eMvl3qsi',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\create-require': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.create-require-YLqdSLmv',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cookie-signature': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.cookie-signature-LZb0pGK3',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\deep-eql': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.deep-eql-HUl1HKXJ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\cors': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.cors-VuvND7Q2',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\deepmerge-ts': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.deepmerge-ts-30uYlRlj',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\defu': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.defu-Bz3mpn58',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\delayed-stream': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.delayed-stream-kkcraKh4',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\depd': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.depd-GtVZW05q',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\destr': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.destr-OmmkW4Dy',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\dunder-proto': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.dunder-proto-OMhdqkTD',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\dotenv': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.dotenv-jrc6abr8',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\diff': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.diff-z9vr2mon',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ecdsa-sig-formatter': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.ecdsa-sig-formatter-NrUYhmrT',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\effect': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.effect-Y0NPrtio',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\empathic': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.empathic-IpLVvx84',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\encodeurl': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.encodeurl-47ZB4tXL',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ee-first': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.ee-first-CV5fNlLh',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-errors': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.es-errors-ycfMdQ54',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-define-property': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.es-define-property-iyzfyA2z',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-object-atoms': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.es-object-atoms-PXseoZuo',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-set-tostringtag': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.es-set-tostringtag-dxqSRXZA',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\escape-html': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.escape-html-5lLvVFhM',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\es-module-lexer': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.es-module-lexer-57ptBrX1',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\esbuild': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.esbuild-GrIeA3BA',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\estree-walker': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.estree-walker-DAghaQof',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\etag': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.etag-quV0kyS6',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\exsolve': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.exsolve-5hCkqQQZ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\event-target-shim': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.event-target-shim-y0RAICql',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\fdir': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.fdir-1VxgKLsb',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\fast-check': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.fast-check-v6TtRWMW',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\express': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.express-RtaQebLG',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\finalhandler': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.finalhandler-pVeOTN2G',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\form-data': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.form-data-848YWxMw',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\expect-type': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.expect-type-LnGR5Urc',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\form-data-encoder': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.form-data-encoder-kF7Bp4Kc',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\formdata-node': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.formdata-node-jn9aq0IA',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\forwarded': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.forwarded-NsMbC1qP',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\fresh': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.fresh-D2Oh1D1u',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\function-bind': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.function-bind-hMMNhDGX',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\get-intrinsic': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.get-intrinsic-mrC5s0b0',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\get-proto': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.get-proto-VazoRpt2',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\giget': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.giget-AtCktzEU',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\has-symbols': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.has-symbols-s9Vw5vWh',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\hasown': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.hasown-eTndOWb2',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\has-tostringtag': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.has-tostringtag-CT5s8Nqp',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\gopd': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.gopd-ge7MJSkM',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\http-errors': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.http-errors-lL3xv1uM',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\humanize-ms': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.humanize-ms-pJ7ato3g',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\inherits': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.inherits-iyBSLmwO',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\iconv-lite': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.iconv-lite-nPVSPfQr',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\is-promise': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.is-promise-4zb4fLeO',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ipaddr.js': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.ipaddr.js-8V4IfzsG',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\jiti': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.jiti-Q8LICfCW',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\js-tokens': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.js-tokens-4ZARUi59',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\jwa': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.jwa-mqJQmgGb',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\jws': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.jws-gllnLScI',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\jsonwebtoken': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.jsonwebtoken-O7HQpPIU',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.includes': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.lodash.includes-OdKVPZ5g',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isinteger': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.lodash.isinteger-HWRIAWrQ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isboolean': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.lodash.isboolean-frjNKuXg',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isnumber': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.lodash.isnumber-gqC3lDup',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isstring': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.lodash.isstring-NQPi25XN',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.once': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.lodash.once-d8b8svjy',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\loupe': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.loupe-h2DAJbNg',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\lodash.isplainobject': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.lodash.isplainobject-y578hIow',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\magic-string': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.magic-string-SwCV1vEg',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\make-error': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.make-error-KlV70MYs',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\merge-descriptors': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.merge-descriptors-7cw01SXN',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\media-typer': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.media-typer-hSTnvCoj',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\math-intrinsics': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.math-intrinsics-BriRsXK5',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\mime-types': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.mime-types-0DgNfYoo',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\negotiator': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.negotiator-dwmI6Whi',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\mime-db': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.mime-db-BCBs6aAp',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ms': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.ms-1hDhOtMa',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\nanoid': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.nanoid-l3GCqLlI',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\node-cron': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.node-cron-ghyDs1WY',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\node-fetch': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.node-fetch-hiRcp4LH',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\node-fetch-native': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.node-fetch-native-4NaSTfjq',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\nypm': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.nypm-4MAmrPzn',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\nodemailer': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.nodemailer-6HVZgKSW',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\node-domexception': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.node-domexception-TvzXJ0j0',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\object-inspect': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.object-inspect-SMhOwOWn',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\object-assign': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.object-assign-rvntP0Po',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\openai': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.openai-RgxorKe3',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ohash': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.ohash-HtVwmo68',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\on-finished': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.on-finished-TN4ARnwW',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\pathval': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.pathval-5vZ8X6sE',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\pathe': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.pathe-P3WqXPWU',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\path-to-regexp': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.path-to-regexp-IkvtK5nu',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\parseurl': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.parseurl-pYvEHOU5',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\perfect-debounce': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.perfect-debounce-qf2pWvdU',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\picocolors': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.picocolors-7uIkGynK',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\once': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.once-Zn7qtT10',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\pkg-types': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.pkg-types-KtGGGuIx',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\picomatch': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.picomatch-YzgeeguK',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\prisma': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.prisma-r1g4rSGI',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\pure-rand': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.pure-rand-bxEatDGq',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\proxy-addr': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.proxy-addr-zR3lMWec',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\qs': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.qs-VXhcQ13N',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\raw-body': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.raw-body-Ur21d3vP',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\range-parser': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.range-parser-LK8YINeC',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\postcss': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.postcss-Dmqga4uP',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\rc9': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.rc9-1db2VUah',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\readdirp': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.readdirp-9Ln9HBx9',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\rollup': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.rollup-FO6mQhGJ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\safer-buffer': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.safer-buffer-hJESBMH3',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\router': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.router-rphs391b',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\safe-buffer': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.safe-buffer-F486v4w5',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\semver': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.semver-awye5STX',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\serve-static': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.serve-static-cZ27IoNH',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\send': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.send-Or5gT7gi',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\setprototypeof': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.setprototypeof-SqDt16y4',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\side-channel': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.side-channel-44jJ6UoU',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\side-channel-map': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.side-channel-map-WGXdTRJ9',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\side-channel-list': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.side-channel-list-YaZxbYoQ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\siginfo': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.siginfo-toACSNck',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\side-channel-weakmap': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.side-channel-weakmap-InwwihG8',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\source-map-js': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.source-map-js-AhmfGytR',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\stackback': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.stackback-gVbC5zjI',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\std-env': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.std-env-ZARMyKIK',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\strip-literal': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.strip-literal-zAp11uUq',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\statuses': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.statuses-6vScN77r',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinybench': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.tinybench-5URsx1fH',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinyexec': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.tinyexec-DXgrzMjz',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinyglobby': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.tinyglobby-ycMbqW78',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinypool': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.tinypool-HWRI01IU',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinyrainbow': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.tinyrainbow-24v0VTsb',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tinyspy': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.tinyspy-NjgVY4P7',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tr46': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.tr46-ALfPDkLf',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\tsx': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.tsx-W4Q5ue2x',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\toidentifier': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.toidentifier-0AEBlDwP',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\type-is': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.type-is-g4NBCvMQ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\ts-node': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.ts-node-nLHXC3Fq',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\unpipe': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.unpipe-QggAj7Vm',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\undici-types': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.undici-types-qytVisn7',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\vary': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.vary-lOLWO3VJ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\typescript': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.typescript-UPT03Di7',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\vite': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.vite-PmScCJcr',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\vitest': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.vitest-xtfEDECt',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\v8-compile-cache-lib': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.v8-compile-cache-lib-yJyNaVB1',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\why-is-node-running': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.why-is-node-running-S6Rw3Qrw',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\web-streams-polyfill': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.web-streams-polyfill-weSZlwWN',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\wrappy': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.wrappy-TU3hYvsq',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\vite-node': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.vite-node-0tWyxYTB',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\yn': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.yn-y3UPYxbO',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\whatwg-url': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.whatwg-url-NBfQBEVk',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\zod': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.zod-FERm2Dnu',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\webidl-conversions': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\.webidl-conversions-9jAXp87J',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\client': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\.client-UCITHeXy',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\config': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\.config-78NJI2Xr',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\engines': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\.engines-JIm7ub0a',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\engines-version': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\.engines-version-WwmqShbi',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\debug': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\.debug-5GyXq86y',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\fetch-engine': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\.fetch-engine-F25BCV31',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@cspotcode\\source-map-support': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@cspotcode\\.source-map-support-ADKu4ck2',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@esbuild\\win32-x64': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@esbuild\\.win32-x64-uenJWOlP',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\get-platform': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@prisma\\.get-platform-oF3GxTd8',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\resolve-uri': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\.resolve-uri-VQrYu9UU',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@rollup\\rollup-win32-x64-msvc': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@rollup\\.rollup-win32-x64-msvc-wMfW2ipF',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\trace-mapping': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\.trace-mapping-YUY106W3',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@standard-schema\\spec': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@standard-schema\\.spec-z4UBiJ43',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@rollup\\rollup-win32-x64-gnu': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@rollup\\.rollup-win32-x64-gnu-LpFR1UX7',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\node12': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\.node12-URrqOipr',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\sourcemap-codec': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@jridgewell\\.sourcemap-codec-hAxSGe2k',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\node16': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\.node16-nKwQi8BZ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\bcryptjs': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.bcryptjs-vSVjJsXJ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\node14': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\.node14-uKnruI2W',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\body-parser': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.body-parser-lzthgwbS',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\cookie-parser': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.cookie-parser-xB8oYGI1',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\chai': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.chai-9vxtrt09',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\cors': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.cors-RFtHQ7Aj',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\connect': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.connect-tCBgY5BM',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\node10': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@tsconfig\\.node10-Ar8dk7RW',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\estree': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.estree-LgkPTHN7',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\http-errors': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.http-errors-d2q4pZ8S',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\deep-eql': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.deep-eql-02t4Y9Wt',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\jsonwebtoken': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.jsonwebtoken-fmka9SVD',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\express': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.express-MyccBbDm',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\ms': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.ms-Rtu2IF4T',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\node': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.node-YAqaeV9A',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\node-cron': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.node-cron-6qSIRfBq',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\node-fetch': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.node-fetch-JlMn2V9k',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\qs': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.qs-bi5F8bnH',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\nodemailer': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.nodemailer-3L7qbNIn',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\express-serve-static-core': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.express-serve-static-core-Rb97Pw2m',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\range-parser': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.range-parser-ofqvmq8i',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\send': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.send-WI9Eq4Bv',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\pretty-format': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\.pretty-format-qeSfaE83',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\expect': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\.expect-oeB27yQ4',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\mocker': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\.mocker-ZD5tKVjm',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\serve-static': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@types\\.serve-static-8rjYTyen',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\snapshot': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\.snapshot-T7UMR4fZ',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\runner': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\.runner-0m39SLFK',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\spy': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\.spy-ux2FAW6V',
+238 silly reify   'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\utils': 'C:\\Users\\LENOVO\\Desktop\\TaskFlow+\\backend\\node_modules\\@vitest\\.utils-x4Y4CO16'
+238 silly reify }
+239 silly audit bulk request {
+239 silly audit   '@cspotcode/source-map-support': [ '0.8.1' ],
+239 silly audit   '@esbuild/aix-ppc64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/android-arm': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/android-arm64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/android-x64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/darwin-arm64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/darwin-x64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/freebsd-arm64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/freebsd-x64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-arm': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-arm64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-ia32': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-loong64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-mips64el': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-ppc64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-riscv64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-s390x': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/linux-x64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/netbsd-arm64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/netbsd-x64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/openbsd-arm64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/openbsd-x64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/openharmony-arm64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/sunos-x64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/win32-arm64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/win32-ia32': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@esbuild/win32-x64': [ '0.27.7', '0.28.0' ],
+239 silly audit   '@jridgewell/resolve-uri': [ '3.1.2' ],
+239 silly audit   '@jridgewell/sourcemap-codec': [ '1.5.5' ],
+239 silly audit   '@jridgewell/trace-mapping': [ '0.3.9' ],
+239 silly audit   '@prisma/client': [ '6.19.3' ],
+239 silly audit   '@prisma/config': [ '6.19.3' ],
+239 silly audit   '@prisma/debug': [ '6.19.3' ],
+239 silly audit   '@prisma/engines': [ '6.19.3' ],
+239 silly audit   '@prisma/engines-version': [ '7.1.1-3.c2990dca591cba766e3b7ef5d9e8a84796e47ab7' ],
+239 silly audit   '@prisma/fetch-engine': [ '6.19.3' ],
+239 silly audit   '@prisma/get-platform': [ '6.19.3' ],
+239 silly audit   '@rollup/rollup-android-arm-eabi': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-android-arm64': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-darwin-arm64': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-darwin-x64': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-freebsd-arm64': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-freebsd-x64': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-arm-gnueabihf': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-arm-musleabihf': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-arm64-gnu': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-arm64-musl': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-loong64-gnu': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-loong64-musl': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-ppc64-gnu': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-ppc64-musl': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-riscv64-gnu': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-riscv64-musl': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-s390x-gnu': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-x64-gnu': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-linux-x64-musl': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-openbsd-x64': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-openharmony-arm64': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-win32-arm64-msvc': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-win32-ia32-msvc': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-win32-x64-gnu': [ '4.60.4' ],
+239 silly audit   '@rollup/rollup-win32-x64-msvc': [ '4.60.4' ],
+239 silly audit   '@standard-schema/spec': [ '1.1.0' ],
+239 silly audit   '@tsconfig/node10': [ '1.0.12' ],
+239 silly audit   '@tsconfig/node12': [ '1.0.11' ],
+239 silly audit   '@tsconfig/node14': [ '1.0.3' ],
+239 silly audit   '@tsconfig/node16': [ '1.0.4' ],
+239 silly audit   '@types/bcryptjs': [ '2.4.6' ],
+239 silly audit   '@types/body-parser': [ '1.19.6' ],
+239 silly audit   '@types/chai': [ '5.2.3' ],
+239 silly audit   '@types/connect': [ '3.4.38' ],
+239 silly audit   '@types/cookie-parser': [ '1.4.10' ],
+239 silly audit   '@types/cors': [ '2.8.19' ],
+239 silly audit   '@types/deep-eql': [ '4.0.2' ],
+239 silly audit   '@types/estree': [ '1.0.9', '1.0.8' ],
+239 silly audit   '@types/express': [ '5.0.6' ],
+239 silly audit   '@types/express-serve-static-core': [ '5.1.1' ],
+239 silly audit   '@types/http-errors': [ '2.0.5' ],
+239 silly audit   '@types/jsonwebtoken': [ '9.0.10' ],
+239 silly audit   '@types/ms': [ '2.1.0' ],
+239 silly audit   '@types/node': [ '22.19.19', '18.19.130' ],
+239 silly audit   '@types/node-cron': [ '3.0.11' ],
+239 silly audit   '@types/node-fetch': [ '2.6.13' ],
+239 silly audit   '@types/nodemailer': [ '6.4.23' ],
+239 silly audit   '@types/qs': [ '6.15.1' ],
+239 silly audit   '@types/range-parser': [ '1.2.7' ],
+239 silly audit   '@types/send': [ '1.2.1' ],
+239 silly audit   '@types/serve-static': [ '2.2.0' ],
+239 silly audit   '@vitest/expect': [ '3.2.4' ],
+239 silly audit   '@vitest/mocker': [ '3.2.4' ],
+239 silly audit   '@vitest/pretty-format': [ '3.2.4' ],
+239 silly audit   '@vitest/runner': [ '3.2.4' ],
+239 silly audit   '@vitest/snapshot': [ '3.2.4' ],
+239 silly audit   '@vitest/spy': [ '3.2.4' ],
+239 silly audit   '@vitest/utils': [ '3.2.4' ],
+239 silly audit   'abort-controller': [ '3.0.0' ],
+239 silly audit   accepts: [ '2.0.0' ],
+239 silly audit   acorn: [ '8.16.0' ],
+239 silly audit   'acorn-walk': [ '8.3.5' ],
+239 silly audit   agentkeepalive: [ '4.6.0' ],
+239 silly audit   arg: [ '4.1.3' ],
+239 silly audit   'assertion-error': [ '2.0.1' ],
+239 silly audit   asynckit: [ '0.4.0' ],
+239 silly audit   bcryptjs: [ '3.0.3' ],
+239 silly audit   'body-parser': [ '2.2.2' ],
+239 silly audit   'buffer-equal-constant-time': [ '1.0.1' ],
+239 silly audit   bytes: [ '3.1.2' ],
+239 silly audit   c12: [ '3.1.0' ],
+239 silly audit   cac: [ '6.7.14' ],
+239 silly audit   'call-bind-apply-helpers': [ '1.0.2' ],
+239 silly audit   'call-bound': [ '1.0.4' ],
+239 silly audit   chai: [ '5.3.3' ],
+239 silly audit   'check-error': [ '2.1.3' ],
+239 silly audit   chokidar: [ '4.0.3' ],
+239 silly audit   citty: [ '0.1.6', '0.2.2' ],
+239 silly audit   'combined-stream': [ '1.0.8' ],
+239 silly audit   confbox: [ '0.2.4' ],
+239 silly audit   consola: [ '3.4.2' ],
+239 silly audit   'content-disposition': [ '1.1.0' ],
+239 silly audit   'content-type': [ '1.0.5', '2.0.0' ],
+239 silly audit   cookie: [ '0.7.2' ],
+239 silly audit   'cookie-parser': [ '1.4.7' ],
+239 silly audit   'cookie-signature': [ '1.0.6', '1.2.2' ],
+239 silly audit   cors: [ '2.8.6' ],
+239 silly audit   'create-require': [ '1.1.1' ],
+239 silly audit   debug: [ '4.4.3' ],
+239 silly audit   'deep-eql': [ '5.0.2' ],
+239 silly audit   'deepmerge-ts': [ '7.1.5' ],
+239 silly audit   defu: [ '6.1.7' ],
+239 silly audit   'delayed-stream': [ '1.0.0' ],
+239 silly audit   depd: [ '2.0.0' ],
+239 silly audit   destr: [ '2.0.5' ],
+239 silly audit   diff: [ '4.0.4' ],
+239 silly audit   dotenv: [ '16.6.1' ],
+239 silly audit   'dunder-proto': [ '1.0.1' ],
+239 silly audit   'ecdsa-sig-formatter': [ '1.0.11' ],
+239 silly audit   'ee-first': [ '1.1.1' ],
+239 silly audit   effect: [ '3.21.0' ],
+239 silly audit   empathic: [ '2.0.0' ],
+239 silly audit   encodeurl: [ '2.0.0' ],
+239 silly audit   'es-define-property': [ '1.0.1' ],
+239 silly audit   'es-errors': [ '1.3.0' ],
+239 silly audit   'es-module-lexer': [ '1.7.0' ],
+239 silly audit   'es-object-atoms': [ '1.1.2' ],
+239 silly audit   'es-set-tostringtag': [ '2.1.0' ],
+239 silly audit   esbuild: [ '0.27.7', '0.28.0' ],
+239 silly audit   'escape-html': [ '1.0.3' ],
+239 silly audit   'estree-walker': [ '3.0.3' ],
+239 silly audit   etag: [ '1.8.1' ],
+239 silly audit   'event-target-shim': [ '5.0.1' ],
+239 silly audit   'expect-type': [ '1.3.0' ],
+239 silly audit   express: [ '5.2.1' ],
+239 silly audit   exsolve: [ '1.0.8' ],
+239 silly audit   'fast-check': [ '3.23.2' ],
+239 silly audit   fdir: [ '6.5.0' ],
+239 silly audit   finalhandler: [ '2.1.1' ],
+239 silly audit   'form-data': [ '4.0.5' ],
+239 silly audit   'form-data-encoder': [ '1.7.2' ],
+239 silly audit   'mime-db': [ '1.52.0', '1.54.0' ],
+239 silly audit   'mime-types': [ '2.1.35', '3.0.2' ],
+239 silly audit   'formdata-node': [ '4.4.1' ],
+239 silly audit   forwarded: [ '0.2.0' ],
+239 silly audit   fresh: [ '2.0.0' ],
+239 silly audit   fsevents: [ '2.3.3' ],
+239 silly audit   'function-bind': [ '1.1.2' ],
+239 silly audit   'get-intrinsic': [ '1.3.0' ],
+239 silly audit   'get-proto': [ '1.0.1' ],
+239 silly audit   giget: [ '2.0.0' ],
+239 silly audit   gopd: [ '1.2.0' ],
+239 silly audit   'has-symbols': [ '1.1.0' ],
+239 silly audit   'has-tostringtag': [ '1.0.2' ],
+239 silly audit   hasown: [ '2.0.4' ],
+239 silly audit   'http-errors': [ '2.0.1' ],
+239 silly audit   'humanize-ms': [ '1.2.1' ],
+239 silly audit   'iconv-lite': [ '0.7.2' ],
+239 silly audit   inherits: [ '2.0.4' ],
+239 silly audit   'ipaddr.js': [ '1.9.1' ],
+239 silly audit   'is-promise': [ '4.0.0' ],
+239 silly audit   jiti: [ '2.7.0' ],
+239 silly audit   'js-tokens': [ '9.0.1' ],
+239 silly audit   jsonwebtoken: [ '9.0.3' ],
+239 silly audit   jwa: [ '2.0.1' ],
+239 silly audit   jws: [ '4.0.1' ],
+239 silly audit   'lodash.includes': [ '4.3.0' ],
+239 silly audit   'lodash.isboolean': [ '3.0.3' ],
+239 silly audit   'lodash.isinteger': [ '4.0.4' ],
+239 silly audit   'lodash.isnumber': [ '3.0.3' ],
+239 silly audit   'lodash.isplainobject': [ '4.0.6' ],
+239 silly audit   'lodash.isstring': [ '4.0.1' ],
+239 silly audit   'lodash.once': [ '4.1.1' ],
+239 silly audit   loupe: [ '3.2.1' ],
+239 silly audit   'magic-string': [ '0.30.21' ],
+239 silly audit   'make-error': [ '1.3.6' ],
+239 silly audit   'math-intrinsics': [ '1.1.0' ],
+239 silly audit   'media-typer': [ '1.1.0' ],
+239 silly audit   'merge-descriptors': [ '2.0.0' ],
+239 silly audit   ms: [ '2.1.3' ],
+239 silly audit   nanoid: [ '3.3.12' ],
+239 silly audit   negotiator: [ '1.0.0' ],
+239 silly audit   'node-cron': [ '4.2.1' ],
+239 silly audit   'node-domexception': [ '1.0.0' ],
+239 silly audit   'node-fetch': [ '2.7.0' ],
+239 silly audit   'node-fetch-native': [ '1.6.7' ],
+239 silly audit   nodemailer: [ '7.0.13' ],
+239 silly audit   nypm: [ '0.6.6' ],
+239 silly audit   'object-assign': [ '4.1.1' ],
+239 silly audit   'object-inspect': [ '1.13.4' ],
+239 silly audit   ohash: [ '2.0.11' ],
+239 silly audit   'on-finished': [ '2.4.1' ],
+239 silly audit   once: [ '1.4.0' ],
+239 silly audit   openai: [ '4.104.0' ],
+239 silly audit   'undici-types': [ '5.26.5', '6.21.0' ],
+239 silly audit   parseurl: [ '1.3.3' ],
+239 silly audit   'path-to-regexp': [ '8.4.2' ],
+239 silly audit   pathe: [ '2.0.3' ],
+239 silly audit   pathval: [ '2.0.1' ],
+239 silly audit   'perfect-debounce': [ '1.0.0' ],
+239 silly audit   picocolors: [ '1.1.1' ],
+239 silly audit   picomatch: [ '4.0.4' ],
+239 silly audit   'pkg-types': [ '2.3.1' ],
+239 silly audit   postcss: [ '8.5.15' ],
+239 silly audit   prisma: [ '6.19.3' ],
+239 silly audit   'proxy-addr': [ '2.0.7' ],
+239 silly audit   'pure-rand': [ '6.1.0' ],
+239 silly audit   qs: [ '6.15.2' ],
+239 silly audit   'range-parser': [ '1.2.1' ],
+239 silly audit   'raw-body': [ '3.0.2' ],
+239 silly audit   rc9: [ '2.1.2' ],
+239 silly audit   readdirp: [ '4.1.2' ],
+239 silly audit   rollup: [ '4.60.4' ],
+239 silly audit   router: [ '2.2.0' ],
+239 silly audit   'safe-buffer': [ '5.2.1' ],
+239 silly audit   'safer-buffer': [ '2.1.2' ],
+239 silly audit   semver: [ '7.8.1' ],
+239 silly audit   send: [ '1.2.1' ],
+239 silly audit   'serve-static': [ '2.2.1' ],
+239 silly audit   setprototypeof: [ '1.2.0' ],
+239 silly audit   'side-channel': [ '1.1.0' ],
+239 silly audit   'side-channel-list': [ '1.0.1' ],
+239 silly audit   'side-channel-map': [ '1.0.1' ],
+239 silly audit   'side-channel-weakmap': [ '1.0.2' ],
+239 silly audit   siginfo: [ '2.0.0' ],
+239 silly audit   'source-map-js': [ '1.2.1' ],
+239 silly audit   stackback: [ '0.0.2' ],
+239 silly audit   statuses: [ '2.0.2' ],
+239 silly audit   'std-env': [ '3.10.0' ],
+239 silly audit   'strip-literal': [ '3.1.0' ],
+239 silly audit   tinybench: [ '2.9.0' ],
+239 silly audit   tinyexec: [ '1.2.3', '0.3.2' ],
+239 silly audit   tinyglobby: [ '0.2.16' ],
+239 silly audit   tinypool: [ '1.1.1' ],
+239 silly audit   tinyrainbow: [ '2.0.0' ],
+239 silly audit   tinyspy: [ '4.0.4' ],
+239 silly audit   toidentifier: [ '1.0.1' ],
+239 silly audit   tr46: [ '0.0.3' ],
+239 silly audit   'ts-node': [ '10.9.2' ],
+239 silly audit   tsx: [ '4.22.3' ],
+239 silly audit   'type-is': [ '2.1.0' ],
+239 silly audit   typescript: [ '5.9.3' ],
+239 silly audit   unpipe: [ '1.0.0' ],
+239 silly audit   'v8-compile-cache-lib': [ '3.0.1' ],
+239 silly audit   vary: [ '1.1.2' ],
+239 silly audit   vite: [ '7.3.3' ],
+239 silly audit   'vite-node': [ '3.2.4' ],
+239 silly audit   vitest: [ '3.2.4' ],
+239 silly audit   'web-streams-polyfill': [ '4.0.0-beta.3' ],
+239 silly audit   'webidl-conversions': [ '3.0.1' ],
+239 silly audit   'whatwg-url': [ '5.0.0' ],
+239 silly audit   'why-is-node-running': [ '2.3.0' ],
+239 silly audit   wrappy: [ '1.0.2' ],
+239 silly audit   yn: [ '3.1.1' ],
+239 silly audit   zod: [ '3.25.76' ]
+239 silly audit }
+240 verbose audit error FetchError: request to https://registry.npmmirror.com/-/npm/v1/security/advisories/bulk failed, reason: 
+240 verbose audit error     at ClientRequest.<anonymous> (E:\node_modules\npm\node_modules\minipass-fetch\lib\index.js:130:14)
+240 verbose audit error     at ClientRequest.emit (node:events:508:28)
+240 verbose audit error     at emitErrorEvent (node:_http_client:108:11)
+240 verbose audit error     at _destroy (node:_http_client:963:9)
+240 verbose audit error     at onSocketNT (node:_http_client:983:5)
+240 verbose audit error     at process.processTicksAndRejections (node:internal/process/task_queues:91:21) {
+240 verbose audit error   code: 'EACCES',
+240 verbose audit error   errno: 'EACCES',
+240 verbose audit error   type: 'system'
+240 verbose audit error }
+241 silly audit error undefined
+242 silly audit report null
+243 http cache @vitest/spy@https://registry.npmmirror.com/@vitest/spy/-/spy-3.2.4.tgz 1ms (cache hit)
+244 http cache @vitest/utils@https://registry.npmmirror.com/@vitest/utils/-/utils-3.2.4.tgz 0ms (cache hit)
+245 http cache @vitest/snapshot@https://registry.npmmirror.com/@vitest/snapshot/-/snapshot-3.2.4.tgz 0ms (cache hit)
+246 http cache @types/serve-static@https://registry.npmmirror.com/@types/serve-static/-/serve-static-2.2.0.tgz 0ms (cache hit)
+247 http cache @vitest/mocker@https://registry.npmmirror.com/@vitest/mocker/-/mocker-3.2.4.tgz 0ms (cache hit)
+248 http cache @vitest/runner@https://registry.npmmirror.com/@vitest/runner/-/runner-3.2.4.tgz 0ms (cache hit)
+249 http cache @types/send@https://registry.npmmirror.com/@types/send/-/send-1.2.1.tgz 0ms (cache hit)
+250 http cache @vitest/pretty-format@https://registry.npmmirror.com/@vitest/pretty-format/-/pretty-format-3.2.4.tgz 0ms (cache hit)
+251 http cache @vitest/expect@https://registry.npmmirror.com/@vitest/expect/-/expect-3.2.4.tgz 0ms (cache hit)
+252 http cache @types/express-serve-static-core@https://registry.npmmirror.com/@types/express-serve-static-core/-/express-serve-static-core-5.1.1.tgz 0ms (cache hit)
+253 http cache @types/nodemailer@https://registry.npmmirror.com/@types/nodemailer/-/nodemailer-6.4.23.tgz 0ms (cache hit)
+254 http cache @types/qs@https://registry.npmmirror.com/@types/qs/-/qs-6.15.1.tgz 0ms (cache hit)
+255 http cache @types/range-parser@https://registry.npmmirror.com/@types/range-parser/-/range-parser-1.2.7.tgz 0ms (cache hit)
+256 http cache @types/node-fetch@https://registry.npmmirror.com/@types/node-fetch/-/node-fetch-2.6.13.tgz 0ms (cache hit)
+257 http cache @types/node@https://registry.npmmirror.com/@types/node/-/node-22.19.19.tgz 0ms (cache hit)
+258 http cache @types/ms@https://registry.npmmirror.com/@types/ms/-/ms-2.1.0.tgz 0ms (cache hit)
+259 http cache @types/http-errors@https://registry.npmmirror.com/@types/http-errors/-/http-errors-2.0.5.tgz 0ms (cache hit)
+260 http cache @types/node-cron@https://registry.npmmirror.com/@types/node-cron/-/node-cron-3.0.11.tgz 0ms (cache hit)
+261 http cache @types/express@https://registry.npmmirror.com/@types/express/-/express-5.0.6.tgz 0ms (cache hit)
+262 http cache @types/jsonwebtoken@https://registry.npmmirror.com/@types/jsonwebtoken/-/jsonwebtoken-9.0.10.tgz 0ms (cache hit)
+263 http cache @types/deep-eql@https://registry.npmmirror.com/@types/deep-eql/-/deep-eql-4.0.2.tgz 0ms (cache hit)
+264 http cache @tsconfig/node10@https://registry.npmmirror.com/@tsconfig/node10/-/node10-1.0.12.tgz 0ms (cache hit)
+265 http cache @types/estree@https://registry.npmmirror.com/@types/estree/-/estree-1.0.9.tgz 0ms (cache hit)
+266 http cache @types/cookie-parser@https://registry.npmmirror.com/@types/cookie-parser/-/cookie-parser-1.4.10.tgz 0ms (cache hit)
+267 http cache @types/connect@https://registry.npmmirror.com/@types/connect/-/connect-3.4.38.tgz 0ms (cache hit)
+268 http cache @types/cors@https://registry.npmmirror.com/@types/cors/-/cors-2.8.19.tgz 0ms (cache hit)
+269 http cache @types/body-parser@https://registry.npmmirror.com/@types/body-parser/-/body-parser-1.19.6.tgz 0ms (cache hit)
+270 http cache @types/chai@https://registry.npmmirror.com/@types/chai/-/chai-5.2.3.tgz 0ms (cache hit)
+271 http cache @tsconfig/node14@https://registry.npmmirror.com/@tsconfig/node14/-/node14-1.0.3.tgz 0ms (cache hit)
+272 http cache @tsconfig/node12@https://registry.npmmirror.com/@tsconfig/node12/-/node12-1.0.11.tgz 0ms (cache hit)
+273 http cache @types/bcryptjs@https://registry.npmmirror.com/@types/bcryptjs/-/bcryptjs-2.4.6.tgz 0ms (cache hit)
+274 http cache @jridgewell/sourcemap-codec@https://registry.npmmirror.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz 0ms (cache hit)
+275 http cache @rollup/rollup-win32-x64-gnu@https://registry.npmmirror.com/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.60.4.tgz 0ms (cache hit)
+276 http cache @tsconfig/node16@https://registry.npmmirror.com/@tsconfig/node16/-/node16-1.0.4.tgz 0ms (cache hit)
+277 http cache @jridgewell/trace-mapping@https://registry.npmmirror.com/@jridgewell/trace-mapping/-/trace-mapping-0.3.9.tgz 0ms (cache hit)
+278 http cache @jridgewell/resolve-uri@https://registry.npmmirror.com/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz 0ms (cache hit)
+279 http cache @prisma/get-platform@https://registry.npmmirror.com/@prisma/get-platform/-/get-platform-6.19.3.tgz 0ms (cache hit)
+280 http cache @rollup/rollup-win32-x64-msvc@https://registry.npmmirror.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.60.4.tgz 0ms (cache hit)
+281 http cache @standard-schema/spec@https://registry.npmmirror.com/@standard-schema/spec/-/spec-1.1.0.tgz 0ms (cache hit)
+282 http cache @prisma/debug@https://registry.npmmirror.com/@prisma/debug/-/debug-6.19.3.tgz 0ms (cache hit)
+283 http cache @cspotcode/source-map-support@https://registry.npmmirror.com/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz 0ms (cache hit)
+284 http cache @prisma/fetch-engine@https://registry.npmmirror.com/@prisma/fetch-engine/-/fetch-engine-6.19.3.tgz 0ms (cache hit)
+285 http cache @prisma/engines-version@https://registry.npmmirror.com/@prisma/engines-version/-/engines-version-7.1.1-3.c2990dca591cba766e3b7ef5d9e8a84796e47ab7.tgz 0ms (cache hit)
+286 http cache @esbuild/win32-x64@https://registry.npmmirror.com/@esbuild/win32-x64/-/win32-x64-0.27.7.tgz 0ms (cache hit)
+287 http cache webidl-conversions@https://registry.npmmirror.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz 0ms (cache hit)
+288 http cache zod@https://registry.npmmirror.com/zod/-/zod-3.25.76.tgz 0ms (cache hit)
+289 http cache @prisma/client@https://registry.npmmirror.com/@prisma/client/-/client-6.19.3.tgz 0ms (cache hit)
+290 http cache @prisma/engines@https://registry.npmmirror.com/@prisma/engines/-/engines-6.19.3.tgz 0ms (cache hit)
+291 http cache @prisma/config@https://registry.npmmirror.com/@prisma/config/-/config-6.19.3.tgz 0ms (cache hit)
+292 http cache wrappy@https://registry.npmmirror.com/wrappy/-/wrappy-1.0.2.tgz 0ms (cache hit)
+293 http cache whatwg-url@https://registry.npmmirror.com/whatwg-url/-/whatwg-url-5.0.0.tgz 0ms (cache hit)
+294 http cache vite-node@https://registry.npmmirror.com/vite-node/-/vite-node-3.2.4.tgz 0ms (cache hit)
+295 http cache web-streams-polyfill@https://registry.npmmirror.com/web-streams-polyfill/-/web-streams-polyfill-4.0.0-beta.3.tgz 0ms (cache hit)
+296 http cache vite@https://registry.npmmirror.com/vite/-/vite-7.3.3.tgz 0ms (cache hit)
+297 http cache why-is-node-running@https://registry.npmmirror.com/why-is-node-running/-/why-is-node-running-2.3.0.tgz 0ms (cache hit)
+298 http cache yn@https://registry.npmmirror.com/yn/-/yn-3.1.1.tgz 0ms (cache hit)
+299 http cache vitest@https://registry.npmmirror.com/vitest/-/vitest-3.2.4.tgz 0ms (cache hit)
+300 http cache v8-compile-cache-lib@https://registry.npmmirror.com/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.1.tgz 0ms (cache hit)
+301 http cache undici-types@https://registry.npmmirror.com/undici-types/-/undici-types-6.21.0.tgz 0ms (cache hit)
+302 http cache unpipe@https://registry.npmmirror.com/unpipe/-/unpipe-1.0.0.tgz 0ms (cache hit)
+303 http cache vary@https://registry.npmmirror.com/vary/-/vary-1.1.2.tgz 0ms (cache hit)
+304 http cache typescript@https://registry.npmmirror.com/typescript/-/typescript-5.9.3.tgz 0ms (cache hit)
+305 http cache ts-node@https://registry.npmmirror.com/ts-node/-/ts-node-10.9.2.tgz 0ms (cache hit)
+306 http cache toidentifier@https://registry.npmmirror.com/toidentifier/-/toidentifier-1.0.1.tgz 0ms (cache hit)
+307 http cache tinyspy@https://registry.npmmirror.com/tinyspy/-/tinyspy-4.0.4.tgz 0ms (cache hit)
+308 http cache tsx@https://registry.npmmirror.com/tsx/-/tsx-4.22.3.tgz 0ms (cache hit)
+309 http cache type-is@https://registry.npmmirror.com/type-is/-/type-is-2.1.0.tgz 0ms (cache hit)
+310 http cache tinyrainbow@https://registry.npmmirror.com/tinyrainbow/-/tinyrainbow-2.0.0.tgz 0ms (cache hit)
+311 http cache tr46@https://registry.npmmirror.com/tr46/-/tr46-0.0.3.tgz 0ms (cache hit)
+312 http cache tinyexec@https://registry.npmmirror.com/tinyexec/-/tinyexec-1.2.3.tgz 0ms (cache hit)
+313 http cache tinypool@https://registry.npmmirror.com/tinypool/-/tinypool-1.1.1.tgz 0ms (cache hit)
+314 http cache tinyglobby@https://registry.npmmirror.com/tinyglobby/-/tinyglobby-0.2.16.tgz 0ms (cache hit)
+315 http cache tinybench@https://registry.npmmirror.com/tinybench/-/tinybench-2.9.0.tgz 0ms (cache hit)
+316 http cache statuses@https://registry.npmmirror.com/statuses/-/statuses-2.0.2.tgz 0ms (cache hit)
+317 http cache stackback@https://registry.npmmirror.com/stackback/-/stackback-0.0.2.tgz 0ms (cache hit)
+318 http cache strip-literal@https://registry.npmmirror.com/strip-literal/-/strip-literal-3.1.0.tgz 0ms (cache hit)
+319 http cache side-channel-weakmap@https://registry.npmmirror.com/side-channel-weakmap/-/side-channel-weakmap-1.0.2.tgz 0ms (cache hit)
+320 http cache source-map-js@https://registry.npmmirror.com/source-map-js/-/source-map-js-1.2.1.tgz 0ms (cache hit)
+321 http cache siginfo@https://registry.npmmirror.com/siginfo/-/siginfo-2.0.0.tgz 0ms (cache hit)
+322 http cache side-channel-map@https://registry.npmmirror.com/side-channel-map/-/side-channel-map-1.0.1.tgz 0ms (cache hit)
+323 http cache side-channel-list@https://registry.npmmirror.com/side-channel-list/-/side-channel-list-1.0.1.tgz 0ms (cache hit)
+324 http cache side-channel@https://registry.npmmirror.com/side-channel/-/side-channel-1.1.0.tgz 0ms (cache hit)
+325 http cache std-env@https://registry.npmmirror.com/std-env/-/std-env-3.10.0.tgz 0ms (cache hit)
+326 http cache send@https://registry.npmmirror.com/send/-/send-1.2.1.tgz 0ms (cache hit)
+327 http cache semver@https://registry.npmmirror.com/semver/-/semver-7.8.1.tgz 0ms (cache hit)
+328 http cache setprototypeof@https://registry.npmmirror.com/setprototypeof/-/setprototypeof-1.2.0.tgz 0ms (cache hit)
+329 http cache serve-static@https://registry.npmmirror.com/serve-static/-/serve-static-2.2.1.tgz 0ms (cache hit)
+330 http cache safer-buffer@https://registry.npmmirror.com/safer-buffer/-/safer-buffer-2.1.2.tgz 0ms (cache hit)
+331 http cache router@https://registry.npmmirror.com/router/-/router-2.2.0.tgz 0ms (cache hit)
+332 http cache safe-buffer@https://registry.npmmirror.com/safe-buffer/-/safe-buffer-5.2.1.tgz 0ms (cache hit)
+333 http cache rc9@https://registry.npmmirror.com/rc9/-/rc9-2.1.2.tgz 0ms (cache hit)
+334 http cache rollup@https://registry.npmmirror.com/rollup/-/rollup-4.60.4.tgz 0ms (cache hit)
+335 http cache readdirp@https://registry.npmmirror.com/readdirp/-/readdirp-4.1.2.tgz 0ms (cache hit)
+336 http cache postcss@https://registry.npmmirror.com/postcss/-/postcss-8.5.15.tgz 0ms (cache hit)
+337 http cache range-parser@https://registry.npmmirror.com/range-parser/-/range-parser-1.2.1.tgz 0ms (cache hit)
+338 http cache qs@https://registry.npmmirror.com/qs/-/qs-6.15.2.tgz 0ms (cache hit)
+339 http cache proxy-addr@https://registry.npmmirror.com/proxy-addr/-/proxy-addr-2.0.7.tgz 0ms (cache hit)
+340 http cache raw-body@https://registry.npmmirror.com/raw-body/-/raw-body-3.0.2.tgz 0ms (cache hit)
+341 http cache pure-rand@https://registry.npmmirror.com/pure-rand/-/pure-rand-6.1.0.tgz 0ms (cache hit)
+342 http cache prisma@https://registry.npmmirror.com/prisma/-/prisma-6.19.3.tgz 0ms (cache hit)
+343 http cache picocolors@https://registry.npmmirror.com/picocolors/-/picocolors-1.1.1.tgz 0ms (cache hit)
+344 http cache picomatch@https://registry.npmmirror.com/picomatch/-/picomatch-4.0.4.tgz 0ms (cache hit)
+345 http cache perfect-debounce@https://registry.npmmirror.com/perfect-debounce/-/perfect-debounce-1.0.0.tgz 0ms (cache hit)
+346 http cache pkg-types@https://registry.npmmirror.com/pkg-types/-/pkg-types-2.3.1.tgz 0ms (cache hit)
+347 http cache path-to-regexp@https://registry.npmmirror.com/path-to-regexp/-/path-to-regexp-8.4.2.tgz 0ms (cache hit)
+348 http cache parseurl@https://registry.npmmirror.com/parseurl/-/parseurl-1.3.3.tgz 0ms (cache hit)
+349 http cache once@https://registry.npmmirror.com/once/-/once-1.4.0.tgz 0ms (cache hit)
+350 http cache pathe@https://registry.npmmirror.com/pathe/-/pathe-2.0.3.tgz 0ms (cache hit)
+351 http cache on-finished@https://registry.npmmirror.com/on-finished/-/on-finished-2.4.1.tgz 0ms (cache hit)
+352 http cache pathval@https://registry.npmmirror.com/pathval/-/pathval-2.0.1.tgz 0ms (cache hit)
+353 http cache ohash@https://registry.npmmirror.com/ohash/-/ohash-2.0.11.tgz 0ms (cache hit)
+354 http cache openai@https://registry.npmmirror.com/openai/-/openai-4.104.0.tgz 0ms (cache hit)
+355 http cache object-assign@https://registry.npmmirror.com/object-assign/-/object-assign-4.1.1.tgz 0ms (cache hit)
+356 http cache object-inspect@https://registry.npmmirror.com/object-inspect/-/object-inspect-1.13.4.tgz 0ms (cache hit)
+357 http cache node-domexception@https://registry.npmmirror.com/node-domexception/-/node-domexception-1.0.0.tgz 0ms (cache hit)
+358 http cache nodemailer@https://registry.npmmirror.com/nodemailer/-/nodemailer-7.0.13.tgz 0ms (cache hit)
+359 http cache nypm@https://registry.npmmirror.com/nypm/-/nypm-0.6.6.tgz 0ms (cache hit)
+360 http cache node-fetch-native@https://registry.npmmirror.com/node-fetch-native/-/node-fetch-native-1.6.7.tgz 0ms (cache hit)
+361 http cache node-fetch@https://registry.npmmirror.com/node-fetch/-/node-fetch-2.7.0.tgz 0ms (cache hit)
+362 http cache node-cron@https://registry.npmmirror.com/node-cron/-/node-cron-4.2.1.tgz 0ms (cache hit)
+363 http cache ms@https://registry.npmmirror.com/ms/-/ms-2.1.3.tgz 0ms (cache hit)
+364 http cache negotiator@https://registry.npmmirror.com/negotiator/-/negotiator-1.0.0.tgz 0ms (cache hit)
+365 http cache nanoid@https://registry.npmmirror.com/nanoid/-/nanoid-3.3.12.tgz 0ms (cache hit)
+366 http cache mime-db@https://registry.npmmirror.com/mime-db/-/mime-db-1.54.0.tgz 0ms (cache hit)
+367 http cache math-intrinsics@https://registry.npmmirror.com/math-intrinsics/-/math-intrinsics-1.1.0.tgz 0ms (cache hit)
+368 http cache media-typer@https://registry.npmmirror.com/media-typer/-/media-typer-1.1.0.tgz 0ms (cache hit)
+369 http cache mime-types@https://registry.npmmirror.com/mime-types/-/mime-types-3.0.2.tgz 0ms (cache hit)
+370 http cache magic-string@https://registry.npmmirror.com/magic-string/-/magic-string-0.30.21.tgz 0ms (cache hit)
+371 http cache make-error@https://registry.npmmirror.com/make-error/-/make-error-1.3.6.tgz 0ms (cache hit)
+372 http cache merge-descriptors@https://registry.npmmirror.com/merge-descriptors/-/merge-descriptors-2.0.0.tgz 0ms (cache hit)
+373 http cache lodash.isplainobject@https://registry.npmmirror.com/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz 0ms (cache hit)
+374 http cache loupe@https://registry.npmmirror.com/loupe/-/loupe-3.2.1.tgz 0ms (cache hit)
+375 http cache lodash.once@https://registry.npmmirror.com/lodash.once/-/lodash.once-4.1.1.tgz 2ms (cache hit)
+376 http cache lodash.isstring@https://registry.npmmirror.com/lodash.isstring/-/lodash.isstring-4.0.1.tgz 0ms (cache hit)
+377 http cache lodash.isinteger@https://registry.npmmirror.com/lodash.isinteger/-/lodash.isinteger-4.0.4.tgz 0ms (cache hit)
+378 http cache lodash.isnumber@https://registry.npmmirror.com/lodash.isnumber/-/lodash.isnumber-3.0.3.tgz 0ms (cache hit)
+379 http cache lodash.isboolean@https://registry.npmmirror.com/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz 0ms (cache hit)
+380 http cache lodash.includes@https://registry.npmmirror.com/lodash.includes/-/lodash.includes-4.3.0.tgz 0ms (cache hit)
+381 http cache jws@https://registry.npmmirror.com/jws/-/jws-4.0.1.tgz 0ms (cache hit)
+382 http cache jsonwebtoken@https://registry.npmmirror.com/jsonwebtoken/-/jsonwebtoken-9.0.3.tgz 0ms (cache hit)
+383 http cache jwa@https://registry.npmmirror.com/jwa/-/jwa-2.0.1.tgz 0ms (cache hit)
+384 http cache js-tokens@https://registry.npmmirror.com/js-tokens/-/js-tokens-9.0.1.tgz 0ms (cache hit)
+385 http cache ipaddr.js@https://registry.npmmirror.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz 0ms (cache hit)
+386 http cache iconv-lite@https://registry.npmmirror.com/iconv-lite/-/iconv-lite-0.7.2.tgz 0ms (cache hit)
+387 http cache inherits@https://registry.npmmirror.com/inherits/-/inherits-2.0.4.tgz 0ms (cache hit)
+388 http cache http-errors@https://registry.npmmirror.com/http-errors/-/http-errors-2.0.1.tgz 0ms (cache hit)
+389 http cache jiti@https://registry.npmmirror.com/jiti/-/jiti-2.7.0.tgz 0ms (cache hit)
+390 http cache is-promise@https://registry.npmmirror.com/is-promise/-/is-promise-4.0.0.tgz 0ms (cache hit)
+391 http cache humanize-ms@https://registry.npmmirror.com/humanize-ms/-/humanize-ms-1.2.1.tgz 0ms (cache hit)
+392 http cache hasown@https://registry.npmmirror.com/hasown/-/hasown-2.0.4.tgz 0ms (cache hit)
+393 http cache has-tostringtag@https://registry.npmmirror.com/has-tostringtag/-/has-tostringtag-1.0.2.tgz 0ms (cache hit)
+394 http cache get-intrinsic@https://registry.npmmirror.com/get-intrinsic/-/get-intrinsic-1.3.0.tgz 0ms (cache hit)
+395 http cache has-symbols@https://registry.npmmirror.com/has-symbols/-/has-symbols-1.1.0.tgz 0ms (cache hit)
+396 http cache gopd@https://registry.npmmirror.com/gopd/-/gopd-1.2.0.tgz 0ms (cache hit)
+397 http cache giget@https://registry.npmmirror.com/giget/-/giget-2.0.0.tgz 0ms (cache hit)
+398 http cache get-proto@https://registry.npmmirror.com/get-proto/-/get-proto-1.0.1.tgz 0ms (cache hit)
+399 http cache fresh@https://registry.npmmirror.com/fresh/-/fresh-2.0.0.tgz 0ms (cache hit)
+400 http cache forwarded@https://registry.npmmirror.com/forwarded/-/forwarded-0.2.0.tgz 0ms (cache hit)
+401 http cache formdata-node@https://registry.npmmirror.com/formdata-node/-/formdata-node-4.4.1.tgz 0ms (cache hit)
+402 http cache expect-type@https://registry.npmmirror.com/expect-type/-/expect-type-1.3.0.tgz 0ms (cache hit)
+403 http cache function-bind@https://registry.npmmirror.com/function-bind/-/function-bind-1.1.2.tgz 0ms (cache hit)
+404 http cache form-data@https://registry.npmmirror.com/form-data/-/form-data-4.0.5.tgz 0ms (cache hit)
+405 http cache form-data-encoder@https://registry.npmmirror.com/form-data-encoder/-/form-data-encoder-1.7.2.tgz 0ms (cache hit)
+406 http cache express@https://registry.npmmirror.com/express/-/express-5.2.1.tgz 0ms (cache hit)
+407 http cache finalhandler@https://registry.npmmirror.com/finalhandler/-/finalhandler-2.1.1.tgz 0ms (cache hit)
+408 http cache fast-check@https://registry.npmmirror.com/fast-check/-/fast-check-3.23.2.tgz 0ms (cache hit)
+409 http cache event-target-shim@https://registry.npmmirror.com/event-target-shim/-/event-target-shim-5.0.1.tgz 0ms (cache hit)
+410 http cache estree-walker@https://registry.npmmirror.com/estree-walker/-/estree-walker-3.0.3.tgz 0ms (cache hit)
+411 http cache exsolve@https://registry.npmmirror.com/exsolve/-/exsolve-1.0.8.tgz 0ms (cache hit)
+412 http cache etag@https://registry.npmmirror.com/etag/-/etag-1.8.1.tgz 0ms (cache hit)
+413 http cache es-set-tostringtag@https://registry.npmmirror.com/es-set-tostringtag/-/es-set-tostringtag-2.1.0.tgz 0ms (cache hit)
+414 http cache fdir@https://registry.npmmirror.com/fdir/-/fdir-6.5.0.tgz 0ms (cache hit)
+415 http cache esbuild@https://registry.npmmirror.com/esbuild/-/esbuild-0.27.7.tgz 0ms (cache hit)
+416 http cache es-errors@https://registry.npmmirror.com/es-errors/-/es-errors-1.3.0.tgz 0ms (cache hit)
+417 http cache es-module-lexer@https://registry.npmmirror.com/es-module-lexer/-/es-module-lexer-1.7.0.tgz 0ms (cache hit)
+418 http cache escape-html@https://registry.npmmirror.com/escape-html/-/escape-html-1.0.3.tgz 0ms (cache hit)
+419 http cache ee-first@https://registry.npmmirror.com/ee-first/-/ee-first-1.1.1.tgz 0ms (cache hit)
+420 http cache encodeurl@https://registry.npmmirror.com/encodeurl/-/encodeurl-2.0.0.tgz 0ms (cache hit)
+421 http cache es-object-atoms@https://registry.npmmirror.com/es-object-atoms/-/es-object-atoms-1.1.2.tgz 0ms (cache hit)
+422 http cache es-define-property@https://registry.npmmirror.com/es-define-property/-/es-define-property-1.0.1.tgz 0ms (cache hit)
+423 http cache effect@https://registry.npmmirror.com/effect/-/effect-3.21.0.tgz 0ms (cache hit)
+424 http cache ecdsa-sig-formatter@https://registry.npmmirror.com/ecdsa-sig-formatter/-/ecdsa-sig-formatter-1.0.11.tgz 0ms (cache hit)
+425 http cache dotenv@https://registry.npmmirror.com/dotenv/-/dotenv-16.6.1.tgz 0ms (cache hit)
+426 http cache empathic@https://registry.npmmirror.com/empathic/-/empathic-2.0.0.tgz 0ms (cache hit)
+427 http cache destr@https://registry.npmmirror.com/destr/-/destr-2.0.5.tgz 0ms (cache hit)
+428 http cache dunder-proto@https://registry.npmmirror.com/dunder-proto/-/dunder-proto-1.0.1.tgz 0ms (cache hit)
+429 http cache diff@https://registry.npmmirror.com/diff/-/diff-4.0.4.tgz 0ms (cache hit)
+430 http cache depd@https://registry.npmmirror.com/depd/-/depd-2.0.0.tgz 0ms (cache hit)
+431 http cache delayed-stream@https://registry.npmmirror.com/delayed-stream/-/delayed-stream-1.0.0.tgz 0ms (cache hit)
+432 http cache deep-eql@https://registry.npmmirror.com/deep-eql/-/deep-eql-5.0.2.tgz 0ms (cache hit)
+433 http cache cookie-signature@https://registry.npmmirror.com/cookie-signature/-/cookie-signature-1.2.2.tgz 0ms (cache hit)
+434 http cache deepmerge-ts@https://registry.npmmirror.com/deepmerge-ts/-/deepmerge-ts-7.1.5.tgz 0ms (cache hit)
+435 http cache defu@https://registry.npmmirror.com/defu/-/defu-6.1.7.tgz 0ms (cache hit)
+436 http cache create-require@https://registry.npmmirror.com/create-require/-/create-require-1.1.1.tgz 0ms (cache hit)
+437 http cache cors@https://registry.npmmirror.com/cors/-/cors-2.8.6.tgz 0ms (cache hit)
+438 http cache confbox@https://registry.npmmirror.com/confbox/-/confbox-0.2.4.tgz 0ms (cache hit)
+439 http cache cookie@https://registry.npmmirror.com/cookie/-/cookie-0.7.2.tgz 0ms (cache hit)
+440 http cache cookie-parser@https://registry.npmmirror.com/cookie-parser/-/cookie-parser-1.4.7.tgz 0ms (cache hit)
+441 http cache debug@https://registry.npmmirror.com/debug/-/debug-4.4.3.tgz 0ms (cache hit)
+442 http cache content-type@https://registry.npmmirror.com/content-type/-/content-type-1.0.5.tgz 0ms (cache hit)
+443 http cache citty@https://registry.npmmirror.com/citty/-/citty-0.1.6.tgz 0ms (cache hit)
+444 http cache consola@https://registry.npmmirror.com/consola/-/consola-3.4.2.tgz 0ms (cache hit)
+445 http cache combined-stream@https://registry.npmmirror.com/combined-stream/-/combined-stream-1.0.8.tgz 0ms (cache hit)
+446 http cache content-disposition@https://registry.npmmirror.com/content-disposition/-/content-disposition-1.1.0.tgz 0ms (cache hit)
+447 http cache chai@https://registry.npmmirror.com/chai/-/chai-5.3.3.tgz 0ms (cache hit)
+448 http cache call-bind-apply-helpers@https://registry.npmmirror.com/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz 0ms (cache hit)
+449 http cache chokidar@https://registry.npmmirror.com/chokidar/-/chokidar-4.0.3.tgz 0ms (cache hit)
+450 http cache bcryptjs@https://registry.npmmirror.com/bcryptjs/-/bcryptjs-3.0.3.tgz 0ms (cache hit)
+451 http cache check-error@https://registry.npmmirror.com/check-error/-/check-error-2.1.3.tgz 0ms (cache hit)
+452 http cache call-bound@https://registry.npmmirror.com/call-bound/-/call-bound-1.0.4.tgz 0ms (cache hit)
+453 http cache c12@https://registry.npmmirror.com/c12/-/c12-3.1.0.tgz 0ms (cache hit)
+454 http cache bytes@https://registry.npmmirror.com/bytes/-/bytes-3.1.2.tgz 0ms (cache hit)
+455 http cache cac@https://registry.npmmirror.com/cac/-/cac-6.7.14.tgz 0ms (cache hit)
+456 http cache arg@https://registry.npmmirror.com/arg/-/arg-4.1.3.tgz 0ms (cache hit)
+457 http cache acorn-walk@https://registry.npmmirror.com/acorn-walk/-/acorn-walk-8.3.5.tgz 0ms (cache hit)
+458 http cache asynckit@https://registry.npmmirror.com/asynckit/-/asynckit-0.4.0.tgz 0ms (cache hit)
+459 http cache buffer-equal-constant-time@https://registry.npmmirror.com/buffer-equal-constant-time/-/buffer-equal-constant-time-1.0.1.tgz 0ms (cache hit)
+460 http cache assertion-error@https://registry.npmmirror.com/assertion-error/-/assertion-error-2.0.1.tgz 0ms (cache hit)
+461 http cache body-parser@https://registry.npmmirror.com/body-parser/-/body-parser-2.2.2.tgz 0ms (cache hit)
+462 http cache accepts@https://registry.npmmirror.com/accepts/-/accepts-2.0.0.tgz 0ms (cache hit)
+463 http cache acorn@https://registry.npmmirror.com/acorn/-/acorn-8.16.0.tgz 0ms (cache hit)
+464 http cache agentkeepalive@https://registry.npmmirror.com/agentkeepalive/-/agentkeepalive-4.6.0.tgz 0ms (cache hit)
+465 http cache abort-controller@https://registry.npmmirror.com/abort-controller/-/abort-controller-3.0.0.tgz 0ms (cache hit)
+466 http cache content-type@https://registry.npmmirror.com/content-type/-/content-type-2.0.0.tgz 0ms (cache hit)
+467 http cache tinyexec@https://registry.npmmirror.com/tinyexec/-/tinyexec-0.3.2.tgz 0ms (cache hit)
+468 http cache esbuild@https://registry.npmmirror.com/esbuild/-/esbuild-0.28.0.tgz 0ms (cache hit)
+469 http cache undici-types@https://registry.npmmirror.com/undici-types/-/undici-types-5.26.5.tgz 0ms (cache hit)
+470 http cache @esbuild/win32-x64@https://registry.npmmirror.com/@esbuild/win32-x64/-/win32-x64-0.28.0.tgz 0ms (cache hit)
+471 http cache citty@https://registry.npmmirror.com/citty/-/citty-0.2.2.tgz 0ms (cache hit)
+472 silly tarball no local data for @vitest/spy@https://registry.npmmirror.com/@vitest/spy/-/spy-3.2.4.tgz. Extracting by manifest.
+473 http cache mime-db@https://registry.npmmirror.com/mime-db/-/mime-db-1.52.0.tgz 0ms (cache hit)
+474 http cache @types/node@https://registry.npmmirror.com/@types/node/-/node-18.19.130.tgz 0ms (cache hit)
+475 silly tarball no local data for @vitest/utils@https://registry.npmmirror.com/@vitest/utils/-/utils-3.2.4.tgz. Extracting by manifest.
+476 silly tarball no local data for @vitest/snapshot@https://registry.npmmirror.com/@vitest/snapshot/-/snapshot-3.2.4.tgz. Extracting by manifest.
+477 silly tarball no local data for @types/serve-static@https://registry.npmmirror.com/@types/serve-static/-/serve-static-2.2.0.tgz. Extracting by manifest.
+478 silly tarball no local data for @vitest/mocker@https://registry.npmmirror.com/@vitest/mocker/-/mocker-3.2.4.tgz. Extracting by manifest.
+479 silly tarball no local data for @vitest/runner@https://registry.npmmirror.com/@vitest/runner/-/runner-3.2.4.tgz. Extracting by manifest.
+480 silly tarball no local data for @types/send@https://registry.npmmirror.com/@types/send/-/send-1.2.1.tgz. Extracting by manifest.
+481 silly tarball no local data for @vitest/pretty-format@https://registry.npmmirror.com/@vitest/pretty-format/-/pretty-format-3.2.4.tgz. Extracting by manifest.
+482 silly tarball no local data for @vitest/expect@https://registry.npmmirror.com/@vitest/expect/-/expect-3.2.4.tgz. Extracting by manifest.
+483 silly tarball no local data for @types/express-serve-static-core@https://registry.npmmirror.com/@types/express-serve-static-core/-/express-serve-static-core-5.1.1.tgz. Extracting by manifest.
+484 silly tarball no local data for @types/nodemailer@https://registry.npmmirror.com/@types/nodemailer/-/nodemailer-6.4.23.tgz. Extracting by manifest.
+485 silly tarball no local data for @types/qs@https://registry.npmmirror.com/@types/qs/-/qs-6.15.1.tgz. Extracting by manifest.
+486 http cache @types/estree@https://registry.npmmirror.com/@types/estree/-/estree-1.0.8.tgz 0ms (cache hit)
+487 silly tarball no local data for @types/range-parser@https://registry.npmmirror.com/@types/range-parser/-/range-parser-1.2.7.tgz. Extracting by manifest.
+488 silly tarball no local data for @types/node-fetch@https://registry.npmmirror.com/@types/node-fetch/-/node-fetch-2.6.13.tgz. Extracting by manifest.
+489 silly tarball no local data for @types/node@https://registry.npmmirror.com/@types/node/-/node-22.19.19.tgz. Extracting by manifest.
+490 silly tarball no local data for @types/ms@https://registry.npmmirror.com/@types/ms/-/ms-2.1.0.tgz. Extracting by manifest.
+491 silly tarball no local data for @types/http-errors@https://registry.npmmirror.com/@types/http-errors/-/http-errors-2.0.5.tgz. Extracting by manifest.
+492 silly tarball no local data for @types/node-cron@https://registry.npmmirror.com/@types/node-cron/-/node-cron-3.0.11.tgz. Extracting by manifest.
+493 silly tarball no local data for @types/express@https://registry.npmmirror.com/@types/express/-/express-5.0.6.tgz. Extracting by manifest.
+494 silly tarball no local data for @types/jsonwebtoken@https://registry.npmmirror.com/@types/jsonwebtoken/-/jsonwebtoken-9.0.10.tgz. Extracting by manifest.
+495 silly tarball no local data for @types/deep-eql@https://registry.npmmirror.com/@types/deep-eql/-/deep-eql-4.0.2.tgz. Extracting by manifest.
+496 silly tarball no local data for @tsconfig/node10@https://registry.npmmirror.com/@tsconfig/node10/-/node10-1.0.12.tgz. Extracting by manifest.
+497 silly tarball no local data for @types/estree@https://registry.npmmirror.com/@types/estree/-/estree-1.0.9.tgz. Extracting by manifest.
+498 silly tarball no local data for @types/cookie-parser@https://registry.npmmirror.com/@types/cookie-parser/-/cookie-parser-1.4.10.tgz. Extracting by manifest.
+499 silly tarball no local data for @types/connect@https://registry.npmmirror.com/@types/connect/-/connect-3.4.38.tgz. Extracting by manifest.
+500 silly tarball no local data for @types/cors@https://registry.npmmirror.com/@types/cors/-/cors-2.8.19.tgz. Extracting by manifest.
+501 silly tarball no local data for @types/body-parser@https://registry.npmmirror.com/@types/body-parser/-/body-parser-1.19.6.tgz. Extracting by manifest.
+502 silly tarball no local data for @types/chai@https://registry.npmmirror.com/@types/chai/-/chai-5.2.3.tgz. Extracting by manifest.
+503 silly tarball no local data for @tsconfig/node14@https://registry.npmmirror.com/@tsconfig/node14/-/node14-1.0.3.tgz. Extracting by manifest.
+504 silly tarball no local data for @tsconfig/node12@https://registry.npmmirror.com/@tsconfig/node12/-/node12-1.0.11.tgz. Extracting by manifest.
+505 silly tarball no local data for @types/bcryptjs@https://registry.npmmirror.com/@types/bcryptjs/-/bcryptjs-2.4.6.tgz. Extracting by manifest.
+506 silly tarball no local data for @jridgewell/sourcemap-codec@https://registry.npmmirror.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz. Extracting by manifest.
+507 http cache cookie-signature@https://registry.npmmirror.com/cookie-signature/-/cookie-signature-1.0.6.tgz 0ms (cache hit)
+508 silly tarball no local data for @rollup/rollup-win32-x64-gnu@https://registry.npmmirror.com/@rollup/rollup-win32-x64-gnu/-/rollup-win32-x64-gnu-4.60.4.tgz. Extracting by manifest.
+509 silly tarball no local data for @tsconfig/node16@https://registry.npmmirror.com/@tsconfig/node16/-/node16-1.0.4.tgz. Extracting by manifest.
+510 silly tarball no local data for @jridgewell/trace-mapping@https://registry.npmmirror.com/@jridgewell/trace-mapping/-/trace-mapping-0.3.9.tgz. Extracting by manifest.
+511 silly tarball no local data for @jridgewell/resolve-uri@https://registry.npmmirror.com/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz. Extracting by manifest.
+512 http cache mime-types@https://registry.npmmirror.com/mime-types/-/mime-types-2.1.35.tgz 0ms (cache hit)
+513 silly tarball no local data for @prisma/get-platform@https://registry.npmmirror.com/@prisma/get-platform/-/get-platform-6.19.3.tgz. Extracting by manifest.
+514 silly tarball no local data for @rollup/rollup-win32-x64-msvc@https://registry.npmmirror.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.60.4.tgz. Extracting by manifest.
+515 silly tarball no local data for @standard-schema/spec@https://registry.npmmirror.com/@standard-schema/spec/-/spec-1.1.0.tgz. Extracting by manifest.
+516 silly tarball no local data for @prisma/debug@https://registry.npmmirror.com/@prisma/debug/-/debug-6.19.3.tgz. Extracting by manifest.
+517 silly tarball no local data for @cspotcode/source-map-support@https://registry.npmmirror.com/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz. Extracting by manifest.
+518 silly tarball no local data for @prisma/fetch-engine@https://registry.npmmirror.com/@prisma/fetch-engine/-/fetch-engine-6.19.3.tgz. Extracting by manifest.
+519 silly tarball no local data for @prisma/engines-version@https://registry.npmmirror.com/@prisma/engines-version/-/engines-version-7.1.1-3.c2990dca591cba766e3b7ef5d9e8a84796e47ab7.tgz. Extracting by manifest.
+520 silly tarball no local data for @esbuild/win32-x64@https://registry.npmmirror.com/@esbuild/win32-x64/-/win32-x64-0.27.7.tgz. Extracting by manifest.
+521 silly tarball no local data for webidl-conversions@https://registry.npmmirror.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz. Extracting by manifest.
+522 silly tarball no local data for zod@https://registry.npmmirror.com/zod/-/zod-3.25.76.tgz. Extracting by manifest.
+523 silly tarball no local data for @prisma/client@https://registry.npmmirror.com/@prisma/client/-/client-6.19.3.tgz. Extracting by manifest.
+524 silly tarball no local data for @prisma/engines@https://registry.npmmirror.com/@prisma/engines/-/engines-6.19.3.tgz. Extracting by manifest.
+525 silly tarball no local data for @prisma/config@https://registry.npmmirror.com/@prisma/config/-/config-6.19.3.tgz. Extracting by manifest.
+526 silly tarball no local data for wrappy@https://registry.npmmirror.com/wrappy/-/wrappy-1.0.2.tgz. Extracting by manifest.
+527 silly tarball no local data for whatwg-url@https://registry.npmmirror.com/whatwg-url/-/whatwg-url-5.0.0.tgz. Extracting by manifest.
+528 silly tarball no local data for vite-node@https://registry.npmmirror.com/vite-node/-/vite-node-3.2.4.tgz. Extracting by manifest.
+529 silly tarball no local data for web-streams-polyfill@https://registry.npmmirror.com/web-streams-polyfill/-/web-streams-polyfill-4.0.0-beta.3.tgz. Extracting by manifest.
+530 silly tarball no local data for vite@https://registry.npmmirror.com/vite/-/vite-7.3.3.tgz. Extracting by manifest.
+531 silly tarball no local data for why-is-node-running@https://registry.npmmirror.com/why-is-node-running/-/why-is-node-running-2.3.0.tgz. Extracting by manifest.
+532 silly tarball no local data for yn@https://registry.npmmirror.com/yn/-/yn-3.1.1.tgz. Extracting by manifest.
+533 silly tarball no local data for vitest@https://registry.npmmirror.com/vitest/-/vitest-3.2.4.tgz. Extracting by manifest.
+534 silly tarball no local data for v8-compile-cache-lib@https://registry.npmmirror.com/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.1.tgz. Extracting by manifest.
+535 silly tarball no local data for undici-types@https://registry.npmmirror.com/undici-types/-/undici-types-6.21.0.tgz. Extracting by manifest.
+536 silly tarball no local data for unpipe@https://registry.npmmirror.com/unpipe/-/unpipe-1.0.0.tgz. Extracting by manifest.
+537 silly tarball no local data for vary@https://registry.npmmirror.com/vary/-/vary-1.1.2.tgz. Extracting by manifest.
+538 silly tarball no local data for typescript@https://registry.npmmirror.com/typescript/-/typescript-5.9.3.tgz. Extracting by manifest.
+539 silly tarball no local data for ts-node@https://registry.npmmirror.com/ts-node/-/ts-node-10.9.2.tgz. Extracting by manifest.
+540 silly tarball no local data for toidentifier@https://registry.npmmirror.com/toidentifier/-/toidentifier-1.0.1.tgz. Extracting by manifest.
+541 silly tarball no local data for tinyspy@https://registry.npmmirror.com/tinyspy/-/tinyspy-4.0.4.tgz. Extracting by manifest.
+542 silly tarball no local data for tsx@https://registry.npmmirror.com/tsx/-/tsx-4.22.3.tgz. Extracting by manifest.
+543 silly tarball no local data for type-is@https://registry.npmmirror.com/type-is/-/type-is-2.1.0.tgz. Extracting by manifest.
+544 silly tarball no local data for tinyrainbow@https://registry.npmmirror.com/tinyrainbow/-/tinyrainbow-2.0.0.tgz. Extracting by manifest.
+545 silly tarball no local data for tr46@https://registry.npmmirror.com/tr46/-/tr46-0.0.3.tgz. Extracting by manifest.
+546 silly tarball no local data for tinyexec@https://registry.npmmirror.com/tinyexec/-/tinyexec-1.2.3.tgz. Extracting by manifest.
+547 silly tarball no local data for tinypool@https://registry.npmmirror.com/tinypool/-/tinypool-1.1.1.tgz. Extracting by manifest.
+548 silly tarball no local data for tinyglobby@https://registry.npmmirror.com/tinyglobby/-/tinyglobby-0.2.16.tgz. Extracting by manifest.
+549 silly tarball no local data for tinybench@https://registry.npmmirror.com/tinybench/-/tinybench-2.9.0.tgz. Extracting by manifest.
+550 silly tarball no local data for statuses@https://registry.npmmirror.com/statuses/-/statuses-2.0.2.tgz. Extracting by manifest.
+551 silly tarball no local data for stackback@https://registry.npmmirror.com/stackback/-/stackback-0.0.2.tgz. Extracting by manifest.
+552 silly tarball no local data for strip-literal@https://registry.npmmirror.com/strip-literal/-/strip-literal-3.1.0.tgz. Extracting by manifest.
+553 silly tarball no local data for side-channel-weakmap@https://registry.npmmirror.com/side-channel-weakmap/-/side-channel-weakmap-1.0.2.tgz. Extracting by manifest.
+554 silly tarball no local data for source-map-js@https://registry.npmmirror.com/source-map-js/-/source-map-js-1.2.1.tgz. Extracting by manifest.
+555 silly tarball no local data for siginfo@https://registry.npmmirror.com/siginfo/-/siginfo-2.0.0.tgz. Extracting by manifest.
+556 silly tarball no local data for side-channel-map@https://registry.npmmirror.com/side-channel-map/-/side-channel-map-1.0.1.tgz. Extracting by manifest.
+557 silly tarball no local data for side-channel-list@https://registry.npmmirror.com/side-channel-list/-/side-channel-list-1.0.1.tgz. Extracting by manifest.
+558 silly tarball no local data for side-channel@https://registry.npmmirror.com/side-channel/-/side-channel-1.1.0.tgz. Extracting by manifest.
+559 silly tarball no local data for std-env@https://registry.npmmirror.com/std-env/-/std-env-3.10.0.tgz. Extracting by manifest.
+560 silly tarball no local data for send@https://registry.npmmirror.com/send/-/send-1.2.1.tgz. Extracting by manifest.
+561 silly tarball no local data for semver@https://registry.npmmirror.com/semver/-/semver-7.8.1.tgz. Extracting by manifest.
+562 silly tarball no local data for setprototypeof@https://registry.npmmirror.com/setprototypeof/-/setprototypeof-1.2.0.tgz. Extracting by manifest.
+563 silly tarball no local data for serve-static@https://registry.npmmirror.com/serve-static/-/serve-static-2.2.1.tgz. Extracting by manifest.
+564 silly tarball no local data for safer-buffer@https://registry.npmmirror.com/safer-buffer/-/safer-buffer-2.1.2.tgz. Extracting by manifest.
+565 silly tarball no local data for router@https://registry.npmmirror.com/router/-/router-2.2.0.tgz. Extracting by manifest.
+566 silly tarball no local data for safe-buffer@https://registry.npmmirror.com/safe-buffer/-/safe-buffer-5.2.1.tgz. Extracting by manifest.
+567 silly tarball no local data for rc9@https://registry.npmmirror.com/rc9/-/rc9-2.1.2.tgz. Extracting by manifest.
+568 silly tarball no local data for rollup@https://registry.npmmirror.com/rollup/-/rollup-4.60.4.tgz. Extracting by manifest.
+569 silly tarball no local data for readdirp@https://registry.npmmirror.com/readdirp/-/readdirp-4.1.2.tgz. Extracting by manifest.
+570 silly tarball no local data for postcss@https://registry.npmmirror.com/postcss/-/postcss-8.5.15.tgz. Extracting by manifest.
+571 silly tarball no local data for range-parser@https://registry.npmmirror.com/range-parser/-/range-parser-1.2.1.tgz. Extracting by manifest.
+572 silly tarball no local data for qs@https://registry.npmmirror.com/qs/-/qs-6.15.2.tgz. Extracting by manifest.
+573 silly tarball no local data for proxy-addr@https://registry.npmmirror.com/proxy-addr/-/proxy-addr-2.0.7.tgz. Extracting by manifest.
+574 silly tarball no local data for raw-body@https://registry.npmmirror.com/raw-body/-/raw-body-3.0.2.tgz. Extracting by manifest.
+575 silly tarball no local data for pure-rand@https://registry.npmmirror.com/pure-rand/-/pure-rand-6.1.0.tgz. Extracting by manifest.
+576 silly tarball no local data for prisma@https://registry.npmmirror.com/prisma/-/prisma-6.19.3.tgz. Extracting by manifest.
+577 silly tarball no local data for picocolors@https://registry.npmmirror.com/picocolors/-/picocolors-1.1.1.tgz. Extracting by manifest.
+578 silly tarball no local data for picomatch@https://registry.npmmirror.com/picomatch/-/picomatch-4.0.4.tgz. Extracting by manifest.
+579 silly tarball no local data for perfect-debounce@https://registry.npmmirror.com/perfect-debounce/-/perfect-debounce-1.0.0.tgz. Extracting by manifest.
+580 silly tarball no local data for pkg-types@https://registry.npmmirror.com/pkg-types/-/pkg-types-2.3.1.tgz. Extracting by manifest.
+581 silly tarball no local data for path-to-regexp@https://registry.npmmirror.com/path-to-regexp/-/path-to-regexp-8.4.2.tgz. Extracting by manifest.
+582 silly tarball no local data for parseurl@https://registry.npmmirror.com/parseurl/-/parseurl-1.3.3.tgz. Extracting by manifest.
+583 silly tarball no local data for once@https://registry.npmmirror.com/once/-/once-1.4.0.tgz. Extracting by manifest.
+584 silly tarball no local data for pathe@https://registry.npmmirror.com/pathe/-/pathe-2.0.3.tgz. Extracting by manifest.
+585 silly tarball no local data for on-finished@https://registry.npmmirror.com/on-finished/-/on-finished-2.4.1.tgz. Extracting by manifest.
+586 silly tarball no local data for pathval@https://registry.npmmirror.com/pathval/-/pathval-2.0.1.tgz. Extracting by manifest.
+587 silly tarball no local data for ohash@https://registry.npmmirror.com/ohash/-/ohash-2.0.11.tgz. Extracting by manifest.
+588 silly tarball no local data for openai@https://registry.npmmirror.com/openai/-/openai-4.104.0.tgz. Extracting by manifest.
+589 silly tarball no local data for object-assign@https://registry.npmmirror.com/object-assign/-/object-assign-4.1.1.tgz. Extracting by manifest.
+590 silly tarball no local data for object-inspect@https://registry.npmmirror.com/object-inspect/-/object-inspect-1.13.4.tgz. Extracting by manifest.
+591 silly tarball no local data for node-domexception@https://registry.npmmirror.com/node-domexception/-/node-domexception-1.0.0.tgz. Extracting by manifest.
+592 silly tarball no local data for nodemailer@https://registry.npmmirror.com/nodemailer/-/nodemailer-7.0.13.tgz. Extracting by manifest.
+593 silly tarball no local data for nypm@https://registry.npmmirror.com/nypm/-/nypm-0.6.6.tgz. Extracting by manifest.
+594 silly tarball no local data for node-fetch-native@https://registry.npmmirror.com/node-fetch-native/-/node-fetch-native-1.6.7.tgz. Extracting by manifest.
+595 silly tarball no local data for node-fetch@https://registry.npmmirror.com/node-fetch/-/node-fetch-2.7.0.tgz. Extracting by manifest.
+596 silly tarball no local data for node-cron@https://registry.npmmirror.com/node-cron/-/node-cron-4.2.1.tgz. Extracting by manifest.
+597 silly tarball no local data for ms@https://registry.npmmirror.com/ms/-/ms-2.1.3.tgz. Extracting by manifest.
+598 silly tarball no local data for negotiator@https://registry.npmmirror.com/negotiator/-/negotiator-1.0.0.tgz. Extracting by manifest.
+599 silly tarball no local data for nanoid@https://registry.npmmirror.com/nanoid/-/nanoid-3.3.12.tgz. Extracting by manifest.
+600 silly tarball no local data for mime-db@https://registry.npmmirror.com/mime-db/-/mime-db-1.54.0.tgz. Extracting by manifest.
+601 silly tarball no local data for math-intrinsics@https://registry.npmmirror.com/math-intrinsics/-/math-intrinsics-1.1.0.tgz. Extracting by manifest.
+602 silly tarball no local data for media-typer@https://registry.npmmirror.com/media-typer/-/media-typer-1.1.0.tgz. Extracting by manifest.
+603 silly tarball no local data for mime-types@https://registry.npmmirror.com/mime-types/-/mime-types-3.0.2.tgz. Extracting by manifest.
+604 silly tarball no local data for magic-string@https://registry.npmmirror.com/magic-string/-/magic-string-0.30.21.tgz. Extracting by manifest.
+605 silly tarball no local data for make-error@https://registry.npmmirror.com/make-error/-/make-error-1.3.6.tgz. Extracting by manifest.
+606 silly tarball no local data for merge-descriptors@https://registry.npmmirror.com/merge-descriptors/-/merge-descriptors-2.0.0.tgz. Extracting by manifest.
+607 silly tarball no local data for lodash.isplainobject@https://registry.npmmirror.com/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz. Extracting by manifest.
+608 silly tarball no local data for loupe@https://registry.npmmirror.com/loupe/-/loupe-3.2.1.tgz. Extracting by manifest.
+609 silly tarball no local data for lodash.once@https://registry.npmmirror.com/lodash.once/-/lodash.once-4.1.1.tgz. Extracting by manifest.
+610 silly tarball no local data for lodash.isstring@https://registry.npmmirror.com/lodash.isstring/-/lodash.isstring-4.0.1.tgz. Extracting by manifest.
+611 silly tarball no local data for lodash.isinteger@https://registry.npmmirror.com/lodash.isinteger/-/lodash.isinteger-4.0.4.tgz. Extracting by manifest.
+612 silly tarball no local data for lodash.isnumber@https://registry.npmmirror.com/lodash.isnumber/-/lodash.isnumber-3.0.3.tgz. Extracting by manifest.
+613 silly tarball no local data for lodash.isboolean@https://registry.npmmirror.com/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz. Extracting by manifest.
+614 silly tarball no local data for lodash.includes@https://registry.npmmirror.com/lodash.includes/-/lodash.includes-4.3.0.tgz. Extracting by manifest.
+615 silly tarball no local data for jws@https://registry.npmmirror.com/jws/-/jws-4.0.1.tgz. Extracting by manifest.
+616 silly tarball no local data for jsonwebtoken@https://registry.npmmirror.com/jsonwebtoken/-/jsonwebtoken-9.0.3.tgz. Extracting by manifest.
+617 silly tarball no local data for jwa@https://registry.npmmirror.com/jwa/-/jwa-2.0.1.tgz. Extracting by manifest.
+618 silly tarball no local data for js-tokens@https://registry.npmmirror.com/js-tokens/-/js-tokens-9.0.1.tgz. Extracting by manifest.
+619 silly tarball no local data for ipaddr.js@https://registry.npmmirror.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz. Extracting by manifest.
+620 silly tarball no local data for iconv-lite@https://registry.npmmirror.com/iconv-lite/-/iconv-lite-0.7.2.tgz. Extracting by manifest.
+621 silly tarball no local data for inherits@https://registry.npmmirror.com/inherits/-/inherits-2.0.4.tgz. Extracting by manifest.
+622 silly tarball no local data for http-errors@https://registry.npmmirror.com/http-errors/-/http-errors-2.0.1.tgz. Extracting by manifest.
+623 silly tarball no local data for jiti@https://registry.npmmirror.com/jiti/-/jiti-2.7.0.tgz. Extracting by manifest.
+624 silly tarball no local data for is-promise@https://registry.npmmirror.com/is-promise/-/is-promise-4.0.0.tgz. Extracting by manifest.
+625 silly tarball no local data for humanize-ms@https://registry.npmmirror.com/humanize-ms/-/humanize-ms-1.2.1.tgz. Extracting by manifest.
+626 silly tarball no local data for hasown@https://registry.npmmirror.com/hasown/-/hasown-2.0.4.tgz. Extracting by manifest.
+627 silly tarball no local data for has-tostringtag@https://registry.npmmirror.com/has-tostringtag/-/has-tostringtag-1.0.2.tgz. Extracting by manifest.
+628 silly tarball no local data for get-intrinsic@https://registry.npmmirror.com/get-intrinsic/-/get-intrinsic-1.3.0.tgz. Extracting by manifest.
+629 silly tarball no local data for has-symbols@https://registry.npmmirror.com/has-symbols/-/has-symbols-1.1.0.tgz. Extracting by manifest.
+630 silly tarball no local data for gopd@https://registry.npmmirror.com/gopd/-/gopd-1.2.0.tgz. Extracting by manifest.
+631 silly tarball no local data for giget@https://registry.npmmirror.com/giget/-/giget-2.0.0.tgz. Extracting by manifest.
+632 silly tarball no local data for get-proto@https://registry.npmmirror.com/get-proto/-/get-proto-1.0.1.tgz. Extracting by manifest.
+633 silly tarball no local data for fresh@https://registry.npmmirror.com/fresh/-/fresh-2.0.0.tgz. Extracting by manifest.
+634 silly tarball no local data for forwarded@https://registry.npmmirror.com/forwarded/-/forwarded-0.2.0.tgz. Extracting by manifest.
+635 silly tarball no local data for formdata-node@https://registry.npmmirror.com/formdata-node/-/formdata-node-4.4.1.tgz. Extracting by manifest.
+636 silly tarball no local data for expect-type@https://registry.npmmirror.com/expect-type/-/expect-type-1.3.0.tgz. Extracting by manifest.
+637 silly tarball no local data for function-bind@https://registry.npmmirror.com/function-bind/-/function-bind-1.1.2.tgz. Extracting by manifest.
+638 silly tarball no local data for form-data@https://registry.npmmirror.com/form-data/-/form-data-4.0.5.tgz. Extracting by manifest.
+639 silly tarball no local data for form-data-encoder@https://registry.npmmirror.com/form-data-encoder/-/form-data-encoder-1.7.2.tgz. Extracting by manifest.
+640 silly tarball no local data for express@https://registry.npmmirror.com/express/-/express-5.2.1.tgz. Extracting by manifest.
+641 silly tarball no local data for finalhandler@https://registry.npmmirror.com/finalhandler/-/finalhandler-2.1.1.tgz. Extracting by manifest.
+642 silly tarball no local data for fast-check@https://registry.npmmirror.com/fast-check/-/fast-check-3.23.2.tgz. Extracting by manifest.
+643 silly tarball no local data for event-target-shim@https://registry.npmmirror.com/event-target-shim/-/event-target-shim-5.0.1.tgz. Extracting by manifest.
+644 silly tarball no local data for estree-walker@https://registry.npmmirror.com/estree-walker/-/estree-walker-3.0.3.tgz. Extracting by manifest.
+645 silly tarball no local data for exsolve@https://registry.npmmirror.com/exsolve/-/exsolve-1.0.8.tgz. Extracting by manifest.
+646 silly tarball no local data for etag@https://registry.npmmirror.com/etag/-/etag-1.8.1.tgz. Extracting by manifest.
+647 silly tarball no local data for es-set-tostringtag@https://registry.npmmirror.com/es-set-tostringtag/-/es-set-tostringtag-2.1.0.tgz. Extracting by manifest.
+648 silly tarball no local data for fdir@https://registry.npmmirror.com/fdir/-/fdir-6.5.0.tgz. Extracting by manifest.
+649 silly tarball no local data for esbuild@https://registry.npmmirror.com/esbuild/-/esbuild-0.27.7.tgz. Extracting by manifest.
+650 silly tarball no local data for es-errors@https://registry.npmmirror.com/es-errors/-/es-errors-1.3.0.tgz. Extracting by manifest.
+651 silly tarball no local data for es-module-lexer@https://registry.npmmirror.com/es-module-lexer/-/es-module-lexer-1.7.0.tgz. Extracting by manifest.
+652 silly tarball no local data for escape-html@https://registry.npmmirror.com/escape-html/-/escape-html-1.0.3.tgz. Extracting by manifest.
+653 silly tarball no local data for ee-first@https://registry.npmmirror.com/ee-first/-/ee-first-1.1.1.tgz. Extracting by manifest.
+654 silly tarball no local data for encodeurl@https://registry.npmmirror.com/encodeurl/-/encodeurl-2.0.0.tgz. Extracting by manifest.
+655 silly tarball no local data for es-object-atoms@https://registry.npmmirror.com/es-object-atoms/-/es-object-atoms-1.1.2.tgz. Extracting by manifest.
+656 silly tarball no local data for es-define-property@https://registry.npmmirror.com/es-define-property/-/es-define-property-1.0.1.tgz. Extracting by manifest.
+657 silly tarball no local data for effect@https://registry.npmmirror.com/effect/-/effect-3.21.0.tgz. Extracting by manifest.
+658 silly tarball no local data for ecdsa-sig-formatter@https://registry.npmmirror.com/ecdsa-sig-formatter/-/ecdsa-sig-formatter-1.0.11.tgz. Extracting by manifest.
+659 silly tarball no local data for dotenv@https://registry.npmmirror.com/dotenv/-/dotenv-16.6.1.tgz. Extracting by manifest.
+660 silly tarball no local data for empathic@https://registry.npmmirror.com/empathic/-/empathic-2.0.0.tgz. Extracting by manifest.
+661 silly tarball no local data for destr@https://registry.npmmirror.com/destr/-/destr-2.0.5.tgz. Extracting by manifest.
+662 silly tarball no local data for dunder-proto@https://registry.npmmirror.com/dunder-proto/-/dunder-proto-1.0.1.tgz. Extracting by manifest.
+663 silly tarball no local data for diff@https://registry.npmmirror.com/diff/-/diff-4.0.4.tgz. Extracting by manifest.
+664 silly tarball no local data for depd@https://registry.npmmirror.com/depd/-/depd-2.0.0.tgz. Extracting by manifest.
+665 silly tarball no local data for delayed-stream@https://registry.npmmirror.com/delayed-stream/-/delayed-stream-1.0.0.tgz. Extracting by manifest.
+666 silly tarball no local data for deep-eql@https://registry.npmmirror.com/deep-eql/-/deep-eql-5.0.2.tgz. Extracting by manifest.
+667 silly tarball no local data for cookie-signature@https://registry.npmmirror.com/cookie-signature/-/cookie-signature-1.2.2.tgz. Extracting by manifest.
+668 silly tarball no local data for deepmerge-ts@https://registry.npmmirror.com/deepmerge-ts/-/deepmerge-ts-7.1.5.tgz. Extracting by manifest.
+669 silly tarball no local data for defu@https://registry.npmmirror.com/defu/-/defu-6.1.7.tgz. Extracting by manifest.
+670 silly tarball no local data for create-require@https://registry.npmmirror.com/create-require/-/create-require-1.1.1.tgz. Extracting by manifest.
+671 silly tarball no local data for cors@https://registry.npmmirror.com/cors/-/cors-2.8.6.tgz. Extracting by manifest.
+672 silly tarball no local data for confbox@https://registry.npmmirror.com/confbox/-/confbox-0.2.4.tgz. Extracting by manifest.
+673 silly tarball no local data for cookie@https://registry.npmmirror.com/cookie/-/cookie-0.7.2.tgz. Extracting by manifest.
+674 silly tarball no local data for cookie-parser@https://registry.npmmirror.com/cookie-parser/-/cookie-parser-1.4.7.tgz. Extracting by manifest.
+675 silly tarball no local data for debug@https://registry.npmmirror.com/debug/-/debug-4.4.3.tgz. Extracting by manifest.
+676 silly tarball no local data for content-type@https://registry.npmmirror.com/content-type/-/content-type-1.0.5.tgz. Extracting by manifest.
+677 silly tarball no local data for citty@https://registry.npmmirror.com/citty/-/citty-0.1.6.tgz. Extracting by manifest.
+678 silly tarball no local data for consola@https://registry.npmmirror.com/consola/-/consola-3.4.2.tgz. Extracting by manifest.
+679 silly tarball no local data for combined-stream@https://registry.npmmirror.com/combined-stream/-/combined-stream-1.0.8.tgz. Extracting by manifest.
+680 silly tarball no local data for content-disposition@https://registry.npmmirror.com/content-disposition/-/content-disposition-1.1.0.tgz. Extracting by manifest.
+681 silly tarball no local data for chai@https://registry.npmmirror.com/chai/-/chai-5.3.3.tgz. Extracting by manifest.
+682 silly tarball no local data for call-bind-apply-helpers@https://registry.npmmirror.com/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz. Extracting by manifest.
+683 silly tarball no local data for chokidar@https://registry.npmmirror.com/chokidar/-/chokidar-4.0.3.tgz. Extracting by manifest.
+684 silly tarball no local data for bcryptjs@https://registry.npmmirror.com/bcryptjs/-/bcryptjs-3.0.3.tgz. Extracting by manifest.
+685 silly tarball no local data for check-error@https://registry.npmmirror.com/check-error/-/check-error-2.1.3.tgz. Extracting by manifest.
+686 silly tarball no local data for call-bound@https://registry.npmmirror.com/call-bound/-/call-bound-1.0.4.tgz. Extracting by manifest.
+687 silly tarball no local data for c12@https://registry.npmmirror.com/c12/-/c12-3.1.0.tgz. Extracting by manifest.
+688 silly tarball no local data for bytes@https://registry.npmmirror.com/bytes/-/bytes-3.1.2.tgz. Extracting by manifest.
+689 silly tarball no local data for cac@https://registry.npmmirror.com/cac/-/cac-6.7.14.tgz. Extracting by manifest.
+690 silly tarball no local data for arg@https://registry.npmmirror.com/arg/-/arg-4.1.3.tgz. Extracting by manifest.
+691 silly tarball no local data for acorn-walk@https://registry.npmmirror.com/acorn-walk/-/acorn-walk-8.3.5.tgz. Extracting by manifest.
+692 silly tarball no local data for asynckit@https://registry.npmmirror.com/asynckit/-/asynckit-0.4.0.tgz. Extracting by manifest.
+693 silly tarball no local data for buffer-equal-constant-time@https://registry.npmmirror.com/buffer-equal-constant-time/-/buffer-equal-constant-time-1.0.1.tgz. Extracting by manifest.
+694 silly tarball no local data for assertion-error@https://registry.npmmirror.com/assertion-error/-/assertion-error-2.0.1.tgz. Extracting by manifest.
+695 silly tarball no local data for body-parser@https://registry.npmmirror.com/body-parser/-/body-parser-2.2.2.tgz. Extracting by manifest.
+696 silly tarball no local data for accepts@https://registry.npmmirror.com/accepts/-/accepts-2.0.0.tgz. Extracting by manifest.
+697 silly tarball no local data for acorn@https://registry.npmmirror.com/acorn/-/acorn-8.16.0.tgz. Extracting by manifest.
+698 silly tarball no local data for agentkeepalive@https://registry.npmmirror.com/agentkeepalive/-/agentkeepalive-4.6.0.tgz. Extracting by manifest.
+699 silly tarball no local data for abort-controller@https://registry.npmmirror.com/abort-controller/-/abort-controller-3.0.0.tgz. Extracting by manifest.
+700 silly tarball no local data for content-type@https://registry.npmmirror.com/content-type/-/content-type-2.0.0.tgz. Extracting by manifest.
+701 silly tarball no local data for tinyexec@https://registry.npmmirror.com/tinyexec/-/tinyexec-0.3.2.tgz. Extracting by manifest.
+702 silly tarball no local data for esbuild@https://registry.npmmirror.com/esbuild/-/esbuild-0.28.0.tgz. Extracting by manifest.
+703 silly tarball no local data for undici-types@https://registry.npmmirror.com/undici-types/-/undici-types-5.26.5.tgz. Extracting by manifest.
+704 silly tarball no local data for @esbuild/win32-x64@https://registry.npmmirror.com/@esbuild/win32-x64/-/win32-x64-0.28.0.tgz. Extracting by manifest.
+705 silly tarball no local data for citty@https://registry.npmmirror.com/citty/-/citty-0.2.2.tgz. Extracting by manifest.
+706 silly tarball no local data for mime-db@https://registry.npmmirror.com/mime-db/-/mime-db-1.52.0.tgz. Extracting by manifest.
+707 silly tarball no local data for @types/node@https://registry.npmmirror.com/@types/node/-/node-18.19.130.tgz. Extracting by manifest.
+708 silly tarball no local data for @types/estree@https://registry.npmmirror.com/@types/estree/-/estree-1.0.8.tgz. Extracting by manifest.
+709 silly tarball no local data for cookie-signature@https://registry.npmmirror.com/cookie-signature/-/cookie-signature-1.0.6.tgz. Extracting by manifest.
+710 silly tarball no local data for mime-types@https://registry.npmmirror.com/mime-types/-/mime-types-2.1.35.tgz. Extracting by manifest.
+711 http fetch GET https://registry.npmmirror.com/@vitest/spy/-/spy-3.2.4.tgz attempt 1 failed with EACCES
+712 http fetch GET https://registry.npmmirror.com/@vitest/utils/-/utils-3.2.4.tgz attempt 1 failed with EACCES
+713 http fetch GET https://registry.npmmirror.com/@vitest/snapshot/-/snapshot-3.2.4.tgz attempt 1 failed with EACCES
+714 http fetch GET https://registry.npmmirror.com/@types/serve-static/-/serve-static-2.2.0.tgz attempt 1 failed with EACCES
+715 http fetch GET https://registry.npmmirror.com/@vitest/mocker/-/mocker-3.2.4.tgz attempt 1 failed with EACCES
+716 http fetch GET https://registry.npmmirror.com/@vitest/runner/-/runner-3.2.4.tgz attempt 1 failed with EACCES
+717 http fetch GET https://registry.npmmirror.com/@types/send/-/send-1.2.1.tgz attempt 1 failed with EACCES
+718 http fetch GET https://registry.npmmirror.com/@vitest/pretty-format/-/pretty-format-3.2.4.tgz attempt 1 failed with EACCES
+719 http fetch GET https://registry.npmmirror.com/@vitest/expect/-/expect-3.2.4.tgz attempt 1 failed with EACCES
+720 http fetch GET https://registry.npmmirror.com/@types/express-serve-static-core/-/express-serve-static-core-5.1.1.tgz attempt 1 failed with EACCES
+721 http fetch GET https://registry.npmmirror.com/@types/nodemailer/-/nodemailer-6.4.23.tgz attempt 1 failed with EACCES
+722 http fetch GET https://registry.npmmirror.com/@types/qs/-/qs-6.15.1.tgz attempt 1 failed with EACCES
+723 http fetch GET https://registry.npmmirror.com/@types/range-parser/-/range-parser-1.2.7.tgz attempt 1 failed with EACCES
+724 http fetch GET https://registry.npmmirror.com/@types/node-fetch/-/node-fetch-2.6.13.tgz attempt 1 failed with EACCES
+725 http fetch GET https://registry.npmmirror.com/@types/node/-/node-22.19.19.tgz attempt 1 failed with EACCES
+726 http fetch GET https://registry.npmmirror.com/npm attempt 2 failed with EACCES
+727 http fetch GET https://registry.npmmirror.com/@vitest/spy/-/spy-3.2.4.tgz attempt 2 failed with EACCES
+728 http fetch GET https://registry.npmmirror.com/@vitest/utils/-/utils-3.2.4.tgz attempt 2 failed with EACCES
+729 http fetch GET https://registry.npmmirror.com/@vitest/snapshot/-/snapshot-3.2.4.tgz attempt 2 failed with EACCES
+730 http fetch GET https://registry.npmmirror.com/@types/serve-static/-/serve-static-2.2.0.tgz attempt 2 failed with EACCES
+731 http fetch GET https://registry.npmmirror.com/@vitest/mocker/-/mocker-3.2.4.tgz attempt 2 failed with EACCES
+732 http fetch GET https://registry.npmmirror.com/@vitest/runner/-/runner-3.2.4.tgz attempt 2 failed with EACCES
+733 http fetch GET https://registry.npmmirror.com/@types/send/-/send-1.2.1.tgz attempt 2 failed with EACCES
+734 http fetch GET https://registry.npmmirror.com/@vitest/pretty-format/-/pretty-format-3.2.4.tgz attempt 2 failed with EACCES
+735 http fetch GET https://registry.npmmirror.com/@vitest/expect/-/expect-3.2.4.tgz attempt 2 failed with EACCES
+736 http fetch GET https://registry.npmmirror.com/@types/express-serve-static-core/-/express-serve-static-core-5.1.1.tgz attempt 2 failed with EACCES
+737 http fetch GET https://registry.npmmirror.com/@types/nodemailer/-/nodemailer-6.4.23.tgz attempt 2 failed with EACCES
+738 http fetch GET https://registry.npmmirror.com/@types/qs/-/qs-6.15.1.tgz attempt 2 failed with EACCES
+739 http fetch GET https://registry.npmmirror.com/@types/range-parser/-/range-parser-1.2.7.tgz attempt 2 failed with EACCES
+740 http fetch GET https://registry.npmmirror.com/@types/node-fetch/-/node-fetch-2.6.13.tgz attempt 2 failed with EACCES
+741 http fetch GET https://registry.npmmirror.com/@types/node/-/node-22.19.19.tgz attempt 2 failed with EACCES
+742 http fetch GET https://registry.npmmirror.com/npm attempt 3 failed with EACCES
+743 http fetch GET https://registry.npmmirror.com/@vitest/spy/-/spy-3.2.4.tgz attempt 3 failed with EACCES
+744 http fetch GET https://registry.npmmirror.com/@vitest/utils/-/utils-3.2.4.tgz attempt 3 failed with EACCES
+745 http fetch GET https://registry.npmmirror.com/@vitest/snapshot/-/snapshot-3.2.4.tgz attempt 3 failed with EACCES
+746 http fetch GET https://registry.npmmirror.com/@types/serve-static/-/serve-static-2.2.0.tgz attempt 3 failed with EACCES
+747 http fetch GET https://registry.npmmirror.com/@vitest/mocker/-/mocker-3.2.4.tgz attempt 3 failed with EACCES
+748 http fetch GET https://registry.npmmirror.com/@vitest/runner/-/runner-3.2.4.tgz attempt 3 failed with EACCES
+749 http fetch GET https://registry.npmmirror.com/@types/send/-/send-1.2.1.tgz attempt 3 failed with EACCES
+750 http fetch GET https://registry.npmmirror.com/@vitest/pretty-format/-/pretty-format-3.2.4.tgz attempt 3 failed with EACCES
+751 http fetch GET https://registry.npmmirror.com/@vitest/expect/-/expect-3.2.4.tgz attempt 3 failed with EACCES
+752 http fetch GET https://registry.npmmirror.com/@types/express-serve-static-core/-/express-serve-static-core-5.1.1.tgz attempt 3 failed with EACCES
+753 http fetch GET https://registry.npmmirror.com/@types/nodemailer/-/nodemailer-6.4.23.tgz attempt 3 failed with EACCES
+754 http fetch GET https://registry.npmmirror.com/@types/qs/-/qs-6.15.1.tgz attempt 3 failed with EACCES
+755 http fetch GET https://registry.npmmirror.com/@types/range-parser/-/range-parser-1.2.7.tgz attempt 3 failed with EACCES
+756 http fetch GET https://registry.npmmirror.com/@types/node-fetch/-/node-fetch-2.6.13.tgz attempt 3 failed with EACCES
+757 http fetch GET https://registry.npmmirror.com/@types/node/-/node-22.19.19.tgz attempt 3 failed with EACCES
+758 verbose cwd C:\Users\LENOVO\Desktop\TaskFlow+\backend
+759 verbose os Windows_NT 10.0.26200
+760 verbose node v24.14.1
+761 verbose npm  v11.11.0
+762 error Exit handler never called!
+763 error This is an error with npm itself. Please report this error at:
+764 error   <https://github.com/npm/cli/issues>
+765 verbose exit 1
+766 verbose code 1
+767 error A complete log of this run can be found in: C:\Users\LENOVO\Desktop\TaskFlow+\backend\.npm-cache\_logs\2026-06-01T10_32_07_690Z-debug-0.log

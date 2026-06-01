@@ -165,7 +165,7 @@ export async function updateProgress(userId: string, id: string, data: UpdatePro
 
   const newStatus = data.currentValue >= (goal.targetValue ?? 0)
     ? 'COMPLETED'
-    : goal.status === 'AT_RISK' ? 'AT_RISK' : 'ACTIVE';
+    : 'ACTIVE';
 
   return prisma.goal.update({
     where: { id },
@@ -300,7 +300,7 @@ export async function calculateAutoProgress(userId: string, id: string): Promise
 
   const newStatus = goal.targetValue && currentValue >= goal.targetValue
     ? 'COMPLETED'
-    : goal.status === 'AT_RISK' ? 'AT_RISK' : 'ACTIVE';
+    : 'ACTIVE';
 
   const updatedGoal = await prisma.goal.update({
     where: { id },
@@ -468,7 +468,7 @@ export async function addProgressLog(userId: string, goalId: string, data: Creat
 
   // 更新目标当前进度（累加）
   const newValue = goal.currentValue + data.value;
-  const newStatus = goal.targetValue && newValue >= goal.targetValue ? 'COMPLETED' : goal.status === 'AT_RISK' ? 'AT_RISK' : 'ACTIVE';
+  const newStatus = goal.targetValue && newValue >= goal.targetValue ? 'COMPLETED' : 'ACTIVE';
 
   const updatedGoal = await prisma.goal.update({
     where: { id: goalId },
@@ -500,7 +500,7 @@ export async function deleteProgressLog(userId: string, goalId: string, logId: s
   const newValue = Math.max(0, goal.currentValue - log.value);
   const newStatus = goal.targetValue && newValue >= goal.targetValue
     ? 'COMPLETED'
-    : goal.status === 'AT_RISK' ? 'AT_RISK' : 'ACTIVE';
+    : 'ACTIVE';
 
   return prisma.goal.update({
     where: { id: goalId },

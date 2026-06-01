@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { validate } from '../middleware/validate';
 import { createCustomerSchema, updateCustomerSchema } from '../validators/customer.schema';
 import * as customerService from '../services/customer.service';
@@ -7,7 +7,7 @@ import { success, error } from '../utils/response';
 const router = Router();
 
 // GET / - 客户列表（支持搜索、状态筛选、时间范围筛选）
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const page = req.query.page ? Number(req.query.page) : undefined;
     const limit = req.query.limit ? Number(req.query.limit) : undefined;
@@ -18,28 +18,26 @@ router.get('/', async (req: Request, res: Response) => {
     const result = await customerService.findAll(req.userId!, { page, limit, search, status, startDate, endDate });
     success(res, result);
   } catch (err) {
-    console.error('获取客户列表失败:', err);
-    error(res, 'INTERNAL_ERROR', '获取客户列表失败', 500);
+    next(err);
   }
 });
 
 // POST / - 创建客户
-router.post('/', validate(createCustomerSchema), async (req: Request, res: Response) => {
+router.post('/', validate(createCustomerSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const customer = await customerService.create(req.userId!, req.body);
     success(res, customer, undefined, 201);
   } catch (err: unknown) {
-    console.error('创建客户失败:', err);
     if ((err as { code?: string })?.code === 'P2003') {
       error(res, 'FOREIGN_KEY_ERROR', '关联数据不存在', 400);
       return;
     }
-    error(res, 'INTERNAL_ERROR', '创建客户失败', 500);
+    next(err);
   }
 });
 
 // GET /:id - 客户详情（含关联项目和最近沟通记录）
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = String(req.params.id);
     const customer = await customerService.findById(req.userId!, id);
@@ -49,13 +47,12 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
     success(res, customer);
   } catch (err) {
-    console.error('获取客户详情失败:', err);
-    error(res, 'INTERNAL_ERROR', '获取客户详情失败', 500);
+    next(err);
   }
 });
 
 // PUT /:id - 更新客户
-router.put('/:id', validate(updateCustomerSchema), async (req: Request, res: Response) => {
+router.put('/:id', validate(updateCustomerSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = String(req.params.id);
     const customer = await customerService.update(req.userId!, id, req.body);
@@ -65,13 +62,12 @@ router.put('/:id', validate(updateCustomerSchema), async (req: Request, res: Res
     }
     success(res, customer);
   } catch (err) {
-    console.error('更新客户失败:', err);
-    error(res, 'INTERNAL_ERROR', '更新客户失败', 500);
+    next(err);
   }
 });
 
 // DELETE /:id - 删除客户
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = String(req.params.id);
     const result = await customerService.remove(req.userId!, id);
@@ -81,8 +77,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     }
     success(res, { deleted: true });
   } catch (err) {
-    console.error('删除客户失败:', err);
-    error(res, 'INTERNAL_ERROR', '删除客户失败', 500);
+    next(err);
   }
 });
 

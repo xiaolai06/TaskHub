@@ -68,7 +68,9 @@ export function useAiChat() {
     abortRef.current = controller;
 
     try {
-      const res = await fetch('http://localhost:3001/api/llm/chat/stream', {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// ...
+const res = await fetch(`${API_BASE}/llm/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -133,9 +135,9 @@ export function useAiChat() {
       }
       setIsLoading(false);
       setCurrentToolCalls([]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       // 如果是主动中断，不显示错误
-      if (err?.name === 'AbortError') {
+      if (err instanceof DOMException && err.name === 'AbortError') {
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: m.content + '\n\n_已停止生成_' } : m));
       } else {
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: `错误: ${err instanceof Error ? err.message : '通信失败'}` } : m));

@@ -8,6 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useProject, useUpdateProject } from '@/hooks/useProjects';
+import { useCosts, useCostSummary, useCreateCost, useDeleteCost } from '@/hooks/useCosts';
+import { CostForm } from '@/components/features/costs/CostForm';
+import { CostList } from '@/components/features/costs/CostList';
+import { CostSummary } from '@/components/features/costs/CostSummary';
 import { useProjectTasks, useCreateTask, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
 import type { Task, CreateTaskInput } from '@/hooks/useTasks';
 import { TaskForm } from '@/components/features/tasks/TaskForm';
@@ -37,6 +41,10 @@ export default function ProjectDetailPage({
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
   const updateProjectMutation = useUpdateProject();
+  const { data: costData, isLoading: costsLoading } = useCosts(projectId);
+  const { data: costSummary } = useCostSummary(projectId);
+  const createCostMutation = useCreateCost(projectId);
+  const deleteCostMutation = useDeleteCost(projectId);
 
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
@@ -135,7 +143,7 @@ export default function ProjectDetailPage({
           {project.status === 'ACTIVE' && (
             <Button variant="outline" size="sm" onClick={handleArchiveProject}>归档项目</Button>
           )}
-          <Link href={`/main/projects/${projectId}/schedule`}>
+          <Link href={`/main/schedule?projectId=${projectId}`}>
             <Button variant="outline" size="sm" className="gap-1">
               <CalendarDays className="h-4 w-4" />排期视图
             </Button>
@@ -161,7 +169,7 @@ export default function ProjectDetailPage({
             {project.endDate ? ` ~ ${new Date(project.endDate).toLocaleDateString('zh-CN')}` : ''}
           </span>
         } />
-        <StatItem label="预算" value={
+        <StatItem label="报价" value={
           <span className="text-sm font-mono text-slate-700">
             {project.budget != null ? `¥${(project.budget / 100).toLocaleString()}` : '-'}
           </span>
@@ -171,6 +179,27 @@ export default function ProjectDetailPage({
         } />
       </div>
 
+
+      {/* 订单利润与成本记录 */}
+      <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
+        <CostSummary summary={costSummary} quote={project.budget} />
+        <Card className="shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold text-slate-700">成本记录</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <CostForm
+              isLoading={createCostMutation.isPending}
+              onSubmit={(data) => createCostMutation.mutate(data, { onSuccess: () => toast.success('成本已记录'), onError: () => toast.error('记录失败') })}
+            />
+            <CostList
+              records={costData?.data || []}
+              isLoading={costsLoading}
+              onDelete={(id) => deleteCostMutation.mutate(id, { onSuccess: () => toast.success('成本已删除'), onError: () => toast.error('删除失败') })}
+            />
+          </CardContent>
+        </Card>
+      </div>
       {/* 任务列表 */}
       <Card className="shadow-sm">
         <CardHeader className="pb-3 flex flex-row items-center justify-between">

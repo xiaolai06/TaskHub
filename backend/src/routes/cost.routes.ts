@@ -6,23 +6,23 @@ const router = Router();
 
 router.get('/project/:projectId', async (req: Request, res: Response, next) => {
   try {
-    const result = await costService.findAll(String(req.params.projectId), req.query as any);
+    const result = await costService.findAll(req.userId!, String(req.params.projectId), req.query as any);
     success(res, result);
   } catch (err) { next(err); }
 });
 
 router.get('/project/:projectId/summary', async (req: Request, res: Response, next) => {
-  try { const result = await costService.getSummaryByProject(String(req.params.projectId)); success(res, result); }
+  try { const result = await costService.getSummaryByProject(req.userId!, String(req.params.projectId)); success(res, result); }
   catch (err) { next(err); }
 });
 
 router.post('/project/:projectId', async (req: Request, res: Response, next) => {
-  try { const result = await costService.create(String(req.params.projectId), req.body); success(res, result, '创建成功', 201); }
+  try { const result = await costService.create(req.userId!, String(req.params.projectId), req.body); success(res, result, '创建成功', 201); }
   catch (err) { next(err); }
 });
 
 router.delete('/:id', async (req: Request, res: Response, next) => {
-  try { await costService.remove(String(req.params.id)); success(res, null, '删除成功'); }
+  try { await costService.remove(req.userId!, String(req.params.id)); success(res, null, '删除成功'); }
   catch (err) { next(err); }
 });
 

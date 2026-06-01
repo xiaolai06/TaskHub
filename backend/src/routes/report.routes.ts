@@ -1,6 +1,6 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import * as reportService from '../services/report.service';
-import { success, error } from '../utils/response';
+import { success } from '../utils/response';
 
 const router = Router();
 
@@ -11,36 +11,36 @@ function getParams(req: Request) {
   };
 }
 
-router.get('/overview', async (req: Request, res: Response) => {
+router.get('/overview', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { period, type } = getParams(req);
     const data = await reportService.getOverview(req.userId!, period, type);
     success(res, data);
-  } catch (err) { console.error(err); error(res, 'INTERNAL_ERROR', '获取概览失败', 500); }
+  } catch (err) { next(err); }
 });
 
-router.get('/project-ranking', async (req: Request, res: Response) => {
+router.get('/project-ranking', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { period, type } = getParams(req);
     const data = await reportService.getProjectRanking(req.userId!, period, type);
     success(res, data);
-  } catch (err) { console.error(err); error(res, 'INTERNAL_ERROR', '获取排行失败', 500); }
+  } catch (err) { next(err); }
 });
 
-router.get('/cost-structure', async (req: Request, res: Response) => {
+router.get('/cost-structure', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { period, type } = getParams(req);
     const data = await reportService.getCostStructure(req.userId!, period, type);
     success(res, data);
-  } catch (err) { console.error(err); error(res, 'INTERNAL_ERROR', '获取失败', 500); }
+  } catch (err) { next(err); }
 });
 
-router.get('/time-analysis', async (req: Request, res: Response) => {
+router.get('/time-analysis', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { period, type } = getParams(req);
     const data = await reportService.getTimeAnalysis(req.userId!, period, type);
     success(res, data);
-  } catch (err) { console.error(err); error(res, 'INTERNAL_ERROR', '获取失败', 500); }
+  } catch (err) { next(err); }
 });
 
 export default router;

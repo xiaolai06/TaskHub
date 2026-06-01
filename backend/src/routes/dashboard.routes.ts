@@ -34,4 +34,15 @@ router.get('/project-stats', async (req: Request, res: Response, next) => {
   }
 });
 
+/** GET /customer-stats — 客户订单概览 */
+router.get('/customer-stats', async (req: Request, res: Response, next) => {
+  try {
+    const customers = await dashboardService.getCustomerStats(req.userId!);
+    success(res, { customers });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 export default router;

@@ -1,178 +1,183 @@
 # TaskFlow+
 
-智能项目管理工具 —— 面向一人公司的 AI 驱动项目管理平台。
+TaskFlow+ 是面向一人公司、自由职业者和小型服务团队的订单执行工作台。它不做复杂账单、订阅计费或 token 成本核算，而是围绕真实交付闭环：客户 -> 订单报价 -> 任务拆解 -> 排期执行 -> 成本记录 -> 利润复盘 -> 通知提醒。
+
+## 当前定位
+
+TaskFlow+ 的核心目标是让一个人能清楚回答四个问题：
+
+- 今天应该先做什么
+- 当前订单能不能按期交付
+- 每单报价、成本、利润是否健康
+- 本月实际入款和经营风险在哪里
+
+## 功能闭环
+
+1. 客户管理
+   - 记录客户资料、联系方式、沟通记录和下次跟进时间。
+   - 客户下可查看关联订单、报价、成本、利润和任务进度。
+
+2. 订单/项目管理
+   - 项目在产品语义上等同于订单。
+   - `budget` 字段统一作为订单报价使用。
+   - 项目详情展示报价、成本、利润、成本结构和任务列表。
+
+3. 任务执行
+   - 支持优先级、状态、预估工时、最早开始日期、截止日期、任务成本。
+   - 任务成本会计入订单总成本，不再只依赖独立成本记录。
+
+4. 排期工作台
+   - 后端按优先级、最早开始、截止日和每日可用工时计算排期。
+   - 前端可选择订单和每日工时上限，查看延期任务、每日负载和预计完成时间。
+   - 可将计算结果应用回任务日期，形成“计划 -> 执行 -> 再排期”的闭环。
+
+5. 经营报表
+   - 财务口径统一为：每单报价、成本、利润、月入款。
+   - 月入款按所选周期内已完成订单的报价统计。
+   - 成本由成本记录和任务快捷成本合并统计。
+   - 报表展示订单利润排行、成本结构、工时分布和 AI 经营建议。
+
+6. 通知与自动化
+   - 支持站内通知、n8n webhook、SMTP 邮件通知。
+   - 晨间简报、周报、订单利润简报、成本预警可接入邮件发送。
+   - 成本预警基于“成本超过报价 80%”触发。
 
 ## 技术栈
 
 | 层 | 技术 |
-|----|------|
-| 前端 | Next.js 16 + React 19 + Tailwind CSS 4 + shadcn/ui |
-| 状态管理 | Zustand + React Query |
-| 后端 | Express 5 + Prisma 6 |
-| 数据库 | SQLite（本地）/ PostgreSQL（线上） |
-| AI | OpenAI SDK（DeepSeek / Claude / Ollama） |
-| 自动化 | n8n 工作流引擎 |
+| --- | --- |
+| 前端 | Next.js 16, React 19, Tailwind CSS 4, React Query |
+| 后端 | Express 5, Prisma 6, TypeScript |
+| 数据库 | SQLite 本地开发，可迁移 PostgreSQL |
+| AI | OpenAI SDK 兼容接口，可接 DeepSeek、Claude、Ollama 等 |
+| 通知 | 站内通知、Webhook、SMTP 邮件 |
+| 自动化 | node-cron，支持 n8n 接入 |
 
 ## 环境要求
 
-- Node.js 18+（推荐 20 LTS）
+- Node.js 18+，推荐 Node.js 20 LTS
 - npm
 - Git
 
-检查版本：
-```bash
-node -v    # 应显示 v18+ 或 v20+
-npm -v
-git --version
-```
-
 ## 快速开始
 
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/jiumuchuan/TaskFlow.git
-cd TaskFlow
-git checkout xiaolai    # 切到开发分支
-```
-
-### 2. 安装后端依赖 + 初始化数据库
+### 1. 安装后端依赖并初始化数据库
 
 ```bash
 cd backend
 npm install
-cp .env.example .env    # 复制环境变量（Windows 用 copy .env.example .env）
-npx prisma db push      # 同步表结构到 SQLite
-npx prisma generate     # 生成 Prisma Client
-npx prisma db seed      # 填充测试数据
+copy .env.example .env
+npx prisma db push
+npx prisma generate
+npx prisma db seed
 ```
 
-### 3. 启动后端
+后端 `.env` 至少需要：
+
+```bash
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="change-this-to-a-long-random-secret-at-least-32-chars"
+JWT_EXPIRES_IN="7d"
+ENCRYPTION_KEY="32-char-aes-encryption-key-here"
+PORT=3001
+NODE_ENV="development"
+FRONTEND_URL="http://localhost:3000"
+LIMIT_ENABLED="false"
+```
+
+启动后端：
 
 ```bash
 npm run dev
 ```
 
-看到以下输出说明成功：
-```
-✅ 数据库连接成功
-🚀 服务器运行在 http://localhost:3001
-📡 API 地址: http://localhost:3001/api
-💚 健康检查: http://localhost:3001/api/health
-```
+默认 API 地址：`http://localhost:3001/api`
 
-### 4. 安装前端依赖 + 启动
+### 2. 安装前端依赖并启动
 
 ```bash
 cd ../frontend
 npm install
+copy .env.example .env.local
 npm run dev
 ```
 
-前端运行在 http://localhost:3000
+前端默认地址：`http://localhost:3000`
 
-### 5. 验证
-
-浏览器打开 http://localhost:3000，应该能看到登录页面。
-
-测试账号：
-| 角色 | 邮箱 | 密码 |
-|------|------|------|
-| 管理员 | admin@taskflow.com | 123456 |
-| 普通用户 | user@taskflow.com | 123456 |
-
-## 环境变量说明
-
-### backend/.env
-
-```bash
-# 数据库（SQLite 文件路径，不用改）
-DATABASE_URL="file:./dev.db"
-
-# 认证（必填，缺失会启动报错）
-JWT_SECRET="改成长随机字符串至少32位"
-JWT_EXPIRES_IN="7d"
-
-# 加密（必填，用于加密 API Key 等敏感配置）
-ENCRYPTION_KEY="32位AES加密密钥"
-
-# 服务
-PORT=3001
-NODE_ENV="development"
-FRONTEND_URL="http://localhost:3000"
-
-# 限频（开发环境可关闭）
-LIMIT_ENABLED="false"
-```
-
-### frontend/.env.local
+前端 `.env.local`：
 
 ```bash
 NEXT_PUBLIC_API_URL="http://localhost:3001/api"
 ```
 
-## 常用开发命令
+## 构建验证
 
 ```bash
-# ===== 后端 =====
 cd backend
-npm run dev                    # 启动开发服务器（热更新）
-npx prisma studio              # 浏览器看数据（http://localhost:5555）
-npx prisma db push             # 改了 schema 后同步到数据库
-npx prisma generate            # 改了 schema 后重新生成类型
-npx prisma db seed             # 重新填充测试数据
-npx prisma db push --force-reset  # 重置数据库（清空重建）
+npm run build
 
-# ===== 前端 =====
-cd frontend
-npm run dev                    # 启动开发服务器
-npm run build                  # 构建生产版本
+cd ../frontend
+npm run build
 ```
 
-## 项目结构
+当前已处理 Next 16 的 Turbopack root 推断问题，`frontend/next.config.ts` 显式设置了 root，避免构建时向上推断到用户目录导致权限错误。
 
-```
-TaskFlow/
-├── backend/                    # Express + Prisma 后端
-│   ├── src/
-│   │   ├── app.ts              # Express 应用入口
-│   │   ├── server.ts           # 启动服务器
-│   │   ├── config/             # 环境变量配置
-│   │   ├── middleware/         # 中间件（auth/校验/限频/错误处理）
-│   │   ├── routes/             # 路由定义
-│   │   ├── services/           # 业务逻辑
-│   │   ├── validators/         # Zod 校验 Schema
-│   │   ├── ai/                 # AI 工具和能力
-│   │   ├── prompts/            # AI Prompt 模板
-│   │   └── utils/              # 工具函数
-│   ├── prisma/
-│   │   ├── schema.prisma       # 数据库表结构（16 张表）
-│   │   ├── seed.ts             # 种子数据
-│   │   └── dev.db              # SQLite 数据库文件
-│   └── tests/                  # 测试文件
-├── frontend/                   # Next.js 前端
-│   ├── src/
-│   │   ├── app/                # 页面路由（App Router）
-│   │   ├── components/         # 组件（ui/ + features/）
-│   │   ├── hooks/              # 自定义 Hooks
-│   │   └── lib/                # 工具函数（api/auth/utils）
-│   └── public/                 # 静态资源
-├── n8n/                        # n8n 工作流
-├── docs/                       # 文档
-├── CLAUDE.md                   # Claude Code 开发规则
-├── .mcp.json                   # MCP 服务器配置
-└── README.md
+## 邮件通知
+
+在设置页配置 SMTP 后，可以发送测试邮件。后端通知服务支持：
+
+- SMTP 配置读取
+- 测试邮件发送
+- 晨间简报邮件
+- 周报邮件
+- n8n webhook 通知兼容
+
+常见 SMTP 字段：
+
+```bash
+SMTP_HOST=smtp.example.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=your-account@example.com
+SMTP_PASS=your-password
+SMTP_FROM=TaskFlow+ <your-account@example.com>
 ```
 
-## 遇到问题？
+## 目录结构
 
-1. **后端启动报"缺少环境变量"** → 检查 `.env` 文件是否创建，必填项是否填写
-2. **数据库表不存在** → 运行 `npx prisma db push`
-3. **Prisma 类型报错** → 运行 `npx prisma generate`
-4. **前端请求 404** → 确认后端已启动在 3001 端口
-5. **端口被占用** → 改 `.env` 中的 `PORT`，或 `lsof -i :3001` 找占用进程
+```text
+TaskFlow+/
+  backend/
+    prisma/              数据库 schema 和 seed
+    src/
+      ai/                AI 工具与能力
+      jobs/              定时任务：简报、周报、成本预警等
+      routes/            REST API
+      services/          业务逻辑
+      validators/        Zod 校验
+  frontend/
+    src/
+      app/               Next.js App Router 页面
+      components/        UI 与业务组件
+      hooks/             React Query hooks
+      lib/               API 和工具函数
+  n8n/                   n8n 工作流资料
+  docs/                  项目文档
+  TaskFlow+ 产品定位.docx
+  README.md
+```
 
-## 文档
+## 产品边界
 
-- 详细开发文档：[docs/development-docs.html](docs/development-docs.html)
-- Claude Code 开发规则：[CLAUDE.md](CLAUDE.md)
+保留：订单报价、订单成本、订单利润、月入款、任务排期、客户跟进、AI 简报、邮件通知。
+
+砍掉：复杂账单、发票、订阅计费、token 成本统计、与交付闭环无关的财务细项。
+
+## 测试账号
+
+如果已执行 seed，可使用：
+
+| 角色 | 邮箱 | 密码 |
+| --- | --- | --- |
+| 管理员 | admin@taskflow.com | 123456 |
+| 普通用户 | user@taskflow.com | 123456 |

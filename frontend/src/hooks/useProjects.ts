@@ -11,6 +11,9 @@ export interface Project {
   type: string | null;
   budget: number | null;
   usedBudget: number;
+  quote?: number;
+  actualCost?: number;
+  profit?: number;
   expenseNote: string | null;
   rewardNote: string | null;
   startDate: string | null;

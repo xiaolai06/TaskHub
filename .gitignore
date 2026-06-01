@@ -51,3 +51,10 @@ Thumbs.db
 
 # n8n
 .n8n/
+n8n_data/
+
+# Docker
+docker-compose.override.yml
+
+# Playwright MCP
+.playwright-mcp/
