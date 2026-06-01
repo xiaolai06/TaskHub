@@ -29,7 +29,7 @@ export async function findAll(userId: string, filters: {
     prisma.project.count({ where }),
   ]);
 
-  // 批量聚合项目预算使用情况（2 次查询替代 2N 次）
+  // 批量聚合订单成本（成本记录 + 任务快捷成本，2 次查询替代 2N 次）
   const projectIds = projects.map(p => p.id);
   const [costAggs, taskCostAggs] = projectIds.length > 0
     ? await Promise.all([
@@ -51,7 +51,10 @@ export async function findAll(userId: string, filters: {
 
   const data = projects.map(p => ({
     ...p,
+    quote: p.budget ?? 0,
+    actualCost: (costMap.get(p.id) ?? 0) + (taskCostMap.get(p.id) ?? 0),
     usedBudget: (costMap.get(p.id) ?? 0) + (taskCostMap.get(p.id) ?? 0),
+    profit: (p.budget ?? 0) - ((costMap.get(p.id) ?? 0) + (taskCostMap.get(p.id) ?? 0)),
   }));
 
   return { data, total, page, limit };
@@ -73,7 +76,8 @@ export async function findById(userId: string, id: string) {
     prisma.task.aggregate({ where: { projectId: id }, _sum: { cost: true } }),
   ]);
 
-  return { ...project, usedBudget: (costAgg._sum.amount ?? 0) + (taskCostAgg._sum.cost ?? 0) };
+  const actualCost = (costAgg._sum.amount ?? 0) + (taskCostAgg._sum.cost ?? 0);
+  return { ...project, quote: project.budget ?? 0, actualCost, usedBudget: actualCost, profit: (project.budget ?? 0) - actualCost };
 }
 
 export async function create(userId: string, data: CreateProjectInput) {
@@ -125,7 +129,8 @@ export async function update(userId: string, id: string, data: UpdateProjectInpu
     prisma.costRecord.aggregate({ where: { projectId: id }, _sum: { amount: true } }),
     prisma.task.aggregate({ where: { projectId: id }, _sum: { cost: true } }),
   ]);
-  return { ...project!, usedBudget: (costAgg._sum.amount ?? 0) + (taskCostAgg._sum.cost ?? 0) };
+  const actualCost = (costAgg._sum.amount ?? 0) + (taskCostAgg._sum.cost ?? 0);
+  return { ...project!, quote: project!.budget ?? 0, actualCost, usedBudget: actualCost, profit: (project!.budget ?? 0) - actualCost };
 }
 
 export async function archive(userId: string, id: string) {

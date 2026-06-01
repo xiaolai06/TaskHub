@@ -6,6 +6,8 @@ import { success, error } from '../utils/response';
 
 const router = Router();
 
+const notificationTypeSchema = z.enum(['TASK_DUE', 'COST_ALERT', 'PROJECT_CHANGE', 'AI_INSIGHT', 'AI_REPORT', 'SYSTEM']);
+
 // ======================== n8n Webhook 回调 ========================
 
 // POST /incoming - 接收 n8n 工作流回调
@@ -17,7 +19,6 @@ const n8nCallbackSchema = z.object({
 });
 
 router.post('/incoming', async (req: Request, res: Response) => {
-  // 验证 Webhook Secret
   const secret = req.headers['x-webhook-secret'];
   if (config.n8n.webhookSecret && secret !== config.n8n.webhookSecret) {
     error(res, 'FORBIDDEN', 'Webhook 密钥无效', 403);
@@ -27,42 +28,38 @@ router.post('/incoming', async (req: Request, res: Response) => {
   try {
     const body = n8nCallbackSchema.parse(req.body);
 
-    console.log(`📥 n8n 回调: workflow=${body.workflowId} status=${body.status}`);
+    console.log(`n8n callback: workflow=${body.workflowId} status=${body.status}`);
 
-    // 根据工作流类型处理回调
     switch (body.workflowId) {
       case 'daily-digest':
       case 'weekly-report':
-        // AI 报告类回调 → 创建通知
         if (body.status === 'success' && body.data.title && body.data.content) {
           await notificationService.createFromN8n({
-            userId: (body.data.userId as string) || 'system',
+            userId: String(body.data.userId || 'system'),
             type: 'AI_REPORT',
-            title: body.data.title as string,
-            content: body.data.content as string,
+            title: String(body.data.title),
+            content: String(body.data.content),
           });
         }
         break;
 
       case 'overdue-alert':
       case 'cost-alert':
-        // 预警类回调 → 创建通知
         if (body.status === 'success' && body.data.title && body.data.content) {
           await notificationService.createFromN8n({
-            userId: (body.data.userId as string) || 'system',
+            userId: String(body.data.userId || 'system'),
             type: body.workflowId === 'cost-alert' ? 'COST_ALERT' : 'TASK_DUE',
-            title: body.data.title as string,
-            content: body.data.content as string,
-            relatedId: body.data.relatedId as string | undefined,
+            title: String(body.data.title),
+            content: String(body.data.content),
+            relatedId: body.data.relatedId ? String(body.data.relatedId) : undefined,
           });
         }
         break;
 
       default:
-        console.log(`ℹ️ 未知工作流: ${body.workflowId}，已记录但未处理`);
+        console.log(`Unknown workflow: ${body.workflowId}`);
     }
 
-    // 推送到配置的通知渠道
     if (body.status === 'success' && body.data.notify) {
       const channels = ['wechat', 'feishu', 'dingtalk', 'slack'];
       for (const channel of channels) {
@@ -79,7 +76,7 @@ router.post('/incoming', async (req: Request, res: Response) => {
       error(res, 'VALIDATION_ERROR', '回调数据格式错误', 400, err.errors);
       return;
     }
-    console.error('❌ n8n 回调处理异常:', err);
+    console.error('n8n callback failed:', err);
     error(res, 'INTERNAL_ERROR', '回调处理失败', 500);
   }
 });
@@ -87,11 +84,11 @@ router.post('/incoming', async (req: Request, res: Response) => {
 // POST /notify - 通用通知推送（n8n 直接调用）
 const notifySchema = z.object({
   userId: z.string().min(1),
-  type: z.string().min(1),
+  type: notificationTypeSchema,
   title: z.string().min(1),
   content: z.string().min(1),
   relatedId: z.string().optional(),
-  channels: z.array(z.string()).optional(), // 推送渠道：wechat/feishu/dingtalk/slack
+  channels: z.array(z.string()).optional(),
 });
 
 router.post('/notify', async (req: Request, res: Response) => {
@@ -102,12 +99,16 @@ router.post('/notify', async (req: Request, res: Response) => {
   }
 
   try {
-    const body = notifySchema.parse(req.body);
+    const body = notifySchema.parse(req.body) as notificationService.N8nNotificationPayload & { channels?: string[] };
 
-    // 写入通知表
-    const notification = await notificationService.createFromN8n(body);
+    const notification = await notificationService.createFromN8n({
+      userId: body.userId,
+      type: body.type,
+      title: body.title,
+      content: body.content,
+      relatedId: body.relatedId,
+    });
 
-    // 推送到外部渠道
     if (body.channels?.length) {
       for (const channel of body.channels) {
         await notificationService.sendWebhook(channel, {
@@ -123,7 +124,7 @@ router.post('/notify', async (req: Request, res: Response) => {
       error(res, 'VALIDATION_ERROR', '通知数据格式错误', 400, err.errors);
       return;
     }
-    console.error('❌ 通知创建异常:', err);
+    console.error('notification webhook failed:', err);
     error(res, 'INTERNAL_ERROR', '通知创建失败', 500);
   }
 });

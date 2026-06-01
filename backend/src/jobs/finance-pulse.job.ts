@@ -13,43 +13,88 @@ function loadPrompt(filename: string, fallback: string): string {
     return fallback;
   }
 }
-const PROMPT = loadPrompt('system-finance-pulse.txt', '你是财务分析助手，请分析财务数据。');
+
+const PROMPT = loadPrompt(
+  'system-finance-pulse.txt',
+  '你是订单经营分析助手，请围绕每单报价、成本、利润、月入款给出简短可执行建议。',
+);
 
 cron.schedule('0 10 * * *', async () => {
-  console.log('[finance-pulse] 开始...');
+  console.log('[finance-pulse] start');
   try {
     const users = await prisma.user.findMany({
-      where: { projects: { some: { costRecords: { some: {} } } } },
+      where: { projects: { some: {} } },
       select: { id: true, preferences: { select: { systemNotify: true } } },
     });
+
     for (const user of users) {
       try {
         if (user.preferences && !user.preferences.systemNotify) continue;
 
-        const projects = await prisma.project.findMany({ where: { ownerId: user.id }, select: { id: true, name: true, budget: true, status: true } });
         const currentMonth = new Date().toISOString().slice(0, 7);
-        const costs = await prisma.costRecord.findMany({ where: { project: { ownerId: user.id }, date: { gte: new Date(currentMonth + '-01') } }, select: { amount: true, category: true, description: true, projectId: true } });
-        const lastMonth = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1).toISOString().slice(0, 7);
-        const lastCosts = await prisma.costRecord.aggregate({ where: { project: { ownerId: user.id }, date: { gte: new Date(lastMonth + '-01'), lt: new Date(currentMonth + '-01') } }, _sum: { amount: true } });
-
-        const data = JSON.stringify({
-          projects: projects.map(p => ({ name: p.name, budget: p.budget, totalCost: costs.filter(c => c.projectId === p.id).reduce((s, c) => s + c.amount, 0), costsByCategory: costs.filter(c => c.projectId === p.id).reduce((acc: Record<string,number>, c) => { acc[c.category] = (acc[c.category]||0) + c.amount; return acc; }, {}) })),
-          thisMonthTotal: costs.reduce((s, c) => s + c.amount, 0),
-          lastMonthTotal: lastCosts._sum.amount || 0,
+        const monthStart = new Date(`${currentMonth}-01`);
+        const projects = await prisma.project.findMany({
+          where: { ownerId: user.id },
+          select: { id: true, name: true, budget: true, status: true, updatedAt: true },
         });
-        if (costs.length === 0) continue;
+        const projectIds = projects.map((project) => project.id);
+        if (projectIds.length === 0) continue;
+
+        const [costs, taskCostAgg, monthlyIncomeAgg] = await Promise.all([
+          prisma.costRecord.findMany({
+            where: { projectId: { in: projectIds }, date: { gte: monthStart } },
+            select: { amount: true, category: true, projectId: true },
+          }),
+          prisma.task.groupBy({
+            by: ['projectId'],
+            where: { projectId: { in: projectIds }, cost: { gt: 0 }, createdAt: { gte: monthStart } },
+            _sum: { cost: true },
+          }),
+          prisma.project.aggregate({
+            where: { ownerId: user.id, status: 'COMPLETED', updatedAt: { gte: monthStart } },
+            _sum: { budget: true },
+          }),
+        ]);
+
+        const taskCostMap = new Map(taskCostAgg.map((row) => [row.projectId, row._sum.cost ?? 0]));
+        const data = JSON.stringify({
+          currentMonth,
+          monthlyIncome: monthlyIncomeAgg._sum.budget || 0,
+          projects: projects.map((project) => {
+            const recordCost = costs.filter((cost) => cost.projectId === project.id).reduce((sum, cost) => sum + cost.amount, 0);
+            const taskCost = taskCostMap.get(project.id) || 0;
+            const quote = project.budget || 0;
+            const totalCost = recordCost + taskCost;
+            return {
+              name: project.name,
+              status: project.status,
+              quote,
+              totalCost,
+              profit: quote - totalCost,
+              costByCategory: costs.filter((cost) => cost.projectId === project.id).reduce((acc: Record<string, number>, cost) => {
+                acc[cost.category] = (acc[cost.category] || 0) + cost.amount;
+                return acc;
+              }, { LABOR: taskCost }),
+            };
+          }),
+        });
 
         const ai = new AIService(user.id);
-        if (!await ai.init()) { console.log(`[finance-pulse] 用户 ${user.id} 无 AI 配置`); continue; }
+        if (!await ai.init()) {
+          console.log(`[finance-pulse] user ${user.id} has no AI config`);
+          continue;
+        }
         let result = '';
         for await (const event of ai.chat({ messages: [{ role: 'system', content: PROMPT }, { role: 'user', content: data }] })) {
           if (event.type === 'text') result += event.content;
         }
-        if (result) {
-          await notificationService.create(user.id, 'AI_INSIGHT', '💰 财务脉搏', result);
-        }
-      } catch (e) { console.error(`[finance-pulse] 用户 ${user.id} 失败:`, e); }
+        if (result) await notificationService.create(user.id, 'AI_INSIGHT', '订单利润简报', result);
+      } catch (error) {
+        console.error(`[finance-pulse] user ${user.id} failed:`, error);
+      }
     }
-    console.log(`[finance-pulse] 完成`);
-  } catch (e) { console.error('[finance-pulse] 失败:', e); }
+    console.log('[finance-pulse] done');
+  } catch (error) {
+    console.error('[finance-pulse] failed:', error);
+  }
 }, { timezone: 'Asia/Shanghai' });

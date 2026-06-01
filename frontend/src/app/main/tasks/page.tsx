@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import {
   Loader2, AlertTriangle, CheckSquare, Plus, LayoutList, Columns3,
@@ -33,7 +33,7 @@ const priorityFilters = [
   { key: 'LOW', label: '低' },
 ];
 
-export default function TasksPage() {
+function TasksPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -282,5 +282,13 @@ export default function TasksPage() {
         onStatusChange={handleStatusChange}
       />
     </div>
+  );
+}
+
+export default function TasksPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-indigo-500" /></div>}>
+      <TasksPageContent />
+    </Suspense>
   );
 }
