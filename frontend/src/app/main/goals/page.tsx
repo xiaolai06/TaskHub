@@ -36,7 +36,7 @@ export default function GoalsPage() {
   const updateMutation = useUpdateGoal();
   const deleteMutation = useDeleteGoal();
 
-  const goalList = goals || [];
+  const goalList = goals?.data || [];
 
   function handleCreate(input: unknown) {
     createMutation.mutate(input, {

@@ -96,9 +96,9 @@ interface GoalParams {
 // ======================== 目标 Hooks ========================
 
 export function useGoalList(params?: GoalParams) {
-  return useQuery<Goal[]>({
+  return useQuery<{ data: Goal[]; total: number }>({
     queryKey: [QUERY_KEY, 'list', params],
-    queryFn: () => api.get<Goal[]>('/goals' + buildQuery(params)),
+    queryFn: () => api.get<{ data: Goal[]; total: number }>('/goals' + buildQuery(params)),
   });
 }
 
