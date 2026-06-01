@@ -23,10 +23,10 @@ interface CalculateResult {
 function getUnitForMetric(metricType: string): string | null {
   const unitMap: Record<string, string | null> = {
     REVENUE: '元',
+    PROFIT: '元',
+    NEW_ORDERS: '个',
     PROJECT_COUNT: '个',
-    CLIENT_COUNT: '个',
-    HOURS: '小时',
-    PERCENTAGE: '%',
+    DELIVERY_RATE: '%',
     MILESTONE: null,
   };
   return unitMap[metricType] || null;
@@ -79,11 +79,8 @@ export async function findById(userId: string, id: string) {
 }
 
 export async function create(userId: string, data: CreateGoalInput) {
-  // 根据 metricType 自动设置 unit 和 progressMode
   const unit = data.unit ?? getUnitForMetric(data.metricType);
   const progressMode = data.progressMode ?? getProgressModeForMetric(data.metricType);
-
-  // MILESTONE 类型不需要 targetValue
   const targetValue = data.metricType === 'MILESTONE' ? null : data.targetValue;
 
   return prisma.goal.create({
@@ -118,18 +115,9 @@ export async function update(userId: string, id: string, data: UpdateGoalInput) 
   if (data.type !== undefined) updateData.type = data.type;
   if (data.metricType !== undefined) {
     updateData.metricType = data.metricType;
-    // 如果 unit 没有显式设置，根据 metricType 自动设置
-    if (data.unit === undefined) {
-      updateData.unit = getUnitForMetric(data.metricType);
-    }
-    // 如果 progressMode 没有显式设置，根据 metricType 自动设置
-    if (data.progressMode === undefined) {
-      updateData.progressMode = getProgressModeForMetric(data.metricType);
-    }
-    // MILESTONE 类型不需要 targetValue
-    if (data.metricType === 'MILESTONE') {
-      updateData.targetValue = null;
-    }
+    if (data.unit === undefined) updateData.unit = getUnitForMetric(data.metricType);
+    if (data.progressMode === undefined) updateData.progressMode = getProgressModeForMetric(data.metricType);
+    if (data.metricType === 'MILESTONE') updateData.targetValue = null;
   }
   if (data.targetValue !== undefined) updateData.targetValue = data.targetValue;
   if (data.unit !== undefined) updateData.unit = data.unit;
@@ -162,17 +150,11 @@ export async function remove(userId: string, id: string) {
 
 export async function updateProgress(userId: string, id: string, data: UpdateProgressInput) {
   const goal = await findById(userId, id);
-
-  const newStatus = data.currentValue >= (goal.targetValue ?? 0)
-    ? 'COMPLETED'
-    : 'ACTIVE';
+  const newStatus = data.currentValue >= (goal.targetValue ?? 0) ? 'COMPLETED' : 'ACTIVE';
 
   return prisma.goal.update({
     where: { id },
-    data: {
-      currentValue: data.currentValue,
-      status: newStatus,
-    },
+    data: { currentValue: data.currentValue, status: newStatus },
     include: {
       milestones: true,
       project: { select: { id: true, name: true, status: true } },
@@ -186,7 +168,6 @@ export async function updateProgress(userId: string, id: string, data: UpdatePro
 export async function calculateAutoProgress(userId: string, id: string): Promise<CalculateResult> {
   const goal = await findById(userId, id);
 
-  // MILESTONE 类型使用里程碑计算
   if (goal.metricType === 'MILESTONE') {
     return calculateMilestoneProgress(goal);
   }
@@ -195,14 +176,11 @@ export async function calculateAutoProgress(userId: string, id: string): Promise
   let source = '';
   let sourceCount = 0;
 
-  // 构建项目 ID 过滤条件
+  // 构建项目范围
   let projectIds: string[] = [];
-
   if (goal.projectId) {
-    // 关联了单个项目
     projectIds = [goal.projectId];
   } else if (goal.customerId) {
-    // 关联了客户，查找该客户下所有项目
     const customerProjects = await prisma.project.findMany({
       where: { customerId: goal.customerId, ownerId: userId },
       select: { id: true },
@@ -210,82 +188,120 @@ export async function calculateAutoProgress(userId: string, id: string): Promise
     projectIds = customerProjects.map(p => p.id);
   }
 
+  const dateFilter = { gte: goal.startDate, lte: goal.endDate };
+
   switch (goal.metricType) {
     case 'REVENUE': {
-      const whereClause: Record<string, unknown> = {
-        createdAt: { gte: goal.startDate, lte: goal.endDate },
+      // 收入 = 周期内已完成订单的报价（budget）之和
+      const where: Record<string, unknown> = {
+        ownerId: userId,
+        status: 'COMPLETED',
+        updatedAt: dateFilter,
       };
+      if (projectIds.length > 0) where.id = { in: projectIds };
 
-      if (projectIds.length > 0) {
-        whereClause.projectId = { in: projectIds };
-      } else {
-        whereClause.project = { ownerId: userId };
+      const completed = await prisma.project.findMany({
+        where,
+        select: { budget: true },
+      });
+      currentValue = completed.reduce((sum, p) => sum + (p.budget ?? 0), 0) / 100;
+      sourceCount = completed.length;
+      source = '已完成订单报价';
+      break;
+    }
+    case 'PROFIT': {
+      // 利润 = 收入 - 成本
+      // 收入
+      const incomeWhere: Record<string, unknown> = {
+        ownerId: userId,
+        status: 'COMPLETED',
+        updatedAt: dateFilter,
+      };
+      if (projectIds.length > 0) incomeWhere.id = { in: projectIds };
+
+      const completed = await prisma.project.findMany({
+        where: incomeWhere,
+        select: { id: true, budget: true },
+      });
+      const income = completed.reduce((sum, p) => sum + (p.budget ?? 0), 0);
+
+      // 成本：成本记录 + 任务快捷成本
+      const completedIds = completed.map(p => p.id);
+      let totalCost = 0;
+      if (completedIds.length > 0) {
+        const [costAgg, taskCostAgg] = await Promise.all([
+          prisma.costRecord.aggregate({
+            where: { projectId: { in: completedIds }, date: dateFilter },
+            _sum: { amount: true },
+          }),
+          prisma.task.aggregate({
+            where: { projectId: { in: completedIds }, cost: { gt: 0 }, createdAt: dateFilter },
+            _sum: { cost: true },
+          }),
+        ]);
+        totalCost = (costAgg._sum.amount ?? 0) + (taskCostAgg._sum.cost ?? 0);
       }
 
-      const costAgg = await prisma.costRecord.aggregate({
-        where: whereClause,
-        _sum: { amount: true },
-      });
-      sourceCount = await prisma.costRecord.count({ where: whereClause });
-      currentValue = (costAgg._sum.amount ?? 0) / 100;
-      source = '项目成本记录';
+      currentValue = (income - totalCost) / 100;
+      sourceCount = completed.length;
+      source = '已完成订单利润';
+      break;
+    }
+    case 'NEW_ORDERS': {
+      // 新订单 = 周期内新建的项目数
+      const where: Record<string, unknown> = {
+        ownerId: userId,
+        createdAt: dateFilter,
+      };
+      if (goal.customerId) where.customerId = goal.customerId;
+
+      sourceCount = await prisma.project.count({ where });
+      currentValue = sourceCount;
+      source = '新建订单';
       break;
     }
     case 'PROJECT_COUNT': {
-      const whereClause: Record<string, unknown> = {
+      const where: Record<string, unknown> = {
         ownerId: userId,
         status: 'COMPLETED',
-        createdAt: { gte: goal.startDate, lte: goal.endDate },
+        updatedAt: dateFilter,
       };
+      if (goal.customerId) where.customerId = goal.customerId;
 
-      if (goal.customerId) {
-        whereClause.customerId = goal.customerId;
-      }
-
-      sourceCount = await prisma.project.count({ where: whereClause });
+      sourceCount = await prisma.project.count({ where });
       currentValue = sourceCount;
       source = '已完成项目';
       break;
     }
-    case 'CLIENT_COUNT': {
-      const whereClause = {
-        userId,
-        createdAt: { gte: goal.startDate, lte: goal.endDate },
+    case 'DELIVERY_RATE': {
+      // 交付率 = 按时完成 / 总完成 * 100
+      const where: Record<string, unknown> = {
+        ownerId: userId,
+        status: 'COMPLETED',
+        updatedAt: dateFilter,
       };
+      if (projectIds.length > 0) where.id = { in: projectIds };
 
-      sourceCount = await prisma.customer.count({ where: whereClause });
-      currentValue = sourceCount;
-      source = '新建客户';
-      break;
-    }
-    case 'HOURS': {
-      const whereClause: Record<string, unknown> = {
-        userId,
-        date: { gte: goal.startDate, lte: goal.endDate },
-      };
-
-      if (projectIds.length > 0) {
-        whereClause.projectId = { in: projectIds };
-      }
-
-      const timeAgg = await prisma.timeEntry.aggregate({
-        where: whereClause,
-        _sum: { hours: true },
+      const allCompleted = await prisma.project.findMany({
+        where,
+        select: { id: true, endDate: true, updatedAt: true },
       });
-      sourceCount = await prisma.timeEntry.count({ where: whereClause });
-      currentValue = timeAgg._sum.hours ?? 0;
-      source = '工时记录';
+
+      if (allCompleted.length === 0) {
+        currentValue = 0;
+        sourceCount = 0;
+      } else {
+        // 按时 = 项目完成时间 <= 项目截止时间（endDate）
+        // 如果没有 endDate，则视为按时
+        const onTime = allCompleted.filter(p => {
+          if (!p.endDate) return true;
+          return p.updatedAt <= p.endDate;
+        });
+        currentValue = Math.round((onTime.length / allCompleted.length) * 100);
+        sourceCount = allCompleted.length;
+      }
+      source = '已完成项目交付';
       break;
-    }
-    case 'PERCENTAGE': {
-      // 百分比类型不支持自动计算
-      return {
-        goal,
-        calculated: goal.currentValue,
-        source: '手动录入',
-        sourceCount: 0,
-        message: '百分比目标不支持自动计算，请手动更新进度',
-      };
     }
     default: {
       return {
@@ -298,9 +314,20 @@ export async function calculateAutoProgress(userId: string, id: string): Promise
     }
   }
 
-  const newStatus = goal.targetValue && currentValue >= goal.targetValue
-    ? 'COMPLETED'
-    : 'ACTIVE';
+  // 判断状态
+  let newStatus: string;
+  if (goal.targetValue && currentValue >= goal.targetValue) {
+    newStatus = 'COMPLETED';
+  } else {
+    // 检查是否落后
+    const now = new Date();
+    const totalDays = Math.max(1, (goal.endDate.getTime() - goal.startDate.getTime()) / 86400000);
+    const elapsedDays = Math.max(0, (now.getTime() - goal.startDate.getTime()) / 86400000);
+    const expectedProgress = Math.min(100, (elapsedDays / totalDays) * 100);
+    const actualProgress = goal.targetValue ? Math.min(100, (currentValue / goal.targetValue) * 100) : 0;
+
+    newStatus = actualProgress < expectedProgress * 0.8 && actualProgress < 100 ? 'AT_RISK' : 'ACTIVE';
+  }
 
   const updatedGoal = await prisma.goal.update({
     where: { id },
@@ -316,13 +343,7 @@ export async function calculateAutoProgress(userId: string, id: string): Promise
     ? `从 ${sourceCount} 条${source}中计算出进度：${currentValue}${goal.unit || ''}`
     : `未找到${source}数据，进度为 0`;
 
-  return {
-    goal: updatedGoal,
-    calculated: currentValue,
-    source,
-    sourceCount,
-    message,
-  };
+  return { goal: updatedGoal, calculated: currentValue, source, sourceCount, message };
 }
 
 // ======================== 里程碑进度计算 ========================
@@ -331,8 +352,6 @@ async function calculateMilestoneProgress(goal: Awaited<ReturnType<typeof findBy
   const milestones = goal.milestones;
   const totalMilestones = milestones.length;
   const completedMilestones = milestones.filter(m => m.completed).length;
-
-  // 里程碑进度用百分比表示
   const currentValue = totalMilestones > 0
     ? Math.round((completedMilestones / totalMilestones) * 100)
     : 0;
@@ -362,16 +381,13 @@ async function calculateMilestoneProgress(goal: Awaited<ReturnType<typeof findBy
   };
 }
 
-// ======================== 目标总览（看板数据） ========================
+// ======================== 目标总览 ========================
 
 export async function getOverview(userId: string) {
   const now = new Date();
 
   const goals = await prisma.goal.findMany({
-    where: {
-      userId,
-      status: { in: ['ACTIVE', 'AT_RISK'] },
-    },
+    where: { userId, status: { in: ['ACTIVE', 'AT_RISK'] } },
     include: {
       milestones: { orderBy: { sortOrder: 'asc' } },
       project: { select: { id: true, name: true, status: true } },
@@ -381,11 +397,10 @@ export async function getOverview(userId: string) {
   });
 
   const goalsWithStatus = goals.map(goal => {
-    const totalDays = Math.max(1, (goal.endDate.getTime() - goal.startDate.getTime()) / (1000 * 60 * 60 * 24));
-    const elapsedDays = Math.max(0, (now.getTime() - goal.startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const totalDays = Math.max(1, (goal.endDate.getTime() - goal.startDate.getTime()) / 86400000);
+    const elapsedDays = Math.max(0, (now.getTime() - goal.startDate.getTime()) / 86400000);
     const expectedProgress = Math.min(100, (elapsedDays / totalDays) * 100);
 
-    // 里程碑类型用里程碑数计算进度
     let actualProgress = 0;
     if (goal.metricType === 'MILESTONE') {
       const total = goal.milestones.length;
@@ -395,7 +410,7 @@ export async function getOverview(userId: string) {
       actualProgress = Math.min(100, (goal.currentValue / goal.targetValue) * 100);
     }
 
-    const daysLeft = Math.max(0, Math.ceil((goal.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    const daysLeft = Math.max(0, Math.ceil((goal.endDate.getTime() - now.getTime()) / 86400000));
     const isAtRisk = actualProgress < expectedProgress * 0.8 && actualProgress < 100;
 
     return {
@@ -417,7 +432,7 @@ export async function getOverview(userId: string) {
   };
 }
 
-// ======================== 获取用户项目列表 ========================
+// ======================== 获取用户项目/客户列表 ========================
 
 export async function getUserProjects(userId: string) {
   return prisma.project.findMany({
@@ -426,8 +441,6 @@ export async function getUserProjects(userId: string) {
     orderBy: { updatedAt: 'desc' },
   });
 }
-
-// ======================== 获取用户客户列表 ========================
 
 export async function getUserCustomers(userId: string) {
   return prisma.customer.findMany({
@@ -450,12 +463,10 @@ export async function getProgressLogs(userId: string, goalId: string) {
 export async function addProgressLog(userId: string, goalId: string, data: CreateProgressLogInput) {
   const goal = await findById(userId, goalId);
 
-  // MILESTONE 类型不支持进度日记
   if (goal.metricType === 'MILESTONE') {
     throw new AppError('里程碑类型目标不支持进度日记，请使用里程碑管理', 400, 'INVALID_OPERATION');
   }
 
-  // 创建进度日记
   const log = await prisma.goalProgressLog.create({
     data: {
       goalId,
@@ -466,7 +477,6 @@ export async function addProgressLog(userId: string, goalId: string, data: Creat
     },
   });
 
-  // 更新目标当前进度（累加）
   const newValue = goal.currentValue + data.value;
   const newStatus = goal.targetValue && newValue >= goal.targetValue ? 'COMPLETED' : 'ACTIVE';
 
@@ -486,21 +496,16 @@ export async function addProgressLog(userId: string, goalId: string, data: Creat
 export async function deleteProgressLog(userId: string, goalId: string, logId: string) {
   await findById(userId, goalId);
 
-  const log = await prisma.goalProgressLog.findFirst({
-    where: { id: logId, goalId },
-  });
+  const log = await prisma.goalProgressLog.findFirst({ where: { id: logId, goalId } });
   if (!log) throw new NotFoundError('进度记录');
 
-  // 删除日记并回退进度
   await prisma.goalProgressLog.delete({ where: { id: logId } });
 
   const goal = await prisma.goal.findUnique({ where: { id: goalId } });
   if (!goal) throw new NotFoundError('目标');
 
   const newValue = Math.max(0, goal.currentValue - log.value);
-  const newStatus = goal.targetValue && newValue >= goal.targetValue
-    ? 'COMPLETED'
-    : 'ACTIVE';
+  const newStatus = goal.targetValue && newValue >= goal.targetValue ? 'COMPLETED' : 'ACTIVE';
 
   return prisma.goal.update({
     where: { id: goalId },
@@ -526,7 +531,6 @@ export async function getMilestones(userId: string, goalId: string) {
 export async function createMilestone(userId: string, goalId: string, data: CreateMilestoneInput) {
   const goal = await findById(userId, goalId);
 
-  // 只有 MILESTONE 类型才应该创建里程碑
   if (goal.metricType !== 'MILESTONE') {
     throw new AppError('只有里程碑类型的目标才能添加里程碑', 400, 'INVALID_OPERATION');
   }
@@ -540,50 +544,35 @@ export async function createMilestone(userId: string, goalId: string, data: Crea
     },
   });
 
-  // 创建里程碑后自动重新计算进度
   await calculateMilestoneProgress(goal);
-
   return milestone;
 }
 
 export async function updateMilestone(
-  userId: string,
-  goalId: string,
-  milestoneId: string,
+  userId: string, goalId: string, milestoneId: string,
   data: { completed?: boolean; title?: string; targetValue?: number },
 ) {
   const goal = await findById(userId, goalId);
 
-  const milestone = await prisma.goalMilestone.findFirst({
-    where: { id: milestoneId, goalId },
-  });
+  const milestone = await prisma.goalMilestone.findFirst({ where: { id: milestoneId, goalId } });
   if (!milestone) throw new NotFoundError('里程碑');
 
   const updatedMilestone = await prisma.goalMilestone.update({
     where: { id: milestoneId },
-    data: {
-      ...data,
-      completedAt: data.completed ? new Date() : null,
-    },
+    data: { ...data, completedAt: data.completed ? new Date() : null },
   });
 
-  // 更新里程碑后自动重新计算进度
   await calculateMilestoneProgress(goal);
-
   return updatedMilestone;
 }
 
 export async function deleteMilestone(userId: string, goalId: string, milestoneId: string) {
   const goal = await findById(userId, goalId);
 
-  const milestone = await prisma.goalMilestone.findFirst({
-    where: { id: milestoneId, goalId },
-  });
+  const milestone = await prisma.goalMilestone.findFirst({ where: { id: milestoneId, goalId } });
   if (!milestone) throw new NotFoundError('里程碑');
 
   await prisma.goalMilestone.delete({ where: { id: milestoneId } });
-
-  // 删除里程碑后自动重新计算进度
   await calculateMilestoneProgress(goal);
 
   return { deleted: true };

@@ -5,13 +5,15 @@ const QUERY_KEY = 'goals';
 
 // ======================== 类型定义 ========================
 
+export type MetricType = 'REVENUE' | 'PROFIT' | 'NEW_ORDERS' | 'PROJECT_COUNT' | 'DELIVERY_RATE' | 'MILESTONE';
+
 export interface Goal {
   id: string;
   userId: string;
   title: string;
   description?: string;
   type: 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
-  metricType: 'REVENUE' | 'PROJECT_COUNT' | 'CLIENT_COUNT' | 'HOURS' | 'PERCENTAGE' | 'MILESTONE';
+  metricType: MetricType;
   targetValue?: number | null;
   currentValue: number;
   unit?: string | null;
@@ -121,9 +123,7 @@ export function useCreateGoal() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: unknown) => api.post<Goal>('/goals', data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
@@ -132,9 +132,7 @@ export function useUpdateGoal() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: unknown }) =>
       api.put<Goal>(`/goals/${id}`, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
@@ -142,9 +140,7 @@ export function useDeleteGoal() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/goals/${id}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
@@ -153,9 +149,7 @@ export function useUpdateProgress() {
   return useMutation({
     mutationFn: ({ id, currentValue }: { id: string; currentValue: number }) =>
       api.patch<Goal>(`/goals/${id}/progress`, { currentValue }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
@@ -163,9 +157,7 @@ export function useCalculateProgress() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.post<CalculateResult>(`/goals/${id}/calculate`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
@@ -196,22 +188,16 @@ export function useProgressLogs(goalId: string, enabled = true) {
 export function useAddProgressLog(goalId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: unknown) =>
-      api.post(`/goals/${goalId}/logs`, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    mutationFn: (data: unknown) => api.post(`/goals/${goalId}/logs`, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
 export function useDeleteProgressLog(goalId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (logId: string) =>
-      api.delete(`/goals/${goalId}/logs/${logId}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    mutationFn: (logId: string) => api.delete(`/goals/${goalId}/logs/${logId}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
@@ -220,11 +206,8 @@ export function useDeleteProgressLog(goalId: string) {
 export function useCreateMilestone(goalId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: unknown) =>
-      api.post<GoalMilestone>(`/goals/${goalId}/milestones`, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    mutationFn: (data: unknown) => api.post<GoalMilestone>(`/goals/${goalId}/milestones`, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
@@ -233,20 +216,15 @@ export function useUpdateMilestone() {
   return useMutation({
     mutationFn: ({ goalId, milestoneId, data }: { goalId: string; milestoneId: string; data: unknown }) =>
       api.patch<GoalMilestone>(`/goals/${goalId}/milestones/${milestoneId}`, data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 
 export function useDeleteMilestone(goalId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (milestoneId: string) =>
-      api.delete(`/goals/${goalId}/milestones/${milestoneId}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
-    },
+    mutationFn: (milestoneId: string) => api.delete(`/goals/${goalId}/milestones/${milestoneId}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }
 

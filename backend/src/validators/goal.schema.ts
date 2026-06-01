@@ -2,13 +2,16 @@ import { z } from 'zod';
 
 // ======================== 目标校验 ========================
 
+const metricTypeEnum = z.enum(
+  ['REVENUE', 'PROFIT', 'NEW_ORDERS', 'PROJECT_COUNT', 'DELIVERY_RATE', 'MILESTONE'],
+  { message: '指标类型无效' },
+);
+
 export const createGoalSchema = z.object({
   title: z.string().min(1, '目标标题不能为空').max(100, '标题最多100字'),
   description: z.string().max(500, '描述最多500字').optional(),
   type: z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY'], { message: '目标周期无效' }),
-  metricType: z.enum(['REVENUE', 'PROJECT_COUNT', 'CLIENT_COUNT', 'HOURS', 'PERCENTAGE', 'MILESTONE'], {
-    message: '指标类型无效',
-  }),
+  metricType: metricTypeEnum,
   targetValue: z.number().positive('目标值必须大于0').nullable().optional(),
   unit: z.string().max(10, '单位最多10字').nullable().optional(),
   progressMode: z.enum(['AUTO', 'MANUAL', 'MILESTONE']).optional(),
@@ -28,7 +31,7 @@ export const updateGoalSchema = z.object({
   title: z.string().min(1, '目标标题不能为空').max(100).optional(),
   description: z.string().max(500).optional(),
   type: z.enum(['MONTHLY', 'QUARTERLY', 'YEARLY']).optional(),
-  metricType: z.enum(['REVENUE', 'PROJECT_COUNT', 'CLIENT_COUNT', 'HOURS', 'PERCENTAGE', 'MILESTONE']).optional(),
+  metricType: metricTypeEnum.optional(),
   targetValue: z.number().positive().nullable().optional(),
   unit: z.string().max(10).nullable().optional(),
   progressMode: z.enum(['AUTO', 'MANUAL', 'MILESTONE']).optional(),

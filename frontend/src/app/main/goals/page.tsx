@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, AlertTriangle, Target, Plus } from 'lucide-react';
+import { Loader2, AlertTriangle, Target, Plus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   useGoalList,
@@ -9,6 +9,7 @@ import {
   useCreateGoal,
   useUpdateGoal,
   useDeleteGoal,
+  useCalculateProgress,
   useProjectList,
   useCustomerList,
 } from '@/hooks/useGoals';
@@ -35,6 +36,7 @@ export default function GoalsPage() {
   const createMutation = useCreateGoal();
   const updateMutation = useUpdateGoal();
   const deleteMutation = useDeleteGoal();
+  const calcMutation = useCalculateProgress();
 
   const goalList = goals?.data || [];
 
@@ -62,10 +64,21 @@ export default function GoalsPage() {
     }
   }
 
+  function handleCalculate(id: string) {
+    calcMutation.mutate(id, {
+      onSuccess: (res) => toast.success(res.message || '计算完成'),
+      onError: () => toast.error('计算失败'),
+    });
+  }
+
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-4 flex items-center justify-between">
-        <GoalOverview data={overview} isLoading={false} />
+    <div className="mx-auto max-w-5xl space-y-5">
+      {/* 页头 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-bold text-slate-800">经营目标</h1>
+          <p className="mt-0.5 text-xs text-slate-400">设定目标，追踪进度，及时调整</p>
+        </div>
         <button
           onClick={() => { setEditGoal(null); setShowForm(true); }}
           className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-indigo-700 active:scale-95"
@@ -74,48 +87,65 @@ export default function GoalsPage() {
         </button>
       </div>
 
-      {/* 筛选 + 列表 */}
-      <div className="mt-4 space-y-3">
-        {/* 筛选栏 */}
-        <GoalFilter
-          status={statusFilter} type={typeFilter}
-          onStatusChange={setStatusFilter} onTypeChange={setTypeFilter}
-        />
+      {/* 总览卡片 */}
+      <GoalOverview data={overview} isLoading={isLoading} />
 
-        {/* 加载态 */}
-        {isLoading && (
-          <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-indigo-400" /></div>
-        )}
+      {/* 筛选栏 */}
+      <GoalFilter
+        status={statusFilter} type={typeFilter}
+        onStatusChange={setStatusFilter} onTypeChange={setTypeFilter}
+      />
 
-        {/* 错误态 */}
-        {error && !isLoading && (
-          <div className="flex flex-col items-center py-16">
-            <AlertTriangle className="h-10 w-10 text-red-300" />
-            <p className="mt-3 text-sm text-red-500">加载失败，请稍后重试</p>
+      {/* 加载态 */}
+      {isLoading && (
+        <div className="flex justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
+        </div>
+      )}
+
+      {/* 错误态 */}
+      {error && !isLoading && (
+        <div className="flex flex-col items-center py-16">
+          <AlertTriangle className="h-10 w-10 text-red-300" />
+          <p className="mt-3 text-sm text-red-500">加载失败，请稍后重试</p>
+        </div>
+      )}
+
+      {/* 空状态 */}
+      {!isLoading && !error && goalList.length === 0 && (
+        <div className="flex flex-col items-center rounded-xl border border-dashed border-slate-200 py-20">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50">
+            <Target className="h-7 w-7 text-indigo-400" />
           </div>
-        )}
+          <p className="mt-4 text-sm font-medium text-slate-600">还没有经营目标</p>
+          <p className="mt-1 text-xs text-slate-400">
+            {statusFilter || typeFilter
+              ? '没有符合条件的目标，试试调整筛选'
+              : '设定第一个目标，追踪你的经营进度'}
+          </p>
+          {!statusFilter && !typeFilter && (
+            <button onClick={() => { setEditGoal(null); setShowForm(true); }}
+              className="mt-4 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+              <Sparkles className="h-4 w-4" />创建第一个目标
+            </button>
+          )}
+        </div>
+      )}
 
-        {/* 空状态 */}
-        {!isLoading && !error && goalList.length === 0 && (
-          <div className="flex flex-col items-center rounded-xl border border-dashed border-slate-200 py-16">
-            <Target className="h-10 w-10 text-slate-200" />
-            <p className="mt-3 text-sm font-medium text-slate-500">暂无目标</p>
-            <p className="mt-1 text-xs text-slate-400">
-              {statusFilter || typeFilter ? '没有符合条件的目标' : '设定第一个目标，追踪你的进度'}
-            </p>
-          </div>
-        )}
-
-        {/* 列表 */}
-        {!isLoading && !error && goalList.map(goal => (
-          <GoalCard
-            key={goal.id}
-            goal={goal}
-            onEdit={(g) => { setEditGoal(g); setShowForm(true); }}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+      {/* 目标列表 */}
+      {!isLoading && !error && goalList.length > 0 && (
+        <div className="space-y-3">
+          {goalList.map(goal => (
+            <GoalCard
+              key={goal.id}
+              goal={goal}
+              onEdit={(g) => { setEditGoal(g); setShowForm(true); }}
+              onDelete={handleDelete}
+              onCalculate={handleCalculate}
+            />
+          ))}
+        </div>
+      )}
 
       {/* 弹窗 */}
       <GoalForm
