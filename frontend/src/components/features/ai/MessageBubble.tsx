@@ -112,7 +112,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
 
         {/* 时间 + 操作 */}
         <div className={cn(
-          'mt-1 flex items-center gap-2 text-[10px] text-slate-500 opacity-0 transition-opacity group-hover:opacity-100',
+          'mt-1 flex items-center gap-2 text-[10px] text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100',
           isUser && 'flex-row-reverse',
         )}>
           <span>{formatTime(message.timestamp)}</span>
@@ -141,7 +141,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
 function UserAvatar({ user }: { user: UserInfo | null }) {
   if (!user) {
     return (
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
         <UserIcon className="h-3.5 w-3.5" />
       </div>
     );
@@ -152,7 +152,7 @@ function UserAvatar({ user }: { user: UserInfo | null }) {
       <img
         src={user.avatar}
         alt={user.name}
-        className="h-7 w-7 shrink-0 rounded-full object-cover ring-2 ring-slate-100"
+        className="h-7 w-7 shrink-0 rounded-full object-cover ring-2 ring-border"
       />
     );
   }

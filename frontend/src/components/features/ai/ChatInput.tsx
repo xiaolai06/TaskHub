@@ -86,7 +86,7 @@ export function ChatInput({
             key={chip.text}
             onClick={() => handleChipClick(chip.text)}
             disabled={isLoading}
-            className="rounded-full border border-slate-200 bg-background px-2.5 py-1 text-[11px] text-slate-500 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-40"
+            className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-40"
           >
             {chip.icon} {chip.text}
           </button>
@@ -105,7 +105,7 @@ export function ChatInput({
           onKeyDown={handleKeyDown}
           placeholder={isLoading ? 'AI 正在思考...' : '输入你的问题...'}
           disabled={isLoading}
-          className="h-[40px] flex-1 rounded-xl border border-slate-200 bg-background px-4 text-[13px] text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:bg-background focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+          className="h-[40px] flex-1 rounded-xl border border-border bg-background px-4 text-[13px] text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:bg-background focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
         />
 
         {isLoading ? (
@@ -125,7 +125,7 @@ export function ChatInput({
               'flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-xl transition-all duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
               value.trim()
                 ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm'
-                : 'bg-slate-100 text-slate-400',
+                : 'bg-muted text-muted-foreground',
             )}
           >
             <Send className="h-4 w-4" aria-hidden="true" />

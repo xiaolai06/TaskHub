@@ -18,7 +18,7 @@ interface CustomerItem {
 const statusCN: Record<string, string> = {
   VIP: 'bg-purple-50 text-purple-600',
   ACTIVE: 'bg-emerald-50 text-emerald-600',
-  INACTIVE: 'bg-slate-100 text-slate-500',
+  INACTIVE: 'bg-muted text-muted-foreground',
   LEAD: 'bg-blue-50 text-blue-600',
 };
 
@@ -73,10 +73,10 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
   if (loading) {
     return (
       <div className="animate-pulse space-y-2 p-3">
-        <div className="h-3 w-16 rounded bg-slate-200" />
-        <div className="h-12 w-full rounded-lg bg-slate-100" />
-        <div className="h-12 w-full rounded-lg bg-slate-100" />
-        <div className="h-12 w-full rounded-lg bg-slate-100" />
+        <div className="h-3 w-16 rounded bg-accent" />
+        <div className="h-12 w-full rounded-lg bg-muted" />
+        <div className="h-12 w-full rounded-lg bg-muted" />
+        <div className="h-12 w-full rounded-lg bg-muted" />
       </div>
     );
   }
@@ -103,8 +103,8 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
                     d && d > 14 ? 'bg-red-500' : 'bg-amber-500',
                   )} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12px] font-medium text-slate-700">{c.name}</p>
-                    <p className="mt-0.5 text-[10px] text-slate-500">
+                    <p className="truncate text-[12px] font-medium text-foreground/80">{c.name}</p>
+                    <p className="mt-0.5 text-[10px] text-muted-foreground">
                       {d ? `${d} 天未联系` : '无联系记录'}
                       {c.company && ` · ${c.company}`}
                     </p>
@@ -118,7 +118,7 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
 
       {/* 全部客户 */}
       <div className="space-y-1">
-        <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+        <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           全部客户 ({sorted.length})
         </p>
         <div className="space-y-0.5">
@@ -130,18 +130,18 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
                 onClick={() => onCustomerClick(c.name)}
                 className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-background hover:shadow-sm"
               >
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-medium text-slate-600">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-foreground/70">
                   {c.name.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12px] font-medium text-slate-700">{c.name}</p>
-                  <p className="text-[10px] text-slate-500">
+                  <p className="truncate text-[12px] font-medium text-foreground/80">{c.name}</p>
+                  <p className="text-[10px] text-muted-foreground">
                     {c.company || (d !== null ? `${d} 天前联系` : '暂无联系')}
                   </p>
                 </div>
                 <span className={cn(
                   'shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium',
-                  statusCN[c.status] || 'bg-slate-50 text-slate-500',
+                  statusCN[c.status] || 'bg-muted text-muted-foreground',
                 )}>
                   {statusLabel[c.status] || c.status}
                 </span>
@@ -153,8 +153,8 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
 
       {sorted.length === 0 && (
         <div className="py-8 text-center">
-          <p className="text-[12px] text-slate-500">暂无客户</p>
-          <p className="mt-1 text-[11px] text-slate-300">在客户管理页面添加</p>
+          <p className="text-[12px] text-muted-foreground">暂无客户</p>
+          <p className="mt-1 text-[11px] text-muted-foreground/50">在客户管理页面添加</p>
         </div>
       )}
     </div>

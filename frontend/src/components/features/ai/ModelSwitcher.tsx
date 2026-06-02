@@ -66,59 +66,59 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
   const displayId = currentModel?.id || '';
 
   return (
-    <div className="relative border-t border-slate-200 px-3 py-2">
+    <div className="relative border-t border-border px-3 py-2">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-muted"
       >
         <Zap className="h-3.5 w-3.5 shrink-0 text-indigo-500" />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-medium text-slate-600 truncate">{displayName}</p>
-          {displayId && <p className="text-[10px] text-slate-500 truncate">{displayId}</p>}
+          <p className="text-[11px] font-medium text-foreground/70 truncate">{displayName}</p>
+          {displayId && <p className="text-[10px] text-muted-foreground truncate">{displayId}</p>}
         </div>
         {loading ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
         ) : (
-          <ChevronDown className={cn('h-3.5 w-3.5 text-slate-400 transition-transform', open && 'rotate-180')} />
+          <ChevronDown className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform', open && 'rotate-180')} />
         )}
       </button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute bottom-full left-2 right-2 z-20 mb-1 rounded-xl border border-slate-200 bg-background shadow-xl overflow-hidden">
+          <div className="absolute bottom-full left-2 right-2 z-20 mb-1 rounded-xl border border-border bg-background shadow-xl overflow-hidden">
             {/* 标题 */}
-            <div className="border-b border-slate-100 px-3 py-2 bg-muted/50 flex items-center justify-between">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">选择模型</p>
-              <span className="text-[10px] text-slate-300">{provider}</span>
+            <div className="border-b border-border px-3 py-2 bg-muted/50 flex items-center justify-between">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">选择模型</p>
+              <span className="text-[10px] text-muted-foreground/50">{provider}</span>
             </div>
 
             <div className="max-h-[220px] overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center gap-2 py-6">
-                  <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
-                  <span className="text-[11px] text-slate-500">获取模型列表...</span>
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                  <span className="text-[11px] text-muted-foreground">获取模型列表...</span>
                 </div>
               ) : models.length === 0 ? (
                 <div className="px-3 py-6 text-center">
-                  <p className="text-[12px] text-slate-500">暂无可用模型</p>
-                  <p className="mt-1 text-[11px] text-slate-300">请在设置页配置 AI 供应商和 API Key</p>
+                  <p className="text-[12px] text-muted-foreground">暂无可用模型</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground/50">请在设置页配置 AI 供应商和 API Key</p>
                 </div>
               ) : (
                 <>
                   {fastModels.length > 0 && (
                     <div className="px-1.5 pt-1.5 pb-0.5">
-                      <p className="px-2 text-[10px] font-medium text-slate-500">⚡ 快速模型</p>
+                      <p className="px-2 text-[10px] font-medium text-muted-foreground">⚡ 快速模型</p>
                       {fastModels.map((m) => (
                         <button
                           key={m.id}
                           onClick={() => { onSelect(m.id); setOpen(false); }}
                           className={cn(
                             'flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors',
-                            selectedModel === m.id ? 'bg-indigo-50' : 'hover:bg-slate-50',
+                            selectedModel === m.id ? 'bg-indigo-50' : 'hover:bg-accent',
                           )}
                         >
-                          <span className={cn('flex-1 truncate text-[12px]', selectedModel === m.id ? 'font-medium text-indigo-700' : 'text-slate-700')}>
+                          <span className={cn('flex-1 truncate text-[12px]', selectedModel === m.id ? 'font-medium text-indigo-700' : 'text-foreground/80')}>
                             {m.name}
                           </span>
                           {selectedModel === m.id && (
@@ -130,7 +130,7 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
                   )}
 
                   {powerfulModels.length > 0 && (
-                    <div className="px-1.5 pt-0.5 pb-1 border-t border-slate-100">
+                    <div className="px-1.5 pt-0.5 pb-1 border-t border-border">
                       <p className="px-2 text-[10px] font-medium text-amber-500">🧠 强力模型</p>
                       {powerfulModels.map((m) => (
                         <button
@@ -138,10 +138,10 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
                           onClick={() => { onSelect(m.id); setOpen(false); }}
                           className={cn(
                             'flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors',
-                            selectedModel === m.id ? 'bg-indigo-50' : 'hover:bg-slate-50',
+                            selectedModel === m.id ? 'bg-indigo-50' : 'hover:bg-accent',
                           )}
                         >
-                          <span className={cn('flex-1 truncate text-[12px]', selectedModel === m.id ? 'font-medium text-indigo-700' : 'text-slate-700')}>
+                          <span className={cn('flex-1 truncate text-[12px]', selectedModel === m.id ? 'font-medium text-indigo-700' : 'text-foreground/80')}>
                             {m.name}
                           </span>
                           {selectedModel === m.id && (
@@ -156,7 +156,7 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
             </div>
 
             {/* 底部操作 */}
-            <div className="border-t border-slate-100 px-1.5 py-1 flex gap-1">
+            <div className="border-t border-border px-1.5 py-1 flex gap-1">
               <button
                 onClick={async () => {
                   setLoading(true);
@@ -173,14 +173,14 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
                     }
                   } catch { } finally { setLoading(false); }
                 }}
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-600"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground/70"
               >
                 <RefreshCw className="h-3 w-3" />
                 刷新列表
               </button>
               <a
                 href="/main/settings"
-                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-600"
+                className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground/70"
               >
                 <Settings className="h-3 w-3" />
                 配置更多模型

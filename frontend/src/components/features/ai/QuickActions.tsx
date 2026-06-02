@@ -21,16 +21,16 @@ const quickActions: QuickAction[] = [
 export function QuickActions({ onAction }: QuickActionsProps) {
   return (
     <div className="space-y-0.5">
-      <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">快捷提问</p>
+      <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">快捷提问</p>
       {quickActions.map((action) => (
         <button
           key={action.text}
           onClick={() => onAction(action.text)}
-          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[12px] text-slate-600 transition-colors hover:bg-background hover:text-indigo-600 hover:shadow-sm"
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-[12px] text-foreground/70 transition-colors hover:bg-background hover:text-indigo-600 hover:shadow-sm"
         >
           <span className="text-sm">{action.icon}</span>
           <span className="flex-1">{action.label}</span>
-          <ChevronRight className="h-3 w-3 text-slate-300" />
+          <ChevronRight className="h-3 w-3 text-muted-foreground/50" />
         </button>
       ))}
     </div>

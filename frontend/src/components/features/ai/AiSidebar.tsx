@@ -60,7 +60,7 @@ export function AiSidebar({
   open,
 }: AiSidebarProps) {
   return (
-    <div className="flex h-full w-[320px] shrink-0 flex-col border-r bg-slate-50/40">
+    <div className="flex h-full w-[320px] shrink-0 flex-col border-r bg-muted/40">
       {/* Tab 切换 */}
       <div className="flex border-b px-2 pt-2">
         {tabs.map((tab) => (
@@ -70,8 +70,8 @@ export function AiSidebar({
             className={cn(
               'flex items-center gap-1.5 rounded-t-md px-3 py-2 text-[12px] font-medium transition-colors',
               activeTab === tab.key
-                ? 'bg-white text-indigo-600 shadow-sm'
-                : 'text-slate-400 hover:text-slate-600',
+                ? 'bg-card text-indigo-600 shadow-sm'
+                : 'text-muted-foreground hover:text-foreground/70',
             )}
           >
             <tab.icon className="h-3.5 w-3.5" />
@@ -86,7 +86,7 @@ export function AiSidebar({
           <div className="space-y-3">
             <SmartDigest onDigestClick={onDigestClick} open={open} />
             <QuickActions onAction={onQuickAction} />
-            <div className="border-t border-slate-200/60 pt-3">
+            <div className="border-t border-border/60 pt-3">
               <ProjectMiniList projects={projects} />
             </div>
           </div>

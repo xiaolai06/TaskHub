@@ -51,7 +51,7 @@ export function ToolConfirmDialog({ toolName, args, onConfirm, onCancel }: ToolC
         </p>
 
         {/* 显示关键参数 */}
-        <div className="bg-white rounded-lg p-3 text-xs space-y-1 border">
+        <div className="bg-card rounded-lg p-3 text-xs space-y-1 border">
           {Object.entries(args).slice(0, 5).map(([key, value]) => (
             <div key={key} className="flex justify-between">
               <span className="text-muted-foreground">{key}:</span>
