@@ -212,7 +212,7 @@ export function Header({ onOpenAi }: HeaderProps) {
         {/* 主题切换按钮 */}
         <button
           onClick={toggleTheme}
-          className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none dark:hover:bg-slate-800"
+          className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
           title={resolved === 'light' ? '切换到暗色模式' : '切换到亮色模式'}
         >
           {resolved === 'light' ? (
