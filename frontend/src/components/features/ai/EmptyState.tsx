@@ -30,7 +30,7 @@ export function EmptyState({ onPromptClick }: EmptyStateProps) {
         />
       ) : (
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 ring-2 ring-indigo-100">
-          <Zap className="h-8 w-8 text-indigo-500" />
+          <Zap className="h-8 w-8 text-indigo-500" aria-hidden="true" />
         </div>
       )}
 
@@ -48,7 +48,7 @@ export function EmptyState({ onPromptClick }: EmptyStateProps) {
         <br />
         管理任务、跟进客户。
       </p>
-      <p className="mt-3 text-[12px] text-slate-400">
+      <p className="mt-3 text-[12px] text-slate-500">
         在下方输入你的问题，或点击快捷提问开始 👇
       </p>
     </div>

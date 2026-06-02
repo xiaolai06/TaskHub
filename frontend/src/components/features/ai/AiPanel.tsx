@@ -173,23 +173,23 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
       )}
 
       <div className={cn(
-        'fixed right-0 top-0 z-50 flex h-screen w-[860px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out',
+        'fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-background shadow-2xl transition-transform duration-300 ease-in-out sm:w-[860px]',
         open ? 'translate-x-0' : 'translate-x-full',
       )}>
         {/* 顶部栏 */}
-        <div className="flex h-11 shrink-0 items-center justify-between border-b bg-slate-50/80 px-3">
+        <div className="flex h-11 shrink-0 items-center justify-between border-b bg-muted/80 px-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-100">
-              <Zap className="h-3 w-3 text-indigo-600" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#5B5FC7]/10">
+              <Zap className="h-3 w-3 text-[#5B5FC7]" />
             </div>
-            <span className="text-[13px] font-semibold text-slate-800">AI 助手</span>
+            <span className="text-[13px] font-semibold text-foreground">AI 助手</span>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={handleNewSession} className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600" title="新对话 (⌘N)">
-              <Plus className="h-4 w-4" />
+            <button onClick={handleNewSession} className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" title="新对话 (⌘N)" aria-label="新建对话">
+              <Plus className="h-4 w-4" aria-hidden="true" />
             </button>
-            <button onClick={onClose} className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600">
-              <X className="h-4 w-4" />
+            <button onClick={onClose} className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" aria-label="关闭 AI 助手">
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>

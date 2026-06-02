@@ -120,7 +120,7 @@ export function MilestoneList({
               >
                 {m.title}
               </span>
-              <span className="font-mono text-[11px] text-slate-400">
+              <span className="font-mono text-[11px] text-slate-500">
                 {formatValue(m.targetValue, unit)}
               </span>
               <button

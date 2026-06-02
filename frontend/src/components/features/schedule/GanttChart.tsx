@@ -196,7 +196,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                   >
                     {showLabel && (
                       <>
-                        <span className="text-[10px] text-slate-400 leading-tight">
+                        <span className="text-[10px] text-slate-500 leading-tight">
                           {d.getMonth() + 1}月
                         </span>
                         <span
@@ -342,7 +342,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
             style={{ height: 32 }}
           >
             <div
-              className="flex-shrink-0 border-r flex items-center px-3 text-[10px] font-medium text-slate-400"
+              className="flex-shrink-0 border-r flex items-center px-3 text-[10px] font-medium text-slate-500"
               style={{ width: labelWidth }}
             >
               每日工时

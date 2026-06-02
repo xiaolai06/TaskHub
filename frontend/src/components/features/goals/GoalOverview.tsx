@@ -14,7 +14,7 @@ export function GoalOverview({ data, isLoading }: Props) {
     return (
       <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3">
         <Loader2 className="h-4 w-4 animate-spin text-indigo-400" />
-        <span className="text-xs text-slate-400">加载中...</span>
+        <span className="text-xs text-slate-500">加载中...</span>
       </div>
     );
   }

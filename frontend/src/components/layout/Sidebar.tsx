@@ -90,7 +90,7 @@ export function Sidebar({ onOpenAi }: { onOpenAi?: () => void }) {
         </div>
         <div>
           <h1 className="text-base font-bold text-slate-900">TaskFlow+</h1>
-          <p className="text-[11px] text-slate-400">智能项目管理</p>
+          <p className="text-[11px] text-slate-500">智能项目管理</p>
         </div>
       </div>
 

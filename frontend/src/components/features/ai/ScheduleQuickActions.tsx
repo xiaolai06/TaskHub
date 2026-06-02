@@ -57,12 +57,12 @@ export function ScheduleQuickActions({ onAction }: ScheduleQuickActionsProps) {
         <button
           key={action.id}
           onClick={() => onAction(action.prompt)}
-          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors text-left"
+          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors text-left focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
         >
-          <action.icon className={`w-4 h-4 ${action.color}`} />
+          <action.icon className={`w-4 h-4 ${action.color}`} aria-hidden="true" />
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium">{action.label}</div>
-            <div className="text-xs text-muted-foreground truncate">{action.description}</div>
+            <div className="text-xs text-slate-500 truncate">{action.description}</div>
           </div>
         </button>
       ))}

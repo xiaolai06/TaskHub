@@ -80,7 +80,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
       {isUser ? (
         <UserAvatar user={user} />
       ) : (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#5B5FC7]/10 text-[#5B5FC7]">
           <Bot className="h-3.5 w-3.5" />
         </div>
       )}
@@ -97,10 +97,10 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
         {/* 消息气泡 */}
         {message.content && (
           <div className={cn(
-            'rounded-2xl px-4 py-3 text-[13px] leading-relaxed',
+            'rounded-2xl px-4 py-3 text-[13px] leading-[1.7]',
             isUser
               ? 'rounded-tr-md bg-indigo-600 text-white'
-              : 'rounded-tl-md border border-slate-200 bg-white text-slate-700 shadow-sm',
+              : 'rounded-tl-md border border-slate-200 bg-background text-foreground shadow-sm',
           )}>
             {isUser ? (
               <p className="whitespace-pre-wrap">{message.content}</p>
@@ -112,20 +112,20 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
 
         {/* 时间 + 操作 */}
         <div className={cn(
-          'mt-1 flex items-center gap-2 text-[10px] text-slate-400 opacity-0 transition-opacity group-hover:opacity-100',
+          'mt-1 flex items-center gap-2 text-[10px] text-slate-500 opacity-0 transition-opacity group-hover:opacity-100',
           isUser && 'flex-row-reverse',
         )}>
           <span>{formatTime(message.timestamp)}</span>
 
           {!isUser && (
             <>
-              <button onClick={handleCopy} className="flex items-center gap-0.5 hover:text-indigo-500 transition-colors">
-                {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+              <button onClick={handleCopy} className="flex items-center gap-0.5 hover:text-indigo-500 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none rounded px-1">
+                {copied ? <Check className="h-3 w-3 text-emerald-500" aria-hidden="true" /> : <Copy className="h-3 w-3" aria-hidden="true" />}
                 {copied ? '已复制' : '复制'}
               </button>
               {onRegenerate && (
-                <button onClick={onRegenerate} className="flex items-center gap-0.5 hover:text-indigo-500 transition-colors">
-                  <RotateCcw className="h-3 w-3" />
+                <button onClick={onRegenerate} className="flex items-center gap-0.5 hover:text-indigo-500 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none rounded px-1">
+                  <RotateCcw className="h-3 w-3" aria-hidden="true" />
                   重新生成
                 </button>
               )}

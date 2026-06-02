@@ -84,9 +84,9 @@ export function SmartDigest({ onDigestClick, open }: SmartDigestProps) {
   return (
     <button
       onClick={onDigestClick}
-      className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left shadow-sm transition-all hover:border-indigo-200 hover:shadow-md"
+      className="w-full rounded-xl border border-slate-200 bg-background p-3 text-left shadow-sm transition-all hover:border-indigo-200 hover:shadow-md"
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">📅 今日数据</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">📅 今日数据</p>
 
       <div className="mt-2.5 space-y-2">
         {/* 待办 */}
@@ -136,7 +136,7 @@ export function SmartDigest({ onDigestClick, open }: SmartDigestProps) {
         </div>
       </div>
 
-      <p className="mt-2.5 text-[10px] text-slate-400">点击查看今日简报 →</p>
+      <p className="mt-2.5 text-[10px] text-slate-500">点击查看今日简报 →</p>
     </button>
   );
 }

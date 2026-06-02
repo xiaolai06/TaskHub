@@ -103,7 +103,7 @@ function WorkloadBar({ dailyWorkload }: { dailyWorkload: ScheduleData['dailyWork
           })}
         </div>
         {/* 图例 */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-400">
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-500">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-indigo-400" />正常
           </span>
@@ -163,7 +163,7 @@ function DelayedTaskList({ delays }: { delays: DelayedTask[] }) {
             </div>
           ))}
           {delays.length > 5 && (
-            <p className="text-[10px] text-slate-400 text-center pt-1">
+            <p className="text-[10px] text-slate-500 text-center pt-1">
               还有 {delays.length - 5} 个延期任务...
             </p>
           )}

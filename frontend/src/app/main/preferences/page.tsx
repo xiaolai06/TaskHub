@@ -47,10 +47,10 @@ function Toggle({ label, desc, checked, onChange }: { label: string; desc?: stri
     <div className="flex items-center justify-between py-3">
       <div>
         <p className="text-sm font-medium text-slate-700">{label}</p>
-        {desc && <p className="text-[12px] text-slate-400">{desc}</p>}
+        {desc && <p className="text-[12px] text-slate-500">{desc}</p>}
       </div>
       <button onClick={() => onChange(!checked)}
-        className={cn('relative h-6 w-11 rounded-full transition-colors', checked ? 'bg-indigo-600' : 'bg-slate-200')}>
+        className={cn('relative h-6 w-11 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none', checked ? 'bg-indigo-600' : 'bg-slate-200')}>
         <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform', checked ? 'left-[22px]' : 'left-0.5')} />
       </button>
     </div>
@@ -62,10 +62,10 @@ function Select({ label, desc, value, onChange, options }: { label: string; desc
     <div className="flex items-center justify-between py-3">
       <div>
         <p className="text-sm font-medium text-slate-700">{label}</p>
-        {desc && <p className="text-[12px] text-slate-400">{desc}</p>}
+        {desc && <p className="text-[12px] text-slate-500">{desc}</p>}
       </div>
       <select value={value} onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
+        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
     </div>
@@ -77,10 +77,10 @@ function NumberSelect({ label, desc, value, onChange, options }: { label: string
     <div className="flex items-center justify-between py-3">
       <div>
         <p className="text-sm font-medium text-slate-700">{label}</p>
-        {desc && <p className="text-[12px] text-slate-400">{desc}</p>}
+        {desc && <p className="text-[12px] text-slate-500">{desc}</p>}
       </div>
       <select value={value} onChange={(e) => onChange(Number(e.target.value))}
-        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
+        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
     </div>
@@ -100,12 +100,12 @@ function ThemeSwitcher() {
     <div className="flex items-center justify-between py-3">
       <div>
         <p className="text-sm font-medium text-slate-700">主题模式</p>
-        <p className="text-[12px] text-slate-400">选择界面外观</p>
+        <p className="text-[12px] text-slate-500">选择界面外观</p>
       </div>
       <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-0.5">
         {options.map((o) => (
           <button key={o.key} onClick={() => setTheme(o.key)}
-            className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+            className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
               theme === o.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
             <o.icon className="h-3.5 w-3.5" />{o.label}
           </button>
@@ -148,7 +148,7 @@ function GreetingPreview({ onClose }: { onClose: () => void }) {
   });
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30" onClick={onClose}>
       <div className="w-full max-w-lg max-h-[80vh] flex flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {/* 头部 */}
         <div className="flex items-center justify-between border-b px-5 py-3">
@@ -174,7 +174,7 @@ function GreetingPreview({ onClose }: { onClose: () => void }) {
         {/* 内置语录 */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">内置语录（48 条）</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">内置语录（48 条）</p>
             {Object.entries(builtin).map(([label, items]) => (
               <div key={label} className="mb-3">
                 <p className="mb-1 text-[12px] font-medium text-slate-500">{label}</p>
@@ -190,13 +190,13 @@ function GreetingPreview({ onClose }: { onClose: () => void }) {
           {/* 自定义语录 */}
           {filtered.length > 0 && (
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">自定义语录（{filtered.length} 条）</p>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">自定义语录（{filtered.length} 条）</p>
               <div className="space-y-1">
                 {filtered.map((g) => (
                   <div key={g.id} className="flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2">
                     <span className={cn('h-2 w-2 shrink-0 rounded-full', g.isActive ? 'bg-emerald-500' : 'bg-slate-300')} />
                     <span className="flex-1 text-[13px] text-slate-700">{g.content}</span>
-                    <span className="text-[11px] text-slate-400">{g.hourStart}:00—{g.hourEnd}:00</span>
+                    <span className="text-[11px] text-slate-500">{g.hourStart}:00—{g.hourEnd}:00</span>
                   </div>
                 ))}
               </div>
@@ -256,7 +256,7 @@ function GreetingManager() {
     <div className="space-y-4">
       {/* 预览按钮 */}
       <div className="flex items-center justify-between">
-        <p className="text-[12px] text-slate-400">自定义语录与内置 48 条合并轮换</p>
+        <p className="text-[12px] text-slate-500">自定义语录与内置 48 条合并轮换</p>
         <button onClick={() => setShowPreview(true)}
           className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50">
           <Eye className="h-3.5 w-3.5" />查看全部语录
@@ -267,18 +267,18 @@ function GreetingManager() {
       <div className="flex gap-2">
         <input type="text" value={newContent} onChange={(e) => setNewContent(e.target.value)}
           placeholder="输入新的祝福语..." onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
         <select value={newStart} onChange={(e) => setNewStart(Number(e.target.value))}
           className="rounded-lg border border-slate-200 px-2 py-2 text-xs text-slate-600 outline-none">
           {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{i}:00</option>)}
         </select>
-        <span className="self-center text-xs text-slate-400">—</span>
+        <span className="self-center text-xs text-slate-500">—</span>
         <select value={newEnd} onChange={(e) => setNewEnd(Number(e.target.value))}
           className="rounded-lg border border-slate-200 px-2 py-2 text-xs text-slate-600 outline-none">
           {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{i}:00</option>)}
         </select>
         <button onClick={handleAdd} disabled={!newContent.trim()}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">添加</button>
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">添加</button>
       </div>
 
       {/* 列表 */}
@@ -293,7 +293,7 @@ function GreetingManager() {
                 <span className={cn('absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform', g.isActive ? 'left-[18px]' : 'left-0.5')} />
               </button>
               <span className={cn('flex-1 text-sm', g.isActive ? 'text-slate-700' : 'text-slate-400')}>{g.content}</span>
-              <span className="shrink-0 text-[11px] text-slate-400">{g.hourStart}:00—{g.hourEnd}:00</span>
+              <span className="shrink-0 text-[11px] text-slate-500">{g.hourStart}:00—{g.hourEnd}:00</span>
               <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px]',
                 g.source === 'custom' ? 'bg-blue-50 text-blue-600' : g.source === 'ai' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-500')}>
                 {g.source === 'custom' ? '自定义' : g.source === 'ai' ? 'AI' : '系统'}
@@ -364,7 +364,7 @@ export default function PreferencesPage() {
       <div className="mb-5 flex gap-1 rounded-lg border border-slate-200 bg-white p-1">
         {tabs.map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={cn('flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-all',
+            className={cn('flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
               activeTab === tab.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
             <tab.icon className="h-4 w-4" />{tab.label}
           </button>
@@ -413,7 +413,7 @@ export default function PreferencesPage() {
           <div className="px-6 py-4">
             <div className="mb-4">
               <h3 className="text-sm font-semibold text-slate-700">自定义祝福语</h3>
-              <p className="text-[12px] text-slate-400">自定义语录会与内置语录合并轮换，按时段显示</p>
+              <p className="text-[12px] text-slate-500">自定义语录会与内置语录合并轮换，按时段显示</p>
             </div>
             <GreetingManager />
           </div>

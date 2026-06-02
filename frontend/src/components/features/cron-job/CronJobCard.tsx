@@ -50,7 +50,7 @@ export function CronJobCard({
             )}
           </div>
 
-          <div className="mt-1.5 flex items-center gap-3 text-[12px] text-slate-400">
+          <div className="mt-1.5 flex items-center gap-3 text-[12px] text-slate-500">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {job.cronExpr}
@@ -68,7 +68,7 @@ export function CronJobCard({
           )}
 
           {job.lastRunAt && (
-            <p className="mt-1 text-[11px] text-slate-400">
+            <p className="mt-1 text-[11px] text-slate-500">
               上次执行: {new Date(job.lastRunAt).toLocaleString('zh-CN')}
               {job.lastStatus && (
                 <span className={cn('ml-2', job.lastStatus === 'success' ? 'text-emerald-500' : 'text-red-500')}>

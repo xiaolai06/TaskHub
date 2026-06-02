@@ -214,7 +214,7 @@ export default function TasksPage() {
           {/* 清除 */}
           {hasActiveFilters && (
             <button onClick={clearFilters}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-slate-500 hover:bg-slate-100 hover:text-slate-600">
               <X className="h-3 w-3" />清除
             </button>
           )}

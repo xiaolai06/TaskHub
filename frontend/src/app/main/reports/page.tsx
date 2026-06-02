@@ -166,7 +166,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
         <div className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
           <h3 className="mb-3 text-sm font-semibold text-slate-700">项目利润排行</h3>
           {ranking.length === 0 ? (
-            <p className="py-6 text-center text-xs text-slate-400">暂无数据</p>
+            <p className="py-6 text-center text-xs text-slate-500">暂无数据</p>
           ) : (
             <div className="space-y-3">
               {ranking.map((r, i) => (
@@ -189,7 +189,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
         <div className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
           <h3 className="mb-3 text-sm font-semibold text-slate-700">支出结构</h3>
           {structure.length === 0 ? (
-            <p className="py-6 text-center text-xs text-slate-400">暂无支出</p>
+            <p className="py-6 text-center text-xs text-slate-500">暂无支出</p>
           ) : (
             <div className="space-y-3">
               {structure.map((s) => (
@@ -213,7 +213,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
         <div className="rounded-xl border border-slate-200/60 bg-white p-4 shadow-sm">
           <h3 className="mb-3 text-sm font-semibold text-slate-700">工时分析</h3>
           {!time || time.byProject.length === 0 ? (
-            <p className="py-6 text-center text-xs text-slate-400">暂无工时记录</p>
+            <p className="py-6 text-center text-xs text-slate-500">暂无工时记录</p>
           ) : (
             <div>
               <div className="flex items-center gap-4 mb-3 text-xs text-slate-500">
@@ -267,7 +267,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
             <span className="text-sm font-semibold text-indigo-700">AI 解读</span>
             {historyEntries.length > 0 && (
               <button onClick={() => setShowHistory(!showHistory)}
-                className="flex items-center gap-1 text-xs text-slate-400 hover:text-indigo-500">
+                className="flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-500">
                 <History className="h-3.5 w-3.5" />{historyEntries.length} 条
               </button>
             )}

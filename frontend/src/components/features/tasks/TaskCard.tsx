@@ -122,7 +122,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
             {task.blockedReason}
           </p>
         ) : task.description ? (
-          <p className="line-clamp-2 text-[12px] leading-[18px] text-slate-400">
+          <p className="line-clamp-2 text-[12px] leading-[18px] text-slate-500">
             {task.description}
           </p>
         ) : (

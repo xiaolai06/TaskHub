@@ -65,7 +65,7 @@ function ProjectCard({ project }: { project: CustomerProject }) {
       <div className="flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${pst.dot}`} />
         <span className="text-sm font-medium text-slate-800">{project.name}</span>
-        <span className="text-[11px] text-slate-400">{pst.label}</span>
+        <span className="text-[11px] text-slate-500">{pst.label}</span>
         {project.type && (
           <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-medium text-indigo-600">
             {project.type}

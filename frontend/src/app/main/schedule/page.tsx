@@ -187,23 +187,23 @@ export default function SchedulePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" aria-hidden="true" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-5xl animate-in fade-in duration-300">
       {/* 标题栏 */}
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-slate-800">排期视图</h1>
-          <p className="mt-0.5 text-xs text-slate-400">按优先级和截止日排列所有项目中的任务</p>
+          <p className="mt-0.5 text-xs text-slate-500">按优先级和截止日排列所有项目中的任务</p>
         </div>
       </div>
 
       {/* 统计卡片 */}
-      <div className="mb-5 grid grid-cols-4 gap-3">
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard icon={<GripVertical className="h-4 w-4" />} label="全部任务" value={stats.total} color="slate" />
         <StatCard icon={<AlertTriangle className="h-4 w-4" />} label="已逾期" value={stats.overdue} color={stats.overdue > 0 ? 'red' : 'slate'} />
         <StatCard icon={<Calendar className="h-4 w-4" />} label="今天" value={stats.today} color="blue" />
@@ -211,7 +211,7 @@ export default function SchedulePage() {
       </div>
 
       {/* 工具栏 */}
-      <div className="mb-4 flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5">
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5">
         {/* 视图切换 */}
         <div className="flex gap-1 rounded-lg bg-slate-50 p-0.5">
           {([
@@ -220,33 +220,37 @@ export default function SchedulePage() {
             { key: 'projects', label: '按项目', icon: Calendar },
           ] as const).map(v => (
             <button key={v.key} onClick={() => setViewMode(v.key)}
-              className={cn('flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
-                viewMode === v.key ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700')}>
+              className={cn('flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
+                viewMode === v.key ? 'bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-white/60')}>
               <v.icon className="h-3 w-3" />{v.label}
             </button>
           ))}
         </div>
 
-        <div className="h-5 w-px bg-slate-200" />
+        <div className="h-5 w-px bg-slate-200 hidden sm:block" aria-hidden="true" />
 
         {/* 排序 */}
-        <select value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}
-          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 outline-none focus:border-indigo-300">
+        <label htmlFor="sort-select" className="sr-only">排序方式</label>
+        <select id="sort-select" value={sortKey} onChange={e => setSortKey(e.target.value as SortKey)}
+          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 outline-none focus:border-indigo-300 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
           <option value="priority">按优先级</option>
           <option value="dueDate">按截止日期</option>
           <option value="hours">按工时</option>
           <option value="project">按项目</option>
         </select>
         <button onClick={() => setSortAsc(!sortAsc)}
-          className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-50" title={sortAsc ? '升序' : '降序'}>
-          {sortAsc ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
+          className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
+          aria-label={sortAsc ? '切换为降序排列' : '切换为升序排列'}
+          aria-pressed={!sortAsc}>
+          {sortAsc ? <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" /> : <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />}
         </button>
 
-        <div className="h-5 w-px bg-slate-200" />
+        <div className="h-5 w-px bg-slate-200 hidden sm:block" aria-hidden="true" />
 
         {/* 状态过滤 */}
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 outline-none focus:border-indigo-300">
+        <label htmlFor="status-filter" className="sr-only">按状态筛选</label>
+        <select id="status-filter" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 outline-none focus:border-indigo-300 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
           <option value="all">全部状态</option>
           <option value="TODO">待办</option>
           <option value="IN_PROGRESS">进行中</option>
@@ -255,7 +259,7 @@ export default function SchedulePage() {
         </select>
 
         <div className="flex-1" />
-        <p className="text-[11px] text-slate-400">{sortedTasks.length} 个任务</p>
+        <p className="text-[11px] text-slate-500">{sortedTasks.length} 个任务</p>
       </div>
 
       {/* 任务列表 */}
@@ -275,9 +279,9 @@ export default function SchedulePage() {
         ))}
         {sortedTasks.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16">
-            <CheckCircle2 className="h-12 w-12 text-slate-200" />
+            <CheckCircle2 className="h-12 w-12 text-slate-200" aria-hidden="true" />
             <p className="mt-3 text-sm font-medium text-slate-500">所有任务已完成 🎉</p>
-            <p className="mt-1 text-xs text-slate-400">没有待处理的任务了</p>
+            <p className="mt-1 text-xs text-slate-500">没有待处理的任务了</p>
           </div>
         )}
       </div>
@@ -304,7 +308,7 @@ function StatCard({ icon, label, value, color }: {
           {icon}
         </div>
         <div>
-          <p className="text-[11px] text-slate-400">{label}</p>
+          <p className="text-[11px] text-slate-500">{label}</p>
           <p className="text-lg font-bold text-slate-800">{value}</p>
         </div>
       </div>
@@ -318,59 +322,67 @@ function TaskRow({ task }: { task: TaskItem }) {
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0));
   return (
     <div className={cn(
-      'flex items-center gap-3 rounded-lg border bg-white px-4 py-3 transition-colors hover:border-slate-300',
+      'rounded-lg border bg-white px-4 py-3 transition-all duration-200 hover:shadow-sm hover:border-slate-300 active:scale-[0.99]',
+      'flex items-center gap-3 max-sm:flex-col max-sm:items-start max-sm:gap-2',
       isOverdue ? 'border-red-200 bg-red-50/30' : 'border-slate-200',
     )}>
       {/* 优先级色条 */}
       <div className={cn(
-        'h-8 w-1 shrink-0 rounded-full',
+        'shrink-0 rounded-full max-sm:hidden',
+        'h-8 w-1',
         task.priority === 'URGENT' ? 'bg-red-500' :
         task.priority === 'HIGH' ? 'bg-orange-500' :
         task.priority === 'MEDIUM' ? 'bg-blue-500' : 'bg-slate-400',
       )} />
 
-      {/* 状态 */}
-      <span className={cn(
-        'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
-        task.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-700' :
-        task.status === 'BLOCKED' ? 'bg-red-100 text-red-700' :
-        task.status === 'REVIEW' ? 'bg-purple-100 text-purple-700' :
-        'bg-slate-100 text-slate-600',
-      )}>
-        {STATUS_LABEL[task.status] || task.status}
-      </span>
-
-      {/* 标题 */}
-      <div className="min-w-0 flex-1">
-        <span className={cn('text-sm font-medium', isOverdue ? 'text-red-700' : 'text-slate-800')}>
-          {task.title}
+      {/* 顶部行：状态 + 标题 */}
+      <div className="flex min-w-0 flex-1 items-center gap-2 max-sm:w-full">
+        {/* 状态 */}
+        <span className={cn(
+          'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
+          task.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-700' :
+          task.status === 'BLOCKED' ? 'bg-red-100 text-red-700' :
+          task.status === 'REVIEW' ? 'bg-purple-100 text-purple-700' :
+          'bg-slate-100 text-slate-600',
+        )}>
+          {STATUS_LABEL[task.status] || task.status}
         </span>
-        <div className="mt-0.5 flex items-center gap-2 text-[11px] text-slate-400">
-          <span>{task.projectName}</span>
-          {task.estimatedHours > 0 && (
-            <>
-              <span className="text-slate-300">·</span>
-              <Timer className="h-3 w-3" />
-              <span>{task.estimatedHours}h</span>
-            </>
-          )}
+
+        {/* 标题 */}
+        <div className="min-w-0 flex-1">
+          <span className={cn('text-sm font-medium', isOverdue ? 'text-red-700' : 'text-slate-800')}>
+            {task.title}
+          </span>
+          <div className="mt-0.5 flex items-center gap-2 text-[11px] text-slate-500">
+            <span>{task.projectName}</span>
+            {task.estimatedHours > 0 && (
+              <>
+                <span className="text-slate-300">·</span>
+                <Timer className="h-3 w-3" />
+                <span>{task.estimatedHours}h</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* 优先级 */}
-      <span className={cn('shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium', PRIORITY_CLASS[task.priority])}>
-        {PRIORITY_LABEL[task.priority]}
-      </span>
+      {/* 底部/右侧：优先级 + 截止日 */}
+      <div className="flex shrink-0 items-center gap-2 max-sm:w-full max-sm:justify-between">
+        {/* 优先级 */}
+        <span className={cn('rounded-full border px-2 py-0.5 text-[10px] font-medium', PRIORITY_CLASS[task.priority])}>
+          {PRIORITY_LABEL[task.priority]}
+        </span>
 
-      {/* 截止日 */}
-      <div className={cn(
-        'shrink-0 text-right',
-        isOverdue ? 'text-red-600 font-semibold' : 'text-slate-500',
-      )}>
-        <p className="text-xs">{fmtDate(task.dueDate)}</p>
-        {task.startDate && (
-          <p className="text-[10px] text-slate-400">{fmtDate(task.startDate)} 开始</p>
-        )}
+        {/* 截止日 */}
+        <div className={cn(
+          'text-right',
+          isOverdue ? 'text-red-600 font-semibold' : 'text-slate-500',
+        )}>
+          <p className="text-xs">{fmtDate(task.dueDate)}</p>
+          {task.startDate && (
+            <p className="text-[10px] text-slate-500">{fmtDate(task.startDate)} 开始</p>
+          )}
+        </div>
       </div>
     </div>
   );

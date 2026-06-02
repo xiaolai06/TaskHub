@@ -139,7 +139,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
       )}
 
       {/* 底部信息 */}
-      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3 text-[12px] text-slate-400">
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3 text-[12px] text-slate-500">
         {project.customer && (
           <span className="flex items-center gap-1">
             <Building2 className="h-3.5 w-3.5" />

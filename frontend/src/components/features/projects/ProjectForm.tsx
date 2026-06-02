@@ -97,7 +97,7 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
 
   return (
     <>
-      <div className="fixed inset-0 z-[100] bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[100] bg-black/30" onClick={onClose} />
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-xl">
           <div className="flex items-center justify-between border-b px-6 py-4">
@@ -117,7 +117,7 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">项目描述</label>
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="简要描述项目目标和范围" rows={2}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
               </div>
 
               {/* 类型（可选预设或自定义）+ 状态 */}
@@ -180,7 +180,7 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">支出说明</label>
                 <textarea value={expenseNote} onChange={(e) => setExpenseNote(e.target.value)}
                   placeholder="如：外包、服务器、域名等（任务花销会自动汇总）" rows={2}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
               </div>
 
               {/* 报酬说明 */}
@@ -188,15 +188,15 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">报酬说明</label>
                 <textarea value={rewardNote} onChange={(e) => setRewardNote(e.target.value)}
                   placeholder="如：合同金额、付款方式等" rows={2}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
               </div>
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
               <button type="button" onClick={() => { reset(); onClose(); }}
-                className="h-10 rounded-lg border border-slate-200 px-5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50">取消</button>
+                className="h-10 rounded-lg border border-slate-200 px-5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">取消</button>
               <button type="submit" disabled={isLoading || !name.trim()}
-                className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50">
+                className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}{isEdit ? '保存修改' : '创建项目'}
               </button>
             </div>

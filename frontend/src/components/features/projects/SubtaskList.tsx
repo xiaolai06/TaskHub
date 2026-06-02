@@ -113,7 +113,7 @@ function CostPopup({ task, onSave, onClose }: {
             <p className="mb-1 text-[11px] font-medium text-slate-500">已有记录：</p>
             <div className="space-y-0.5">
               {task.costNote.split('；').map((entry, i) => (
-                <p key={i} className="text-[11px] text-slate-400">· {entry}</p>
+                <p key={i} className="text-[11px] text-slate-500">· {entry}</p>
               ))}
             </div>
           </div>
@@ -193,7 +193,7 @@ export function SubtaskList({ tasks, projectId, onCreateSubtask, onUpdateTask, o
                   </span>
                 )}
 
-                {children.length > 0 && <span className="shrink-0 text-[11px] text-slate-400">{doneCount}/{children.length}</span>}
+                {children.length > 0 && <span className="shrink-0 text-[11px] text-slate-500">{doneCount}/{children.length}</span>}
                 <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium', st.color)}>{st.label}</span>
 
                 <div className="flex shrink-0 items-center gap-0.5">

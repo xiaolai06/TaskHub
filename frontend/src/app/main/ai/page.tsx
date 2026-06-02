@@ -179,9 +179,9 @@ function JobRow({ job, onToggle, onEdit, onDelete }: {
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-slate-800">{job.name}</span>
           <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium', badge.cls)}>{badge.label}</span>
-          {job.isSystem && <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-400">系统</span>}
+          {job.isSystem && <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">系统</span>}
         </div>
-        <p className="mt-0.5 flex items-center gap-2 text-[11px] text-slate-400">
+        <p className="mt-0.5 flex items-center gap-2 text-[11px] text-slate-500">
           <Clock className="h-3 w-3 shrink-0" />
           <code className="font-mono text-[11px]">{job.cronExpr}</code>
           <span className="text-slate-300">—</span>
@@ -194,13 +194,13 @@ function JobRow({ job, onToggle, onEdit, onDelete }: {
         <div className="flex items-center gap-1">
           {onEdit && (
             <button onClick={onEdit}
-              className="rounded-md px-2 py-1 text-[11px] text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-500">
+              className="rounded-md px-2 py-1 text-[11px] text-slate-500 transition-colors hover:bg-indigo-50 hover:text-indigo-500">
               编辑
             </button>
           )}
           {onDelete && (
             <button onClick={onDelete}
-              className="rounded-md px-2 py-1 text-[11px] text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500">
+              className="rounded-md px-2 py-1 text-[11px] text-slate-500 transition-colors hover:bg-red-50 hover:text-red-500">
               删除
             </button>
           )}

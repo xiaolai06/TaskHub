@@ -280,13 +280,13 @@ export default function ResearchPage() {
                               {cfg.label}
                             </span>
                             {item.extra && (
-                              <span className="text-[10px] text-slate-400">{item.extra}</span>
+                              <span className="text-[10px] text-slate-500">{item.extra}</span>
                             )}
                           </div>
                           <p className="mt-1 text-[12px] leading-relaxed text-slate-500">{item.snippet}</p>
                           {item.url && (
                             <a href={item.url} target="_blank" rel="noreferrer"
-                              className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-slate-400 transition-colors hover:text-indigo-500">
+                              className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-slate-500 transition-colors hover:text-indigo-500">
                               <ExternalLink className="h-3 w-3" />
                               打开链接
                             </a>
@@ -363,7 +363,7 @@ export default function ResearchPage() {
                             ))}
                           </div>
                         )}
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-slate-500">
                           {new Date(item.createdAt).toLocaleDateString('zh-CN')}
                         </span>
                       </div>

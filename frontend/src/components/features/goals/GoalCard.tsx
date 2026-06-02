@@ -97,7 +97,7 @@ export function GoalCard({ goal, onEdit, onDelete }: GoalCardProps) {
           {isAtRisk && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-500" />}
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap text-[11px] text-slate-400">
+        <div className="flex items-center gap-2 flex-wrap text-[11px] text-slate-500">
           <span>{metricLabel[goal.metricType] || '自定义'} · {typeLabel[goal.type]}</span>
           <span className="text-slate-300">·</span>
           <Calendar className="h-3 w-3" />
@@ -120,7 +120,7 @@ export function GoalCard({ goal, onEdit, onDelete }: GoalCardProps) {
 
         {/* 描述：仅非完成态且不拥挤时显示 */}
         {goal.description && !isComplete && (
-          <p className="mt-0.5 text-[11px] text-slate-400 line-clamp-1">{goal.description}</p>
+          <p className="mt-0.5 text-[11px] text-slate-500 line-clamp-1">{goal.description}</p>
         )}
       </div>
 

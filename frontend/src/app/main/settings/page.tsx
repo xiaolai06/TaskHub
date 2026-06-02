@@ -472,13 +472,13 @@ function SearchConfig() {
                 <label className="mb-1 block text-xs font-medium text-slate-600">包含域名（每行一个）</label>
                 <textarea rows={2} value={cfg.includeDomains || ''} onChange={e => setCfg(p => ({ ...p, includeDomains: e.target.value }))}
                   placeholder="github.com&#10;zhihu.com" className={cn(inputCls, 'text-[11px]')} />
-                <p className="mt-0.5 text-[10px] text-slate-400">搜索结果仅限于这些网站</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">搜索结果仅限于这些网站</p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">排除域名（每行一个）</label>
                 <textarea rows={2} value={cfg.excludeDomains || ''} onChange={e => setCfg(p => ({ ...p, excludeDomains: e.target.value }))}
                   placeholder="zhihu.com&#10;csdn.net" className={cn(inputCls, 'text-[11px]')} />
-                <p className="mt-0.5 text-[10px] text-slate-400">搜索结果中排除这些网站</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">搜索结果中排除这些网站</p>
               </div>
             </div>
           </div>
@@ -499,7 +499,7 @@ function SearchConfig() {
             {showPh ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           </button>
         </div>
-        <p className="mt-0.5 text-[10px] text-slate-400">
+        <p className="mt-0.5 text-[10px] text-slate-500">
           在 producthunt.com → Settings → API 免费申请，每天 100 次请求
         </p>
       </div>
@@ -557,7 +557,7 @@ function IntegrationConfig() {
         <label className="mb-1.5 block text-sm font-medium text-slate-700">n8n Webhook 地址</label>
         <input type="url" value={n8nWebhook} onChange={(e) => setN8nWebhook(e.target.value)}
           placeholder="https://n8n.example.com/webhook/xxx" className={inputCls} />
-        <p className="mt-1 text-[11px] text-slate-400">n8n 自动化工作流的回调地址</p>
+        <p className="mt-1 text-[11px] text-slate-500">n8n 自动化工作流的回调地址</p>
       </div>
 
       <div>
@@ -620,7 +620,7 @@ function SecuritySettings() {
                 <Smartphone className="h-5 w-5 shrink-0 text-slate-400" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-slate-700">{s.device}</p>
-                  <p className="text-[11px] text-slate-400">IP: {s.ip} · {new Date(s.createdAt).toLocaleDateString('zh-CN')}</p>
+                  <p className="text-[11px] text-slate-500">IP: {s.ip} · {new Date(s.createdAt).toLocaleDateString('zh-CN')}</p>
                 </div>
                 <button onClick={() => handleKick(s.id)}
                   className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50">
@@ -648,12 +648,12 @@ function DataManagement() {
         <button className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white transition-all hover:border-indigo-300 hover:shadow-sm">
           <Download className="h-6 w-6 text-indigo-500" />
           <span className="text-sm font-medium text-slate-700">导出项目数据</span>
-          <span className="text-[11px] text-slate-400">CSV 格式</span>
+          <span className="text-[11px] text-slate-500">CSV 格式</span>
         </button>
         <button className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white transition-all hover:border-indigo-300 hover:shadow-sm">
           <Download className="h-6 w-6 text-emerald-500" />
           <span className="text-sm font-medium text-slate-700">导出客户数据</span>
-          <span className="text-[11px] text-slate-400">CSV 格式</span>
+          <span className="text-[11px] text-slate-500">CSV 格式</span>
         </button>
       </div>
 

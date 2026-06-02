@@ -67,7 +67,7 @@ export default function GoalsPage() {
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-slate-800">目标管理</h1>
-          <p className="mt-0.5 text-xs text-slate-400">设定月度/季度目标，追踪进度</p>
+          <p className="mt-0.5 text-xs text-slate-500">设定月度/季度目标，追踪进度</p>
         </div>
         <button
           onClick={() => { setEditGoal(null); setShowForm(true); }}
@@ -106,7 +106,7 @@ export default function GoalsPage() {
           <div className="flex flex-col items-center rounded-xl border border-dashed border-slate-200 py-16">
             <Target className="h-10 w-10 text-slate-200" />
             <p className="mt-3 text-sm font-medium text-slate-500">暂无目标</p>
-            <p className="mt-1 text-xs text-slate-400">
+            <p className="mt-1 text-xs text-slate-500">
               {statusFilter || typeFilter ? '没有符合条件的目标' : '设定第一个目标，追踪你的进度'}
             </p>
           </div>

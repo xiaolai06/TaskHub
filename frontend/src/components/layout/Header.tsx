@@ -251,8 +251,8 @@ export function Header({ onOpenAi }: HeaderProps) {
                     <div className="mt-0.5 shrink-0">{infoIcon(item.type)}</div>
                     <div className="min-w-0 flex-1">
                       <p className={cn('text-[13px]', !item.read ? 'font-semibold text-slate-800' : 'font-medium text-slate-600')}>{item.title}</p>
-                      <p className="mt-0.5 text-[12px] text-slate-400">{item.desc}</p>
-                      <p className="mt-1 text-[11px] text-slate-400">{item.time}</p>
+                      <p className="mt-0.5 text-[12px] text-slate-500">{item.desc}</p>
+                      <p className="mt-1 text-[11px] text-slate-500">{item.time}</p>
                     </div>
                     {!item.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />}
                   </div>
@@ -280,7 +280,7 @@ export function Header({ onOpenAi }: HeaderProps) {
             <div className="absolute right-0 top-full mt-1 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
               <div className="flex items-center justify-between border-b px-4 py-2.5">
                 <span className="text-sm font-semibold text-slate-800">待办任务</span>
-                <span className="text-xs text-slate-400">{quickTasks.length} 项</span>
+                <span className="text-xs text-slate-500">{quickTasks.length} 项</span>
               </div>
               {quickTasks.length === 0 ? (
                 <div className="px-4 py-8 text-center text-sm text-slate-400">
@@ -293,10 +293,10 @@ export function Header({ onOpenAi }: HeaderProps) {
                       <span className={cn('mt-1 h-2 w-2 shrink-0 rounded-full', task.priority === 'URGENT' || task.priority === 'HIGH' ? 'bg-red-400' : task.priority === 'MEDIUM' ? 'bg-amber-400' : 'bg-slate-300')} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[13px] font-medium text-slate-700">{task.title}</p>
-                        <p className="mt-0.5 text-[12px] text-slate-400">{task.project.name}</p>
+                        <p className="mt-0.5 text-[12px] text-slate-500">{task.project.name}</p>
                       </div>
                       {task.dueDate && (
-                        <span className="flex shrink-0 items-center gap-1 text-[11px] text-slate-400">
+                        <span className="flex shrink-0 items-center gap-1 text-[11px] text-slate-500">
                           <Clock className="h-3 w-3" />{new Date(task.dueDate).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
                         </span>
                       )}
@@ -336,7 +336,7 @@ export function Header({ onOpenAi }: HeaderProps) {
             )}
             <div className="hidden text-left md:block">
               <p className="text-[13px] font-medium text-slate-700">{user?.name || '未登录'}</p>
-              <p className="text-[11px] text-slate-400">{roleLabel}</p>
+              <p className="text-[11px] text-slate-500">{roleLabel}</p>
             </div>
             <ChevronDown className="hidden h-3.5 w-3.5 text-slate-400 md:block" />
           </DropdownMenuTrigger>

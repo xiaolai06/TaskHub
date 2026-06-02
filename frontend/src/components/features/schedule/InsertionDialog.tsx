@@ -243,7 +243,7 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
                         {t.title}
                       </span>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-slate-400 font-mono text-xs">
+                        <span className="text-slate-500 font-mono text-xs">
                           {t.originalEnd}
                         </span>
                         <ArrowRight className="h-3 w-3 text-slate-300" />

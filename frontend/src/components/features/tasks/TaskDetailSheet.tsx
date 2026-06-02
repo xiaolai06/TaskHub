@@ -50,7 +50,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
   return (
     <>
       {/* 遮罩 */}
-      <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />
 
       {/* 抽屉 */}
       <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-xl">
@@ -71,19 +71,19 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
           <div className="flex items-center gap-1">
             <button
               onClick={() => onEdit?.(task)}
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
             >
               <Edit3 className="h-4 w-4" />
             </button>
             <button
               onClick={() => { onDelete?.(task.id); onClose(); }}
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500"
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
             >
               <Trash2 className="h-4 w-4" />
             </button>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
             >
               <X className="h-4 w-4" />
             </button>
@@ -95,7 +95,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
           <div className="space-y-5">
             {/* 描述 */}
             <div>
-              <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">描述</h3>
+              <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">描述</h3>
               {task.description ? (
                 <p className="text-sm leading-relaxed text-slate-600">{task.description}</p>
               ) : (
@@ -148,7 +148,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
 
             {/* 时间信息 */}
             <div>
-              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">时间线</h3>
+              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">时间线</h3>
               <div className="space-y-2 text-[13px]">
                 <TimeLineRow label="创建时间" value={formatDateTime(task.createdAt)} />
                 <TimeLineRow label="最后更新" value={formatDateTime(task.updatedAt)} />
@@ -161,7 +161,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
             {/* 子任务 */}
             {children.length > 0 && (
               <div>
-                <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                   子任务 {doneCount}/{children.length}
                 </h3>
                 {/* 进度条 */}
@@ -207,7 +207,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
 function InfoCard({ label, value, icon, highlight }: { label: string; value: string; icon?: React.ReactNode; highlight?: boolean }) {
   return (
     <div className="rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2.5">
-      <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
       <p className={cn('flex items-center gap-1 text-sm font-medium', highlight ? 'text-red-500' : 'text-slate-700')}>
         {icon}
         {value}

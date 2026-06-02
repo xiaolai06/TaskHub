@@ -210,10 +210,10 @@ export default function ProjectDetailPage({
                     <span className={`text-sm truncate ${task.status === 'DONE' ? 'line-through text-slate-400' : 'text-slate-700'}`}>
                       {task.title}
                     </span>
-                    <span className="text-[10px] text-slate-400">{priorityLabels[task.priority] || task.priority}</span>
-                    <span className="text-[10px] text-slate-400">{task.estimatedHours}h</span>
+                    <span className="text-[10px] text-slate-500">{priorityLabels[task.priority] || task.priority}</span>
+                    <span className="text-[10px] text-slate-500">{task.estimatedHours}h</span>
                     {task.dueDate && (
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-slate-500">
                         截止 {new Date(task.dueDate).toLocaleDateString('zh-CN')}
                       </span>
                     )}

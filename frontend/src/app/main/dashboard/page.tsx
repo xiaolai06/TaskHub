@@ -98,7 +98,7 @@ function StatCard({
   colorClass: string;
 }) {
   return (
-    <div className="flex items-start justify-between rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm">
+    <div className="flex items-start justify-between rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.98]">
       <div>
         <p className="text-[12px] text-slate-500">{label}</p>
         <p className="mt-1 text-xl font-extrabold text-slate-900">{value}</p>
@@ -106,12 +106,12 @@ function StatCard({
           <p className="mt-0.5 flex items-center gap-0.5 text-[11px]">
             {trend.positive ? <ArrowUpRight className="h-3 w-3 text-emerald-500" /> : <ArrowDownRight className="h-3 w-3 text-red-500" />}
             <span className={trend.positive ? 'text-emerald-600' : 'text-red-500'}>{trend.value}</span>
-            <span className="ml-0.5 text-slate-400">较上周</span>
+            <span className="ml-0.5 text-slate-500">较上周</span>
           </p>
         )}
       </div>
       <div className={cn('rounded-lg p-2', colorClass)}>
-        <Icon className="h-4 w-4" />
+        <Icon className="h-4 w-4" aria-hidden="true" />
       </div>
     </div>
   );
@@ -121,7 +121,7 @@ function StatCard({
 
 function Card({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-[280px] flex-col rounded-xl border border-slate-200/60 bg-white shadow-sm">
+    <div className="flex min-h-[280px] flex-col rounded-xl border border-slate-200/60 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
         <h2 className="text-sm font-semibold text-slate-700">{title}</h2>
         {count !== undefined && <span className="text-xs text-slate-400">{count}</span>}
@@ -176,7 +176,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" aria-hidden="true" />
       </div>
     );
   }
@@ -184,11 +184,11 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-32">
-        <AlertTriangle className="h-10 w-10 text-red-300" />
+        <AlertTriangle className="h-10 w-10 text-red-300" aria-hidden="true" />
         <p className="mt-4 text-sm text-red-500">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
+          className="mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
         >
           重试
         </button>
@@ -197,13 +197,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 animate-in fade-in duration-300">
       {/* 顶部：日期选择 + 快捷切换 */}
       <div className="flex flex-wrap items-center gap-3">
         {/* 具体日期 */}
         <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2">
-          <Calendar className="h-4 w-4 text-slate-400" />
+          <Calendar className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          <label htmlFor="dashboard-date" className="sr-only">选择日期</label>
           <input
+            id="dashboard-date"
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
@@ -218,7 +220,7 @@ export default function DashboardPage() {
               key={r.key}
               onClick={() => setTimeRange(r.key)}
               className={cn(
-                'rounded-md px-4 py-1.5 text-sm font-medium transition-all',
+                'rounded-md px-4 py-1.5 text-sm font-medium transition-all active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
                 timeRange === r.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50',
               )}
             >
@@ -243,7 +245,7 @@ export default function DashboardPage() {
         <Card title="项目概览" count={projects.length}>
           {projects.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-400">
-              <FolderKanban className="mb-2 h-8 w-8 text-slate-200" />暂无项目
+              <FolderKanban className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无项目
             </div>
           ) : (
             <div className="divide-y">
@@ -253,7 +255,7 @@ export default function DashboardPage() {
                   <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[13px] font-medium text-slate-800">{p.name}</p>
-                      <p className="text-[11px] text-slate-400">{p.doneTasks}/{p.totalTasks} 任务</p>
+                      <p className="text-[11px] text-slate-500">{p.doneTasks}/{p.totalTasks} 任务</p>
                     </div>
                     <div className="w-20">
                       <div className="flex items-center gap-1.5">
@@ -277,7 +279,7 @@ export default function DashboardPage() {
         <Card title="最近活动" count={recentTasks.length}>
           {recentTasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-400">
-              <Clock className="mb-2 h-8 w-8 text-slate-200" />暂无活动
+              <Clock className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无活动
             </div>
           ) : (
             <div className="divide-y">
@@ -286,13 +288,13 @@ export default function DashboardPage() {
                   <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', task.priority === 'URGENT' || task.priority === 'HIGH' ? 'bg-red-400' : task.priority === 'MEDIUM' ? 'bg-amber-400' : 'bg-slate-300')} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[13px] font-medium text-slate-700">{task.title}</p>
-                    <p className="text-[11px] text-slate-400">{task.project.name}{task.assignee && ` · ${task.assignee.name}`}</p>
+                    <p className="text-[11px] text-slate-500">{task.project.name}{task.assignee && ` · ${task.assignee.name}`}</p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-0.5">
                     <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium', priorityColor[task.priority] || 'text-slate-500 bg-slate-50')}>
                       {task.priority === 'URGENT' ? '紧急' : task.priority === 'HIGH' ? '高' : task.priority === 'MEDIUM' ? '中' : '低'}
                     </span>
-                    <span className="text-[10px] text-slate-400">{timeAgo(task.updatedAt)}</span>
+                    <span className="text-[10px] text-slate-500">{timeAgo(task.updatedAt)}</span>
                   </div>
                 </div>
               ))}
@@ -352,7 +354,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-medium text-slate-800">{c.name}</p>
-                  <p className="text-[11px] text-slate-400">{c.contact} · {c.projects} 个项目</p>
+                  <p className="text-[11px] text-slate-500">{c.contact} · {c.projects} 个项目</p>
                 </div>
                 <span className={cn(
                   'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',

@@ -138,13 +138,13 @@ function TaskRow({
               {task.title}
             </span>
             {children.length > 0 && (
-              <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+              <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
                 {doneCount}/{children.length}
               </span>
             )}
           </div>
           {task.description && depth === 0 && (
-            <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-400" style={{ paddingLeft: depth * 20 }}>
+            <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500" style={{ paddingLeft: depth * 20 }}>
               {task.description}
             </p>
           )}
@@ -174,7 +174,7 @@ function TaskRow({
           <div className="flex flex-col gap-0.5">
             <span className="text-[12px] text-slate-600">{task.project?.name || '—'}</span>
             {task.cost > 0 && (
-              <span className="flex items-center gap-0.5 text-[11px] text-slate-400">
+              <span className="flex items-center gap-0.5 text-[11px] text-slate-500">
                 <DollarSign className="h-3 w-3" />{formatCost(task.cost)}
               </span>
             )}
@@ -276,7 +276,7 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
             <th className="px-3 py-2.5 text-left">
               <SortHeader label="任务名称" field="title" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>
-            <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400">状态</th>
+            <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">状态</th>
             <th className="px-3 py-2.5 text-left">
               <SortHeader label="优先级" field="priority" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>

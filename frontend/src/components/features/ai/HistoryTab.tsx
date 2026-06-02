@@ -91,7 +91,7 @@ export function HistoryTab({
             onClick={() => onSwitchSession(s.sessionId)}
             onKeyDown={(e) => { if (e.key === 'Enter') onSwitchSession(s.sessionId); }}
             className={cn(
-              'group flex cursor-pointer items-start gap-2 rounded-lg px-2 py-2.5 transition-colors hover:bg-slate-100',
+              'group flex cursor-pointer items-start gap-2 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted',
               s.sessionId === activeSessionId && 'bg-indigo-50/70',
             )}
           >
@@ -106,7 +106,7 @@ export function HistoryTab({
               )}>
                 {inferTitle(s)}
               </p>
-              <p className="mt-0.5 text-[10px] text-slate-400">
+              <p className="mt-0.5 text-[10px] text-slate-500">
                 {s.messageCount} 条消息 · {relativeTime(s.lastMessage)}
               </p>
             </div>
@@ -121,7 +121,7 @@ export function HistoryTab({
 
         {filtered.length === 0 && (
           <div className="py-6 text-center">
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               {search.trim() ? '没有匹配的会话' : '暂无历史会话'}
             </p>
           </div>

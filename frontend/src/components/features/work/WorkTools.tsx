@@ -194,7 +194,7 @@ function TodoPanel({ onClose }: { onClose: () => void }) {
         <div className="flex items-center gap-1.5">
           <ListTodo className="h-4 w-4 text-indigo-500" />
           <span className="text-sm font-semibold text-slate-700">今日任务</span>
-          {todos.length > 0 && <span className="text-[11px] text-slate-400">{doneCount}/{todos.length}</span>}
+          {todos.length > 0 && <span className="text-[11px] text-slate-500">{doneCount}/{todos.length}</span>}
         </div>
         <button onClick={onClose} className="text-xs text-slate-400 hover:text-slate-600">收起</button>
       </div>

@@ -96,7 +96,7 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
                 <button
                   key={c.id}
                   onClick={() => onCustomerClick(c.name)}
-                  className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-white hover:shadow-sm"
+                  className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-background hover:shadow-sm"
                 >
                   <span className={cn(
                     'h-2 w-2 shrink-0 rounded-full',
@@ -104,7 +104,7 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
                   )} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[12px] font-medium text-slate-700">{c.name}</p>
-                    <p className="mt-0.5 text-[10px] text-slate-400">
+                    <p className="mt-0.5 text-[10px] text-slate-500">
                       {d ? `${d} 天未联系` : '无联系记录'}
                       {c.company && ` · ${c.company}`}
                     </p>
@@ -118,7 +118,7 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
 
       {/* 全部客户 */}
       <div className="space-y-1">
-        <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+        <p className="px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
           全部客户 ({sorted.length})
         </p>
         <div className="space-y-0.5">
@@ -128,14 +128,14 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
               <button
                 key={c.id}
                 onClick={() => onCustomerClick(c.name)}
-                className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-white hover:shadow-sm"
+                className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-background hover:shadow-sm"
               >
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[11px] font-medium text-slate-600">
                   {c.name.charAt(0)}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[12px] font-medium text-slate-700">{c.name}</p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-slate-500">
                     {c.company || (d !== null ? `${d} 天前联系` : '暂无联系')}
                   </p>
                 </div>
@@ -153,7 +153,7 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
 
       {sorted.length === 0 && (
         <div className="py-8 text-center">
-          <p className="text-[12px] text-slate-400">暂无客户</p>
+          <p className="text-[12px] text-slate-500">暂无客户</p>
           <p className="mt-1 text-[11px] text-slate-300">在客户管理页面添加</p>
         </div>
       )}

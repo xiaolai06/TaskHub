@@ -75,7 +75,7 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
               className="flex-1 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
             />
           </div>
-          <p className="text-[10px] text-slate-400">
+          <p className="text-[10px] text-slate-500">
             💡 记录后进度会自动累加，删除记录会自动回退
           </p>
           <div className="flex justify-end gap-2">
@@ -111,7 +111,7 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
               className="group flex items-start gap-2.5 rounded-lg px-2 py-2 hover:bg-slate-50"
             >
               {/* 日期 */}
-              <div className="flex shrink-0 items-center gap-1 text-[11px] text-slate-400">
+              <div className="flex shrink-0 items-center gap-1 text-[11px] text-slate-500">
                 <Calendar className="h-3 w-3" />
                 {formatDate(log.date)}
               </div>

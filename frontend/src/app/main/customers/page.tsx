@@ -99,7 +99,7 @@ export default function CustomersPage() {
           <span className="text-xs text-slate-300">至</span>
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border-none bg-transparent text-xs text-slate-600 outline-none" />
           {(startDate || endDate) && (
-            <button onClick={clearDateFilter} className="ml-1 rounded px-1.5 py-0.5 text-[11px] text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">清除</button>
+            <button onClick={clearDateFilter} className="ml-1 rounded px-1.5 py-0.5 text-[11px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-600">清除</button>
           )}
         </div>
 
