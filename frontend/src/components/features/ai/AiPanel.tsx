@@ -172,10 +172,10 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
         />
       )}
 
-      <div className={cn(
-        'fixed right-0 top-0 z-50 flex h-screen w-[860px] flex-col bg-card shadow-2xl transition-transform duration-300 ease-in-out',
-        open ? 'translate-x-0' : 'translate-x-full',
-      )}>
+      <div
+        className="fixed right-0 top-0 z-50 flex h-screen w-[860px] flex-col bg-card shadow-2xl transition-transform duration-300 ease-in-out"
+        style={{ transform: open ? 'translateX(0)' : 'translateX(100%)' }}
+      >
         {/* 顶部栏 */}
         <div className="flex h-11 shrink-0 items-center justify-between border-b border-border bg-muted/50 px-3">
           <div className="flex items-center gap-2">
