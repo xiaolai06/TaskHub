@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   FolderKanban, CheckSquare, TrendingUp, AlertTriangle,
   DollarSign, Clock, ArrowUpRight, ArrowDownRight, Loader2,
@@ -113,20 +114,6 @@ function StatCard({
       <div className={cn('rounded-lg p-2', colorClass)}>
         <Icon className="h-4 w-4" aria-hidden="true" />
       </div>
-    </div>
-  );
-}
-
-// ========== 卡片容器 ==========
-
-function Card({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-[280px] flex-col rounded-xl border border-slate-200/60 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
-        <h2 className="text-sm font-semibold text-slate-700">{title}</h2>
-        {count !== undefined && <span className="text-xs text-slate-500">{count}</span>}
-      </div>
-      <div className="flex-1 overflow-hidden">{children}</div>
     </div>
   );
 }
@@ -242,68 +229,88 @@ export default function DashboardPage() {
       {/* 2x2 网格布局 */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* 项目概览 */}
-        <Card title="项目概览" count={projects.length}>
-          {projects.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-500">
-              <FolderKanban className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无项目
+        <Card className="min-h-[280px] border-slate-200/60">
+          <CardHeader className="border-b border-slate-100 px-4 py-2.5">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold text-slate-700">项目概览</CardTitle>
+              <span className="text-xs text-slate-500">{projects.length}</span>
             </div>
-          ) : (
-            <div className="divide-y">
-              {projects.map((p) => {
-                const progress = p.totalTasks > 0 ? Math.round((p.doneTasks / p.totalTasks) * 100) : 0;
-                return (
-                  <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-medium text-slate-800">{p.name}</p>
-                      <p className="text-[11px] text-slate-500">{p.doneTasks}/{p.totalTasks} 任务</p>
-                    </div>
-                    <div className="w-20">
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                          <div className={cn('h-full rounded-full', progress >= 80 ? 'bg-amber-400' : 'bg-indigo-500')} style={{ width: `${progress}%` }} />
-                        </div>
-                        <span className="text-[11px] font-medium text-slate-500">{progress}%</span>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden px-0 pt-0">
+            {projects.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-500">
+                <FolderKanban className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无项目
+              </div>
+            ) : (
+              <div className="divide-y">
+                {projects.map((p) => {
+                  const progress = p.totalTasks > 0 ? Math.round((p.doneTasks / p.totalTasks) * 100) : 0;
+                  return (
+                    <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-medium text-slate-800">{p.name}</p>
+                        <p className="text-[11px] text-slate-500">{p.doneTasks}/{p.totalTasks} 任务</p>
                       </div>
+                      <div className="w-20">
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
+                            <div className={cn('h-full rounded-full', progress >= 80 ? 'bg-amber-400' : 'bg-indigo-500')} style={{ width: `${progress}%` }} />
+                          </div>
+                          <span className="text-[11px] font-medium text-slate-500">{progress}%</span>
+                        </div>
+                      </div>
+                      <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium', statusColor[p.status] || statusColor.TODO)}>
+                        {statusLabel[p.status] || p.status}
+                      </span>
                     </div>
-                    <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium', statusColor[p.status] || statusColor.TODO)}>
-                      {statusLabel[p.status] || p.status}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
         </Card>
 
         {/* 最近活动 */}
-        <Card title="最近活动" count={recentTasks.length}>
-          {recentTasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-500">
-              <Clock className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无活动
+        <Card className="min-h-[280px] border-slate-200/60">
+          <CardHeader className="border-b border-slate-100 px-4 py-2.5">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold text-slate-700">最近活动</CardTitle>
+              <span className="text-xs text-slate-500">{recentTasks.length}</span>
             </div>
-          ) : (
-            <div className="divide-y">
-              {recentTasks.map((task) => (
-                <div key={task.id} className="flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
-                  <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', task.priority === 'URGENT' || task.priority === 'HIGH' ? 'bg-red-400' : task.priority === 'MEDIUM' ? 'bg-amber-400' : 'bg-slate-300')} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-medium text-slate-700">{task.title}</p>
-                    <p className="text-[11px] text-slate-500">{task.project.name}{task.assignee && ` · ${task.assignee.name}`}</p>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden px-0 pt-0">
+            {recentTasks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-500">
+                <Clock className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无活动
+              </div>
+            ) : (
+              <div className="divide-y">
+                {recentTasks.map((task) => (
+                  <div key={task.id} className="flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
+                    <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', task.priority === 'URGENT' || task.priority === 'HIGH' ? 'bg-red-400' : task.priority === 'MEDIUM' ? 'bg-amber-400' : 'bg-slate-300')} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-medium text-slate-700">{task.title}</p>
+                      <p className="text-[11px] text-slate-500">{task.project.name}{task.assignee && ` · ${task.assignee.name}`}</p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-0.5">
+                      <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium', priorityColor[task.priority] || 'text-slate-500 bg-slate-50')}>
+                        {task.priority === 'URGENT' ? '紧急' : task.priority === 'HIGH' ? '高' : task.priority === 'MEDIUM' ? '中' : '低'}
+                      </span>
+                      <span className="text-[10px] text-slate-500">{timeAgo(task.updatedAt)}</span>
+                    </div>
                   </div>
-                  <div className="flex shrink-0 flex-col items-end gap-0.5">
-                    <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium', priorityColor[task.priority] || 'text-slate-500 bg-slate-50')}>
-                      {task.priority === 'URGENT' ? '紧急' : task.priority === 'HIGH' ? '高' : task.priority === 'MEDIUM' ? '中' : '低'}
-                    </span>
-                    <span className="text-[10px] text-slate-500">{timeAgo(task.updatedAt)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </CardContent>
         </Card>
 
         {/* 任务分布 */}
-        <Card title="任务分布">
+        <Card className="min-h-[280px] border-slate-200/60">
+          <CardHeader className="border-b border-slate-100 px-4 py-2.5">
+            <CardTitle className="text-sm font-semibold text-slate-700">任务分布</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden px-0 pt-0">
           <div className="px-4 py-3">
             {(() => {
               const statusCounts: Record<string, number> = {};
@@ -342,10 +349,18 @@ export default function DashboardPage() {
               );
             })()}
           </div>
+          </CardContent>
         </Card>
 
         {/* 客户概览 */}
-        <Card title="客户概览" count={customers.length}>
+        <Card className="min-h-[280px] border-slate-200/60">
+          <CardHeader className="border-b border-slate-100 px-4 py-2.5">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold text-slate-700">客户概览</CardTitle>
+              <span className="text-xs text-slate-500">{customers.length}</span>
+            </div>
+          </CardHeader>
+          <CardContent className="flex-1 overflow-hidden px-0 pt-0">
           <div className="divide-y">
             {customers.map((c) => (
               <div key={c.id} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
@@ -365,6 +380,7 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+          </CardContent>
         </Card>
       </div>
     </div>
