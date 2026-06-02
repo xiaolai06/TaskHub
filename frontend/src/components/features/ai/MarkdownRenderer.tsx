@@ -41,11 +41,11 @@ export function MarkdownRenderer({ content }: { content: string }) {
 
     // 标题
     if (line.startsWith('### ')) {
-      elements.push(<h3 key={`h-${i}`} className="mt-3 mb-1 text-sm font-semibold text-slate-800">{renderInline(line.slice(4))}</h3>);
+      elements.push(<h3 key={`h-${i}`} className="mt-3 mb-1 text-sm font-semibold text-foreground">{renderInline(line.slice(4))}</h3>);
       i++; continue;
     }
     if (line.startsWith('## ')) {
-      elements.push(<h2 key={`h-${i}`} className="mt-3 mb-1 text-base font-bold text-slate-800">{renderInline(line.slice(3))}</h2>);
+      elements.push(<h2 key={`h-${i}`} className="mt-3 mb-1 text-base font-bold text-foreground">{renderInline(line.slice(3))}</h2>);
       i++; continue;
     }
 
@@ -62,14 +62,14 @@ export function MarkdownRenderer({ content }: { content: string }) {
         const body = tableRows.filter((_, idx) => idx !== 1 || !tableRows[1]?.every(c => /^[-:]+$/.test(c)));
         const realBody = tableRows[1] && tableRows[1].every(c => /^[-:]+$/.test(c)) ? tableRows.slice(2) : tableRows.slice(1);
         elements.push(
-          <div key={`tbl-${i}`} className="my-2 overflow-x-auto rounded-lg border border-slate-200">
+          <div key={`tbl-${i}`} className="my-2 overflow-x-auto rounded-lg border border-border">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50">
-                <tr>{header.map((h, j) => <th key={j} className="px-3 py-2 font-medium text-slate-600 border-b">{renderInline(h)}</th>)}</tr>
+              <thead className="bg-muted">
+                <tr>{header.map((h, j) => <th key={j} className="px-3 py-2 font-medium text-foreground/70 border-b">{renderInline(h)}</th>)}</tr>
               </thead>
               <tbody>
                 {realBody.map((row, ri) => (
-                  <tr key={ri} className="border-b last:border-0">{row.map((c, ci) => <td key={ci} className="px-3 py-1.5 text-slate-700">{renderInline(c)}</td>)}</tr>
+                  <tr key={ri} className="border-b last:border-0">{row.map((c, ci) => <td key={ci} className="px-3 py-1.5 text-foreground/80">{renderInline(c)}</td>)}</tr>
                 ))}
               </tbody>
             </table>
@@ -89,8 +89,8 @@ export function MarkdownRenderer({ content }: { content: string }) {
       elements.push(
         <ul key={`ul-${i}`} className="my-1 space-y-0.5">
           {items.map((item, j) => (
-            <li key={j} className="flex items-start gap-2 text-xs text-slate-700">
-              <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />
+            <li key={j} className="flex items-start gap-2 text-xs text-foreground/80">
+              <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground" />
               <span>{renderInline(item)}</span>
             </li>
           ))}
@@ -107,7 +107,7 @@ export function MarkdownRenderer({ content }: { content: string }) {
         i++;
       }
       elements.push(
-        <blockquote key={`q-${i}`} className="my-2 border-l-2 border-indigo-300 pl-3 text-xs text-slate-500 italic">
+        <blockquote key={`q-${i}`} className="my-2 border-l-2 border-indigo-300 pl-3 text-xs text-muted-foreground italic">
           {quoteLines.map((q, j) => <p key={j} className={j > 0 ? 'mt-1' : ''}>{renderInline(q)}</p>)}
         </blockquote>
       );
@@ -115,7 +115,7 @@ export function MarkdownRenderer({ content }: { content: string }) {
     }
 
     // 普通段落
-    elements.push(<p key={`p-${i}`} className="text-xs leading-relaxed text-slate-700">{renderInline(line)}</p>);
+    elements.push(<p key={`p-${i}`} className="text-xs leading-relaxed text-foreground/80">{renderInline(line)}</p>);
     i++;
   }
 
@@ -163,9 +163,9 @@ function renderInline(text: string): React.ReactNode {
 
   return <>{parts.map((p, i) => {
     switch (p.type) {
-      case 'strong': return <strong key={i} className="font-semibold text-slate-800">{p.text}</strong>;
+      case 'strong': return <strong key={i} className="font-semibold text-foreground">{p.text}</strong>;
       case 'em': return <em key={i} className="italic">{p.text}</em>;
-      case 'code': return <code key={i} className="rounded bg-slate-100 px-1 py-0.5 text-xs text-rose-600 font-mono">{p.text}</code>;
+      case 'code': return <code key={i} className="rounded bg-muted px-1 py-0.5 text-xs text-rose-600 font-mono">{p.text}</code>;
       case 'link': return <a key={i} href={p.url} className="text-indigo-500 underline" target="_blank" rel="noreferrer">{p.text}</a>;
       default: return <span key={i}>{p.text}</span>;
     }

@@ -18,6 +18,12 @@ import { exchangeRateTool } from './exchange-rate';
 import { devToTool } from './dev-to';
 import { productHuntTool } from './product-hunt';
 import { getCurrentTimeTool } from './get-current-time';
+// 排期智能工具
+import { complexityAssessmentTool } from './complexity-assessment';
+import { insertionEvaluationTool } from './insertion-evaluation';
+import { rebalanceSuggestTool } from './rebalance-suggest';
+import { scheduleAdviceTool } from './schedule-advice';
+import { historicalAccuracyTool } from './historical-accuracy';
 
 const allTools: ToolDefinition[] = [
   // 💰 finance
@@ -34,6 +40,9 @@ const allTools: ToolDefinition[] = [
   exchangeRateTool, devToTool, productHuntTool,
   // 🕐 system
   getCurrentTimeTool,
+  // 📅 schedule intelligence
+  complexityAssessmentTool, insertionEvaluationTool, rebalanceSuggestTool, scheduleAdviceTool,
+  historicalAccuracyTool,
 ];
 
 const toolMap = new Map<string, ToolDefinition>();

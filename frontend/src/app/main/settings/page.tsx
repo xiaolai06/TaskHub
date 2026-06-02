@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
   Loader2, CheckCircle, AlertCircle, Bot, Link, Shield, Database,
-  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search, Plus, Mail, Send,
+  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search, Plus,
 } from 'lucide-react';
 
 // ========== 类型 ==========
@@ -472,13 +472,13 @@ function SearchConfig() {
                 <label className="mb-1 block text-xs font-medium text-slate-600">包含域名（每行一个）</label>
                 <textarea rows={2} value={cfg.includeDomains || ''} onChange={e => setCfg(p => ({ ...p, includeDomains: e.target.value }))}
                   placeholder="github.com&#10;zhihu.com" className={cn(inputCls, 'text-[11px]')} />
-                <p className="mt-0.5 text-[10px] text-slate-400">搜索结果仅限于这些网站</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">搜索结果仅限于这些网站</p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-slate-600">排除域名（每行一个）</label>
                 <textarea rows={2} value={cfg.excludeDomains || ''} onChange={e => setCfg(p => ({ ...p, excludeDomains: e.target.value }))}
                   placeholder="zhihu.com&#10;csdn.net" className={cn(inputCls, 'text-[11px]')} />
-                <p className="mt-0.5 text-[10px] text-slate-400">搜索结果中排除这些网站</p>
+                <p className="mt-0.5 text-[10px] text-slate-500">搜索结果中排除这些网站</p>
               </div>
             </div>
           </div>
@@ -499,7 +499,7 @@ function SearchConfig() {
             {showPh ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           </button>
         </div>
-        <p className="mt-0.5 text-[10px] text-slate-400">
+        <p className="mt-0.5 text-[10px] text-slate-500">
           在 producthunt.com → Settings → API 免费申请，每天 100 次请求
         </p>
       </div>
@@ -524,18 +524,8 @@ function SearchConfig() {
 function IntegrationConfig() {
   const [n8nWebhook, setN8nWebhook] = useState('');
   const [webhookSecret, setWebhookSecret] = useState('');
-  const [smtpHost, setSmtpHost] = useState('');
-  const [smtpPort, setSmtpPort] = useState('587');
-  const [smtpUser, setSmtpUser] = useState('');
-  const [smtpPass, setSmtpPass] = useState('');
-  const [smtpFrom, setSmtpFrom] = useState('');
-  const [smtpSecure, setSmtpSecure] = useState(false);
-  const [emailNotify, setEmailNotify] = useState(false);
-  const [showSmtpPass, setShowSmtpPass] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [testingEmail, setTestingEmail] = useState(false);
-  const [emailTestResult, setEmailTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   useEffect(() => {
     api.get<Record<string, string>>('/settings/integration')
@@ -543,129 +533,41 @@ function IntegrationConfig() {
         if (res.n8n_webhook) setN8nWebhook(res.n8n_webhook);
       })
       .catch(() => {});
-
-    api.get<Record<string, string>>('/settings/email')
-      .then((res) => {
-        if (res.host) setSmtpHost(res.host);
-        if (res.port) setSmtpPort(res.port);
-        if (res.user) setSmtpUser(res.user);
-        if (res.pass && res.pass !== '***') setSmtpPass(res.pass);
-        if (res.from) setSmtpFrom(res.from);
-        setSmtpSecure(res.secure === 'true');
-      })
-      .catch(() => {});
-
-    api.get<{ emailNotify?: boolean }>('/preferences')
-      .then((res) => setEmailNotify(Boolean(res.emailNotify)))
-      .catch(() => {});
   }, []);
 
   async function handleSave() {
     setSaving(true);
-    setSaved(false);
     try {
       await api.post('/settings/batch', {
         settings: [
           { category: 'INTEGRATION', key: 'n8n_webhook', value: n8nWebhook },
           { category: 'INTEGRATION', key: 'webhook_secret', value: webhookSecret, encrypted: true },
-          { category: 'EMAIL', key: 'host', value: smtpHost },
-          { category: 'EMAIL', key: 'port', value: smtpPort },
-          { category: 'EMAIL', key: 'user', value: smtpUser },
-          { category: 'EMAIL', key: 'pass', value: smtpPass, encrypted: true },
-          { category: 'EMAIL', key: 'from', value: smtpFrom },
-          { category: 'EMAIL', key: 'secure', value: String(smtpSecure) },
         ],
       });
-      await api.put('/preferences', { emailNotify });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {} finally { setSaving(false); }
   }
 
-  async function handleTestEmail() {
-    setTestingEmail(true);
-    setEmailTestResult(null);
-    try {
-      await handleSave();
-      const res = await api.post<{ email: string }>('/notifications/test-email');
-      setEmailTestResult({ success: true, message: `测试邮件已发送至 ${res.email}` });
-    } catch (err) {
-      setEmailTestResult({ success: false, message: err instanceof Error ? err.message : '测试邮件发送失败' });
-    } finally { setTestingEmail(false); }
-  }
-
   const inputCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-800"><Link className="h-4 w-4 text-indigo-500" />自动化集成</h3>
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">n8n Webhook 地址</label>
-          <input type="url" value={n8nWebhook} onChange={(e) => setN8nWebhook(e.target.value)}
-            placeholder="https://n8n.example.com/webhook/xxx" className={inputCls} />
-          <p className="mt-1 text-[11px] text-slate-400">n8n 自动化工作流的回调地址</p>
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-700">Webhook 密钥</label>
-          <input type="password" value={webhookSecret} onChange={(e) => setWebhookSecret(e.target.value)}
-            placeholder="用于验证 Webhook 来源" className={inputCls} />
-        </div>
+    <div className="space-y-5">
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-slate-700">n8n Webhook 地址</label>
+        <input type="url" value={n8nWebhook} onChange={(e) => setN8nWebhook(e.target.value)}
+          placeholder="https://n8n.example.com/webhook/xxx" className={inputCls} />
+        <p className="mt-1 text-[11px] text-slate-500">n8n 自动化工作流的回调地址</p>
       </div>
 
-      <div className="border-t border-slate-100 pt-5">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-800"><Mail className="h-4 w-4 text-emerald-500" />邮箱通知</h3>
-          <label className="flex items-center gap-2 text-xs font-medium text-slate-600">
-            <input type="checkbox" checked={emailNotify} onChange={(e) => setEmailNotify(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
-            启用晨报/周报邮件
-          </label>
-        </div>
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-slate-700">Webhook 密钥</label>
+        <input type="password" value={webhookSecret} onChange={(e) => setWebhookSecret(e.target.value)}
+          placeholder="用于验证 Webhook 来源" className={inputCls} />
+      </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">SMTP 主机</label>
-            <input value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} placeholder="smtp.example.com" className={inputCls} />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">端口</label>
-            <input value={smtpPort} onChange={(e) => setSmtpPort(e.target.value)} placeholder="587" className={inputCls} />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">账号</label>
-            <input value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)} placeholder="name@example.com" className={inputCls} />
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">密码 / 授权码</label>
-            <div className="relative">
-              <input type={showSmtpPass ? 'text' : 'password'} value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)}
-                placeholder="SMTP 授权码" className={cn(inputCls, 'pr-9')} />
-              <button type="button" onClick={() => setShowSmtpPass(!showSmtpPass)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                {showSmtpPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">发件人</label>
-            <input value={smtpFrom} onChange={(e) => setSmtpFrom(e.target.value)} placeholder="TaskFlow <name@example.com>" className={inputCls} />
-          </div>
-          <label className="flex items-end gap-2 pb-2 text-sm font-medium text-slate-600">
-            <input type="checkbox" checked={smtpSecure} onChange={(e) => setSmtpSecure(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
-            使用 SSL/TLS
-          </label>
-        </div>
-
-        {emailTestResult && (
-          <div className={cn('mt-4 flex items-center gap-2 rounded-lg px-3 py-2 text-sm',
-            emailTestResult.success ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600')}>
-            {emailTestResult.success ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-            {emailTestResult.message}
-          </div>
-        )}
+      <div className="rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center">
+        <p className="text-sm text-slate-400">微信 / 钉钉集成开发中...</p>
       </div>
 
       {saved && (
@@ -674,18 +576,11 @@ function IntegrationConfig() {
         </div>
       )}
 
-      <div className="flex gap-2">
-        <button onClick={handleSave} disabled={saving}
-          className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-          保存配置
-        </button>
-        <button onClick={handleTestEmail} disabled={testingEmail || !smtpHost || !smtpUser || !smtpPass}
-          className="flex h-10 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 disabled:opacity-50">
-          {testingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          发送测试邮件
-        </button>
-      </div>
+      <button onClick={handleSave} disabled={saving}
+        className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50">
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+        保存配置
+      </button>
     </div>
   );
 }
@@ -725,7 +620,7 @@ function SecuritySettings() {
                 <Smartphone className="h-5 w-5 shrink-0 text-slate-400" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-slate-700">{s.device}</p>
-                  <p className="text-[11px] text-slate-400">IP: {s.ip} · {new Date(s.createdAt).toLocaleDateString('zh-CN')}</p>
+                  <p className="text-[11px] text-slate-500">IP: {s.ip} · {new Date(s.createdAt).toLocaleDateString('zh-CN')}</p>
                 </div>
                 <button onClick={() => handleKick(s.id)}
                   className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50">
@@ -753,12 +648,12 @@ function DataManagement() {
         <button className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white transition-all hover:border-indigo-300 hover:shadow-sm">
           <Download className="h-6 w-6 text-indigo-500" />
           <span className="text-sm font-medium text-slate-700">导出项目数据</span>
-          <span className="text-[11px] text-slate-400">CSV 格式</span>
+          <span className="text-[11px] text-slate-500">CSV 格式</span>
         </button>
         <button className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white transition-all hover:border-indigo-300 hover:shadow-sm">
           <Download className="h-6 w-6 text-emerald-500" />
           <span className="text-sm font-medium text-slate-700">导出客户数据</span>
-          <span className="text-[11px] text-slate-400">CSV 格式</span>
+          <span className="text-[11px] text-slate-500">CSV 格式</span>
         </button>
       </div>
 

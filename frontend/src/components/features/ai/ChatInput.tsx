@@ -70,7 +70,7 @@ export function ChatInput({
   }
 
   return (
-    <div className="shrink-0 border-t bg-white px-3 pb-3 pt-2.5">
+    <div className="shrink-0 border-t bg-background px-3 pb-3 pt-2.5">
       {/* 模型切换 toast — 2s 自动消失 */}
       {toastMessage && (
         <div className="mb-2 flex items-center gap-1.5 rounded-md bg-emerald-50/70 px-2.5 py-1.5 text-[10px] text-emerald-700 animate-in fade-in slide-in-from-left-2">
@@ -86,7 +86,7 @@ export function ChatInput({
             key={chip.text}
             onClick={() => handleChipClick(chip.text)}
             disabled={isLoading}
-            className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-slate-400 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-40"
+            className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-40"
           >
             {chip.icon} {chip.text}
           </button>
@@ -95,37 +95,40 @@ export function ChatInput({
 
       {/* 输入行 */}
       <div className="flex items-center gap-2">
+        <label htmlFor="ai-chat-input" className="sr-only">输入你的问题</label>
         <input
           ref={inputRef}
+          id="ai-chat-input"
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={isLoading ? 'AI 正在思考...' : '输入你的问题...'}
           disabled={isLoading}
-          className="h-[40px] flex-1 rounded-xl border border-slate-200 bg-white px-4 text-[13px] text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:bg-white focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+          className="h-[40px] flex-1 rounded-xl border border-border bg-background px-4 text-[13px] text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:bg-background focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
         />
 
         {isLoading ? (
           <button
             onClick={onStop}
-            className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-xl bg-red-500 text-white transition-all hover:bg-red-600 active:scale-95"
-            title="停止生成"
+            className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-xl bg-red-500 text-white transition-all hover:bg-red-600 active:scale-95 focus-visible:ring-2 focus-visible:ring-red-500/40 focus-visible:outline-none"
+            aria-label="停止生成"
           >
-            <Square className="h-4 w-4" />
+            <Square className="h-4 w-4" aria-hidden="true" />
           </button>
         ) : (
           <button
             onClick={onSend}
             disabled={!value.trim()}
+            aria-label="发送消息"
             className={cn(
-              'flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-xl transition-all duration-150 active:scale-95',
+              'flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-xl transition-all duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
               value.trim()
                 ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm'
-                : 'bg-slate-100 text-slate-400',
+                : 'bg-muted text-muted-foreground',
             )}
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-4 w-4" aria-hidden="true" />
           </button>
         )}
       </div>

@@ -36,7 +36,7 @@ function StatCard({ icon, label, value, sub, variant = 'default' }: StatCardProp
           <div className="space-y-1">
             <p className="text-xs text-slate-500">{label}</p>
             <p className="text-2xl font-bold text-slate-800">{value}</p>
-            {sub && <p className="text-xs text-slate-400">{sub}</p>}
+            {sub && <p className="text-xs text-slate-500">{sub}</p>}
           </div>
           <div className={`p-2 rounded-lg ${colorMap[variant]}`}>{icon}</div>
         </div>
@@ -59,7 +59,7 @@ function WorkloadBar({ dailyWorkload }: { dailyWorkload: ScheduleData['dailyWork
         <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-indigo-400" />
           每日工时分布
-          <span className="text-xs text-slate-400 font-normal">（前 14 天）</span>
+          <span className="text-xs text-slate-500 font-normal">（前 14 天）</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
@@ -97,13 +97,13 @@ function WorkloadBar({ dailyWorkload }: { dailyWorkload: ScheduleData['dailyWork
                   />
                 </div>
                 {/* 日期 */}
-                <span className="text-[9px] text-slate-400">{dayNum}</span>
+                <span className="text-[9px] text-slate-500">{dayNum}</span>
               </div>
             );
           })}
         </div>
         {/* 图例 */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-400">
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-500">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-indigo-400" />正常
           </span>
@@ -163,7 +163,7 @@ function DelayedTaskList({ delays }: { delays: DelayedTask[] }) {
             </div>
           ))}
           {delays.length > 5 && (
-            <p className="text-[10px] text-slate-400 text-center pt-1">
+            <p className="text-[10px] text-slate-500 text-center pt-1">
               还有 {delays.length - 5} 个延期任务...
             </p>
           )}

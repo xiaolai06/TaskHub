@@ -228,7 +228,7 @@ export default function ProjectDetailPage({
             <div className="flex flex-col items-center py-12">
               <FolderKanban className="h-10 w-10 text-slate-200" />
               <p className="mt-3 text-sm text-slate-500">{statusFilter ? '没有符合筛选条件的任务' : '暂无任务'}</p>
-              <p className="mt-1 text-xs text-slate-400">点击上方按钮创建第一个任务</p>
+              <p className="mt-1 text-xs text-slate-500">点击上方按钮创建第一个任务</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -236,22 +236,22 @@ export default function ProjectDetailPage({
                 <div key={task.id} className="flex items-center justify-between rounded-lg border px-4 py-3 hover:bg-slate-50">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <StatusBadge status={task.status} />
-                    <span className={`text-sm truncate ${task.status === 'DONE' ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                    <span className={`text-sm truncate ${task.status === 'DONE' ? 'line-through text-slate-500' : 'text-slate-700'}`}>
                       {task.title}
                     </span>
-                    <span className="text-[10px] text-slate-400">{priorityLabels[task.priority] || task.priority}</span>
-                    <span className="text-[10px] text-slate-400">{task.estimatedHours}h</span>
+                    <span className="text-[10px] text-slate-500">{priorityLabels[task.priority] || task.priority}</span>
+                    <span className="text-[10px] text-slate-500">{task.estimatedHours}h</span>
                     {task.dueDate && (
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-slate-500">
                         截止 {new Date(task.dueDate).toLocaleDateString('zh-CN')}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-1 ml-2">
                     <button onClick={() => handleEditTask(task)}
-                      className="rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-600">编辑</button>
+                      className="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-600">编辑</button>
                     <button onClick={() => handleDeleteTask(task.id)}
-                      className="rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-red-50 hover:text-red-500">删除</button>
+                      className="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-red-50 hover:text-red-500">删除</button>
                   </div>
                 </div>
               ))}
@@ -276,7 +276,7 @@ export default function ProjectDetailPage({
 function StatItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-lg border bg-white p-4">
-      <p className="text-xs text-slate-400">{label}</p>
+      <p className="text-xs text-slate-500">{label}</p>
       <div className="mt-1">{value}</div>
     </div>
   );

@@ -71,7 +71,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-50 bg-black/30" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-xl">
           {/* 头部 */}
@@ -93,7 +93,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="输入客户名称"
-                  className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+                  className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
                   required
                 />
               </div>
@@ -105,7 +105,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
                   >
                     {statusOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -119,7 +119,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
                     value={industry}
                     onChange={(e) => setIndustry(e.target.value)}
                     placeholder="如：互联网、制造业"
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
                   />
                 </div>
               </div>
@@ -133,7 +133,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
                     placeholder="公司名称"
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
                   />
                 </div>
                 <div>
@@ -143,7 +143,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="email@example.com"
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
                   />
                 </div>
               </div>
@@ -157,7 +157,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="联系电话"
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
                   />
                 </div>
                 <div>
@@ -167,7 +167,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="客户地址"
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
                   />
                 </div>
               </div>
@@ -180,7 +180,7 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="关于客户的重要信息，如决策人、合作偏好、特殊要求等"
                   rows={3}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
                 />
               </div>
             </div>
@@ -190,14 +190,14 @@ export function CustomerForm({ open, onClose, onSubmit, isLoading, editCustomer 
               <button
                 type="button"
                 onClick={() => { reset(); onClose(); }}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
               >
                 取消
               </button>
               <button
                 type="submit"
                 disabled={isLoading || !name.trim()}
-                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
               >
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isEdit ? '保存修改' : '添加客户'}

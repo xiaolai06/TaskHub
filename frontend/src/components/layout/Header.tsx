@@ -17,10 +17,11 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   LogOut, User, Settings, Sparkles, ChevronDown,
   Bell, Clock, CheckSquare, Plus, FolderKanban, Users,
-  Newspaper, TrendingUp, AlertCircle,
+  Newspaper, TrendingUp, AlertCircle, Sun, Moon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WorkTools } from '@/components/features/work/WorkTools';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 interface QuickTask {
   id: string;
@@ -125,12 +126,18 @@ function getGreeting(name: string, customGreetings: string[]): string {
 export function Header({ onOpenAi }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { theme, setTheme, resolved } = useTheme();
   const [quickTasks, setQuickTasks] = useState<QuickTask[]>([]);
   const [customGreetings, setCustomGreetings] = useState<string[]>([]);
   const [showTasks, setShowTasks] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const taskRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
+
+  // 主题切换：light ↔ dark
+  function toggleTheme() {
+    setTheme(resolved === 'light' ? 'dark' : 'light');
+  }
 
   useEffect(() => {
     api.get<{ tasks: QuickTask[] }>('/dashboard/recent-activity')
@@ -188,11 +195,11 @@ export function Header({ onOpenAi }: HeaderProps) {
     }
   };
 
-  const navBtn = 'inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-600 transition-all duration-100 hover:border-slate-300 hover:bg-slate-50 active:scale-95 active:bg-slate-100';
+  const navBtn = 'inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground/70 transition-all duration-100 hover:border-border hover:bg-accent active:scale-95 active:bg-accent';
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur-md">
-      {/* 左侧：时间 + 祝福语 */}
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-border bg-card/95 px-5 backdrop-blur-md">
+      {/* 左侧：时间 + 祝福语 + 主题切换 */}
       <div className="flex items-center gap-3">
         <div className="flex shrink-0 items-center gap-1.5 font-mono text-sm text-slate-500 tabular-nums">
           <Clock className="h-4 w-4 text-slate-400" />
@@ -202,6 +209,18 @@ export function Header({ onOpenAi }: HeaderProps) {
         <span className="text-sm text-slate-500">
           {user?.name ? getGreeting(user.name, customGreetings) : '欢迎使用 TaskFlow+'}
         </span>
+        {/* 主题切换按钮 */}
+        <button
+          onClick={toggleTheme}
+          className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+          title={resolved === 'light' ? '切换到暗色模式' : '切换到亮色模式'}
+        >
+          {resolved === 'light' ? (
+            <Moon className="h-4 w-4" />
+          ) : (
+            <Sun className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       {/* 右侧：操作按钮组 */}
@@ -240,26 +259,26 @@ export function Header({ onOpenAi }: HeaderProps) {
             )}
           </button>
           {showInfo && (
-            <div className="absolute right-0 top-full mt-1 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-              <div className="flex items-center justify-between border-b px-4 py-2.5">
-                <span className="text-sm font-semibold text-slate-800">消息资讯</span>
-                <span className="text-xs text-slate-400">{unreadInfo} 条未读</span>
+            <div className="absolute right-0 top-full mt-1 w-80 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+              <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+                <span className="text-sm font-semibold text-foreground">消息资讯</span>
+                <span className="text-xs text-muted-foreground">{unreadInfo} 条未读</span>
               </div>
               <div className="max-h-80 divide-y overflow-y-auto">
                 {infoItems.map((item) => (
-                  <div key={item.id} className={cn('flex items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-50', !item.read && 'bg-blue-50/30')}>
+                  <div key={item.id} className={cn('flex items-start gap-3 px-4 py-3 transition-colors hover:bg-accent', !item.read && 'bg-blue-50/30 dark:bg-blue-950/30')}>
                     <div className="mt-0.5 shrink-0">{infoIcon(item.type)}</div>
                     <div className="min-w-0 flex-1">
-                      <p className={cn('text-[13px]', !item.read ? 'font-semibold text-slate-800' : 'font-medium text-slate-600')}>{item.title}</p>
-                      <p className="mt-0.5 text-[12px] text-slate-400">{item.desc}</p>
-                      <p className="mt-1 text-[11px] text-slate-400">{item.time}</p>
+                      <p className={cn('text-[13px]', !item.read ? 'font-semibold text-foreground' : 'font-medium text-foreground/70')}>{item.title}</p>
+                      <p className="mt-0.5 text-[12px] text-muted-foreground">{item.desc}</p>
+                      <p className="mt-1 text-[11px] text-muted-foreground">{item.time}</p>
                     </div>
                     {!item.read && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-blue-500" />}
                   </div>
                 ))}
               </div>
               <div className="border-t px-4 py-2">
-                <button onClick={() => { setShowInfo(false); router.push('/main/settings'); }} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部消息 →</button>
+                <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部消息 →</button>
               </div>
             </div>
           )}
@@ -277,26 +296,26 @@ export function Header({ onOpenAi }: HeaderProps) {
             )}
           </button>
           {showTasks && (
-            <div className="absolute right-0 top-full mt-1 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-              <div className="flex items-center justify-between border-b px-4 py-2.5">
-                <span className="text-sm font-semibold text-slate-800">待办任务</span>
-                <span className="text-xs text-slate-400">{quickTasks.length} 项</span>
+            <div className="absolute right-0 top-full mt-1 w-80 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+              <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+                <span className="text-sm font-semibold text-foreground">待办任务</span>
+                <span className="text-xs text-muted-foreground">{quickTasks.length} 项</span>
               </div>
               {quickTasks.length === 0 ? (
-                <div className="px-4 py-8 text-center text-sm text-slate-400">
-                  <CheckSquare className="mx-auto mb-2 h-8 w-8 text-slate-200" />暂无待办任务
+                <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                  <CheckSquare className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />暂无待办任务
                 </div>
               ) : (
-                <div className="max-h-72 divide-y overflow-y-auto">
+                <div className="max-h-72 divide-y divide-border overflow-y-auto">
                   {quickTasks.map((task) => (
-                    <div key={task.id} className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-slate-50">
+                    <div key={task.id} className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-accent">
                       <span className={cn('mt-1 h-2 w-2 shrink-0 rounded-full', task.priority === 'URGENT' || task.priority === 'HIGH' ? 'bg-red-400' : task.priority === 'MEDIUM' ? 'bg-amber-400' : 'bg-slate-300')} />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] font-medium text-slate-700">{task.title}</p>
-                        <p className="mt-0.5 text-[12px] text-slate-400">{task.project.name}</p>
+                        <p className="truncate text-[13px] font-medium text-foreground">{task.title}</p>
+                        <p className="mt-0.5 text-[12px] text-muted-foreground">{task.project.name}</p>
                       </div>
                       {task.dueDate && (
-                        <span className="flex shrink-0 items-center gap-1 text-[11px] text-slate-400">
+                        <span className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground">
                           <Clock className="h-3 w-3" />{new Date(task.dueDate).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
                         </span>
                       )}
@@ -305,7 +324,7 @@ export function Header({ onOpenAi }: HeaderProps) {
                 </div>
               )}
               <div className="border-t px-4 py-2">
-                <button onClick={() => { setShowTasks(false); router.push('/main/tasks'); }} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部任务 →</button>
+                <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部任务 →</button>
               </div>
             </div>
           )}
@@ -318,11 +337,11 @@ export function Header({ onOpenAi }: HeaderProps) {
         </button>
 
         {/* 分隔 */}
-        <div className="mx-0.5 h-6 w-px bg-slate-200" />
+        <div className="mx-0.5 h-6 w-px bg-border" />
 
         {/* 用户 */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-100 hover:bg-slate-50 active:scale-95">
+          <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-100 hover:bg-accent active:scale-95">
             {user?.avatar && user.avatar.startsWith('data:') ? (
               <img src={user.avatar} alt="头像" className="h-9 w-9 rounded-full object-cover" />
             ) : user?.avatar && user.avatar.startsWith('bg-') ? (
@@ -335,8 +354,8 @@ export function Header({ onOpenAi }: HeaderProps) {
               </Avatar>
             )}
             <div className="hidden text-left md:block">
-              <p className="text-[13px] font-medium text-slate-700">{user?.name || '未登录'}</p>
-              <p className="text-[11px] text-slate-400">{roleLabel}</p>
+              <p className="text-[13px] font-medium text-foreground">{user?.name || '未登录'}</p>
+              <p className="text-[11px] text-muted-foreground">{roleLabel}</p>
             </div>
             <ChevronDown className="hidden h-3.5 w-3.5 text-slate-400 md:block" />
           </DropdownMenuTrigger>
@@ -345,7 +364,7 @@ export function Header({ onOpenAi }: HeaderProps) {
               <DropdownMenuLabel>
                 <div className="flex flex-col gap-0.5">
                   <span>{user?.name}</span>
-                  <span className="text-xs font-normal text-slate-400">{user?.email}</span>
+                  <span className="text-xs font-normal text-muted-foreground">{user?.email}</span>
                 </div>
               </DropdownMenuLabel>
             </DropdownMenuGroup>

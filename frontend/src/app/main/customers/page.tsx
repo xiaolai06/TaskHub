@@ -69,7 +69,7 @@ export default function CustomersPage() {
             </div>
             <div>
               <p className="text-xl font-bold text-slate-800">{s.value}</p>
-              <p className="text-xs text-slate-400">{s.label}</p>
+              <p className="text-xs text-slate-500">{s.label}</p>
             </div>
           </div>
         ))}
@@ -94,24 +94,24 @@ export default function CustomersPage() {
 
         {/* 时间范围 */}
         <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5">
-          <CalendarDays className="h-4 w-4 text-slate-400" />
+          <CalendarDays className="h-4 w-4 text-slate-500" />
           <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border-none bg-transparent text-xs text-slate-600 outline-none" />
           <span className="text-xs text-slate-300">至</span>
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border-none bg-transparent text-xs text-slate-600 outline-none" />
           {(startDate || endDate) && (
-            <button onClick={clearDateFilter} className="ml-1 rounded px-1.5 py-0.5 text-[11px] text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600">清除</button>
+            <button onClick={clearDateFilter} className="ml-1 rounded px-1.5 py-0.5 text-[11px] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-600">清除</button>
           )}
         </div>
 
         {/* 搜索框 */}
         <div className="relative min-w-[200px] max-w-xs flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="搜索客户..."
-            className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+            className="w-full rounded-lg border border-slate-200 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-500 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
           />
         </div>
 
@@ -124,7 +124,7 @@ export default function CustomersPage() {
           添加客户
         </button>
 
-        <span className="ml-auto text-xs text-slate-400">共 {stats.total} 个客户</span>
+        <span className="ml-auto text-xs text-slate-500">共 {stats.total} 个客户</span>
       </div>
 
       {/* ── 内容区 ── */}

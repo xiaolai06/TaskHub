@@ -21,10 +21,10 @@ interface SmartDigestProps {
 function Skeleton() {
   return (
     <div className="animate-pulse space-y-2.5 p-3">
-      <div className="h-3 w-16 rounded bg-slate-200" />
-      <div className="h-8 w-full rounded-lg bg-slate-100" />
-      <div className="h-8 w-full rounded-lg bg-slate-100" />
-      <div className="h-8 w-full rounded-lg bg-slate-100" />
+      <div className="h-3 w-16 rounded bg-accent" />
+      <div className="h-8 w-full rounded-lg bg-muted" />
+      <div className="h-8 w-full rounded-lg bg-muted" />
+      <div className="h-8 w-full rounded-lg bg-muted" />
     </div>
   );
 }
@@ -84,19 +84,19 @@ export function SmartDigest({ onDigestClick, open }: SmartDigestProps) {
   return (
     <button
       onClick={onDigestClick}
-      className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left shadow-sm transition-all hover:border-indigo-200 hover:shadow-md"
+      className="w-full rounded-xl border border-border bg-background p-3 text-left shadow-sm transition-all hover:border-indigo-200 hover:shadow-md"
     >
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">📅 今日数据</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">📅 今日数据</p>
 
       <div className="mt-2.5 space-y-2">
         {/* 待办 */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm">🎯</span>
-            <span className="text-[12px] text-slate-600">待办任务</span>
+            <span className="text-[12px] text-foreground/70">待办任务</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-bold text-slate-800">{data.taskCount} 项</span>
+            <span className="text-sm font-bold text-foreground">{data.taskCount} 项</span>
             {data.overdueCount > 0 && (
               <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
                 {data.overdueCount} 逾期
@@ -109,9 +109,9 @@ export function SmartDigest({ onDigestClick, open }: SmartDigestProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm">💰</span>
-            <span className="text-[12px] text-slate-600">本月收入</span>
+            <span className="text-[12px] text-foreground/70">本月收入</span>
           </div>
-          <span className="text-sm font-bold text-slate-800">
+          <span className="text-sm font-bold text-foreground">
             ¥{data.monthlyRevenue.toLocaleString()}
             {data.profitMargin > 0 && (
               <span className="ml-1 text-[10px] font-normal text-emerald-600">+{data.profitMargin}%</span>
@@ -123,10 +123,10 @@ export function SmartDigest({ onDigestClick, open }: SmartDigestProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm">👤</span>
-            <span className="text-[12px] text-slate-600">客户总数</span>
+            <span className="text-[12px] text-foreground/70">客户总数</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-bold text-slate-800">{data.followUpCount} 个</span>
+            <span className="text-sm font-bold text-foreground">{data.followUpCount} 个</span>
             {data.urgentFollowUpCount > 0 && (
               <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-600">
                 {data.urgentFollowUpCount} 紧急
@@ -136,7 +136,7 @@ export function SmartDigest({ onDigestClick, open }: SmartDigestProps) {
         </div>
       </div>
 
-      <p className="mt-2.5 text-[10px] text-slate-400">点击查看今日简报 →</p>
+      <p className="mt-2.5 text-[10px] text-muted-foreground">点击查看今日简报 →</p>
     </button>
   );
 }

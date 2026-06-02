@@ -67,11 +67,11 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --chart-1: oklch(0.65 0.15 250);
+  --chart-2: oklch(0.65 0.15 155);
+  --chart-3: oklch(0.7 0.15 75);
+  --chart-4: oklch(0.65 0.15 15);
+  --chart-5: oklch(0.6 0.15 290);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
@@ -84,37 +84,50 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  /* 背景层级 - 微带紫色调 */
+  --background: oklch(0.145 0.005 280);
+  --foreground: oklch(0.93 0 0);
+  --card: oklch(0.18 0.005 280);
+  --card-foreground: oklch(0.93 0 0);
+  --popover: oklch(0.20 0.005 280);
+  --popover-foreground: oklch(0.93 0 0);
+
+  /* 主色 - 品牌紫 */
+  --primary: oklch(0.65 0.15 280);
+  --primary-foreground: oklch(0.98 0 0);
+
+  /* 次要/静音 */
+  --secondary: oklch(0.22 0.01 280);
+  --secondary-foreground: oklch(0.93 0 0);
+  --muted: oklch(0.22 0.01 280);
+  --muted-foreground: oklch(0.60 0 0);
+
+  /* 交互态 */
+  --accent: oklch(0.24 0.015 280);
+  --accent-foreground: oklch(0.93 0 0);
+
+  /* 语义色 */
+  --destructive: oklch(0.65 0.2 25);
+  --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --ring: oklch(0.50 0.1 280);
+
+  /* 图表 */
+  --chart-1: oklch(0.65 0.15 250);
+  --chart-2: oklch(0.65 0.15 155);
+  --chart-3: oklch(0.7 0.15 75);
+  --chart-4: oklch(0.65 0.15 15);
+  --chart-5: oklch(0.6 0.15 290);
+
+  /* 侧边栏 */
+  --sidebar: oklch(0.16 0.005 280);
+  --sidebar-foreground: oklch(0.93 0 0);
+  --sidebar-primary: oklch(0.65 0.15 280);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.22 0.01 280);
+  --sidebar-accent-foreground: oklch(0.93 0 0);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.50 0.1 280);
 }
 
 @layer base {
@@ -126,5 +139,55 @@
   }
   html {
     @apply font-sans;
+    /* 主题切换过渡动画 */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* 暗色模式边缘微发光效果 */
+  .dark .card,
+  .dark [data-slot="card"] {
+    box-shadow:
+      0 0 0 1px oklch(1 0 0 / 8%),
+      0 0 20px -5px oklch(0.65 0.15 280 / 15%),
+      0 4px 16px -4px oklch(0 0 0 / 40%);
+  }
+
+  .dark header,
+  .dark [data-slot="header"] {
+    box-shadow:
+      0 1px 0 0 oklch(1 0 0 / 8%),
+      0 0 24px -8px oklch(0.65 0.15 280 / 10%);
+  }
+
+  .dark .sheet-content,
+  .dark [role="dialog"] {
+    box-shadow:
+      0 0 0 1px oklch(1 0 0 / 10%),
+      0 0 40px -10px oklch(0.65 0.15 280 / 12%),
+      0 8px 32px -8px oklch(0 0 0 / 50%);
+  }
+}
+
+@layer utilities {
+  .transition-smooth {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* 暗色模式发光效果工具类 */
+  .glow-subtle {
+    box-shadow: 0 0 20px -5px oklch(0.65 0.15 280 / 20%);
+  }
+
+  .glow-border {
+    box-shadow:
+      0 0 0 1px oklch(1 0 0 / 10%),
+      0 0 16px -4px oklch(0.65 0.15 280 / 15%);
+  }
+
+  .glow-strong {
+    box-shadow:
+      0 0 0 1px oklch(1 0 0 / 12%),
+      0 0 30px -8px oklch(0.65 0.15 280 / 25%),
+      0 4px 20px -4px oklch(0 0 0 / 40%);
   }
 }

@@ -50,7 +50,7 @@ export function CronJobCard({
             )}
           </div>
 
-          <div className="mt-1.5 flex items-center gap-3 text-[12px] text-slate-400">
+          <div className="mt-1.5 flex items-center gap-3 text-[12px] text-slate-500">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {job.cronExpr}
@@ -68,7 +68,7 @@ export function CronJobCard({
           )}
 
           {job.lastRunAt && (
-            <p className="mt-1 text-[11px] text-slate-400">
+            <p className="mt-1 text-[11px] text-slate-500">
               上次执行: {new Date(job.lastRunAt).toLocaleString('zh-CN')}
               {job.lastStatus && (
                 <span className={cn('ml-2', job.lastStatus === 'success' ? 'text-emerald-500' : 'text-red-500')}>
@@ -92,15 +92,15 @@ export function CronJobCard({
           </button>
           {!job.isSystem && (
             <>
-              <button onClick={onEdit} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-50 hover:text-indigo-500" title="编辑">
+              <button onClick={onEdit} className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-50 hover:text-indigo-500" title="编辑">
                 <Edit3 className="h-4 w-4" />
               </button>
-              <button onClick={onDelete} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500" title="删除">
+              <button onClick={onDelete} className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-500" title="删除">
                 <Trash2 className="h-4 w-4" />
               </button>
             </>
           )}
-          <button className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-500" title="手动触发">
+          <button className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-indigo-50 hover:text-indigo-500" title="手动触发">
             <Play className="h-4 w-4" />
           </button>
         </div>

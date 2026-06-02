@@ -48,9 +48,9 @@ export function ToolCallBar({ tools }: ToolCallBarProps) {
       </button>
 
       {expanded && (
-        <div className="mt-1.5 space-y-0.5 border-t border-slate-200/50 pt-1.5">
+        <div className="mt-1.5 space-y-0.5 border-t border-border/50 pt-1.5">
           {tools.map((t, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-slate-500">
+            <div key={i} className="flex items-center gap-1.5 text-muted-foreground">
               {t.status === 'done' ? (
                 <Check className="h-3 w-3 shrink-0 text-emerald-400" />
               ) : (
@@ -58,7 +58,7 @@ export function ToolCallBar({ tools }: ToolCallBarProps) {
               )}
               <span>{t.icon}</span>
               <span>{t.label}</span>
-              {t.summary && <span className="text-slate-400">· {t.summary}</span>}
+              {t.summary && <span className="text-muted-foreground">· {t.summary}</span>}
             </div>
           ))}
         </div>

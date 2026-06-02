@@ -70,13 +70,13 @@ export function HistoryTab({
       {/* 搜索 */}
       {sessions.length > 5 && (
         <div className="relative mt-2">
-          <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="搜索会话..."
-            className="w-full rounded-lg border border-slate-200 py-1.5 pl-6 pr-2 text-[11px] text-slate-600 outline-none placeholder:text-slate-300 focus:border-indigo-300"
+            className="w-full rounded-lg border border-border py-1.5 pl-6 pr-2 text-[11px] text-foreground/70 outline-none placeholder:text-muted-foreground/50 focus:border-indigo-300"
           />
         </div>
       )}
@@ -91,28 +91,28 @@ export function HistoryTab({
             onClick={() => onSwitchSession(s.sessionId)}
             onKeyDown={(e) => { if (e.key === 'Enter') onSwitchSession(s.sessionId); }}
             className={cn(
-              'group flex cursor-pointer items-start gap-2 rounded-lg px-2 py-2.5 transition-colors hover:bg-slate-100',
+              'group flex cursor-pointer items-start gap-2 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted',
               s.sessionId === activeSessionId && 'bg-indigo-50/70',
             )}
           >
             <MessageSquare className={cn(
               'mt-0.5 h-3.5 w-3.5 shrink-0',
-              s.sessionId === activeSessionId ? 'text-indigo-400' : 'text-slate-300',
+              s.sessionId === activeSessionId ? 'text-indigo-400' : 'text-muted-foreground/50',
             )} />
             <div className="min-w-0 flex-1">
               <p className={cn(
                 'truncate text-[12px] leading-tight',
-                s.sessionId === activeSessionId ? 'font-semibold text-indigo-700' : 'text-slate-600',
+                s.sessionId === activeSessionId ? 'font-semibold text-indigo-700' : 'text-foreground/70',
               )}>
                 {inferTitle(s)}
               </p>
-              <p className="mt-0.5 text-[10px] text-slate-400">
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
                 {s.messageCount} 条消息 · {relativeTime(s.lastMessage)}
               </p>
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); onDeleteSession(s.sessionId); }}
-              className="shrink-0 rounded p-0.5 text-slate-300 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-400 group-hover:opacity-100"
+              className="shrink-0 rounded p-0.5 text-muted-foreground/50 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-400 group-hover:opacity-100"
             >
               <Trash2 className="h-3 w-3" />
             </button>
@@ -121,7 +121,7 @@ export function HistoryTab({
 
         {filtered.length === 0 && (
           <div className="py-6 text-center">
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-muted-foreground">
               {search.trim() ? '没有匹配的会话' : '暂无历史会话'}
             </p>
           </div>

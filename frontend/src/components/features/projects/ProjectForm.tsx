@@ -28,12 +28,14 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('ACTIVE');
   const [budget, setBudget] = useState('');
+  const [reward, setReward] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [customerId, setCustomerId] = useState('');
   const [projectType, setProjectType] = useState('');
   const [customType, setCustomType] = useState('');
   const [expenseNote, setExpenseNote] = useState('');
+  const [rewardNote, setRewardNote] = useState('');
 
   const isEdit = !!editProject;
   const showCustomType = !presetTypes.includes(projectType) && projectType !== '';
@@ -44,6 +46,8 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
       setDescription(editProject.description || '');
       setStatus(editProject.status);
       setBudget(editProject.budget ? String(editProject.budget / 100) : '');
+      setReward(editProject.rewardNote || '');
+      setRewardNote(editProject.rewardNote || '');
       setStartDate(editProject.startDate ? editProject.startDate.split('T')[0] : '');
       setEndDate(editProject.endDate ? editProject.endDate.split('T')[0] : '');
       setCustomerId(editProject.customerId || '');
@@ -55,6 +59,7 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
         setCustomType(editProject.type);
       }
       setExpenseNote(editProject.expenseNote || '');
+      setRewardNote(editProject.rewardNote || '');
     } else {
       reset();
     }
@@ -70,6 +75,7 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
       status,
       type: finalType || undefined,
       budget: budget ? Number(budget) * 100 : undefined,
+      rewardNote: reward.trim() || undefined,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       customerId: customerId || undefined,
@@ -79,9 +85,9 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
 
   function reset() {
     setName(''); setDescription(''); setStatus('ACTIVE');
-    setBudget(''); setStartDate(''); setEndDate('');
+    setBudget(''); setReward(''); setStartDate(''); setEndDate('');
     setCustomerId(''); setProjectType(''); setCustomType('');
-    setExpenseNote('');
+    setExpenseNote(''); setRewardNote('');
   }
 
   if (!open) return null;
@@ -91,7 +97,7 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
 
   return (
     <>
-      <div className="fixed inset-0 z-[100] bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="fixed inset-0 z-[100] bg-black/30" onClick={onClose} />
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white shadow-xl">
           <div className="flex items-center justify-between border-b px-6 py-4">
@@ -111,7 +117,7 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-slate-700">项目描述</label>
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="简要描述项目目标和范围" rows={2}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
               </div>
 
               {/* 类型（可选预设或自定义）+ 状态 */}
@@ -136,11 +142,15 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
                 </div>
               </div>
 
-              {/* 报价 */}
-              <div>
+              {/* 预算 + 报酬 */}
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">报价（元）</label>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">预算（元）</label>
                   <input type="number" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="0.00" min="0" step="0.01" className={inputCls} />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-slate-700">报酬（元）</label>
+                  <input type="number" value={reward} onChange={(e) => setReward(e.target.value)} placeholder="0.00" min="0" step="0.01" className={inputCls} />
                 </div>
               </div>
 
@@ -165,20 +175,28 @@ export function ProjectForm({ open, onClose, onSubmit, isLoading, editProject }:
                 </select>
               </div>
 
-              {/* 成本备注 */}
+              {/* 支出说明 */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">成本备注</label>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">支出说明</label>
                 <textarea value={expenseNote} onChange={(e) => setExpenseNote(e.target.value)}
-                  placeholder="如：外包、服务器、素材、差旅等成本说明" rows={2}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+                  placeholder="如：外包、服务器、域名等（任务花销会自动汇总）" rows={2}
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
+              </div>
+
+              {/* 报酬说明 */}
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">报酬说明</label>
+                <textarea value={rewardNote} onChange={(e) => setRewardNote(e.target.value)}
+                  placeholder="如：合同金额、付款方式等" rows={2}
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
               </div>
             </div>
 
             <div className="mt-6 flex justify-end gap-3">
               <button type="button" onClick={() => { reset(); onClose(); }}
-                className="h-10 rounded-lg border border-slate-200 px-5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50">取消</button>
+                className="h-10 rounded-lg border border-slate-200 px-5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">取消</button>
               <button type="submit" disabled={isLoading || !name.trim()}
-                className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50">
+                className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
                 {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}{isEdit ? '保存修改' : '创建项目'}
               </button>
             </div>

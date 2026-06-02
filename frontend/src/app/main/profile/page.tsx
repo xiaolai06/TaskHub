@@ -265,7 +265,7 @@ export default function ProfilePage() {
                 ))}
                 {savedImage && avatarType === 'color' && (
                   <button type="button" onClick={() => { setAvatarType('image'); setAvatarValue(savedImage); }}
-                    className="ml-2 flex h-8 items-center gap-1 rounded-full border border-dashed border-slate-300 px-2 text-[11px] text-slate-400 transition-colors hover:border-indigo-300 hover:text-indigo-500">
+                    className="ml-2 flex h-8 items-center gap-1 rounded-full border border-dashed border-slate-300 px-2 text-[11px] text-slate-500 transition-colors hover:border-indigo-300 hover:text-indigo-500">
                     <Camera className="h-3 w-3" />恢复图片
                   </button>
                 )}
@@ -369,7 +369,7 @@ export default function ProfilePage() {
       <div className="rounded-xl border border-slate-200/60 bg-white shadow-sm">
         <div className="border-b border-slate-100 px-6 py-4">
           <h2 className="text-sm font-semibold text-slate-700">我的标签</h2>
-          <p className="mt-0.5 text-[11px] text-slate-400">选择能代表你的标签，最多 8 个</p>
+          <p className="mt-0.5 text-[11px] text-slate-500">选择能代表你的标签，最多 8 个</p>
         </div>
         <div className="px-6 py-5">
           <div className="flex flex-wrap gap-2">
@@ -390,7 +390,7 @@ export default function ProfilePage() {
               );
             })}
           </div>
-          {tags.length > 0 && <p className="mt-3 text-[11px] text-slate-400">已选 {tags.length}/8</p>}
+          {tags.length > 0 && <p className="mt-3 text-[11px] text-slate-500">已选 {tags.length}/8</p>}
         </div>
       </div>
 

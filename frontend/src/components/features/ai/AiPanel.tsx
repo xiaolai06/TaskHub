@@ -12,7 +12,7 @@ import { EmptyState } from './EmptyState';
 import { LoadingIndicator } from './LoadingIndicator';
 import { ChatInput } from './ChatInput';
 
-type TabKey = 'overview' | 'customers' | 'history';
+type TabKey = 'overview' | 'customers' | 'history' | 'schedule';
 
 // ═══ 消息列表（memo，避免输入时重渲染） ═══
 
@@ -167,28 +167,28 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     <>
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         />
       )}
 
-      <div className={cn(
-        'fixed right-0 top-0 z-50 flex h-screen w-[860px] flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out',
-        open ? 'translate-x-0' : 'translate-x-full',
-      )}>
+      <div
+        className="fixed right-0 top-0 z-50 flex h-screen w-[860px] flex-col bg-card shadow-2xl transition-transform duration-300 ease-in-out"
+        style={{ transform: open ? 'translateX(0)' : 'translateX(100%)' }}
+      >
         {/* 顶部栏 */}
-        <div className="flex h-11 shrink-0 items-center justify-between border-b bg-slate-50/80 px-3">
+        <div className="flex h-11 shrink-0 items-center justify-between border-b border-border bg-muted/50 px-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-100">
-              <Zap className="h-3 w-3 text-indigo-600" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
+              <Zap className="h-3 w-3 text-primary" />
             </div>
-            <span className="text-[13px] font-semibold text-slate-800">AI 助手</span>
+            <span className="text-[13px] font-semibold text-foreground">AI 助手</span>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={handleNewSession} className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600" title="新对话 (⌘N)">
+            <button onClick={handleNewSession} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none" title="新对话 (⌘N)">
               <Plus className="h-4 w-4" />
             </button>
-            <button onClick={onClose} className="rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600">
+            <button onClick={onClose} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none">
               <X className="h-4 w-4" />
             </button>
           </div>

@@ -2,7 +2,7 @@
 export interface ToolDefinition {
   name: string;
   description: string;
-  category: 'finance' | 'work' | 'client' | 'goal';
+  category: 'finance' | 'work' | 'client' | 'goal' | 'schedule';
   parameters: {
     type: 'object';
     properties: Record<string, { type: string; description?: string; enum?: string[]; default?: unknown }>;

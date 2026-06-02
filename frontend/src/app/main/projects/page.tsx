@@ -107,14 +107,14 @@ export default function ProjectsPage() {
 
         {/* 日期筛选 */}
         <div className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5">
-          <Calendar className="h-4 w-4 shrink-0 text-slate-400" />
+          <Calendar className="h-4 w-4 shrink-0 text-slate-500" />
           <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
             className="w-36 bg-transparent text-sm text-slate-600 outline-none [color-scheme:light]" />
           <span className="text-sm text-slate-300">—</span>
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
             className="w-36 bg-transparent text-sm text-slate-600 outline-none [color-scheme:light]" />
           {(startDate || endDate) && (
-            <button onClick={() => { setStartDate(''); setEndDate(''); }} className="text-slate-400 hover:text-slate-600">
+            <button onClick={() => { setStartDate(''); setEndDate(''); }} className="text-slate-500 hover:text-slate-600">
               <X className="h-4 w-4" />
             </button>
           )}
@@ -146,7 +146,7 @@ export default function ProjectsPage() {
       ) : !data?.data?.length ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-24 shadow-sm">
           <FolderKanban className="mb-3 h-12 w-12 text-slate-200" />
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-500">
             {statusFilter || startDate || endDate ? '没有符合条件的项目' : '暂无项目'}
           </p>
           {!statusFilter && !startDate && !endDate && (
@@ -172,7 +172,7 @@ export default function ProjectsPage() {
                 <div className="mt-2 rounded-xl border border-slate-200/60 bg-white shadow-sm">
                   <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
                     <h3 className="text-[13px] font-semibold text-slate-700">任务列表</h3>
-                    <button onClick={() => setExpandedProjectId(null)} className="rounded p-1 text-slate-400 hover:bg-slate-100">
+                    <button onClick={() => setExpandedProjectId(null)} className="rounded p-1 text-slate-500 hover:bg-slate-100">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>

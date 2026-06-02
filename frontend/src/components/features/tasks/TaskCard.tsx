@@ -122,7 +122,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
             {task.blockedReason}
           </p>
         ) : task.description ? (
-          <p className="line-clamp-2 text-[12px] leading-[18px] text-slate-400">
+          <p className="line-clamp-2 text-[12px] leading-[18px] text-slate-500">
             {task.description}
           </p>
         ) : (
@@ -143,7 +143,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
       {/* 底部信息行 — 固定 32px */}
       <div className="mt-auto flex h-8 items-center gap-x-3 border-t border-slate-100 pt-0 text-[11px]">
         {/* 优先级 */}
-        <span className="flex items-center gap-1 text-slate-400">
+        <span className="flex items-center gap-1 text-slate-500">
           <span className={cn('h-1.5 w-1.5 rounded-full', priorityDot[task.priority] || 'bg-slate-300')} />
           {priorityLabel[task.priority] || '中'}
         </span>
@@ -151,7 +151,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
 
         {/* 任务花销（任务自身的 cost） */}
         {cost ? (
-          <span className="flex items-center gap-0.5 text-slate-400">
+          <span className="flex items-center gap-0.5 text-slate-500">
             <DollarSign className="h-3 w-3" />
             {cost}
           </span>
@@ -162,7 +162,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
 
         {/* 预估工时 */}
         {task.estimatedHours > 0 ? (
-          <span className="flex items-center gap-0.5 text-slate-400">
+          <span className="flex items-center gap-0.5 text-slate-500">
             <Clock className="h-3 w-3" />
             {task.estimatedHours}h
           </span>
@@ -173,7 +173,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
         {/* 截止日期 — 始终靠右 */}
         <span className={cn(
           'ml-auto flex items-center gap-0.5',
-          overdue ? 'font-semibold text-red-500' : task.dueDate ? 'text-slate-400' : 'text-transparent',
+          overdue ? 'font-semibold text-red-500' : task.dueDate ? 'text-slate-500' : 'text-transparent',
         )}>
           <Calendar className="h-3 w-3" />
           {task.dueDate ? formatDate(task.dueDate) : '无日期'}
@@ -182,7 +182,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
 
         {/* 子任务进度 */}
         {children.length > 0 && (
-          <span className="text-slate-400">{doneCount}/{children.length}</span>
+          <span className="text-slate-500">{doneCount}/{children.length}</span>
         )}
       </div>
     </div>
