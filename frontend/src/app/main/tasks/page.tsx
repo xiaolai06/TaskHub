@@ -149,13 +149,13 @@ export default function TasksPage() {
 
           {/* 搜索框 */}
           <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5">
-            <Search className="h-3.5 w-3.5 text-slate-400" />
+            <Search className="h-3.5 w-3.5 text-slate-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="搜索任务..."
-              className="w-32 border-none bg-transparent text-xs text-slate-600 outline-none placeholder:text-slate-400"
+              className="w-32 border-none bg-transparent text-xs text-slate-600 outline-none placeholder:text-slate-500"
             />
             {search && (
               <button onClick={() => setSearch('')} className="text-slate-300 hover:text-slate-500">
@@ -166,7 +166,7 @@ export default function TasksPage() {
 
           {/* 项目筛选 */}
           <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5">
-            <FolderKanban className="h-3.5 w-3.5 text-slate-400" />
+            <FolderKanban className="h-3.5 w-3.5 text-slate-500" />
             <select
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
@@ -203,7 +203,7 @@ export default function TasksPage() {
 
           {/* 日期范围 */}
           <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-1.5">
-            <CalendarDays className="h-3.5 w-3.5 text-slate-400" />
+            <CalendarDays className="h-3.5 w-3.5 text-slate-500" />
             <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
               className="border-none bg-transparent text-[11px] text-slate-600 outline-none" />
             <span className="text-[11px] text-slate-300">—</span>
@@ -222,7 +222,7 @@ export default function TasksPage() {
 
         <div className="flex items-center gap-3">
           {!isLoading && !error && (
-            <span className="text-xs text-slate-400">{taskCount} 个任务</span>
+            <span className="text-xs text-slate-500">{taskCount} 个任务</span>
           )}
           <button onClick={() => { setEditTask(null); setShowForm(true); }}
             className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95">
@@ -246,14 +246,14 @@ export default function TasksPage() {
         <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-24 shadow-sm">
           <CheckSquare className="mb-3 h-12 w-12 text-slate-200" />
           <p className="text-sm font-medium text-slate-500">暂无任务</p>
-          <p className="mt-1 text-xs text-slate-400">点击「新建任务」开始创建</p>
+          <p className="mt-1 text-xs text-slate-500">点击「新建任务」开始创建</p>
           <button onClick={() => { setEditTask(null); setShowForm(true); }}
             className="mt-4 text-sm font-medium text-indigo-600 hover:underline">创建第一个任务</button>
         </div>
       ) : taskCount === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-20">
           <CheckSquare className="mb-3 h-10 w-10 text-slate-200" />
-          <p className="text-sm text-slate-400">没有匹配的任务</p>
+          <p className="text-sm text-slate-500">没有匹配的任务</p>
           <button onClick={clearFilters} className="mt-3 text-sm font-medium text-indigo-600 hover:underline">清除筛选</button>
         </div>
       ) : viewMode === 'board' ? (

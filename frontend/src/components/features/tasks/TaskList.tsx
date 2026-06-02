@@ -81,7 +81,7 @@ function SortHeader({
       onClick={() => onSort(field)}
       className={cn(
         'flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider transition-colors',
-        isActive ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600',
+        isActive ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-600',
         className,
       )}
     >
@@ -125,7 +125,7 @@ function TaskRow({
       <tr className="group transition-colors hover:bg-slate-50/60">
         <td className="w-8 pl-3">
           {children.length > 0 ? (
-            <button onClick={() => onToggleExpand(task.id)} className="rounded p-0.5 text-slate-400 hover:text-slate-600">
+            <button onClick={() => onToggleExpand(task.id)} className="rounded p-0.5 text-slate-500 hover:text-slate-600">
               {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </button>
           ) : null}
@@ -184,24 +184,24 @@ function TaskRow({
         {/* 工时 */}
         <td className="py-3 text-[13px] tabular-nums text-slate-500">
           {task.estimatedHours > 0 ? (
-            <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-slate-400" />{task.estimatedHours}h</span>
+            <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-slate-500" />{task.estimatedHours}h</span>
           ) : '—'}
         </td>
 
         {/* 截止日期 */}
         <td className={cn('py-3 text-[13px]', overdue ? 'font-semibold text-red-500' : 'text-slate-500')}>
           {task.dueDate ? (
-            <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-slate-400" />{formatDate(task.dueDate)}</span>
+            <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-slate-500" />{formatDate(task.dueDate)}</span>
           ) : '—'}
         </td>
 
         {/* 操作 */}
         <td className="py-3">
           <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-            <button onClick={() => onEdit?.(task)} className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
+            <button onClick={() => onEdit?.(task)} className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-600">
               <Edit3 className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => onDelete?.(task.id)} className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500">
+            <button onClick={() => onDelete?.(task.id)} className="rounded-md p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-500">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -262,7 +262,7 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-20">
         <CheckSquare className="mb-3 h-10 w-10 text-slate-200" />
-        <p className="text-sm text-slate-400">暂无任务</p>
+        <p className="text-sm text-slate-500">暂无任务</p>
       </div>
     );
   }

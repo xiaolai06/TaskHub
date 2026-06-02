@@ -159,7 +159,7 @@ export default function ResearchPage() {
         {/* 搜索栏（搜索tab显示） */}
         {activeTab === 'search' && (
           <div className="flex flex-1 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
-            <Search className="h-4 w-4 text-slate-400" />
+            <Search className="h-4 w-4 text-slate-500" />
             <input
               type="text"
               value={searchQuery}
@@ -186,7 +186,7 @@ export default function ResearchPage() {
           {briefing ? (
             <div>
               <div className="mb-4 flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                <span className="flex items-center gap-1.5 text-xs text-slate-500">
                   <Clock className="h-3 w-3" />
                   {new Date(briefing.generatedAt).toLocaleString('zh-CN')}
                 </span>
@@ -206,7 +206,7 @@ export default function ResearchPage() {
                 <Newspaper className="h-7 w-7 text-indigo-400" />
               </div>
               <h3 className="mt-4 text-sm font-semibold text-slate-700">AI 行业简报</h3>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-500">
                 AI 综合多源信息，为你生成今日值得关注的行业动态
               </p>
               <button onClick={generateBriefing} disabled={briefingLoading}
@@ -227,10 +227,10 @@ export default function ResearchPage() {
             <div className="rounded-xl border border-dashed border-slate-200 bg-white py-10 text-center">
               <Globe className="mx-auto h-8 w-8 text-slate-200" />
               <p className="mt-3 text-sm text-slate-500">在上方搜索框输入关键词</p>
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="mt-1 text-xs text-slate-500">
                 自动搜索 GitHub · Hacker News · Dev.to 三个技术社区
               </p>
-              <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+              <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500">
                 {['独立开发者', 'SaaS 定价', 'AI Agent', 'React 最佳实践', '一人公司'].map(tag => (
                   <button key={tag} onClick={() => { setSearchQuery(tag); doSearch(); }}
                     className="rounded-full border border-slate-200 px-3 py-1 transition-colors hover:border-indigo-300 hover:text-indigo-500">
@@ -245,7 +245,7 @@ export default function ResearchPage() {
           {searching && (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-5 w-5 animate-spin text-indigo-400" />
-              <span className="ml-2 text-sm text-slate-400">搜索中...</span>
+              <span className="ml-2 text-sm text-slate-500">搜索中...</span>
             </div>
           )}
 
@@ -253,7 +253,7 @@ export default function ResearchPage() {
           {!searching && results.length > 0 && (
             <>
               <div className="mb-3 flex items-center gap-2">
-                <span className="text-xs text-slate-400">找到 {searchData?.total || results.length} 条结果</span>
+                <span className="text-xs text-slate-500">找到 {searchData?.total || results.length} 条结果</span>
                 <span className="text-[10px] text-slate-300">· 按热度排序</span>
               </div>
               <div className="space-y-2">
@@ -310,8 +310,8 @@ export default function ResearchPage() {
           {!searching && searchQuery && results.length === 0 && (
             <div className="flex flex-col items-center py-12">
               <Search className="h-10 w-10 text-slate-200" />
-              <p className="mt-3 text-sm text-slate-400">各平台都未找到匹配结果</p>
-              <p className="mt-1 text-xs text-slate-400">换个关键词试试，或者用 AI 面板里的 search_web 全网搜索</p>
+              <p className="mt-3 text-sm text-slate-500">各平台都未找到匹配结果</p>
+              <p className="mt-1 text-xs text-slate-500">换个关键词试试，或者用 AI 面板里的 search_web 全网搜索</p>
             </div>
           )}
         </div>
@@ -340,8 +340,8 @@ export default function ResearchPage() {
           {savedItems.length === 0 ? (
             <div className="flex flex-col items-center rounded-xl border border-dashed border-slate-200 py-12">
               <Bookmark className="h-10 w-10 text-slate-200" />
-              <p className="mt-3 text-sm text-slate-400">暂无收藏</p>
-              <p className="mt-1 text-xs text-slate-400">在"搜索发现"中搜索感兴趣的内容，点击星标收藏</p>
+              <p className="mt-3 text-sm text-slate-500">暂无收藏</p>
+              <p className="mt-1 text-xs text-slate-500">在"搜索发现"中搜索感兴趣的内容，点击星标收藏</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -357,7 +357,7 @@ export default function ResearchPage() {
                       <div className="mt-2 flex items-center gap-2">
                         {tags.length > 0 && (
                           <div className="flex items-center gap-1">
-                            <Tag className="h-3 w-3 text-slate-400" />
+                            <Tag className="h-3 w-3 text-slate-500" />
                             {tags.map(t => (
                               <span key={t} className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{t}</span>
                             ))}

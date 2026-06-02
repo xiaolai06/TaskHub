@@ -44,7 +44,7 @@ export function CronJobForm({ open, onClose, onSave, initial }: CronJobFormProps
       <div className="mx-4 w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-xl" onClick={e => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-base font-semibold text-slate-800">{initial ? '编辑定时任务' : '新建定时任务'}</h3>
-          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-50"><X className="h-4 w-4" /></button>
+          <button onClick={onClose} className="rounded-lg p-1 text-slate-500 hover:bg-slate-50"><X className="h-4 w-4" /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -67,7 +67,7 @@ export function CronJobForm({ open, onClose, onSave, initial }: CronJobFormProps
             <div className="mt-1 flex flex-wrap gap-1">
               {CRON_EXAMPLES.map(ex => (
                 <button key={ex.expr} type="button" onClick={() => setCronExpr(ex.expr)}
-                  className={cn('rounded-md border px-2 py-0.5 text-[10px] transition-colors', cronExpr === ex.expr ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200')}>
+                  className={cn('rounded-md border px-2 py-0.5 text-[10px] transition-colors', cronExpr === ex.expr ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200')}>
                   {ex.label}
                 </button>
               ))}

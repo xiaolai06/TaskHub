@@ -43,7 +43,7 @@ export function EmptyState({ onPromptClick }: EmptyStateProps) {
       <p className="mt-2.5 text-[14px] text-slate-500 leading-relaxed text-center max-w-xs">
         我是你的 AI 工作助手 👋
       </p>
-      <p className="mt-1 text-[13px] text-slate-400 leading-relaxed text-center max-w-xs">
+      <p className="mt-1 text-[13px] text-slate-500 leading-relaxed text-center max-w-xs">
         可以帮你查看项目进度、分析财务数据、
         <br />
         管理任务、跟进客户。

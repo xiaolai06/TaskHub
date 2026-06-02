@@ -239,7 +239,7 @@ export default function SchedulePage() {
           <option value="project">按项目</option>
         </select>
         <button onClick={() => setSortAsc(!sortAsc)}
-          className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
+          className="rounded-lg p-1 text-slate-500 transition-colors hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
           aria-label={sortAsc ? '切换为降序排列' : '切换为升序排列'}
           aria-pressed={!sortAsc}>
           {sortAsc ? <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" /> : <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />}
@@ -266,7 +266,7 @@ export default function SchedulePage() {
       <div className="space-y-4">
         {Object.entries(grouped).map(([groupName, tasks]) => (
           <div key={groupName}>
-            <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
               {groupName}
               <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px]">{tasks.length}</span>
             </h2>

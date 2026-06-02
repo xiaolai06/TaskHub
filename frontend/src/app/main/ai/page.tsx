@@ -45,7 +45,7 @@ export default function AiWorkbenchPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-slate-800">定时任务</h1>
-          <p className="mt-0.5 text-xs text-slate-400">
+          <p className="mt-0.5 text-xs text-slate-500">
             配置定时自动执行的任务，系统预置任务首次启动时自动初始化
           </p>
         </div>
@@ -78,7 +78,7 @@ export default function AiWorkbenchPage() {
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-12">
           <Clock className="h-10 w-10 text-slate-200" />
           <p className="mt-3 text-sm font-medium text-slate-500">暂无定时任务</p>
-          <p className="mt-1 text-xs text-slate-400">系统任务首次启动自动初始化，或点击下方手动创建</p>
+          <p className="mt-1 text-xs text-slate-500">系统任务首次启动自动初始化，或点击下方手动创建</p>
           <div className="mt-4 flex gap-2">
             <button onClick={() => initMutation.mutate(undefined, { onSuccess: () => refetch() })} disabled={initMutation.isPending}
               className="flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-100 disabled:opacity-50">
@@ -98,7 +98,7 @@ export default function AiWorkbenchPage() {
           {/* 系统预置 */}
           {systemJobs.length > 0 && (
             <section>
-              <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 <Circle className="h-2 w-2 fill-indigo-400 text-indigo-400" />
                 系统预置（{systemJobs.length}）
               </h2>
@@ -114,7 +114,7 @@ export default function AiWorkbenchPage() {
           {/* 自定义 */}
           {customJobs.length > 0 && (
             <section>
-              <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <h2 className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
                 <Circle className="h-2 w-2 fill-amber-400 text-amber-400" />
                 自定义（{customJobs.length}）
               </h2>

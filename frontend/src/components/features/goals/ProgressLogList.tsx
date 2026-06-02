@@ -99,10 +99,10 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
       {/* 日记列表 */}
       {isLoading ? (
         <div className="flex justify-center py-4">
-          <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+          <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
         </div>
       ) : logs.length === 0 ? (
-        <p className="py-3 text-center text-xs text-slate-400">暂无进度记录</p>
+        <p className="py-3 text-center text-xs text-slate-500">暂无进度记录</p>
       ) : (
         <div className="space-y-1.5">
           {logs.map((log) => (

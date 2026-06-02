@@ -231,7 +231,7 @@ export function GoalForm({
               {customers.length > 0 && (
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    关联客户 <span className="text-xs font-normal text-slate-400">（可选）</span>
+                    关联客户 <span className="text-xs font-normal text-slate-500">（可选）</span>
                   </label>
                   <select
                     value={customerId}
@@ -255,7 +255,7 @@ export function GoalForm({
               {projects.length > 0 && (
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    关联项目 <span className="text-xs font-normal text-slate-400">（可选）</span>
+                    关联项目 <span className="text-xs font-normal text-slate-500">（可选）</span>
                   </label>
                   <select
                     value={projectId}

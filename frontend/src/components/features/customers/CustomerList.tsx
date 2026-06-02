@@ -76,7 +76,7 @@ function ProjectCard({ project }: { project: CustomerProject }) {
       <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
         {project.budget != null && (
           <span className="flex items-center gap-1">
-            <DollarSign className="h-3 w-3 text-slate-400" />
+            <DollarSign className="h-3 w-3 text-slate-500" />
             预算 {formatMoney(project.budget)}
           </span>
         )}
@@ -85,7 +85,7 @@ function ProjectCard({ project }: { project: CustomerProject }) {
           已花费 {formatMoney(project.usedBudget)}
         </span>
         <span className="flex items-center gap-1">
-          <CheckCircle2 className="h-3 w-3 text-slate-400" />
+          <CheckCircle2 className="h-3 w-3 text-slate-500" />
           任务 {project.completedTaskCount}/{project.taskCount}
           {project.taskCount > 0 && (
             <span className="text-slate-300">({progress}%)</span>
@@ -94,7 +94,7 @@ function ProjectCard({ project }: { project: CustomerProject }) {
       </div>
       {/* 报酬说明 / 支出说明 */}
       {(project.rewardNote || project.expenseNote) && (
-        <div className="mt-2 space-y-0.5 text-xs text-slate-400">
+        <div className="mt-2 space-y-0.5 text-xs text-slate-500">
           {project.rewardNote && <p>💬 报酬: {project.rewardNote}</p>}
           {project.expenseNote && <p>📝 支出: {project.expenseNote}</p>}
         </div>
@@ -193,7 +193,7 @@ export function CustomerList({
             <Users className="h-7 w-7 text-slate-200" />
           </div>
           <p className="text-sm font-medium text-slate-500">暂无客户</p>
-          <p className="mt-1 text-xs text-slate-400">添加您的第一个客户开始管理</p>
+          <p className="mt-1 text-xs text-slate-500">添加您的第一个客户开始管理</p>
           <button onClick={() => { setEditCustomer(null); setShowForm(true); }} className="mt-4 text-sm font-medium text-indigo-600 hover:underline">添加客户</button>
         </div>
       ) : (
@@ -216,25 +216,25 @@ export function CustomerList({
                       </div>
                       {c.company && (
                         <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
-                          <Building2 className="h-3 w-3 text-slate-400" />
+                          <Building2 className="h-3 w-3 text-slate-500" />
                           {c.company}
-                          {c.industry && <span className="ml-1 flex items-center gap-1 text-slate-400">· <Briefcase className="h-3 w-3" />{c.industry}</span>}
+                          {c.industry && <span className="ml-1 flex items-center gap-1 text-slate-500">· <Briefcase className="h-3 w-3" />{c.industry}</span>}
                         </p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button onClick={() => handleEdit(c)} className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="编辑"><Pencil className="h-4 w-4" /></button>
-                    <button onClick={() => handleDelete(c.id, c.name)} className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500" title="删除"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => handleEdit(c)} className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="编辑"><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => handleDelete(c.id, c.name)} className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-500" title="删除"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
 
                 {/* ── 第二行：联系信息 ── */}
                 <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-500">
-                  {c.email && <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-400" />{c.email}</span>}
-                  {c.phone && <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-400" />{c.phone}</span>}
-                  {c.address && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-slate-400" />{c.address}</span>}
-                  <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-400" />创建于 {formatDate(c.createdAt)}</span>
+                  {c.email && <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-500" />{c.email}</span>}
+                  {c.phone && <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-500" />{c.phone}</span>}
+                  {c.address && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-slate-500" />{c.address}</span>}
+                  <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-500" />创建于 {formatDate(c.createdAt)}</span>
                 </div>
 
                 {/* ── 关联项目（可展开） ── */}
@@ -257,7 +257,7 @@ export function CustomerList({
                 ) : null}
 
                 {/* ── 沟通记录 + 备注 ── */}
-                <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-400">
+                <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-500">
                   {c.lastContactAt ? (
                     <span className="flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5" />

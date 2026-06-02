@@ -124,7 +124,7 @@ function Card({ title, count, children }: { title: string; count?: number; child
     <div className="flex min-h-[280px] flex-col rounded-xl border border-slate-200/60 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
         <h2 className="text-sm font-semibold text-slate-700">{title}</h2>
-        {count !== undefined && <span className="text-xs text-slate-400">{count}</span>}
+        {count !== undefined && <span className="text-xs text-slate-500">{count}</span>}
       </div>
       <div className="flex-1 overflow-hidden">{children}</div>
     </div>
@@ -202,14 +202,14 @@ export default function DashboardPage() {
       <div className="flex flex-wrap items-center gap-3">
         {/* 具体日期 */}
         <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2">
-          <Calendar className="h-4 w-4 text-slate-400" aria-hidden="true" />
+          <Calendar className="h-4 w-4 text-slate-500" aria-hidden="true" />
           <label htmlFor="dashboard-date" className="sr-only">选择日期</label>
           <input
             id="dashboard-date"
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-40 bg-transparent text-sm text-slate-600 outline-none"
+            className="w-40 bg-transparent text-sm text-slate-600 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
           />
         </div>
         <div className="h-5 w-px bg-slate-200" />
@@ -244,7 +244,7 @@ export default function DashboardPage() {
         {/* 项目概览 */}
         <Card title="项目概览" count={projects.length}>
           {projects.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-400">
+            <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-500">
               <FolderKanban className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无项目
             </div>
           ) : (
@@ -278,7 +278,7 @@ export default function DashboardPage() {
         {/* 最近活动 */}
         <Card title="最近活动" count={recentTasks.length}>
           {recentTasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-400">
+            <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-500">
               <Clock className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无活动
             </div>
           ) : (
@@ -335,7 +335,7 @@ export default function DashboardPage() {
                   </div>
                   {/* 总计 */}
                   <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span className="text-xs text-slate-400">总计任务</span>
+                    <span className="text-xs text-slate-500">总计任务</span>
                     <span className="text-sm font-bold text-slate-700">{recentTasks.length}</span>
                   </div>
                 </>

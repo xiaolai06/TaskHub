@@ -78,10 +78,10 @@ function CostPopup({ task, onSave, onClose }: {
 
         <div className="mb-3 flex items-center justify-between">
           <span className="text-sm font-semibold text-slate-700">快捷记账</span>
-          <button onClick={onClose} className="rounded p-1 text-slate-400 hover:bg-slate-100"><X className="h-4 w-4" /></button>
+          <button onClick={onClose} className="rounded p-1 text-slate-500 hover:bg-slate-100"><X className="h-4 w-4" /></button>
         </div>
 
-        <p className="mb-4 truncate text-xs text-slate-400">任务：{task.title}</p>
+        <p className="mb-4 truncate text-xs text-slate-500">任务：{task.title}</p>
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
@@ -229,7 +229,7 @@ export function SubtaskList({ tasks, projectId, onCreateSubtask, onUpdateTask, o
                         {child.cost && child.cost > 0 && (
                           <span className="text-[11px] text-amber-500" title={child.costNote || ''}>
                             {formatCost(child.cost)}
-                            {child.costNote && <span className="ml-1 text-slate-400">({child.costNote})</span>}
+                            {child.costNote && <span className="ml-1 text-slate-500">({child.costNote})</span>}
                           </span>
                         )}
                         <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium', cst.color)}>{cst.label}</span>
@@ -247,7 +247,7 @@ export function SubtaskList({ tasks, projectId, onCreateSubtask, onUpdateTask, o
         })}
 
         <button onClick={() => { setEditTask(null); setShowTaskForm(true); }}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-slate-400 transition-colors hover:bg-slate-50 hover:text-indigo-600">
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-slate-500 transition-colors hover:bg-slate-50 hover:text-indigo-600">
           <Plus className="h-4 w-4" />添加任务
         </button>
       </div>

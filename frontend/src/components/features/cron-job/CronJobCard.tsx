@@ -92,15 +92,15 @@ export function CronJobCard({
           </button>
           {!job.isSystem && (
             <>
-              <button onClick={onEdit} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-50 hover:text-indigo-500" title="编辑">
+              <button onClick={onEdit} className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-50 hover:text-indigo-500" title="编辑">
                 <Edit3 className="h-4 w-4" />
               </button>
-              <button onClick={onDelete} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500" title="删除">
+              <button onClick={onDelete} className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-500" title="删除">
                 <Trash2 className="h-4 w-4" />
               </button>
             </>
           )}
-          <button className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-indigo-50 hover:text-indigo-500" title="手动触发">
+          <button className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-indigo-50 hover:text-indigo-500" title="手动触发">
             <Play className="h-4 w-4" />
           </button>
         </div>
