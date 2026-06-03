@@ -72,28 +72,23 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5">
-      {/* 页头 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-slate-800">经营目标</h1>
-        </div>
+    <div className="mx-auto max-w-5xl space-y-4">
+      {/* 总览卡片 */}
+      <GoalOverview data={overview} isLoading={isLoading} />
+
+      {/* 新建 + 筛选 */}
+      <div className="flex items-center justify-between gap-3">
+        <GoalFilter
+          status={statusFilter} type={typeFilter}
+          onStatusChange={setStatusFilter} onTypeChange={setTypeFilter}
+        />
         <button
           onClick={() => { setEditGoal(null); setShowForm(true); }}
-          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-indigo-700 active:scale-95"
+          className="flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-indigo-700 active:scale-95"
         >
           <Plus className="h-4 w-4" />新建目标
         </button>
       </div>
-
-      {/* 总览卡片 */}
-      <GoalOverview data={overview} isLoading={isLoading} />
-
-      {/* 筛选栏 */}
-      <GoalFilter
-        status={statusFilter} type={typeFilter}
-        onStatusChange={setStatusFilter} onTypeChange={setTypeFilter}
-      />
 
       {/* 加载态 */}
       {isLoading && (

@@ -89,58 +89,53 @@ function ScheduleContent() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-bold text-foreground">排期工作台</h1>
-        </div>
+    <div className="mx-auto max-w-7xl space-y-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          value={effectiveProjectId}
+          onChange={(event) => setProjectId(event.target.value)}
+          className="h-9 rounded-lg border border-border bg-card px-3 text-sm text-foreground outline-none focus:border-indigo-300"
+        >
+          {projects.map((project) => (
+            <option key={project.id} value={project.id}>
+              {project.name}
+            </option>
+          ))}
+        </select>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={effectiveProjectId}
-            onChange={(event) => setProjectId(event.target.value)}
-            className="h-10 rounded-lg border border-border bg-card px-3 text-sm text-foreground outline-none focus:border-indigo-300"
-          >
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
+        <label className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-sm text-foreground/80">
+          每日
+          <input
+            type="number"
+            min={1}
+            max={24}
+            value={dailyHourLimit}
+            onChange={(event) => setDailyHourLimit(Number(event.target.value) || 8)}
+            className="w-10 border-none bg-transparent text-center outline-none"
+          />
+          h
+        </label>
 
-          <label className="flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-3 text-sm text-foreground/80">
-            每日
-            <input
-              type="number"
-              min={1}
-              max={24}
-              value={dailyHourLimit}
-              onChange={(event) => setDailyHourLimit(Number(event.target.value) || 8)}
-              className="w-12 border-none bg-transparent text-center outline-none"
-            />
-            h
-          </label>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={refreshSchedule}
+          disabled={scheduleFetching}
+          className="gap-1.5"
+        >
+          {scheduleFetching ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="h-3.5 w-3.5" />
+          )}
+          重新计算
+        </Button>
 
-          <Button
-            variant="outline"
-            onClick={refreshSchedule}
-            disabled={scheduleFetching}
-            className="gap-1.5"
-          >
-            {scheduleFetching ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-            重新计算
-          </Button>
-
-          <Button variant="outline" className="gap-1.5" onClick={() => setInsertionOpen(true)}>
-            <WandSparkles className="h-4 w-4" />
-            插单模拟
-          </Button>
-          <InsertionDialog projectId={effectiveProjectId} open={insertionOpen} onOpenChange={setInsertionOpen} />
-        </div>
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setInsertionOpen(true)}>
+          <WandSparkles className="h-3.5 w-3.5" />
+          插单模拟
+        </Button>
+        <InsertionDialog projectId={effectiveProjectId} open={insertionOpen} onOpenChange={setInsertionOpen} />
       </div>
 
       {scheduleError ? (

@@ -213,14 +213,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4 animate-in fade-in duration-300">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-bold text-foreground">经营概览</h1>
-        </div>
-        <div className="text-xs text-muted-foreground">
-        </div>
-      </div>
-
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-6">
         <StatCard
           icon={FolderKanban}
