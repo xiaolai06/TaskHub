@@ -1,16 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type ComponentType } from 'react';
+import { AlertTriangle, CheckSquare, Clock, DollarSign, FolderKanban, Loader2, TrendingUp, Users } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api, ApiError } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import {
-  FolderKanban, CheckSquare, TrendingUp, AlertTriangle,
-  DollarSign, Clock, ArrowUpRight, ArrowDownRight, Loader2,
-  Users, Calendar, ChevronLeft, ChevronRight,
-} from 'lucide-react';
-
-// ========== 类型 ==========
 
 interface DashboardStats {
   projectCount: number;
@@ -18,6 +12,8 @@ interface DashboardStats {
   doneTasks: number;
   completionRate: number;
   totalCost: number;
+  monthlyIncome: number;
+  estimatedProfit: number;
   overdueCount: number;
 }
 
@@ -36,146 +32,178 @@ interface ProjectSummary {
   id: string;
   name: string;
   status: string;
+  quote: number;
   totalTasks: number;
   doneTasks: number;
 }
 
-type TimeRange = 'today' | 'week' | 'month' | 'quarter';
-
-// ========== 工具 ==========
-
-const priorityColor: Record<string, string> = {
-  URGENT: 'text-red-600 bg-red-50',
-  HIGH: 'text-orange-600 bg-orange-50',
-  MEDIUM: 'text-amber-600 bg-amber-50',
-  LOW: 'text-slate-500 bg-slate-50',
-};
-
-const statusColor: Record<string, string> = {
-  TODO: 'text-slate-600 bg-slate-50',
-  IN_PROGRESS: 'text-blue-600 bg-blue-50',
-  DONE: 'text-emerald-600 bg-emerald-50',
-  BLOCKED: 'text-red-600 bg-red-50',
-};
-
-const statusLabel: Record<string, string> = {
-  TODO: '待办', IN_PROGRESS: '进行中', DONE: '已完成', BLOCKED: '阻塞',
-  ACTIVE: '进行中', COMPLETED: '已完成', ARCHIVED: '已归档',
-};
-
-// TODO: 接入真实 API 后删除此常量
-const MOCK_CUSTOMERS = [
-  { id: '1', name: '张三公司', contact: '张经理', projects: 3, status: '活跃' },
-  { id: '2', name: '李四科技', contact: '李总', projects: 2, status: '活跃' },
-  { id: '3', name: '王五集团', contact: '王主管', projects: 1, status: '跟进中' },
-  { id: '4', name: '赵六传媒', contact: '赵经理', projects: 4, status: '活跃' },
-];
-
-function formatCost(fen: number): string {
-  const yuan = fen / 100;
-  if (yuan >= 10000) return `¥${(yuan / 10000).toFixed(1)}w`;
-  return `¥${yuan.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+interface CustomerSummary {
+  id: string;
+  name: string;
+  contact: string;
+  status: string;
+  projects: number;
+  quoteTotal: number;
+  completedOrders: number;
+  lastContactAt: string | null;
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return '刚刚';
-  if (mins < 60) return `${mins} 分钟前`;
-  const hours = Math.floor(mins / 60);
+function formatYuan(fen: number): string {
+  const yuan = fen / 100;
+  if (yuan >= 10000) {
+    return `¥${(yuan / 10000).toFixed(1)}w`;
+  }
+  return `¥${yuan.toLocaleString('zh-CN', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
+}
+
+function formatDate(date: string | null): string {
+  if (!date) return '-';
+  return new Date(date).toLocaleDateString('zh-CN', {
+    month: 'numeric',
+    day: 'numeric',
+  });
+}
+
+function timeAgo(date: string): string {
+  const diffMs = Date.now() - new Date(date).getTime();
+  const minutes = Math.max(0, Math.floor(diffMs / 60000));
+
+  if (minutes < 1) return '刚刚';
+  if (minutes < 60) return `${minutes} 分钟前`;
+
+  const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} 小时前`;
+
   return `${Math.floor(hours / 24)} 天前`;
 }
 
-// ========== 统计卡片 ==========
+const priorityLabel: Record<string, string> = {
+  URGENT: '紧急',
+  HIGH: '高',
+  MEDIUM: '中',
+  LOW: '低',
+};
+
+const priorityClass: Record<string, string> = {
+  URGENT: 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
+  HIGH: 'bg-orange-50 text-orange-600 dark:bg-orange-950/40 dark:text-orange-400',
+  MEDIUM: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
+  LOW: 'bg-muted text-muted-foreground',
+};
+
+const projectStatusLabel: Record<string, string> = {
+  ACTIVE: '进行中',
+  COMPLETED: '已完成',
+  ARCHIVED: '已归档',
+};
+
+const projectStatusClass: Record<string, string> = {
+  ACTIVE: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
+  COMPLETED: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400',
+  ARCHIVED: 'bg-muted text-muted-foreground',
+};
+
+const customerStatusLabel: Record<string, string> = {
+  ACTIVE: '活跃',
+  VIP: '重点客户',
+  LEAD: '待跟进',
+  INACTIVE: '已暂停',
+};
+
+const customerStatusClass: Record<string, string> = {
+  ACTIVE: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400',
+  VIP: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
+  LEAD: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
+  INACTIVE: 'bg-muted text-muted-foreground',
+};
 
 function StatCard({
-  icon: Icon, label, value, trend, colorClass,
+  icon: Icon,
+  label,
+  value,
+  hint,
+  toneClass,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   label: string;
   value: string | number;
-  trend?: { value: string; positive: boolean };
-  colorClass: string;
+  hint?: string;
+  toneClass: string;
 }) {
   return (
-    <div className="flex items-start justify-between rounded-xl border border-slate-200/60 bg-white px-4 py-3 shadow-sm transition-all duration-200 hover:shadow-md active:scale-[0.98]">
-      <div>
-        <p className="text-[12px] text-slate-500">{label}</p>
-        <p className="mt-1 text-xl font-extrabold text-slate-900">{value}</p>
-        {trend && (
-          <p className="mt-0.5 flex items-center gap-0.5 text-[11px]">
-            {trend.positive ? <ArrowUpRight className="h-3 w-3 text-emerald-500" /> : <ArrowDownRight className="h-3 w-3 text-red-500" />}
-            <span className={trend.positive ? 'text-emerald-600' : 'text-red-500'}>{trend.value}</span>
-            <span className="ml-0.5 text-slate-500">较上周</span>
-          </p>
-        )}
-      </div>
-      <div className={cn('rounded-lg p-2', colorClass)}>
-        <Icon className="h-4 w-4" aria-hidden="true" />
+    <div className="rounded-xl border border-border/60 bg-card px-4 py-3 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[12px] text-muted-foreground">{label}</p>
+          <p className="mt-1 text-xl font-bold text-foreground">{value}</p>
+          {hint ? <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p> : null}
+        </div>
+        <div className={cn('rounded-lg p-2', toneClass)}>
+          <Icon className="h-4 w-4" />
+        </div>
       </div>
     </div>
   );
 }
 
-// ========== 页面 ==========
-
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [customers, setCustomers] = useState<CustomerSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeRange, setTimeRange] = useState<TimeRange>('week');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     async function load() {
       try {
-        const [s, a, p] = await Promise.all([
+        const [statsRes, tasksRes, projectsRes, customersRes] = await Promise.all([
           api.get<{ stats: DashboardStats }>('/dashboard/summary'),
           api.get<{ tasks: RecentTask[] }>('/dashboard/recent-activity'),
           api.get<{ projects: ProjectSummary[] }>('/dashboard/project-stats'),
+          api.get<{ customers: CustomerSummary[] }>('/dashboard/customer-stats'),
         ]);
-        setStats(s.stats);
-        setRecentTasks(a.tasks);
-        setProjects(p.projects);
+
+        setStats(statsRes.stats);
+        setRecentTasks(tasksRes.tasks);
+        setProjects(projectsRes.projects);
+        setCustomers(customersRes.customers);
+        setError(null);
       } catch (err) {
         setError(err instanceof ApiError ? err.message : '加载仪表盘失败');
       } finally {
         setLoading(false);
       }
     }
+
     load();
   }, []);
 
-  const timeRanges: { key: TimeRange; label: string }[] = [
-    { key: 'today', label: '今日' },
-    { key: 'week', label: '本周' },
-    { key: 'month', label: '本月' },
-    { key: 'quarter', label: '本季度' },
-  ];
-
-  // 模拟客户数据（TODO: 接入真实 API 后删除）
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- 常量，非 hook
-  const customers = MOCK_CUSTOMERS;
+  const pendingTasks = useMemo(() => {
+    if (!stats) return 0;
+    return Math.max(0, stats.totalTasks - stats.doneTasks);
+  }, [stats]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" aria-hidden="true" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
   }
 
-  if (error) {
+  if (error || !stats) {
     return (
       <div className="flex flex-col items-center justify-center py-32">
-        <AlertTriangle className="h-10 w-10 text-red-300" aria-hidden="true" />
-        <p className="mt-4 text-sm text-red-500">{error}</p>
+        <AlertTriangle className="h-10 w-10 text-red-300" />
+        <p className="mt-4 text-sm text-red-500">{error || '加载仪表盘失败'}</p>
         <button
+          type="button"
           onClick={() => window.location.reload()}
-          className="mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
+          className="mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline"
         >
           重试
         </button>
@@ -185,119 +213,143 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4 animate-in fade-in duration-300">
-      {/* 顶部：日期选择 + 快捷切换 */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* 具体日期 */}
-        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2">
-          <Calendar className="h-4 w-4 text-slate-500" aria-hidden="true" />
-          <label htmlFor="dashboard-date" className="sr-only">选择日期</label>
-          <input
-            id="dashboard-date"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-40 bg-transparent text-sm text-slate-600 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
-          />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-bold text-foreground">经营概览</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            聚合当前订单执行、任务推进、客户跟进与财务结果。
+          </p>
         </div>
-        <div className="h-5 w-px bg-slate-200" />
-        {/* 快捷切换 */}
-        <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
-          {timeRanges.map((r) => (
-            <button
-              key={r.key}
-              onClick={() => setTimeRange(r.key)}
-              className={cn(
-                'rounded-md px-4 py-1.5 text-sm font-medium transition-all active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
-                timeRange === r.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50',
-              )}
-            >
-              {r.label}
-            </button>
-          ))}
+        <div className="text-xs text-muted-foreground">
+          订单报价、成本、利润与月入款口径已统一
         </div>
       </div>
 
-      {/* 统计卡片 */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <StatCard icon={FolderKanban} label="项目总数" value={stats?.projectCount ?? 0} colorClass="bg-indigo-100 text-indigo-600" />
-        <StatCard icon={CheckSquare} label="总任务" value={stats?.totalTasks ?? 0} trend={{ value: `${stats?.completionRate ?? 0}% 完成`, positive: true }} colorClass="bg-blue-100 text-blue-600" />
-        <StatCard icon={TrendingUp} label="完成率" value={`${stats?.completionRate ?? 0}%`} colorClass="bg-emerald-100 text-emerald-600" />
-        <StatCard icon={DollarSign} label="总成本" value={stats ? formatCost(stats.totalCost) : '¥0'} colorClass="bg-amber-100 text-amber-600" />
-        <StatCard icon={Clock} label="逾期任务" value={stats?.overdueCount ?? 0} trend={(stats?.overdueCount ?? 0) > 0 ? { value: '需要关注', positive: false } : undefined} colorClass="bg-red-100 text-red-600" />
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-6">
+        <StatCard
+          icon={FolderKanban}
+          label="进行中订单"
+          value={stats.projectCount}
+          hint="项目总数"
+          toneClass="bg-indigo-100 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"
+        />
+        <StatCard
+          icon={CheckSquare}
+          label="任务完成率"
+          value={`${stats.completionRate}%`}
+          hint={`${stats.doneTasks}/${stats.totalTasks} 个任务`}
+          toneClass="bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="本月入款"
+          value={formatYuan(stats.monthlyIncome)}
+          hint="已完成订单报价合计"
+          toneClass="bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
+        />
+        <StatCard
+          icon={DollarSign}
+          label="已发生成本"
+          value={formatYuan(stats.totalCost)}
+          hint="成本记录 + 任务成本"
+          toneClass="bg-amber-100 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="预估利润"
+          value={formatYuan(stats.estimatedProfit)}
+          hint="本月入款 - 已发生成本"
+          toneClass={stats.estimatedProfit >= 0
+            ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400'
+            : 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400'}
+        />
+        <StatCard
+          icon={Clock}
+          label="逾期任务"
+          value={stats.overdueCount}
+          hint={pendingTasks > 0 ? `待处理 ${pendingTasks} 个` : '当前无积压'}
+          toneClass={stats.overdueCount > 0
+            ? 'bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400'
+            : 'bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-300'}
+        />
       </div>
 
-      {/* 2x2 网格布局 */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* 项目概览 */}
-        <Card className="min-h-[280px] border-slate-200/60">
-          <CardHeader className="border-b border-slate-100 px-4 py-2.5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">项目概览</CardTitle>
-              <span className="text-xs text-slate-500">{projects.length}</span>
-            </div>
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <Card className="border-border/60">
+          <CardHeader className="border-b border-border px-4 py-3">
+            <CardTitle className="text-sm font-semibold text-foreground">订单进度</CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 overflow-hidden px-0 pt-0">
+          <CardContent className="space-y-4 px-4 py-4">
             {projects.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-500">
-                <FolderKanban className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无项目
-              </div>
+              <p className="py-8 text-center text-sm text-muted-foreground">暂无订单数据</p>
             ) : (
-              <div className="divide-y">
-                {projects.map((p) => {
-                  const progress = p.totalTasks > 0 ? Math.round((p.doneTasks / p.totalTasks) * 100) : 0;
-                  return (
-                    <div key={p.id} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] font-medium text-slate-800">{p.name}</p>
-                        <p className="text-[11px] text-slate-500">{p.doneTasks}/{p.totalTasks} 任务</p>
+              projects.map((project) => {
+                const progress = project.totalTasks > 0
+                  ? Math.round((project.doneTasks / project.totalTasks) * 100)
+                  : 0;
+
+                return (
+                  <div key={project.id} className="space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">{project.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          报价 {formatYuan(project.quote)} · {project.doneTasks}/{project.totalTasks} 个任务
+                        </p>
                       </div>
-                      <div className="w-20">
-                        <div className="flex items-center gap-1.5">
-                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                            <div className={cn('h-full rounded-full', progress >= 80 ? 'bg-amber-400' : 'bg-indigo-500')} style={{ width: `${progress}%` }} />
-                          </div>
-                          <span className="text-[11px] font-medium text-slate-500">{progress}%</span>
-                        </div>
-                      </div>
-                      <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium', statusColor[p.status] || statusColor.TODO)}>
-                        {statusLabel[p.status] || p.status}
+                      <span className={cn(
+                        'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
+                        projectStatusClass[project.status] || projectStatusClass.ACTIVE,
+                      )}>
+                        {projectStatusLabel[project.status] || project.status}
                       </span>
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className="h-full rounded-full bg-indigo-500"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                      <span className="w-10 text-right text-[11px] text-muted-foreground">
+                        {progress}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </CardContent>
         </Card>
 
-        {/* 最近活动 */}
-        <Card className="min-h-[280px] border-slate-200/60">
-          <CardHeader className="border-b border-slate-100 px-4 py-2.5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">最近活动</CardTitle>
-              <span className="text-xs text-slate-500">{recentTasks.length}</span>
-            </div>
+        <Card className="border-border/60">
+          <CardHeader className="border-b border-border px-4 py-3">
+            <CardTitle className="text-sm font-semibold text-foreground">近期任务动态</CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 overflow-hidden px-0 pt-0">
+          <CardContent className="px-0 py-0">
             {recentTasks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-sm text-slate-500">
-                <Clock className="mb-2 h-8 w-8 text-slate-200" aria-hidden="true" />暂无活动
-              </div>
+              <p className="py-12 text-center text-sm text-muted-foreground">暂无任务动态</p>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-border">
                 {recentTasks.map((task) => (
-                  <div key={task.id} className="flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
-                    <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', task.priority === 'URGENT' || task.priority === 'HIGH' ? 'bg-red-400' : task.priority === 'MEDIUM' ? 'bg-amber-400' : 'bg-slate-300')} />
+                  <div key={task.id} className="flex items-start gap-3 px-4 py-3">
+                    <span className={cn(
+                      'mt-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+                      priorityClass[task.priority] || priorityClass.LOW,
+                    )}>
+                      {priorityLabel[task.priority] || task.priority}
+                    </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-medium text-slate-700">{task.title}</p>
-                      <p className="text-[11px] text-slate-500">{task.project.name}{task.assignee && ` · ${task.assignee.name}`}</p>
+                      <p className="truncate text-sm font-medium text-foreground">{task.title}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {task.project.name}
+                        {task.assignee ? ` · ${task.assignee.name}` : ''}
+                        {task.dueDate ? ` · 截止 ${formatDate(task.dueDate)}` : ''}
+                      </p>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-0.5">
-                      <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium', priorityColor[task.priority] || 'text-slate-500 bg-slate-50')}>
-                        {task.priority === 'URGENT' ? '紧急' : task.priority === 'HIGH' ? '高' : task.priority === 'MEDIUM' ? '中' : '低'}
-                      </span>
-                      <span className="text-[10px] text-slate-500">{timeAgo(task.updatedAt)}</span>
-                    </div>
+                    <span className="shrink-0 text-[11px] text-muted-foreground">
+                      {timeAgo(task.updatedAt)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -305,81 +357,91 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* 任务分布 */}
-        <Card className="min-h-[280px] border-slate-200/60">
-          <CardHeader className="border-b border-slate-100 px-4 py-2.5">
-            <CardTitle className="text-sm font-semibold text-slate-700">任务分布</CardTitle>
+        <Card className="border-border/60">
+          <CardHeader className="border-b border-border px-4 py-3">
+            <CardTitle className="text-sm font-semibold text-foreground">任务闭环检查</CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 overflow-hidden px-0 pt-0">
-          <div className="px-4 py-3">
-            {(() => {
-              const statusCounts: Record<string, number> = {};
-              recentTasks.forEach((t) => { statusCounts[t.status] = (statusCounts[t.status] || 0) + 1; });
-              const total = recentTasks.length || 1;
-              const bars = [
-                { key: 'IN_PROGRESS', label: '进行中', color: 'bg-blue-500' },
-                { key: 'TODO', label: '待办', color: 'bg-slate-400' },
-                { key: 'DONE', label: '已完成', color: 'bg-emerald-500' },
-                { key: 'BLOCKED', label: '阻塞', color: 'bg-red-400' },
-              ];
-              return (
-                <>
-                  <div className="flex h-3 overflow-hidden rounded-full bg-slate-100">
-                    {bars.map((bar) => {
-                      const count = statusCounts[bar.key] || 0;
-                      if (count === 0) return null;
-                      return <div key={bar.key} className={cn('h-full', bar.color)} style={{ width: `${(count / total) * 100}%` }} />;
-                    })}
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-3">
-                    {bars.map((bar) => (
-                      <div key={bar.key} className="flex items-center gap-2">
-                        <span className={cn('h-2.5 w-2.5 rounded-full', bar.color)} />
-                        <span className="text-xs text-slate-500">{bar.label}</span>
-                        <span className="ml-auto text-xs font-semibold text-slate-700">{statusCounts[bar.key] || 0}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {/* 总计 */}
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span className="text-xs text-slate-500">总计任务</span>
-                    <span className="text-sm font-bold text-slate-700">{recentTasks.length}</span>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
+          <CardContent className="space-y-4 px-4 py-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg bg-muted/50 px-3 py-3">
+                <p className="text-xs text-muted-foreground">全部任务</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{stats.totalTasks}</p>
+              </div>
+              <div className="rounded-lg bg-muted/50 px-3 py-3">
+                <p className="text-xs text-muted-foreground">未完成任务</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{pendingTasks}</p>
+              </div>
+              <div className="rounded-lg bg-muted/50 px-3 py-3">
+                <p className="text-xs text-muted-foreground">已完成任务</p>
+                <p className="mt-1 text-lg font-bold text-foreground">{stats.doneTasks}</p>
+              </div>
+              <div className="rounded-lg bg-muted/50 px-3 py-3">
+                <p className="text-xs text-muted-foreground">逾期风险</p>
+                <p className={cn(
+                  'mt-1 text-lg font-bold',
+                  stats.overdueCount > 0 ? 'text-red-600' : 'text-foreground',
+                )}>
+                  {stats.overdueCount}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">整体完成进度</span>
+                <span className="font-medium text-foreground">{stats.completionRate}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-emerald-500"
+                  style={{ width: `${stats.completionRate}%` }}
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* 客户概览 */}
-        <Card className="min-h-[280px] border-slate-200/60">
-          <CardHeader className="border-b border-slate-100 px-4 py-2.5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-slate-700">客户概览</CardTitle>
-              <span className="text-xs text-slate-500">{customers.length}</span>
+        <Card className="border-border/60">
+          <CardHeader className="border-b border-border px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="text-sm font-semibold text-foreground">客户跟进概览</CardTitle>
+              <span className="text-xs text-muted-foreground">{customers.length} 个客户</span>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 overflow-hidden px-0 pt-0">
-          <div className="divide-y">
-            {customers.map((c) => (
-              <div key={c.id} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-slate-50">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-semibold text-indigo-600">
-                  {c.name.slice(0, 1)}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium text-slate-800">{c.name}</p>
-                  <p className="text-[11px] text-slate-500">{c.contact} · {c.projects} 个项目</p>
-                </div>
-                <span className={cn(
-                  'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
-                  c.status === '活跃' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600',
-                )}>
-                  {c.status}
-                </span>
+          <CardContent className="px-0 py-0">
+            {customers.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-sm text-muted-foreground">
+                <Users className="mb-2 h-8 w-8 text-slate-300" />
+                暂无客户数据
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="divide-y divide-border">
+                {customers.map((customer) => (
+                  <div key={customer.id} className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-semibold text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-300">
+                      {customer.name.slice(0, 1)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-foreground">{customer.name}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        联系人 {customer.contact} · {customer.projects} 单 · 报价 {formatYuan(customer.quoteTotal)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={cn(
+                        'rounded-full px-2 py-0.5 text-[10px] font-medium',
+                        customerStatusClass[customer.status] || customerStatusClass.ACTIVE,
+                      )}>
+                        {customerStatusLabel[customer.status] || customer.status}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {customer.lastContactAt ? `最近联系 ${formatDate(customer.lastContactAt)}` : '待建立联系'}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

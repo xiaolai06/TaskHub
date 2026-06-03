@@ -14,14 +14,14 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
   ACTIVE: { label: '合作中', color: 'text-emerald-700', bg: 'bg-emerald-50' },
   VIP: { label: '重点客户', color: 'text-amber-700', bg: 'bg-amber-50' },
   LEAD: { label: '待跟进', color: 'text-blue-700', bg: 'bg-blue-50' },
-  INACTIVE: { label: '已暂停', color: 'text-slate-500', bg: 'bg-slate-100' },
+  INACTIVE: { label: '已暂停', color: 'text-muted-foreground', bg: 'bg-muted' },
 };
 
 /** 项目状态标签 */
 const PROJECT_ST: Record<string, { label: string; dot: string }> = {
   ACTIVE: { label: '进行中', dot: 'bg-emerald-400' },
   COMPLETED: { label: '已完成', dot: 'bg-blue-400' },
-  ARCHIVED: { label: '已归档', dot: 'bg-slate-300' },
+  ARCHIVED: { label: '已归档', dot: 'bg-accent' },
 };
 
 /** 沟通类型标签 */
@@ -60,12 +60,12 @@ function ProjectCard({ project }: { project: CustomerProject }) {
     ? Math.round((project.completedTaskCount / project.taskCount) * 100)
     : 0;
   return (
-    <div className="rounded-lg border border-slate-200/80 bg-slate-50/50 p-3.5">
+    <div className="rounded-lg border border-border/80 bg-muted/50 p-3.5">
       {/* 项目头 */}
       <div className="flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${pst.dot}`} />
-        <span className="text-sm font-medium text-slate-800">{project.name}</span>
-        <span className="text-[11px] text-slate-500">{pst.label}</span>
+        <span className="text-sm font-medium text-foreground">{project.name}</span>
+        <span className="text-[11px] text-muted-foreground">{pst.label}</span>
         {project.type && (
           <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-medium text-indigo-600">
             {project.type}
@@ -73,30 +73,30 @@ function ProjectCard({ project }: { project: CustomerProject }) {
         )}
       </div>
       {/* 财务 + 进度 */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
         {project.budget != null && (
           <span className="flex items-center gap-1">
-            <DollarSign className="h-3 w-3 text-slate-500" />
-            预算 {formatMoney(project.budget)}
+            <DollarSign className="h-3 w-3 text-muted-foreground" />
+            报价 {formatMoney(project.budget)}
           </span>
         )}
         <span className="flex items-center gap-1">
           <DollarSign className="h-3 w-3 text-red-300" />
-          已花费 {formatMoney(project.usedBudget)}
+          成本 {formatMoney(project.usedBudget)}
         </span>
         <span className="flex items-center gap-1">
-          <CheckCircle2 className="h-3 w-3 text-slate-500" />
+          <CheckCircle2 className="h-3 w-3 text-muted-foreground" />
           任务 {project.completedTaskCount}/{project.taskCount}
           {project.taskCount > 0 && (
-            <span className="text-slate-300">({progress}%)</span>
+            <span className="text-muted-foreground/50">({progress}%)</span>
           )}
         </span>
       </div>
-      {/* 报酬说明 / 支出说明 */}
+      {/* 报价说明 / 成本说明 */}
       {(project.rewardNote || project.expenseNote) && (
-        <div className="mt-2 space-y-0.5 text-xs text-slate-500">
-          {project.rewardNote && <p>💬 报酬: {project.rewardNote}</p>}
-          {project.expenseNote && <p>📝 支出: {project.expenseNote}</p>}
+        <div className="mt-2 space-y-0.5 text-xs text-muted-foreground">
+          {project.rewardNote && <p>💬 报价说明: {project.rewardNote}</p>}
+          {project.expenseNote && <p>📝 成本说明: {project.expenseNote}</p>}
         </div>
       )}
     </div>
@@ -188,12 +188,12 @@ export function CustomerList({
     <>
       {/* 空状态 */}
       {!customers.length ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-24 shadow-sm">
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50">
-            <Users className="h-7 w-7 text-slate-200" />
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-card py-24 shadow-sm">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+            <Users className="h-7 w-7 text-muted-foreground/30" />
           </div>
-          <p className="text-sm font-medium text-slate-500">暂无客户</p>
-          <p className="mt-1 text-xs text-slate-500">添加您的第一个客户开始管理</p>
+          <p className="text-sm font-medium text-muted-foreground">暂无客户</p>
+          <p className="mt-1 text-xs text-muted-foreground">添加您的第一个客户开始管理</p>
           <button onClick={() => { setEditCustomer(null); setShowForm(true); }} className="mt-4 text-sm font-medium text-indigo-600 hover:underline">添加客户</button>
         </div>
       ) : (
@@ -202,7 +202,7 @@ export function CustomerList({
           {customers.map((c) => {
             const st = STATUS_MAP[c.status] ?? STATUS_MAP.ACTIVE;
             return (
-              <div key={c.id} className="group rounded-xl border border-slate-200/60 bg-white p-5 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md">
+              <div key={c.id} className="group rounded-xl border border-border/60 bg-card p-5 shadow-sm transition-all hover:border-indigo-200 hover:shadow-md">
                 {/* ── 第一行：名称 + 状态 + 操作 ── */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
@@ -211,30 +211,30 @@ export function CustomerList({
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-[15px] font-semibold text-slate-800">{c.name}</h3>
+                        <h3 className="text-[15px] font-semibold text-foreground">{c.name}</h3>
                         <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${st.color} ${st.bg}`}>{st.label}</span>
                       </div>
                       {c.company && (
-                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
-                          <Building2 className="h-3 w-3 text-slate-500" />
+                        <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Building2 className="h-3 w-3 text-muted-foreground" />
                           {c.company}
-                          {c.industry && <span className="ml-1 flex items-center gap-1 text-slate-500">· <Briefcase className="h-3 w-3" />{c.industry}</span>}
+                          {c.industry && <span className="ml-1 flex items-center gap-1 text-muted-foreground">· <Briefcase className="h-3 w-3" />{c.industry}</span>}
                         </p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button onClick={() => handleEdit(c)} className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="编辑"><Pencil className="h-4 w-4" /></button>
-                    <button onClick={() => handleDelete(c.id, c.name)} className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-500" title="删除"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => handleEdit(c)} className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-indigo-50 hover:text-indigo-600" title="编辑"><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => handleDelete(c.id, c.name)} className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-500" title="删除"><Trash2 className="h-4 w-4" /></button>
                   </div>
                 </div>
 
                 {/* ── 第二行：联系信息 ── */}
-                <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-500">
-                  {c.email && <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-500" />{c.email}</span>}
-                  {c.phone && <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-500" />{c.phone}</span>}
-                  {c.address && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-slate-500" />{c.address}</span>}
-                  <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-500" />创建于 {formatDate(c.createdAt)}</span>
+                <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
+                  {c.email && <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-muted-foreground" />{c.email}</span>}
+                  {c.phone && <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-muted-foreground" />{c.phone}</span>}
+                  {c.address && <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-muted-foreground" />{c.address}</span>}
+                  <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-muted-foreground" />创建于 {formatDate(c.createdAt)}</span>
                 </div>
 
                 {/* ── 关联项目（可展开） ── */}
@@ -242,7 +242,7 @@ export function CustomerList({
                   <div className="mt-3">
                     <button
                       onClick={() => toggleProjects(c.id)}
-                      className="flex items-center gap-1.5 text-xs font-medium text-slate-600 transition-colors hover:text-indigo-600"
+                      className="flex items-center gap-1.5 text-xs font-medium text-foreground/70 transition-colors hover:text-indigo-600"
                     >
                       {expandedProjects.has(c.id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
                       <FolderKanban className="h-3.5 w-3.5" />
@@ -257,15 +257,15 @@ export function CustomerList({
                 ) : null}
 
                 {/* ── 沟通记录 + 备注 ── */}
-                <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-500">
+                <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
                   {c.lastContactAt ? (
                     <span className="flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5" />
                       上次沟通: {CONTACT_TYPE[c.lastContactType ?? ''] ?? '沟通'} · {timeAgo(c.lastContactAt)}
-                      <span className="text-slate-300">（共 {c._count?.communications ?? 0} 次）</span>
+                      <span className="text-muted-foreground/50">（共 {c._count?.communications ?? 0} 次）</span>
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1.5 text-slate-300">
+                    <span className="flex items-center gap-1.5 text-muted-foreground/50">
                       <Clock className="h-3.5 w-3.5" />暂无沟通记录
                     </span>
                   )}
@@ -279,7 +279,7 @@ export function CustomerList({
 
                 {/* ── 备注 ── */}
                 {c.notes && (
-                  <div className="mt-2.5 flex items-start gap-1.5 rounded-lg bg-amber-50/50 px-3 py-2 text-xs text-slate-500">
+                  <div className="mt-2.5 flex items-start gap-1.5 rounded-lg bg-amber-50/50 px-3 py-2 text-xs text-muted-foreground">
                     <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
                     {c.notes}
                   </div>

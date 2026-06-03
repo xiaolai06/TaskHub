@@ -134,43 +134,43 @@ function TasksPageContent() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           {/* 视图切换 */}
-          <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
             <button onClick={() => setViewMode('board')}
               className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
-                viewMode === 'board' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+                viewMode === 'board' ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
               <Columns3 className="h-3.5 w-3.5" />看板
             </button>
             <button onClick={() => setViewMode('list')}
               className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
-                viewMode === 'list' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+                viewMode === 'list' ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
               <LayoutList className="h-3.5 w-3.5" />列表
             </button>
           </div>
 
           {/* 搜索框 */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5">
-            <Search className="h-3.5 w-3.5 text-slate-500" />
+          <div className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5">
+            <Search className="h-3.5 w-3.5 text-muted-foreground" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="搜索任务..."
-              className="w-32 border-none bg-transparent text-xs text-slate-600 outline-none placeholder:text-slate-500"
+              className="w-32 border-none bg-transparent text-xs text-foreground/70 outline-none placeholder:text-muted-foreground"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="text-slate-300 hover:text-slate-500">
+              <button onClick={() => setSearch('')} className="text-muted-foreground/50 hover:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none">
                 <X className="h-3 w-3" />
               </button>
             )}
           </div>
 
           {/* 项目筛选 */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5">
-            <FolderKanban className="h-3.5 w-3.5 text-slate-500" />
+          <div className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5">
+            <FolderKanban className="h-3.5 w-3.5 text-muted-foreground" />
             <select
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
-              className="border-none bg-transparent text-xs text-slate-600 outline-none"
+              className="border-none bg-transparent text-xs text-foreground/70 outline-none"
             >
               <option value="">全部项目</option>
               {projects?.data?.map((p) => (
@@ -180,41 +180,41 @@ function TasksPageContent() {
           </div>
 
           {/* 状态筛选 */}
-          <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
             {statusFilters.map((f) => (
               <button key={f.key} onClick={() => setStatusFilter(f.key)}
                 className={cn('rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-all',
-                  statusFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+                  statusFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
                 {f.label}
               </button>
             ))}
           </div>
 
           {/* 优先级筛选 */}
-          <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-white p-0.5">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
             {priorityFilters.map((f) => (
               <button key={f.key} onClick={() => setPriorityFilter(f.key)}
                 className={cn('rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-all',
-                  priorityFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+                  priorityFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
                 {f.label}
               </button>
             ))}
           </div>
 
           {/* 日期范围 */}
-          <div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-1.5">
-            <CalendarDays className="h-3.5 w-3.5 text-slate-500" />
+          <div className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2 py-1.5">
+            <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
             <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="border-none bg-transparent text-[11px] text-slate-600 outline-none" />
-            <span className="text-[11px] text-slate-300">—</span>
+              className="border-none bg-transparent text-[11px] text-foreground/70 outline-none" />
+            <span className="text-[11px] text-muted-foreground/50">—</span>
             <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="border-none bg-transparent text-[11px] text-slate-600 outline-none" />
+              className="border-none bg-transparent text-[11px] text-foreground/70 outline-none" />
           </div>
 
           {/* 清除 */}
           {hasActiveFilters && (
             <button onClick={clearFilters}
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-slate-500 hover:bg-slate-100 hover:text-slate-600">
+              className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground">
               <X className="h-3 w-3" />清除
             </button>
           )}
@@ -222,7 +222,7 @@ function TasksPageContent() {
 
         <div className="flex items-center gap-3">
           {!isLoading && !error && (
-            <span className="text-xs text-slate-500">{taskCount} 个任务</span>
+            <span className="text-xs text-muted-foreground">{taskCount} 个任务</span>
           )}
           <button onClick={() => { setEditTask(null); setShowForm(true); }}
             className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95">
@@ -243,17 +243,17 @@ function TasksPageContent() {
           <button onClick={() => window.location.reload()} className="mt-3 text-sm font-medium text-indigo-600 hover:underline">重试</button>
         </div>
       ) : taskCount === 0 && !hasActiveFilters ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-24 shadow-sm">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-card py-24 shadow-sm">
           <CheckSquare className="mb-3 h-12 w-12 text-slate-200" />
-          <p className="text-sm font-medium text-slate-500">暂无任务</p>
-          <p className="mt-1 text-xs text-slate-500">点击「新建任务」开始创建</p>
+          <p className="text-sm font-medium text-muted-foreground">暂无任务</p>
+          <p className="mt-1 text-xs text-muted-foreground">点击「新建任务」开始创建</p>
           <button onClick={() => { setEditTask(null); setShowForm(true); }}
             className="mt-4 text-sm font-medium text-indigo-600 hover:underline">创建第一个任务</button>
         </div>
       ) : taskCount === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-20">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-card py-20">
           <CheckSquare className="mb-3 h-10 w-10 text-slate-200" />
-          <p className="text-sm text-slate-500">没有匹配的任务</p>
+          <p className="text-sm text-muted-foreground">没有匹配的任务</p>
           <button onClick={clearFilters} className="mt-3 text-sm font-medium text-indigo-600 hover:underline">清除筛选</button>
         </div>
       ) : viewMode === 'board' ? (

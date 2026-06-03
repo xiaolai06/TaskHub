@@ -105,7 +105,7 @@ export function ChatInput({
           onKeyDown={handleKeyDown}
           placeholder={isLoading ? 'AI 正在思考...' : '输入你的问题...'}
           disabled={isLoading}
-          className="h-[40px] flex-1 rounded-xl border border-border bg-background px-4 text-[13px] text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:bg-background focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+          className="h-[40px] flex-1 rounded-xl border border-border bg-background px-4 text-[13px] text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:bg-background focus:ring-2 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-50"
         />
 
         {isLoading ? (

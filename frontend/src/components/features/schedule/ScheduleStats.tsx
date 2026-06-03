@@ -34,9 +34,9 @@ function StatCard({ icon, label, value, sub, variant = 'default' }: StatCardProp
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <p className="text-xs text-slate-500">{label}</p>
-            <p className="text-2xl font-bold text-slate-800">{value}</p>
-            {sub && <p className="text-xs text-slate-500">{sub}</p>}
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-2xl font-bold text-foreground">{value}</p>
+            {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
           </div>
           <div className={`p-2 rounded-lg ${colorMap[variant]}`}>{icon}</div>
         </div>
@@ -56,10 +56,10 @@ function WorkloadBar({ dailyWorkload }: { dailyWorkload: ScheduleData['dailyWork
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
+        <CardTitle className="text-sm font-medium text-foreground/70 flex items-center gap-2">
           <CalendarDays className="h-4 w-4 text-indigo-400" />
           每日工时分布
-          <span className="text-xs text-slate-500 font-normal">（前 14 天）</span>
+          <span className="text-xs text-muted-foreground font-normal">（前 14 天）</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
@@ -78,7 +78,7 @@ function WorkloadBar({ dailyWorkload }: { dailyWorkload: ScheduleData['dailyWork
                 {/* 数值 */}
                 <span
                   className={`text-[9px] font-mono opacity-0 group-hover:opacity-100 transition-opacity ${
-                    isOverloaded ? 'text-red-500 font-bold' : 'text-slate-500'
+                    isOverloaded ? 'text-red-500 font-bold' : 'text-muted-foreground'
                   }`}
                 >
                   {day.hours}h
@@ -97,13 +97,13 @@ function WorkloadBar({ dailyWorkload }: { dailyWorkload: ScheduleData['dailyWork
                   />
                 </div>
                 {/* 日期 */}
-                <span className="text-[9px] text-slate-500">{dayNum}</span>
+                <span className="text-[9px] text-muted-foreground">{dayNum}</span>
               </div>
             );
           })}
         </div>
         {/* 图例 */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-500">
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-indigo-400" />正常
           </span>
@@ -126,7 +126,7 @@ function DelayedTaskList({ delays }: { delays: DelayedTask[] }) {
     return (
       <Card className="shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
+          <CardTitle className="text-sm font-medium text-foreground/70 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-green-400" />
             延期任务
           </CardTitle>
@@ -143,7 +143,7 @@ function DelayedTaskList({ delays }: { delays: DelayedTask[] }) {
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-slate-600 flex items-center gap-2">
+        <CardTitle className="text-sm font-medium text-foreground/70 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-red-400" />
           延期任务
           <span className="text-xs text-red-400 font-normal">（{delays.length} 个）</span>
@@ -156,14 +156,14 @@ function DelayedTaskList({ delays }: { delays: DelayedTask[] }) {
               key={task.id}
               className="flex items-center justify-between py-1.5 text-xs border-b last:border-b-0"
             >
-              <span className="text-slate-700 truncate mr-2">{task.title}</span>
+              <span className="text-foreground/80 truncate mr-2">{task.title}</span>
               <span className="text-red-500 font-mono flex-shrink-0">
                 +{task.overdueDays} 天
               </span>
             </div>
           ))}
           {delays.length > 5 && (
-            <p className="text-[10px] text-slate-500 text-center pt-1">
+            <p className="text-[10px] text-muted-foreground text-center pt-1">
               还有 {delays.length - 5} 个延期任务...
             </p>
           )}

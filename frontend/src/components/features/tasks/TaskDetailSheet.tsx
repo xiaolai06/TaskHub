@@ -53,13 +53,13 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
       <div className="fixed inset-0 z-40 bg-black/20" onClick={onClose} />
 
       {/* 抽屉 */}
-      <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-xl">
+      <div className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-border bg-card shadow-xl">
         {/* 头部 */}
-        <div className="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+        <div className="flex items-start justify-between border-b border-border px-6 py-5">
           <div className="flex-1 pr-4">
             <h2 className={cn(
               'text-base font-bold leading-snug',
-              task.status === 'DONE' ? 'text-slate-400 line-through' : 'text-slate-800',
+              task.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground',
             )}>
               {task.title}
             </h2>
@@ -71,19 +71,19 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
           <div className="flex items-center gap-1">
             <button
               onClick={() => onEdit?.(task)}
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground/70 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
             >
               <Edit3 className="h-4 w-4" />
             </button>
             <button
               onClick={() => { onDelete?.(task.id); onClose(); }}
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-500 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-500 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
             >
               <Trash2 className="h-4 w-4" />
             </button>
             <button
               onClick={onClose}
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
+              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground/70 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none"
             >
               <X className="h-4 w-4" />
             </button>
@@ -95,11 +95,11 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
           <div className="space-y-5">
             {/* 描述 */}
             <div>
-              <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">描述</h3>
+              <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">描述</h3>
               {task.description ? (
-                <p className="text-sm leading-relaxed text-slate-600">{task.description}</p>
+                <p className="text-sm leading-relaxed text-foreground/70">{task.description}</p>
               ) : (
-                <p className="text-sm text-slate-300">暂无描述</p>
+                <p className="text-sm text-muted-foreground/50">暂无描述</p>
               )}
             </div>
 
@@ -148,7 +148,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
 
             {/* 时间信息 */}
             <div>
-              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">时间线</h3>
+              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">时间线</h3>
               <div className="space-y-2 text-[13px]">
                 <TimeLineRow label="创建时间" value={formatDateTime(task.createdAt)} />
                 <TimeLineRow label="最后更新" value={formatDateTime(task.updatedAt)} />
@@ -161,11 +161,11 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
             {/* 子任务 */}
             {children.length > 0 && (
               <div>
-                <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   子任务 {doneCount}/{children.length}
                 </h3>
                 {/* 进度条 */}
-                <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
                   <div
                     className="h-full rounded-full bg-emerald-500 transition-all"
                     style={{ width: `${children.length > 0 ? Math.round((doneCount / children.length) * 100) : 0}%` }}
@@ -173,21 +173,21 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
                 </div>
                 <div className="space-y-1">
                   {children.map((child) => (
-                    <div key={child.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50">
+                    <div key={child.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted">
                       <button
                         onClick={() => onStatusChange?.(child.id, child.status === 'DONE' ? 'TODO' : 'DONE')}
                         className={cn(
                           'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all',
                           child.status === 'DONE'
                             ? 'border-emerald-500 bg-emerald-500 text-white'
-                            : 'border-slate-300 hover:border-indigo-400',
+                            : 'border-border hover:border-indigo-400',
                         )}
                       >
                         {child.status === 'DONE' && <CheckSquare className="h-2.5 w-2.5" />}
                       </button>
                       <span className={cn(
                         'flex-1 text-[13px]',
-                        child.status === 'DONE' ? 'text-slate-400 line-through' : 'text-slate-600',
+                        child.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground/70',
                       )}>
                         {child.title}
                       </span>
@@ -206,9 +206,9 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
 
 function InfoCard({ label, value, icon, highlight }: { label: string; value: string; icon?: React.ReactNode; highlight?: boolean }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-slate-50/50 px-3 py-2.5">
-      <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-      <p className={cn('flex items-center gap-1 text-sm font-medium', highlight ? 'text-red-500' : 'text-slate-700')}>
+    <div className="rounded-lg border border-border bg-muted/50 px-3 py-2.5">
+      <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className={cn('flex items-center gap-1 text-sm font-medium', highlight ? 'text-red-500' : 'text-foreground/80')}>
         {icon}
         {value}
       </p>
@@ -219,8 +219,8 @@ function InfoCard({ label, value, icon, highlight }: { label: string; value: str
 function TimeLineRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-slate-400">{label}</span>
-      <span className="font-medium text-slate-600">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-medium text-foreground/70">{value}</span>
     </div>
   );
 }

@@ -47,9 +47,9 @@ function TimerCard({ timer, onPause, onStop }: {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+    <div className="rounded-lg border border-border bg-muted p-2.5">
       <div className="flex items-center justify-between">
-        <span className="truncate text-xs font-medium text-slate-700">
+        <span className="truncate text-xs font-medium text-foreground/80">
           {timer.description || '计时中'}
         </span>
         <div className="flex items-center gap-1">
@@ -61,7 +61,7 @@ function TimerCard({ timer, onPause, onStop }: {
           </button>
         </div>
       </div>
-      <p className="mt-1 font-mono text-lg font-bold text-slate-800 tabular-nums">{fmt(elapsed)}</p>
+      <p className="mt-1 font-mono text-lg font-bold text-foreground tabular-nums">{fmt(elapsed)}</p>
     </div>
   );
 }
@@ -110,10 +110,10 @@ function TimerPanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
+    <div className="w-80 rounded-xl border border-border bg-card p-4 shadow-lg">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-slate-700">工作时间</span>
-        <button onClick={onClose} className="text-xs text-slate-400 hover:text-slate-600">收起</button>
+        <span className="text-sm font-semibold text-foreground/80">工作时间</span>
+        <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground/70">收起</button>
       </div>
 
       {timers.length > 0 && (
@@ -127,10 +127,10 @@ function TimerPanel({ onClose }: { onClose: () => void }) {
       <div className="space-y-2">
         <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)}
           placeholder="工作说明（必填）" onKeyDown={(e) => e.key === 'Enter' && handleStart()}
-          className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+          className="w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/70 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
 
         <select value={taskId} onChange={(e) => setTaskId(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-600 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
+          className="w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/70 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
           <option value="">不绑定任务</option>
           {tasks.map((t) => (
             <option key={t.id} value={t.id}>
@@ -141,7 +141,7 @@ function TimerPanel({ onClose }: { onClose: () => void }) {
         </select>
 
         <button onClick={handleStart} disabled={!desc.trim()}
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+          className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">
           <Play className="h-4 w-4" />开始计时
         </button>
       </div>
@@ -189,22 +189,22 @@ function TodoPanel({ onClose }: { onClose: () => void }) {
   const doneCount = todos.filter((t) => t.completed).length;
 
   return (
-    <div className="w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-lg">
+    <div className="w-80 rounded-xl border border-border bg-card p-4 shadow-lg">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-1.5">
           <ListTodo className="h-4 w-4 text-indigo-500" />
-          <span className="text-sm font-semibold text-slate-700">今日任务</span>
-          {todos.length > 0 && <span className="text-[11px] text-slate-500">{doneCount}/{todos.length}</span>}
+          <span className="text-sm font-semibold text-foreground/80">今日任务</span>
+          {todos.length > 0 && <span className="text-[11px] text-muted-foreground">{doneCount}/{todos.length}</span>}
         </div>
-        <button onClick={onClose} className="text-xs text-slate-400 hover:text-slate-600">收起</button>
+        <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground/70">收起</button>
       </div>
 
       <div className="flex gap-1.5 mb-3">
         <input type="text" value={input} onChange={(e) => setInput(e.target.value)}
           placeholder="今天要做什么？" onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          className="flex-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs text-slate-600 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+          className="flex-1 rounded-lg border border-border px-2.5 py-1.5 text-xs text-foreground/70 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
         <button onClick={handleAdd} disabled={!input.trim()}
-          className="rounded-lg bg-indigo-600 px-2.5 py-1.5 text-white hover:bg-indigo-700 disabled:opacity-50">
+          className="rounded-lg bg-indigo-600 px-2.5 py-1.5 text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">
           <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -212,21 +212,21 @@ function TodoPanel({ onClose }: { onClose: () => void }) {
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-indigo-500" /></div>
       ) : todos.length === 0 ? (
-        <p className="py-4 text-center text-xs text-slate-400">今天还没有待办事项</p>
+        <p className="py-4 text-center text-xs text-muted-foreground">今天还没有待办事项</p>
       ) : (
         <div className="max-h-64 space-y-1 overflow-y-auto">
           {todos.map((todo) => (
-            <div key={todo.id} className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-50">
+            <div key={todo.id} className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted">
               <button onClick={() => handleToggle(todo.id, todo.completed)}
                 className={cn('flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all',
-                  todo.completed ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 hover:border-indigo-400')}>
+                  todo.completed ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-border hover:border-indigo-400')}>
                 {todo.completed && <Check className="h-3 w-3" />}
               </button>
-              <span className={cn('flex-1 text-[13px]', todo.completed ? 'text-slate-400 line-through' : 'text-slate-700')}>
+              <span className={cn('flex-1 text-[13px]', todo.completed ? 'text-muted-foreground line-through' : 'text-foreground/80')}>
                 {todo.content}
               </span>
               <button onClick={() => handleDelete(todo.id)}
-                className="shrink-0 rounded p-0.5 text-slate-300 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100">
+                className="shrink-0 rounded p-0.5 text-muted-foreground/50 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100">
                 <Trash2 className="h-3 w-3" />
               </button>
             </div>
@@ -244,13 +244,13 @@ export function WorkTools() {
   return (
     <div className="relative flex items-center gap-1">
       <button onClick={() => { setShowTimer(!showTimer); setShowTodo(false); }}
-        className={cn('flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-95',
+        className={cn('flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-all hover:border-border hover:bg-muted active:scale-95',
           showTimer && 'border-indigo-300 bg-indigo-50 text-indigo-600')}>
         <Timer className="h-4 w-4" />计时
       </button>
 
       <button onClick={() => { setShowTodo(!showTodo); setShowTimer(false); }}
-        className={cn('flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-95',
+        className={cn('flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-all hover:border-border hover:bg-muted active:scale-95',
           showTodo && 'border-indigo-300 bg-indigo-50 text-indigo-600')}>
         <ListTodo className="h-4 w-4" />任务
       </button>

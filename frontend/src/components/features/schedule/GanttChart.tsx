@@ -24,7 +24,7 @@ const PRIORITY_COLORS: Record<string, { bg: string; border: string; text: string
   URGENT: { bg: 'bg-red-100', border: 'border-red-400', text: 'text-red-700' },
   HIGH: { bg: 'bg-orange-100', border: 'border-orange-400', text: 'text-orange-700' },
   MEDIUM: { bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-700' },
-  LOW: { bg: 'bg-slate-100', border: 'border-slate-400', text: 'text-slate-600' },
+  LOW: { bg: 'bg-muted', border: 'border-border', text: 'text-foreground/70' },
 };
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -116,7 +116,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
 
   if (tasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
         <CalendarDays className="h-12 w-12 mb-3" />
         <p className="text-sm font-medium">暂无排期数据</p>
         <p className="text-xs mt-1">请先为项目添加任务</p>
@@ -128,7 +128,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
     <div className="space-y-3">
       {/* 工具栏 */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span className="inline-block w-3 h-3 rounded-sm bg-red-100 border border-red-400" />
           <span>延期</span>
           <span className="inline-block w-3 h-3 rounded-sm bg-orange-100 border border-orange-400 ml-2" />
@@ -159,7 +159,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
       </div>
 
       {/* 甘特图主体 */}
-      <div className="border rounded-lg overflow-x-auto bg-white">
+      <div className="border rounded-lg overflow-x-auto bg-card">
         <div style={{ minWidth: chartWidth }}>
           {/* 表头：日期 */}
           <div
@@ -168,7 +168,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
           >
             {/* 任务名称列 */}
             <div
-              className="flex-shrink-0 border-r flex items-center px-3 text-xs font-medium text-slate-500"
+              className="flex-shrink-0 border-r flex items-center px-3 text-xs font-medium text-muted-foreground"
               style={{ width: labelWidth }}
             >
               任务名称
@@ -189,19 +189,19 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                     key={i}
                     className={`
                       flex-shrink-0 border-r flex flex-col items-center justify-center
-                      ${isToday ? 'bg-indigo-50' : isWeekend ? 'bg-slate-50/50' : ''}
-                      ${zoom === 'day' ? 'border-r-slate-100' : 'border-r-slate-100'}
+                      ${isToday ? 'bg-indigo-50' : isWeekend ? 'bg-muted/50' : ''}
+                      ${zoom === 'day' ? 'border-r-border' : 'border-r-border'}
                     `}
                     style={{ width: cellWidth }}
                   >
                     {showLabel && (
                       <>
-                        <span className="text-[10px] text-slate-500 leading-tight">
+                        <span className="text-[10px] text-muted-foreground leading-tight">
                           {d.getMonth() + 1}月
                         </span>
                         <span
                           className={`text-[10px] leading-tight font-medium ${
-                            isToday ? 'text-indigo-600' : 'text-slate-500'
+                            isToday ? 'text-indigo-600' : 'text-muted-foreground'
                           }`}
                         >
                           {zoom === 'day' ? d.getDate() : `W${Math.ceil(d.getDate() / 7)}`}
@@ -238,7 +238,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
               <div
                 key={task.id}
                 className={`flex border-b last:border-b-0 ${
-                  idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'
+                  idx % 2 === 0 ? 'bg-card' : 'bg-muted/30'
                 } hover:bg-indigo-50/30 transition-colors`}
                 style={{ height: rowHeight }}
               >
@@ -256,7 +256,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                           )}
                           <span
                             className={`text-xs truncate ${
-                              task.isDelayed ? 'text-red-600 font-medium' : 'text-slate-700'
+                              task.isDelayed ? 'text-red-600 font-medium' : 'text-foreground/80'
                             }`}
                           >
                             {task.title}
@@ -271,7 +271,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                       </TooltipTrigger>
                       <TooltipContent side="right" className="text-xs">
                         <p className="font-medium">{task.title}</p>
-                        <p className="text-slate-500">
+                        <p className="text-muted-foreground">
                           {task.estimatedHours}h · {task.scheduledStart} ~ {task.scheduledEnd}
                         </p>
                         {task.isDelayed && (
@@ -342,7 +342,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
             style={{ height: 32 }}
           >
             <div
-              className="flex-shrink-0 border-r flex items-center px-3 text-[10px] font-medium text-slate-500"
+              className="flex-shrink-0 border-r flex items-center px-3 text-[10px] font-medium text-muted-foreground"
               style={{ width: labelWidth }}
             >
               每日工时
@@ -366,7 +366,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                     {hours > 0 && (
                       <span
                         className={`text-[9px] font-mono ${
-                          isOverloaded ? 'text-red-600 font-bold' : 'text-slate-400'
+                          isOverloaded ? 'text-red-600 font-bold' : 'text-muted-foreground'
                         }`}
                       >
                         {hours % 1 === 0 ? hours : hours.toFixed(1)}

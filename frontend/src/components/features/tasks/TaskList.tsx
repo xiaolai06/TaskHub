@@ -81,7 +81,7 @@ function SortHeader({
       onClick={() => onSort(field)}
       className={cn(
         'flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider transition-colors',
-        isActive ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-600',
+        isActive ? 'text-indigo-600' : 'text-muted-foreground hover:text-foreground/70',
         className,
       )}
     >
@@ -122,10 +122,10 @@ function TaskRow({
 
   return (
     <>
-      <tr className="group transition-colors hover:bg-slate-50/60">
+      <tr className="group transition-colors hover:bg-muted/60">
         <td className="w-8 pl-3">
           {children.length > 0 ? (
-            <button onClick={() => onToggleExpand(task.id)} className="rounded p-0.5 text-slate-500 hover:text-slate-600">
+            <button onClick={() => onToggleExpand(task.id)} className="rounded p-0.5 text-muted-foreground hover:text-foreground/70">
               {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </button>
           ) : null}
@@ -134,17 +134,17 @@ function TaskRow({
         {/* 标题 */}
         <td className="py-3">
           <div className="flex items-center gap-2" style={{ paddingLeft: depth * 20 }}>
-            <span className={cn('text-sm font-medium', task.status === 'DONE' ? 'text-slate-400 line-through' : 'text-slate-700')}>
+            <span className={cn('text-sm font-medium', task.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground/80')}>
               {task.title}
             </span>
             {children.length > 0 && (
-              <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 {doneCount}/{children.length}
               </span>
             )}
           </div>
           {task.description && depth === 0 && (
-            <p className="mt-0.5 line-clamp-1 text-[11px] text-slate-500" style={{ paddingLeft: depth * 20 }}>
+            <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground" style={{ paddingLeft: depth * 20 }}>
               {task.description}
             </p>
           )}
@@ -172,9 +172,9 @@ function TaskRow({
         {/* 项目 + 花销 */}
         <td className="py-3">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[12px] text-slate-600">{task.project?.name || '—'}</span>
+            <span className="text-[12px] text-foreground/70">{task.project?.name || '—'}</span>
             {task.cost > 0 && (
-              <span className="flex items-center gap-0.5 text-[11px] text-slate-500">
+              <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
                 <DollarSign className="h-3 w-3" />{formatCost(task.cost)}
               </span>
             )}
@@ -182,26 +182,26 @@ function TaskRow({
         </td>
 
         {/* 工时 */}
-        <td className="py-3 text-[13px] tabular-nums text-slate-500">
+        <td className="py-3 text-[13px] tabular-nums text-muted-foreground">
           {task.estimatedHours > 0 ? (
-            <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-slate-500" />{task.estimatedHours}h</span>
+            <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-muted-foreground" />{task.estimatedHours}h</span>
           ) : '—'}
         </td>
 
         {/* 截止日期 */}
-        <td className={cn('py-3 text-[13px]', overdue ? 'font-semibold text-red-500' : 'text-slate-500')}>
+        <td className={cn('py-3 text-[13px]', overdue ? 'font-semibold text-red-500' : 'text-muted-foreground')}>
           {task.dueDate ? (
-            <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-slate-500" />{formatDate(task.dueDate)}</span>
+            <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-muted-foreground" />{formatDate(task.dueDate)}</span>
           ) : '—'}
         </td>
 
         {/* 操作 */}
         <td className="py-3">
           <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-            <button onClick={() => onEdit?.(task)} className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-600">
+            <button onClick={() => onEdit?.(task)} className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground/70">
               <Edit3 className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => onDelete?.(task.id)} className="rounded-md p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-500">
+            <button onClick={() => onDelete?.(task.id)} className="rounded-md p-1.5 text-muted-foreground hover:bg-red-50 hover:text-red-500">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -260,23 +260,23 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
 
   if (topLevelTasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-20">
-        <CheckSquare className="mb-3 h-10 w-10 text-slate-200" />
-        <p className="text-sm text-slate-500">暂无任务</p>
+      <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-card py-20">
+        <CheckSquare className="mb-3 h-10 w-10 text-muted-foreground/30" />
+        <p className="text-sm text-muted-foreground">暂无任务</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200/60 bg-white">
+    <div className="overflow-hidden rounded-xl border border-border/60 bg-card">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-slate-100 bg-slate-50/80">
+          <tr className="border-b border-border bg-muted/80">
             <th className="w-8 pl-4" />
             <th className="px-3 py-2.5 text-left">
               <SortHeader label="任务名称" field="title" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>
-            <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">状态</th>
+            <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">状态</th>
             <th className="px-3 py-2.5 text-left">
               <SortHeader label="优先级" field="priority" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>
@@ -292,7 +292,7 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
             <th className="w-20 px-3 py-2.5" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-border">
           {sortedTasks.map((task) => (
             <TaskRow
               key={task.id}

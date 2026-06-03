@@ -11,7 +11,7 @@ const priorityDot: Record<string, string> = {
   URGENT: 'bg-red-500',
   HIGH: 'bg-orange-500',
   MEDIUM: 'bg-amber-400',
-  LOW: 'bg-slate-300',
+  LOW: 'bg-accent',
 };
 
 const priorityLabel: Record<string, string> = {
@@ -68,12 +68,12 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
     <div
       onClick={() => onClick?.(task)}
       className={cn(
-        'group relative flex h-[168px] flex-col rounded-xl border border-slate-200/60 bg-white shadow-sm transition-all',
+        'group relative flex h-[168px] flex-col rounded-xl border border-border/60 bg-card shadow-sm transition-all',
         'border-l-[3px] pl-4 pr-3.5 py-3.5',
         getPriorityBorderColor(task.priority),
         isDragging && 'shadow-xl scale-[1.03] rotate-[1.5deg] border-indigo-200',
         isDone && 'opacity-55',
-        onClick && 'cursor-pointer hover:border-slate-300 hover:shadow-md',
+        onClick && 'cursor-pointer hover:border-border hover:shadow-md',
       )}
     >
       {/* 顶部：标题 + 操作 — 固定 40px */}
@@ -81,7 +81,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
         <h4
           className={cn(
             'line-clamp-2 flex-1 text-sm font-semibold leading-snug',
-            isDone ? 'text-slate-400 line-through' : 'text-slate-800',
+            isDone ? 'text-muted-foreground line-through' : 'text-foreground',
           )}
         >
           {task.title}
@@ -91,15 +91,15 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
         <div className="relative shrink-0" ref={menuRef}>
           <button
             onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-            className="rounded-md p-1 text-slate-300 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-500 group-hover:opacity-100"
+            className="rounded-md p-1 text-muted-foreground/50 opacity-0 transition-all hover:bg-muted hover:text-muted-foreground group-hover:opacity-100"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
           {showMenu && (
-            <div className="absolute right-0 top-full z-20 mt-1 w-28 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+            <div className="absolute right-0 top-full z-20 mt-1 w-28 overflow-hidden rounded-lg border border-border bg-card shadow-lg">
               <button
                 onClick={(e) => { e.stopPropagation(); onEdit?.(task); setShowMenu(false); }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-[12px] text-slate-600 hover:bg-slate-50"
+                className="flex w-full items-center gap-2 px-3 py-2 text-[12px] text-foreground/70 hover:bg-muted"
               >
                 <Edit3 className="h-3 w-3" />编辑
               </button>
@@ -122,7 +122,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
             {task.blockedReason}
           </p>
         ) : task.description ? (
-          <p className="line-clamp-2 text-[12px] leading-[18px] text-slate-500">
+          <p className="line-clamp-2 text-[12px] leading-[18px] text-muted-foreground">
             {task.description}
           </p>
         ) : (
@@ -133,7 +133,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
       {/* 项目名称 + 状态徽章 — 固定 24px */}
       <div className="mt-1.5 flex h-6 items-center gap-2">
         {task.project && (
-          <span className="max-w-[120px] truncate rounded-md bg-slate-50 px-1.5 py-0.5 text-[11px] font-medium text-slate-500">
+          <span className="max-w-[120px] truncate rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
             {task.project.name}
           </span>
         )}
@@ -141,28 +141,28 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
       </div>
 
       {/* 底部信息行 — 固定 32px */}
-      <div className="mt-auto flex h-8 items-center gap-x-3 border-t border-slate-100 pt-0 text-[11px]">
+      <div className="mt-auto flex h-8 items-center gap-x-3 border-t border-border pt-0 text-[11px]">
         {/* 优先级 */}
-        <span className="flex items-center gap-1 text-slate-500">
-          <span className={cn('h-1.5 w-1.5 rounded-full', priorityDot[task.priority] || 'bg-slate-300')} />
+        <span className="flex items-center gap-1 text-muted-foreground">
+          <span className={cn('h-1.5 w-1.5 rounded-full', priorityDot[task.priority] || 'bg-accent')} />
           {priorityLabel[task.priority] || '中'}
         </span>
-        <span className="h-0.5 w-0.5 rounded-full bg-slate-200" />
+        <span className="h-0.5 w-0.5 rounded-full bg-accent" />
 
         {/* 任务花销（任务自身的 cost） */}
         {cost ? (
-          <span className="flex items-center gap-0.5 text-slate-500">
+          <span className="flex items-center gap-0.5 text-muted-foreground">
             <DollarSign className="h-3 w-3" />
             {cost}
           </span>
         ) : (
           <span className="text-transparent">—</span>
         )}
-        <span className="h-0.5 w-0.5 rounded-full bg-slate-200" />
+        <span className="h-0.5 w-0.5 rounded-full bg-accent" />
 
         {/* 预估工时 */}
         {task.estimatedHours > 0 ? (
-          <span className="flex items-center gap-0.5 text-slate-500">
+          <span className="flex items-center gap-0.5 text-muted-foreground">
             <Clock className="h-3 w-3" />
             {task.estimatedHours}h
           </span>
@@ -173,7 +173,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
         {/* 截止日期 — 始终靠右 */}
         <span className={cn(
           'ml-auto flex items-center gap-0.5',
-          overdue ? 'font-semibold text-red-500' : task.dueDate ? 'text-slate-500' : 'text-transparent',
+          overdue ? 'font-semibold text-red-500' : task.dueDate ? 'text-muted-foreground' : 'text-transparent',
         )}>
           <Calendar className="h-3 w-3" />
           {task.dueDate ? formatDate(task.dueDate) : '无日期'}
@@ -182,7 +182,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
 
         {/* 子任务进度 */}
         {children.length > 0 && (
-          <span className="text-slate-500">{doneCount}/{children.length}</span>
+          <span className="text-muted-foreground">{doneCount}/{children.length}</span>
         )}
       </div>
     </div>

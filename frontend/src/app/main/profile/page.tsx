@@ -217,30 +217,30 @@ export default function ProfilePage() {
     return <div className="flex items-center justify-center py-32"><Loader2 className="h-8 w-8 animate-spin text-indigo-500" /></div>;
   }
 
-  const inputCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
-  const selectCls = 'w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  const selectCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-slate-800">个人信息</h1>
+        <h1 className="text-lg font-bold text-foreground">个人信息</h1>
         <div className="flex items-center gap-2 text-sm">
-          {saving && <span className="flex items-center gap-1 text-slate-400"><Loader2 className="h-3.5 w-3.5 animate-spin" />保存中...</span>}
+          {saving && <span className="flex items-center gap-1 text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />保存中...</span>}
           {saved && <span className="flex items-center gap-1 text-emerald-500"><CheckCircle className="h-3.5 w-3.5" />已保存</span>}
         </div>
       </div>
 
       {/* ===== 头像 + 基本信息 ===== */}
-      <div className="rounded-xl border border-slate-200/60 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-6 py-4">
-          <h2 className="text-sm font-semibold text-slate-700">基本资料</h2>
+      <div className="rounded-xl border border-border/60 bg-card shadow-sm">
+        <div className="border-b border-border px-6 py-4">
+          <h2 className="text-sm font-semibold text-foreground/80">基本资料</h2>
         </div>
         <div className="px-6 py-5">
           {/* 头像 */}
           <div className="mb-6 flex items-start gap-5">
             <div className="relative">
               {avatarType === 'image' && avatarValue ? (
-                <img src={avatarValue} alt="头像" className="h-24 w-24 rounded-full object-cover ring-2 ring-slate-200" />
+                <img src={avatarValue} alt="头像" className="h-24 w-24 rounded-full object-cover ring-2 ring-border" />
               ) : (
                 <div className={cn('flex h-24 w-24 items-center justify-center rounded-full text-3xl font-bold text-white', avatarValue)}>
                   {initials}
@@ -256,7 +256,7 @@ export default function ProfilePage() {
               </label>
             </div>
             <div className="flex-1">
-              <p className="mb-2 text-sm font-medium text-slate-700">头像设置</p>
+              <p className="mb-2 text-sm font-medium text-foreground/80">头像设置</p>
               <div className="flex flex-wrap items-center gap-2">
                 {avatarColors.map((color) => (
                   <button key={color} type="button" onClick={() => handleColorSelect(color)}
@@ -265,7 +265,7 @@ export default function ProfilePage() {
                 ))}
                 {savedImage && avatarType === 'color' && (
                   <button type="button" onClick={() => { setAvatarType('image'); setAvatarValue(savedImage); }}
-                    className="ml-2 flex h-8 items-center gap-1 rounded-full border border-dashed border-slate-300 px-2 text-[11px] text-slate-500 transition-colors hover:border-indigo-300 hover:text-indigo-500">
+                    className="ml-2 flex h-8 items-center gap-1 rounded-full border border-dashed border-border px-2 text-[11px] text-muted-foreground transition-colors hover:border-indigo-300 hover:text-indigo-500">
                     <Camera className="h-3 w-3" />恢复图片
                   </button>
                 )}
@@ -276,39 +276,39 @@ export default function ProfilePage() {
           {/* 姓名 + 邮箱 */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">姓名</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground/80">姓名</label>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="你的名字" className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">邮箱</label>
-              <input type="email" value={user?.email || ''} disabled className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-400" />
+              <label className="mb-1.5 block text-sm font-medium text-foreground/80">邮箱</label>
+              <input type="email" value={user?.email || ''} disabled className="w-full rounded-lg border border-border bg-muted px-3.5 py-2.5 text-sm text-muted-foreground" />
             </div>
           </div>
 
           {/* 个人简介 */}
           <div className="mt-4">
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">个人简介</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground/80">个人简介</label>
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="用一句话介绍自己吧" rows={2}
-              className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+              className="w-full resize-none rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
           </div>
         </div>
       </div>
 
       {/* ===== 趣味信息 ===== */}
-      <div className="rounded-xl border border-slate-200/60 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-6 py-4">
-          <h2 className="text-sm font-semibold text-slate-700">趣味信息</h2>
+      <div className="rounded-xl border border-border/60 bg-card shadow-sm">
+        <div className="border-b border-border px-6 py-4">
+          <h2 className="text-sm font-semibold text-foreground/80">趣味信息</h2>
         </div>
         <div className="px-6 py-5 space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Cake className="h-4 w-4 text-pink-500" />生日
               </label>
               <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Star className="h-4 w-4 text-amber-500" />星座
               </label>
               <select value={zodiac} onChange={(e) => setZodiac(e.target.value)} className={selectCls}>
@@ -317,7 +317,7 @@ export default function ProfilePage() {
               </select>
             </div>
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Brain className="h-4 w-4 text-purple-500" />MBTI
               </label>
               <select value={mbti} onChange={(e) => setMbti(e.target.value)} className={selectCls}>
@@ -329,13 +329,13 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Building2 className="h-4 w-4 text-blue-500" />公司/组织
               </label>
               <input type="text" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="你在哪工作" className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Sparkles className="h-4 w-4 text-indigo-500" />职位头衔
               </label>
               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="你的职位" className={inputCls} />
@@ -344,19 +344,19 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Phone className="h-4 w-4 text-green-500" />手机号
               </label>
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="联系方式" className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <MapPin className="h-4 w-4 text-red-500" />所在地
               </label>
               <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="城市" className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-slate-700">
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Globe className="h-4 w-4 text-cyan-500" />个人网站
               </label>
               <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://..." className={inputCls} />
@@ -366,10 +366,10 @@ export default function ProfilePage() {
       </div>
 
       {/* ===== 趣味标签 ===== */}
-      <div className="rounded-xl border border-slate-200/60 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-6 py-4">
-          <h2 className="text-sm font-semibold text-slate-700">我的标签</h2>
-          <p className="mt-0.5 text-[11px] text-slate-500">选择能代表你的标签，最多 8 个</p>
+      <div className="rounded-xl border border-border/60 bg-card shadow-sm">
+        <div className="border-b border-border px-6 py-4">
+          <h2 className="text-sm font-semibold text-foreground/80">我的标签</h2>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">选择能代表你的标签，最多 8 个</p>
         </div>
         <div className="px-6 py-5">
           <div className="flex flex-wrap gap-2">
@@ -382,7 +382,7 @@ export default function ProfilePage() {
                 }}
                   className={cn(
                     'rounded-full px-3 py-1.5 text-sm transition-all',
-                    selected ? 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300' : 'bg-slate-100 text-slate-500 hover:bg-slate-200',
+                    selected ? 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-300' : 'bg-muted text-muted-foreground hover:bg-accent',
                     !selected && tags.length >= 8 && 'opacity-40 cursor-not-allowed',
                   )}>
                   {tag}
@@ -390,27 +390,27 @@ export default function ProfilePage() {
               );
             })}
           </div>
-          {tags.length > 0 && <p className="mt-3 text-[11px] text-slate-500">已选 {tags.length}/8</p>}
+          {tags.length > 0 && <p className="mt-3 text-[11px] text-muted-foreground">已选 {tags.length}/8</p>}
         </div>
       </div>
 
       {/* ===== 修改密码 ===== */}
-      <div className="rounded-xl border border-slate-200/60 bg-white shadow-sm">
-        <div className="border-b border-slate-100 px-6 py-4">
-          <h2 className="text-sm font-semibold text-slate-700">修改密码</h2>
+      <div className="rounded-xl border border-border/60 bg-card shadow-sm">
+        <div className="border-b border-border px-6 py-4">
+          <h2 className="text-sm font-semibold text-foreground/80">修改密码</h2>
         </div>
         <form onSubmit={handleChangePassword} className="px-6 py-5 space-y-4">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">原密码</label>
+            <label className="mb-1.5 block text-sm font-medium text-foreground/80">原密码</label>
             <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="输入原密码" className={inputCls} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">新密码</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground/80">新密码</label>
               <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="至少6位" className={inputCls} />
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">确认新密码</label>
+              <label className="mb-1.5 block text-sm font-medium text-foreground/80">确认新密码</label>
               <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="再次输入" className={inputCls} />
             </div>
           </div>
@@ -423,7 +423,7 @@ export default function ProfilePage() {
           )}
           <div className="flex justify-end">
             <button type="submit" disabled={savingPassword || !oldPassword || !newPassword}
-              className="flex h-10 items-center gap-1.5 rounded-lg bg-red-600 px-5 text-sm font-medium text-white transition-all hover:bg-red-700 active:scale-95 disabled:opacity-50">
+              className="flex h-10 items-center gap-1.5 rounded-lg bg-red-600 px-5 text-sm font-medium text-white transition-all hover:bg-red-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
               {savingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
               修改密码
             </button>

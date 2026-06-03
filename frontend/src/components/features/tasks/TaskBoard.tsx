@@ -28,10 +28,10 @@ interface ColumnDef {
 }
 
 const columns: ColumnDef[] = [
-  { key: 'TODO', label: '待办', color: 'text-slate-600', accentBg: 'bg-slate-100', countBg: 'bg-slate-100 text-slate-500' },
-  { key: 'IN_PROGRESS', label: '进行中', color: 'text-blue-600', accentBg: 'bg-blue-50', countBg: 'bg-blue-50 text-blue-500' },
-  { key: 'DONE', label: '已完成', color: 'text-emerald-600', accentBg: 'bg-emerald-50', countBg: 'bg-emerald-50 text-emerald-500' },
-  { key: 'BLOCKED', label: '阻塞', color: 'text-red-600', accentBg: 'bg-red-50', countBg: 'bg-red-50 text-red-500' },
+  { key: 'TODO', label: '待办', color: 'text-foreground/70', accentBg: 'bg-muted', countBg: 'bg-muted text-muted-foreground' },
+  { key: 'IN_PROGRESS', label: '进行中', color: 'text-blue-600 dark:text-blue-400', accentBg: 'bg-blue-50 dark:bg-blue-950/40', countBg: 'bg-blue-50 text-blue-500 dark:bg-blue-950/40 dark:text-blue-400' },
+  { key: 'DONE', label: '已完成', color: 'text-emerald-600 dark:text-emerald-400', accentBg: 'bg-emerald-50 dark:bg-emerald-950/40', countBg: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-400' },
+  { key: 'BLOCKED', label: '阻塞', color: 'text-red-600 dark:text-red-400', accentBg: 'bg-red-50 dark:bg-red-950/40', countBg: 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400' },
 ];
 
 // ========== 可拖拽卡片 ==========
@@ -59,9 +59,9 @@ function DraggableCard({
       <div
         {...attributes}
         {...listeners}
-        className="absolute left-0 top-0 z-10 flex h-full w-7 cursor-grab items-center justify-center rounded-l-xl opacity-0 transition-opacity hover:bg-slate-100/60 group-hover/card:opacity-100 active:cursor-grabbing"
+        className="absolute left-0 top-0 z-10 flex h-full w-7 cursor-grab items-center justify-center rounded-l-xl opacity-0 transition-opacity hover:bg-muted/60 group-hover/card:opacity-100 active:cursor-grabbing"
       >
-        <GripVertical className="h-4 w-4 text-slate-300" />
+        <GripVertical className="h-4 w-4 text-muted-foreground/50" />
       </div>
       <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} onClick={onClick} />
     </div>
@@ -99,15 +99,15 @@ function DroppableColumn({
       </div>
 
       {/* 分割线 */}
-      <div className="mb-3 h-px bg-slate-200/60" />
+      <div className="mb-3 h-px bg-accent/60" />
 
       {/* 卡片区域 — 独立滚动 */}
       <div
         className={cn(
           'flex-1 space-y-3 overflow-y-auto rounded-xl border-2 border-dashed p-3 transition-colors',
           isOver
-            ? 'border-indigo-300 bg-indigo-50/40'
-            : 'border-transparent bg-slate-50/60',
+            ? 'border-indigo-300 bg-indigo-50/40 dark:border-indigo-700 dark:bg-indigo-950/30'
+            : 'border-transparent bg-muted/60',
         )}
         style={{ maxHeight: 'calc(100vh - 220px)' }}
       >
@@ -121,7 +121,7 @@ function DroppableColumn({
           />
         ))}
         {tasks.length === 0 && !isOver && (
-          <div className="flex h-20 items-center justify-center text-[12px] text-slate-300">
+          <div className="flex h-20 items-center justify-center text-[12px] text-muted-foreground/50">
             暂无任务
           </div>
         )}

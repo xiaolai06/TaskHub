@@ -29,16 +29,16 @@ export function CronJobCard({
 
   return (
     <div className={cn(
-      'rounded-xl border bg-white p-4 transition-all hover:shadow-sm',
-      job.enabled ? 'border-slate-200' : 'border-slate-100 opacity-60',
+      'rounded-xl border bg-card p-4 transition-all hover:shadow-sm',
+      job.enabled ? 'border-border' : 'border-border opacity-60',
     )}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-slate-800">{job.name}</h3>
+            <h3 className="text-sm font-semibold text-foreground">{job.name}</h3>
             <span className={cn(
               'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
-              ACTION_LABELS[job.action] ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-500',
+              ACTION_LABELS[job.action] ? 'bg-indigo-50 text-indigo-600' : 'bg-muted text-muted-foreground',
             )}>
               <Tag className="h-3 w-3" />
               {ACTION_LABELS[job.action] || job.action}
@@ -50,7 +50,7 @@ export function CronJobCard({
             )}
           </div>
 
-          <div className="mt-1.5 flex items-center gap-3 text-[12px] text-slate-500">
+          <div className="mt-1.5 flex items-center gap-3 text-[12px] text-muted-foreground">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {job.cronExpr}
@@ -64,11 +64,11 @@ export function CronJobCard({
           </div>
 
           {config.description && (
-            <p className="mt-1.5 text-[12px] text-slate-500">{config.description}</p>
+            <p className="mt-1.5 text-[12px] text-muted-foreground">{config.description}</p>
           )}
 
           {job.lastRunAt && (
-            <p className="mt-1 text-[11px] text-slate-500">
+            <p className="mt-1 text-[11px] text-muted-foreground">
               上次执行: {new Date(job.lastRunAt).toLocaleString('zh-CN')}
               {job.lastStatus && (
                 <span className={cn('ml-2', job.lastStatus === 'success' ? 'text-emerald-500' : 'text-red-500')}>
@@ -84,7 +84,7 @@ export function CronJobCard({
             onClick={onToggle}
             className={cn(
               'rounded-lg p-1.5 transition-colors',
-              job.enabled ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-300 hover:bg-slate-50',
+              job.enabled ? 'text-emerald-500 hover:bg-emerald-50' : 'text-muted-foreground/50 hover:bg-muted',
             )}
             title={job.enabled ? '禁用' : '启用'}
           >
@@ -92,15 +92,15 @@ export function CronJobCard({
           </button>
           {!job.isSystem && (
             <>
-              <button onClick={onEdit} className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-50 hover:text-indigo-500" title="编辑">
+              <button onClick={onEdit} className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-indigo-500" title="编辑">
                 <Edit3 className="h-4 w-4" />
               </button>
-              <button onClick={onDelete} className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-red-50 hover:text-red-500" title="删除">
+              <button onClick={onDelete} className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-500" title="删除">
                 <Trash2 className="h-4 w-4" />
               </button>
             </>
           )}
-          <button className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-indigo-50 hover:text-indigo-500" title="手动触发">
+          <button className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-indigo-50 hover:text-indigo-500" title="手动触发">
             <Play className="h-4 w-4" />
           </button>
         </div>

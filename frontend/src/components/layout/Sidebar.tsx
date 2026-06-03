@@ -14,9 +14,11 @@ import {
   Calendar,
   Sparkles,
   ChevronDown,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface NavGroup {
   label: string;
@@ -65,7 +67,13 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-export function Sidebar({ onOpenAi }: { onOpenAi?: () => void }) {
+interface SidebarProps {
+  onOpenAi?: () => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+}
+
+export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
 
@@ -82,44 +90,61 @@ export function Sidebar({ onOpenAi }: { onOpenAi?: () => void }) {
   }
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[272px] flex-col border-r border-slate-200 bg-white">
-      {/* Logo */}
-      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-slate-100 px-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600">
+    <aside className={cn(
+      'fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border bg-card transition-all duration-300 ease-in-out',
+      collapsed ? 'w-[72px]' : 'w-[272px]',
+    )}>
+      {/* Logo + 折叠按钮 */}
+      <div className={cn(
+        'flex h-16 shrink-0 items-center border-b border-border',
+        collapsed ? 'justify-center px-2' : 'gap-3 px-5',
+      )}>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600">
           <span className="text-base font-bold text-white">T</span>
         </div>
-        <div>
-          <h1 className="text-base font-bold text-slate-900">TaskFlow+</h1>
-          <p className="text-[11px] text-slate-500">智能项目管理</p>
-        </div>
+        {!collapsed && (
+          <div className="flex-1">
+            <h1 className="text-base font-bold text-foreground">TaskFlow+</h1>
+            <p className="text-[11px] text-muted-foreground">智能项目管理</p>
+          </div>
+        )}
+        <button
+          onClick={onToggleCollapse}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          title={collapsed ? '展开侧边栏' : '收起侧边栏'}
+        >
+          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
+        </button>
       </div>
 
       {/* 导航 */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         {navGroups.map((group) => {
-          const isCollapsed = collapsedGroups.has(group.label);
+          const isCollapsed = collapsed || collapsedGroups.has(group.label);
           return (
             <div key={group.label} className="mb-2">
               {/* 分组标题 */}
-              <button
-                onClick={() => toggleGroup(group.label)}
-                aria-expanded={!isCollapsed}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-50"
-              >
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  {group.label}
-                </span>
-                <ChevronDown
-                  className={cn(
-                    'h-3.5 w-3.5 text-slate-400 transition-transform',
-                    isCollapsed && '-rotate-90',
-                  )}
-                />
-              </button>
+              {!collapsed && (
+                <button
+                  onClick={() => toggleGroup(group.label)}
+                  aria-expanded={!collapsedGroups.has(group.label)}
+                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-accent"
+                >
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    {group.label}
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      'h-3.5 w-3.5 text-muted-foreground transition-transform',
+                      collapsedGroups.has(group.label) && '-rotate-90',
+                    )}
+                  />
+                </button>
+              )}
 
               {/* 分组项 */}
-              {!isCollapsed && (
-                <div className="mt-1 space-y-0.5">
+              {!collapsedGroups.has(group.label) && (
+                <div className={cn('mt-1 space-y-0.5', collapsed && 'px-0')}>
                   {group.items.map((item) => {
                     const isActive = item.href === '/main/dashboard'
                       ? pathname === '/main/dashboard'
@@ -129,18 +154,20 @@ export function Sidebar({ onOpenAi }: { onOpenAi?: () => void }) {
                       <Link
                         key={item.href + item.label}
                         href={item.href}
+                        title={collapsed ? item.label : undefined}
                         className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
+                          'flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-150',
+                          collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
                           isActive
-                            ? 'border-l-[3px] border-l-indigo-500 bg-indigo-50 pl-[9px] text-indigo-600'
-                            : 'border-l-[3px] border-l-transparent pl-[9px] text-slate-500 hover:bg-slate-50 hover:text-slate-900',
+                            ? 'border-l-[3px] border-l-indigo-500 bg-indigo-50 pl-[9px] text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400'
+                            : 'border-l-[3px] border-l-transparent pl-[9px] text-muted-foreground hover:bg-accent hover:text-foreground',
                         )}
                       >
                         <item.icon className={cn(
                           'h-[18px] w-[18px] shrink-0',
-                          isActive ? 'text-indigo-500' : 'text-slate-400',
+                          isActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-muted-foreground',
                         )} />
-                        {item.label}
+                        {!collapsed && item.label}
                       </Link>
                     );
                   })}
@@ -152,22 +179,28 @@ export function Sidebar({ onOpenAi }: { onOpenAi?: () => void }) {
       </nav>
 
       {/* 底部 AI 入口 */}
-      <div className="border-t border-slate-100 p-4">
+      <div className={cn('border-t border-border', collapsed ? 'p-2' : 'p-4')}>
         <button
           onClick={onOpenAi}
-          className="flex w-full items-center gap-3 rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-3.5 text-left transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm"
+          title={collapsed ? 'AI 助手' : undefined}
+          className={cn(
+            'flex w-full items-center rounded-xl border border-indigo-100 bg-indigo-50/50 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm dark:border-indigo-800/40 dark:bg-indigo-950/30 dark:hover:border-indigo-700/50 dark:hover:bg-indigo-950/50',
+            collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3.5',
+          )}
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100">
-            <Sparkles className="h-[18px] w-[18px] text-indigo-600" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-950/50">
+            <Sparkles className="h-[18px] w-[18px] text-indigo-600 dark:text-indigo-400" />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-indigo-700">
-              AI 助手
-            </p>
-            <p className="text-[11px] text-indigo-400">
-              ⌘J 展开对话
-            </p>
-          </div>
+          {!collapsed && (
+            <div>
+              <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-400">
+                AI 助手
+              </p>
+              <p className="text-[11px] text-indigo-400 dark:text-indigo-500">
+                ⌘J 展开对话
+              </p>
+            </div>
+          )}
         </button>
       </div>
     </aside>

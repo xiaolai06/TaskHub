@@ -41,7 +41,7 @@ export function MilestoneList({
     <div className="space-y-2">
       {/* 标题行 */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-500">
+        <span className="text-xs font-medium text-muted-foreground">
           里程碑 {doneCount}/{milestones.length}
         </span>
         <button
@@ -61,7 +61,7 @@ export function MilestoneList({
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="里程碑标题"
-            className="flex-1 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
+            className="flex-1 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
           />
           <input
             type="number"
@@ -69,18 +69,18 @@ export function MilestoneList({
             onChange={(e) => setNewValue(e.target.value)}
             placeholder="目标值"
             min="0"
-            className="w-20 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
+            className="w-20 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
           />
           <button
             onClick={handleAdd}
             disabled={!newTitle.trim() || !newValue}
-            className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             添加
           </button>
           <button
             onClick={() => setShowAdd(false)}
-            className="rounded-md px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-100"
+            className="rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted"
           >
             取消
           </button>
@@ -90,16 +90,16 @@ export function MilestoneList({
       {/* 里程碑列表 */}
       {isLoading ? (
         <div className="flex justify-center py-4">
-          <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       ) : milestones.length === 0 ? (
-        <p className="py-3 text-center text-xs text-slate-400">暂无里程碑</p>
+        <p className="py-3 text-center text-xs text-muted-foreground">暂无里程碑</p>
       ) : (
         <div className="space-y-1">
           {milestones.map((m) => (
             <div
               key={m.id}
-              className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50"
+              className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-muted"
             >
               <button
                 onClick={() => onToggle(m.id, !m.completed)}
@@ -107,7 +107,7 @@ export function MilestoneList({
                   'flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-all',
                   m.completed
                     ? 'border-emerald-500 bg-emerald-500 text-white'
-                    : 'border-slate-300 hover:border-indigo-400',
+                    : 'border-border hover:border-indigo-400',
                 )}
               >
                 {m.completed && <CheckCircle2 className="h-3 w-3" />}
@@ -115,17 +115,17 @@ export function MilestoneList({
               <span
                 className={cn(
                   'flex-1 text-xs',
-                  m.completed ? 'text-slate-400 line-through' : 'text-slate-600',
+                  m.completed ? 'text-muted-foreground line-through' : 'text-foreground/70',
                 )}
               >
                 {m.title}
               </span>
-              <span className="font-mono text-[11px] text-slate-500">
+              <span className="font-mono text-[11px] text-muted-foreground">
                 {formatValue(m.targetValue, unit)}
               </span>
               <button
                 onClick={() => onDelete(m.id)}
-                className="rounded p-1 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                className="rounded p-1 text-muted-foreground/50 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
               >
                 <Trash2 className="h-3 w-3" />
               </button>

@@ -39,7 +39,7 @@ const PRIORITIES = [
   { value: 'URGENT', label: '紧急', color: 'text-red-600' },
   { value: 'HIGH', label: '高', color: 'text-orange-600' },
   { value: 'MEDIUM', label: '中', color: 'text-blue-600' },
-  { value: 'LOW', label: '低', color: 'text-slate-600' },
+  { value: 'LOW', label: '低', color: 'text-foreground/70' },
 ];
 
 // ======================== 组件 ========================
@@ -169,12 +169,12 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
                 新任务排期位置
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <span className="font-medium text-slate-700">{title}</span>
-                <ArrowRight className="h-4 w-4 text-slate-400" />
+                <span className="font-medium text-foreground/80">{title}</span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
                 <span className="text-indigo-600 font-mono">
                   {impact?.newTaskScheduled.scheduledStart}
                 </span>
-                <span className="text-slate-400">~</span>
+                <span className="text-muted-foreground">~</span>
                 <span className="text-indigo-600 font-mono">
                   {impact?.newTaskScheduled.scheduledEnd}
                 </span>
@@ -200,10 +200,10 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
                 项目完成日期
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <span className="text-slate-500 font-mono">
+                <span className="text-muted-foreground font-mono">
                   {impact?.projectEndDateChange.original ?? '未设定'}
                 </span>
-                <ArrowRight className="h-4 w-4 text-slate-400" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
                 <span
                   className={`font-mono font-medium ${
                     (impact?.projectEndDateChange.delayDays ?? 0) > 0
@@ -229,7 +229,7 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
             {/* 受影响的任务 */}
             {(impact?.affectedTasks.length ?? 0) > 0 && (
               <div>
-                <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground/80 mb-3">
                   <AlertTriangle className="h-4 w-4 text-orange-500" />
                   被延期的任务（{impact?.affectedTasks.length} 个）
                 </div>
@@ -237,16 +237,16 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
                   {impact?.affectedTasks.map((t) => (
                     <div
                       key={t.id}
-                      className="flex items-center justify-between rounded-md border bg-white px-3 py-2 text-sm"
+                      className="flex items-center justify-between rounded-md border bg-card px-3 py-2 text-sm"
                     >
-                      <span className="text-slate-700 truncate mr-3">
+                      <span className="text-foreground/80 truncate mr-3">
                         {t.title}
                       </span>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-slate-500 font-mono text-xs">
+                        <span className="text-muted-foreground font-mono text-xs">
                           {t.originalEnd}
                         </span>
-                        <ArrowRight className="h-3 w-3 text-slate-300" />
+                        <ArrowRight className="h-3 w-3 text-muted-foreground/50" />
                         <span className="text-red-600 font-mono text-xs font-medium">
                           {t.newEnd}
                         </span>
@@ -275,13 +275,13 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
 
             {/* 对比摘要 */}
             <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="rounded-lg bg-slate-50 p-3">
-                <p className="text-slate-500 mb-1">原计划</p>
-                <p className="font-mono text-slate-700">
+              <div className="rounded-lg bg-muted p-3">
+                <p className="text-muted-foreground mb-1">原计划</p>
+                <p className="font-mono text-foreground/80">
                   {result.originalSchedule.summary.totalTasks} 个任务 ·{' '}
                   {result.originalSchedule.summary.totalHours}h
                 </p>
-                <p className="font-mono text-slate-500">
+                <p className="font-mono text-muted-foreground">
                   {result.originalSchedule.summary.projectStart ?? '-'} ~{' '}
                   {result.originalSchedule.summary.projectEnd ?? '-'}
                 </p>

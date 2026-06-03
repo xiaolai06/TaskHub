@@ -37,7 +37,7 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
     <div className="space-y-2">
       {/* 标题行 */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-500">
+        <span className="text-xs font-medium text-muted-foreground">
           进度记录 ({logs.length})
         </span>
         <button
@@ -53,7 +53,7 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
       {showAdd && (
         <div className="space-y-2 rounded-lg border border-indigo-200 bg-indigo-50/50 p-3">
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-600">{unitHint}：</label>
+            <label className="text-xs text-foreground/70">{unitHint}：</label>
             <input
               type="number"
               value={newValue}
@@ -61,34 +61,34 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
               placeholder={unitPlaceholder}
               min="0"
               step={unit === '元' ? '0.01' : unit === '小时' ? '0.5' : '1'}
-              className="w-24 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
+              className="w-24 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
             />
-            <span className="text-xs text-slate-500">{unit || ''}</span>
+            <span className="text-xs text-muted-foreground">{unit || ''}</span>
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-xs text-slate-600">备注：</label>
+            <label className="text-xs text-foreground/70">备注：</label>
             <input
               type="text"
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
               placeholder="说明进度来源（如：收到项目A回款）"
-              className="flex-1 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
+              className="flex-1 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs outline-none focus:border-indigo-300"
             />
           </div>
-          <p className="text-[10px] text-slate-500">
+          <p className="text-[10px] text-muted-foreground">
             💡 记录后进度会自动累加，删除记录会自动回退
           </p>
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setShowAdd(false)}
-              className="rounded-md px-2.5 py-1.5 text-xs text-slate-500 hover:bg-slate-100"
+              className="rounded-md px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted"
             >
               取消
             </button>
             <button
               onClick={handleAdd}
               disabled={!newValue || Number(newValue) <= 0}
-              className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               记录
             </button>
@@ -99,19 +99,19 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
       {/* 日记列表 */}
       {isLoading ? (
         <div className="flex justify-center py-4">
-          <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       ) : logs.length === 0 ? (
-        <p className="py-3 text-center text-xs text-slate-500">暂无进度记录</p>
+        <p className="py-3 text-center text-xs text-muted-foreground">暂无进度记录</p>
       ) : (
         <div className="space-y-1.5">
           {logs.map((log) => (
             <div
               key={log.id}
-              className="group flex items-start gap-2.5 rounded-lg px-2 py-2 hover:bg-slate-50"
+              className="group flex items-start gap-2.5 rounded-lg px-2 py-2 hover:bg-muted"
             >
               {/* 日期 */}
-              <div className="flex shrink-0 items-center gap-1 text-[11px] text-slate-500">
+              <div className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground">
                 <Calendar className="h-3 w-3" />
                 {formatDate(log.date)}
               </div>
@@ -121,7 +121,7 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
               </span>
               {/* 备注 */}
               {log.note && (
-                <div className="flex min-w-0 flex-1 items-center gap-1 text-xs text-slate-500">
+                <div className="flex min-w-0 flex-1 items-center gap-1 text-xs text-muted-foreground">
                   <MessageSquare className="h-3 w-3 shrink-0" />
                   <span className="truncate">{log.note}</span>
                 </div>
@@ -129,7 +129,7 @@ export function ProgressLogList({ unit, logs, isLoading, onAdd, onDelete }: Prog
               {/* 删除 */}
               <button
                 onClick={() => onDelete(log.id)}
-                className="shrink-0 rounded p-1 text-slate-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                className="shrink-0 rounded p-1 text-muted-foreground/50 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
               >
                 <Trash2 className="h-3 w-3" />
               </button>

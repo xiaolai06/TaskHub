@@ -46,12 +46,12 @@ function Toggle({ label, desc, checked, onChange }: { label: string; desc?: stri
   return (
     <div className="flex items-center justify-between py-3">
       <div>
-        <p className="text-sm font-medium text-slate-700">{label}</p>
-        {desc && <p className="text-[12px] text-slate-500">{desc}</p>}
+        <p className="text-sm font-medium text-foreground/80">{label}</p>
+        {desc && <p className="text-[12px] text-muted-foreground">{desc}</p>}
       </div>
       <button onClick={() => onChange(!checked)}
-        className={cn('relative h-6 w-11 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none', checked ? 'bg-indigo-600' : 'bg-slate-200')}>
-        <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform', checked ? 'left-[22px]' : 'left-0.5')} />
+        className={cn('relative h-6 w-11 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none', checked ? 'bg-indigo-600' : 'bg-accent')}>
+        <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-card shadow transition-transform', checked ? 'left-[22px]' : 'left-0.5')} />
       </button>
     </div>
   );
@@ -61,11 +61,11 @@ function Select({ label, desc, value, onChange, options }: { label: string; desc
   return (
     <div className="flex items-center justify-between py-3">
       <div>
-        <p className="text-sm font-medium text-slate-700">{label}</p>
-        {desc && <p className="text-[12px] text-slate-500">{desc}</p>}
+        <p className="text-sm font-medium text-foreground/80">{label}</p>
+        {desc && <p className="text-[12px] text-muted-foreground">{desc}</p>}
       </div>
       <select value={value} onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
+        className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground/70 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
     </div>
@@ -76,11 +76,11 @@ function NumberSelect({ label, desc, value, onChange, options }: { label: string
   return (
     <div className="flex items-center justify-between py-3">
       <div>
-        <p className="text-sm font-medium text-slate-700">{label}</p>
-        {desc && <p className="text-[12px] text-slate-500">{desc}</p>}
+        <p className="text-sm font-medium text-foreground/80">{label}</p>
+        {desc && <p className="text-[12px] text-muted-foreground">{desc}</p>}
       </div>
       <select value={value} onChange={(e) => onChange(Number(e.target.value))}
-        className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
+        className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground/70 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
     </div>
@@ -99,14 +99,14 @@ function ThemeSwitcher() {
   return (
     <div className="flex items-center justify-between py-3">
       <div>
-        <p className="text-sm font-medium text-slate-700">主题模式</p>
-        <p className="text-[12px] text-slate-500">选择界面外观</p>
+        <p className="text-sm font-medium text-foreground/80">主题模式</p>
+        <p className="text-[12px] text-muted-foreground">选择界面外观</p>
       </div>
-      <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-0.5">
+      <div className="flex gap-1 rounded-lg border border-border bg-card p-0.5">
         {options.map((o) => (
           <button key={o.key} onClick={() => setTheme(o.key)}
             className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
-              theme === o.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+              theme === o.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
             <o.icon className="h-3.5 w-3.5" />{o.label}
           </button>
         ))}
@@ -149,23 +149,23 @@ function GreetingPreview({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30" onClick={onClose}>
-      <div className="w-full max-w-lg max-h-[80vh] flex flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg max-h-[80vh] flex flex-col rounded-2xl border border-border bg-card shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {/* 头部 */}
         <div className="flex items-center justify-between border-b px-5 py-3">
-          <h3 className="text-sm font-semibold text-slate-800">祝福语库</h3>
-          <button onClick={onClose} className="rounded p-1 text-slate-400 hover:bg-slate-100"><X className="h-4 w-4" /></button>
+          <h3 className="text-sm font-semibold text-foreground">祝福语库</h3>
+          <button onClick={onClose} className="rounded p-1 text-muted-foreground hover:bg-accent"><X className="h-4 w-4" /></button>
         </div>
 
         {/* 筛选 */}
         <div className="flex gap-2 border-b px-5 py-3">
-          <div className="flex flex-1 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5">
-            <Search className="h-4 w-4 text-slate-400" />
+          <div className="flex flex-1 items-center gap-2 rounded-lg border border-border bg-muted px-3 py-1.5">
+            <Search className="h-4 w-4 text-muted-foreground" />
             <input type="text" value={filter} onChange={(e) => setFilter(e.target.value)}
-              placeholder="搜索语录..." className="flex-1 bg-transparent text-sm text-slate-600 outline-none" />
-            {filter && <button onClick={() => setFilter('')} className="text-slate-400 hover:text-slate-600"><X className="h-3.5 w-3.5" /></button>}
+              placeholder="搜索语录..." className="flex-1 bg-transparent text-sm text-foreground/70 outline-none" />
+            {filter && <button onClick={() => setFilter('')} className="text-muted-foreground hover:text-foreground"><X className="h-3.5 w-3.5" /></button>}
           </div>
           <select value={hourFilter ?? ''} onChange={(e) => setHourFilter(e.target.value ? Number(e.target.value) : null)}
-            className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-600 outline-none">
+            className="rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground/70 outline-none">
             <option value="">全部时段</option>
             {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{i}:00</option>)}
           </select>
@@ -174,13 +174,13 @@ function GreetingPreview({ onClose }: { onClose: () => void }) {
         {/* 内置语录 */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">内置语录（48 条）</p>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">内置语录（48 条）</p>
             {Object.entries(builtin).map(([label, items]) => (
               <div key={label} className="mb-3">
-                <p className="mb-1 text-[12px] font-medium text-slate-500">{label}</p>
+                <p className="mb-1 text-[12px] font-medium text-muted-foreground">{label}</p>
                 <div className="space-y-1">
                   {items.filter((m) => !filter || m.includes(filter)).map((m, i) => (
-                    <div key={i} className="rounded-lg bg-slate-50 px-3 py-2 text-[13px] text-slate-600">{m}</div>
+                    <div key={i} className="rounded-lg bg-muted px-3 py-2 text-[13px] text-foreground/70">{m}</div>
                   ))}
                 </div>
               </div>
@@ -190,13 +190,13 @@ function GreetingPreview({ onClose }: { onClose: () => void }) {
           {/* 自定义语录 */}
           {filtered.length > 0 && (
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">自定义语录（{filtered.length} 条）</p>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">自定义语录（{filtered.length} 条）</p>
               <div className="space-y-1">
                 {filtered.map((g) => (
                   <div key={g.id} className="flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2">
                     <span className={cn('h-2 w-2 shrink-0 rounded-full', g.isActive ? 'bg-emerald-500' : 'bg-slate-300')} />
-                    <span className="flex-1 text-[13px] text-slate-700">{g.content}</span>
-                    <span className="text-[11px] text-slate-500">{g.hourStart}:00—{g.hourEnd}:00</span>
+                    <span className="flex-1 text-[13px] text-foreground/80">{g.content}</span>
+                    <span className="text-[11px] text-muted-foreground">{g.hourStart}:00—{g.hourEnd}:00</span>
                   </div>
                 ))}
               </div>
@@ -256,9 +256,9 @@ function GreetingManager() {
     <div className="space-y-4">
       {/* 预览按钮 */}
       <div className="flex items-center justify-between">
-        <p className="text-[12px] text-slate-500">自定义语录与内置 48 条合并轮换</p>
+        <p className="text-[12px] text-muted-foreground">自定义语录与内置 48 条合并轮换</p>
         <button onClick={() => setShowPreview(true)}
-          className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50">
+          className="flex items-center gap-1 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground/70 transition-colors hover:bg-accent">
           <Eye className="h-3.5 w-3.5" />查看全部语录
         </button>
       </div>
@@ -267,35 +267,35 @@ function GreetingManager() {
       <div className="flex gap-2">
         <input type="text" value={newContent} onChange={(e) => setNewContent(e.target.value)}
           placeholder="输入新的祝福语..." onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
+          className="flex-1 rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
         <select value={newStart} onChange={(e) => setNewStart(Number(e.target.value))}
-          className="rounded-lg border border-slate-200 px-2 py-2 text-xs text-slate-600 outline-none">
+          className="rounded-lg border border-border px-2 py-2 text-xs text-foreground/70 outline-none">
           {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{i}:00</option>)}
         </select>
-        <span className="self-center text-xs text-slate-500">—</span>
+        <span className="self-center text-xs text-muted-foreground">—</span>
         <select value={newEnd} onChange={(e) => setNewEnd(Number(e.target.value))}
-          className="rounded-lg border border-slate-200 px-2 py-2 text-xs text-slate-600 outline-none">
+          className="rounded-lg border border-border px-2 py-2 text-xs text-foreground/70 outline-none">
           {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{i}:00</option>)}
         </select>
         <button onClick={handleAdd} disabled={!newContent.trim()}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">添加</button>
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">添加</button>
       </div>
 
       {/* 列表 */}
       {greetings.length === 0 ? (
-        <p className="py-6 text-center text-sm text-slate-400">暂无自定义语录</p>
+        <p className="py-6 text-center text-sm text-muted-foreground">暂无自定义语录</p>
       ) : (
-        <div className="divide-y rounded-lg border border-slate-200">
+        <div className="divide-y rounded-lg border border-border">
           {greetings.map((g) => (
             <div key={g.id} className="flex items-center gap-3 px-4 py-2.5">
               <button onClick={() => handleToggle(g.id, g.isActive)}
-                className={cn('relative h-5 w-9 shrink-0 rounded-full transition-colors', g.isActive ? 'bg-indigo-600' : 'bg-slate-200')}>
-                <span className={cn('absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform', g.isActive ? 'left-[18px]' : 'left-0.5')} />
+                className={cn('relative h-5 w-9 shrink-0 rounded-full transition-colors', g.isActive ? 'bg-indigo-600' : 'bg-accent')}>
+                <span className={cn('absolute top-0.5 h-4 w-4 rounded-full bg-card shadow transition-transform', g.isActive ? 'left-[18px]' : 'left-0.5')} />
               </button>
-              <span className={cn('flex-1 text-sm', g.isActive ? 'text-slate-700' : 'text-slate-400')}>{g.content}</span>
-              <span className="shrink-0 text-[11px] text-slate-500">{g.hourStart}:00—{g.hourEnd}:00</span>
+              <span className={cn('flex-1 text-sm', g.isActive ? 'text-foreground/80' : 'text-muted-foreground')}>{g.content}</span>
+              <span className="shrink-0 text-[11px] text-muted-foreground">{g.hourStart}:00—{g.hourEnd}:00</span>
               <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px]',
-                g.source === 'custom' ? 'bg-blue-50 text-blue-600' : g.source === 'ai' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-500')}>
+                g.source === 'custom' ? 'bg-blue-50 text-blue-600' : g.source === 'ai' ? 'bg-purple-50 text-purple-600' : 'bg-muted text-muted-foreground')}>
                 {g.source === 'custom' ? '自定义' : g.source === 'ai' ? 'AI' : '系统'}
               </span>
               <button onClick={() => handleDelete(g.id)}
@@ -353,26 +353,26 @@ export default function PreferencesPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-lg font-bold text-slate-800">偏好设置</h1>
+        <h1 className="text-lg font-bold text-foreground">偏好设置</h1>
         <div className="flex items-center gap-2 text-sm">
-          {saving && <span className="flex items-center gap-1 text-slate-400"><Loader2 className="h-3.5 w-3.5 animate-spin" />保存中...</span>}
+          {saving && <span className="flex items-center gap-1 text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />保存中...</span>}
           {saved && <span className="flex items-center gap-1 text-emerald-500"><CheckCircle className="h-3.5 w-3.5" />已保存</span>}
         </div>
       </div>
 
       {/* 分类标签 */}
-      <div className="mb-5 flex gap-1 rounded-lg border border-slate-200 bg-white p-1">
+      <div className="mb-5 flex gap-1 rounded-lg border border-border bg-card p-1">
         {tabs.map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             className={cn('flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none',
-              activeTab === tab.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50')}>
+              activeTab === tab.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
             <tab.icon className="h-4 w-4" />{tab.label}
           </button>
         ))}
       </div>
 
       {/* 内容区 */}
-      <div className="rounded-xl border border-slate-200/60 bg-white shadow-sm">
+      <div className="rounded-xl border border-border/60 bg-card shadow-sm">
         {activeTab === 'general' && (
           <div className="divide-y px-6">
             <ThemeSwitcher />
@@ -412,8 +412,8 @@ export default function PreferencesPage() {
         {activeTab === 'greetings' && (
           <div className="px-6 py-4">
             <div className="mb-4">
-              <h3 className="text-sm font-semibold text-slate-700">自定义祝福语</h3>
-              <p className="text-[12px] text-slate-500">自定义语录会与内置语录合并轮换，按时段显示</p>
+              <h3 className="text-sm font-semibold text-foreground/80">自定义祝福语</h3>
+              <p className="text-[12px] text-muted-foreground">自定义语录会与内置语录合并轮换，按时段显示</p>
             </div>
             <GreetingManager />
           </div>

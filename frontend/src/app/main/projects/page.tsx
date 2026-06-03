@@ -91,13 +91,13 @@ export default function ProjectsPage() {
       {/* 筛选栏 */}
       <div className="flex flex-wrap items-center gap-3">
         {/* 状态筛选 */}
-        <div className="flex h-10 items-center gap-1 rounded-lg border border-slate-200 bg-white p-1">
+        <div className="flex h-10 items-center gap-1 rounded-lg border border-border bg-card p-1">
           {filters.map((f) => (
             <button
               key={f.key}
               onClick={() => setStatusFilter(f.key)}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
-                statusFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'
+              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none ${
+                statusFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent'
               }`}
             >
               {f.label}
@@ -106,15 +106,15 @@ export default function ProjectsPage() {
         </div>
 
         {/* 日期筛选 */}
-        <div className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5">
-          <Calendar className="h-4 w-4 shrink-0 text-slate-500" />
+        <div className="flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-3.5">
+          <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-            className="w-36 bg-transparent text-sm text-slate-600 outline-none [color-scheme:light]" />
-          <span className="text-sm text-slate-300">—</span>
+            className="w-36 bg-transparent text-sm text-foreground/70 outline-none" />
+          <span className="text-sm text-muted-foreground/50">—</span>
           <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-            className="w-36 bg-transparent text-sm text-slate-600 outline-none [color-scheme:light]" />
+            className="w-36 bg-transparent text-sm text-foreground/70 outline-none" />
           {(startDate || endDate) && (
-            <button onClick={() => { setStartDate(''); setEndDate(''); }} className="text-slate-500 hover:text-slate-600">
+            <button onClick={() => { setStartDate(''); setEndDate(''); }} className="text-muted-foreground hover:text-foreground">
               <X className="h-4 w-4" />
             </button>
           )}
@@ -144,9 +144,9 @@ export default function ProjectsPage() {
           <button onClick={() => window.location.reload()} className="mt-3 text-sm font-medium text-indigo-600 hover:underline">重试</button>
         </div>
       ) : !data?.data?.length ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/60 bg-white py-24 shadow-sm">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-card py-24 shadow-sm">
           <FolderKanban className="mb-3 h-12 w-12 text-slate-200" />
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {statusFilter || startDate || endDate ? '没有符合条件的项目' : '暂无项目'}
           </p>
           {!statusFilter && !startDate && !endDate && (
@@ -169,10 +169,10 @@ export default function ProjectsPage() {
               </div>
 
               {expandedProjectId === project.id && (
-                <div className="mt-2 rounded-xl border border-slate-200/60 bg-white shadow-sm">
-                  <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
-                    <h3 className="text-[13px] font-semibold text-slate-700">任务列表</h3>
-                    <button onClick={() => setExpandedProjectId(null)} className="rounded p-1 text-slate-500 hover:bg-slate-100">
+                <div className="mt-2 rounded-xl border border-border/60 bg-card shadow-sm">
+                  <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+                    <h3 className="text-[13px] font-semibold text-foreground/80">任务列表</h3>
+                    <button onClick={() => setExpandedProjectId(null)} className="rounded p-1 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
