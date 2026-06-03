@@ -74,17 +74,17 @@ function ScheduleContent() {
     },
   });
 
-  // 智能安排：调用 AI 排期建议
+  // 智能安排：发送到 AI 面板
   async function handleAiSchedule() {
     if (!effectiveProjectId) return;
     setAiLoading(true);
     try {
-      const res = await api.post<{ advice?: string }>('/llm/chat', {
-        message: `请帮我分析项目「${selectedProject?.name || ''}」的排期：当前每日工时上限 ${dailyHourLimit}h，${schedule?.summary.totalTasks ?? 0} 个任务共 ${schedule?.summary.totalHours ?? 0}h，延期 ${schedule?.summary.delayedTasks ?? 0} 个，冲突 ${schedule?.summary.conflictDays ?? 0} 天。请给出具体的排期优化建议。`,
+      const res = await api.post<{ data?: { content?: string } }>('/llm/chat', {
+        message: `请帮我分析项目「${selectedProject?.name || ''}」的排期：当前每日工时上限 ${dailyHourLimit}h，${schedule?.summary.totalTasks ?? 0} 个任务共 ${schedule?.summary.totalHours ?? 0}h，延期 ${schedule?.summary.delayedTasks ?? 0} 个，冲突 ${schedule?.summary.conflictDays ?? 0} 天。请给出具体的排期优化建议，包括哪些任务应该优先、是否需要调整工时上限、预计完成时间是否合理。`,
       });
-      toast.success('AI 排期建议已生成，请在 AI 面板查看');
+      toast.success('AI 排期建议已生成');
     } catch {
-      toast.error('AI 排期请求失败');
+      toast.error('AI 排期请求失败，请检查 AI 配置');
     } finally {
       setAiLoading(false);
     }
@@ -188,16 +188,14 @@ function ScheduleContent() {
               </div>
 
               {/* 应用排期 */}
-              <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-                <Button
-                  onClick={() => applyMutation.mutate()}
-                  disabled={!schedule.tasks.length || applyMutation.isPending}
-                  className="h-10 w-full gap-1.5"
-                >
-                  {applyMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                  应用排期到任务日期
-                </Button>
-              </div>
+              <Button
+                onClick={() => applyMutation.mutate()}
+                disabled={!schedule.tasks.length || applyMutation.isPending}
+                className="h-10 w-full gap-1.5"
+              >
+                {applyMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                应用排期到任务日期
+              </Button>
 
               {/* 调度建议 */}
               <div className="rounded-xl border border-border bg-card p-4">

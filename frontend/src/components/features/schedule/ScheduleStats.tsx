@@ -169,7 +169,6 @@ export function ScheduleStats({ schedule, delays, conflicts }: ScheduleStatsProp
             : '—'}
           sub={workDays > 0 ? `${workDays} 个工作日` : '暂无排期'}
           variant="default"
-          details={dailyWorkload.slice(0, 7).map(d => ({ label: d.date, value: `${d.hours}h`, danger: d.isOverloaded }))}
         />
         <StatCard
           icon={<BarChart3 className="h-5 w-5" />}
@@ -177,11 +176,6 @@ export function ScheduleStats({ schedule, delays, conflicts }: ScheduleStatsProp
           value={`${avgHours}h`}
           sub={avgHours > 8 ? '偏高，注意休息' : avgHours > 6 ? '较满' : '正常'}
           variant={avgHours > 8 ? 'warning' : 'default'}
-          details={[
-            { label: '总工时', value: `${summary.totalHours}h` },
-            { label: '工作日', value: `${workDays} 天` },
-            { label: '日上限', value: `${dailyWorkload.length > 0 ? Math.max(...dailyWorkload.map(d => d.hours)) : 0}h`, danger: dailyWorkload.some(d => d.isOverloaded) },
-          ]}
         />
         <StatCard
           icon={<AlertTriangle className="h-5 w-5" />}
@@ -197,7 +191,6 @@ export function ScheduleStats({ schedule, delays, conflicts }: ScheduleStatsProp
           value={summary.conflictDays}
           sub={summary.conflictDays > 0 ? '工时超限' : '无冲突'}
           variant={summary.conflictDays > 0 ? 'warning' : 'success'}
-          details={conflictDetails.length > 0 ? conflictDetails : [{ label: '无冲突天', value: '✓' }]}
         />
         <StatCard
           icon={<Timer className="h-5 w-5" />}
@@ -205,11 +198,6 @@ export function ScheduleStats({ schedule, delays, conflicts }: ScheduleStatsProp
           value={daysLeft !== null ? `${daysLeft} 天` : '—'}
           sub={projectEnd ? `目标 ${projectEnd}` : '未设定截止'}
           variant={daysLeft !== null && daysLeft <= 3 ? 'danger' : daysLeft !== null && daysLeft <= 7 ? 'warning' : 'default'}
-          details={[
-            { label: '项目开始', value: summary.projectStart || '—' },
-            { label: '项目截止', value: summary.projectEnd || '—' },
-            { label: '剩余天数', value: daysLeft !== null ? `${daysLeft} 天` : '—', danger: daysLeft !== null && daysLeft <= 3 },
-          ]}
         />
       </div>
 
