@@ -20,7 +20,7 @@ interface TodayTodoItem {
 }
 
 interface TaskOption {
-  id: string; title: string; project: { name: string }; actualHours?: number | null; estimatedHours?: number;
+  id: string; title: string; status: string; project: { name: string }; actualHours?: number | null; estimatedHours?: number;
 }
 
 // ========== 计时器卡片 ==========
@@ -84,7 +84,7 @@ function TimerPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     // 加载全部未完成任务供绑定选择
     api.get<{ data: TaskOption[] }>('/tasks?limit=200')
-      .then((res) => setTasks((res.data || []).filter((t: TaskOption) => t.title)))
+      .then((res) => setTasks((res.data || []).filter((t: TaskOption) => t.title && t.status !== 'DONE')))
       .catch(() => {});
   }, []);
 

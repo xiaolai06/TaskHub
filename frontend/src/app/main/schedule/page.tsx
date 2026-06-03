@@ -91,9 +91,6 @@ function ScheduleContent() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-bold text-foreground">排期工作台</h1>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            依据优先级、最早开始时间、截止日期和每日工时上限生成真实交付排期
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

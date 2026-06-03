@@ -216,9 +216,6 @@ export default function DashboardPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-lg font-bold text-foreground">经营概览</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            聚合当前订单执行、任务推进、客户跟进与财务结果。
-          </p>
         </div>
         <div className="text-xs text-muted-foreground">
           订单报价、成本、利润与月入款口径已统一

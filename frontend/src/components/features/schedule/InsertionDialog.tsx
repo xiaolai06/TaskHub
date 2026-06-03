@@ -93,7 +93,7 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => (v ? setOpen(v) : handleClose())}>
-      <DialogTrigger nativeButton={false}>{children}</DialogTrigger>
+      <DialogTrigger render={(props) => <span {...props}>{children}</span>} />
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

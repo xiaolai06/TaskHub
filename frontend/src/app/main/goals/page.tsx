@@ -77,7 +77,6 @@ export default function GoalsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-slate-800">经营目标</h1>
-          <p className="mt-0.5 text-xs text-slate-400">设定目标，追踪进度，及时调整</p>
         </div>
         <button
           onClick={() => { setEditGoal(null); setShowForm(true); }}
