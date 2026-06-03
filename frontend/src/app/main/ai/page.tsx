@@ -45,9 +45,6 @@ export default function AiWorkbenchPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-foreground">定时任务</h1>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            配置定时自动执行的任务，系统预置任务首次启动时自动初始化
-          </p>
         </div>
         <div className="flex gap-2">
           <button
@@ -78,7 +75,6 @@ export default function AiWorkbenchPage() {
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card py-12">
           <Clock className="h-10 w-10 text-slate-200" />
           <p className="mt-3 text-sm font-medium text-muted-foreground">暂无定时任务</p>
-          <p className="mt-1 text-xs text-muted-foreground">系统任务首次启动自动初始化，或点击下方手动创建</p>
           <div className="mt-4 flex gap-2">
             <button onClick={() => initMutation.mutate(undefined, { onSuccess: () => refetch() })} disabled={initMutation.isPending}
               className="flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-50">

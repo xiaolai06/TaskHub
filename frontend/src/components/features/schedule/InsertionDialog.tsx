@@ -8,7 +8,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,11 +45,11 @@ const PRIORITIES = [
 
 interface InsertionDialogProps {
   projectId: string;
-  children: React.ReactNode;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
-  const [open, setOpen] = useState(false);
+export function InsertionDialog({ projectId, open, onOpenChange }: InsertionDialogProps) {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState('MEDIUM');
   const [estimatedHours, setEstimatedHours] = useState('');
@@ -81,7 +80,7 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
   };
 
   const handleClose = () => {
-    setOpen(false);
+    onOpenChange(false);
     setTitle('');
     setPriority('MEDIUM');
     setEstimatedHours('');
@@ -92,8 +91,7 @@ export function InsertionDialog({ projectId, children }: InsertionDialogProps) {
   const impact = result?.impact;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => (v ? setOpen(v) : handleClose())}>
-      <DialogTrigger render={(props) => <span {...props}>{children}</span>} />
+    <Dialog open={open} onOpenChange={(v) => (v ? onOpenChange(v) : handleClose())}>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

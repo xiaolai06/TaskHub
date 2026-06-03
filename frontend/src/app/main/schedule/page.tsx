@@ -31,6 +31,8 @@ function ScheduleContent() {
   const [projectId, setProjectId] = useState(initialProjectId);
   const [dailyHourLimit, setDailyHourLimit] = useState(8);
 
+  const [insertionOpen, setInsertionOpen] = useState(false);
+
   const { data: projectList, isLoading: projectsLoading } = useProjectList({
     limit: 100,
     status: 'ACTIVE',
@@ -133,12 +135,11 @@ function ScheduleContent() {
             重新计算
           </Button>
 
-          <InsertionDialog projectId={effectiveProjectId}>
-            <Button variant="outline" className="gap-1.5">
-              <WandSparkles className="h-4 w-4" />
-              插单模拟
-            </Button>
-          </InsertionDialog>
+          <Button variant="outline" className="gap-1.5" onClick={() => setInsertionOpen(true)}>
+            <WandSparkles className="h-4 w-4" />
+            插单模拟
+          </Button>
+          <InsertionDialog projectId={effectiveProjectId} open={insertionOpen} onOpenChange={setInsertionOpen} />
         </div>
       </div>
 

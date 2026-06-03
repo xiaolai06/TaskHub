@@ -218,7 +218,6 @@ export default function DashboardPage() {
           <h1 className="text-lg font-bold text-foreground">经营概览</h1>
         </div>
         <div className="text-xs text-muted-foreground">
-          订单报价、成本、利润与月入款口径已统一
         </div>
       </div>
 
