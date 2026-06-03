@@ -8,6 +8,8 @@ import {
   CalendarX,
   CalendarDays,
   TrendingUp,
+  BarChart3,
+  Timer,
 } from 'lucide-react';
 import type { ScheduleData, DelayedTask, ConflictData } from '@/hooks/useSchedule';
 
@@ -184,25 +186,40 @@ interface ScheduleStatsProps {
 export function ScheduleStats({ schedule, delays, conflicts }: ScheduleStatsProps) {
   const { summary, dailyWorkload } = schedule;
 
+  // 计算派生指标
+  const workDays = dailyWorkload.filter(d => d.hours > 0).length;
+  const avgHours = workDays > 0 ? Math.round((summary.totalHours / workDays) * 10) / 10 : 0;
+  const projectEnd = summary.projectEnd;
+  const daysLeft = projectEnd
+    ? Math.max(0, Math.ceil((new Date(projectEnd).getTime() - Date.now()) / 86400000))
+    : null;
+
   return (
     <div className="space-y-4">
-      {/* 统计卡片行 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 统计卡片 2×3 */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <StatCard
           icon={<ListChecks className="h-5 w-5" />}
           label="待排任务"
           value={summary.totalTasks}
-          sub={`${summary.totalHours} 小时总工时`}
+          sub={`${summary.totalHours}h 总工时`}
           variant="default"
         />
         <StatCard
           icon={<Clock className="h-5 w-5" />}
-          label="总工时"
-          value={`${summary.totalHours}h`}
-          sub={summary.projectStart && summary.projectEnd
-            ? `${summary.projectStart} ~ ${summary.projectEnd}`
-            : '暂无排期'}
+          label="排期跨度"
+          value={summary.projectStart && summary.projectEnd
+            ? `${summary.projectStart.slice(5)} ~ ${summary.projectEnd.slice(5)}`
+            : '—'}
+          sub={workDays > 0 ? `${workDays} 个工作日` : '暂无排期'}
           variant="default"
+        />
+        <StatCard
+          icon={<BarChart3 className="h-5 w-5" />}
+          label="每日均工时"
+          value={`${avgHours}h`}
+          sub={avgHours > 8 ? '偏高，注意休息' : avgHours > 6 ? '较满' : '正常'}
+          variant={avgHours > 8 ? 'warning' : 'default'}
         />
         <StatCard
           icon={<AlertTriangle className="h-5 w-5" />}
@@ -217,6 +234,13 @@ export function ScheduleStats({ schedule, delays, conflicts }: ScheduleStatsProp
           value={summary.conflictDays}
           sub={summary.conflictDays > 0 ? '工时超限' : '无冲突'}
           variant={summary.conflictDays > 0 ? 'warning' : 'success'}
+        />
+        <StatCard
+          icon={<Timer className="h-5 w-5" />}
+          label="预计完成"
+          value={daysLeft !== null ? `${daysLeft} 天` : '—'}
+          sub={projectEnd ? `目标 ${projectEnd}` : '未设定截止'}
+          variant={daysLeft !== null && daysLeft <= 3 ? 'danger' : daysLeft !== null && daysLeft <= 7 ? 'warning' : 'default'}
         />
       </div>
 
