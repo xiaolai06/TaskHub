@@ -187,16 +187,8 @@ function ScheduleContent() {
                 </div>
               </div>
 
-              {/* 应用排期说明 + 按钮 */}
+              {/* 应用排期 */}
               <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-                <div className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 px-3 py-2.5 text-xs text-blue-700 dark:text-blue-300">
-                  <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium mb-1">应用排期到任务日期</p>
-                    <p>将上方甘特图中计算好的排期结果（开始/截止日期）写回到每个任务的实际日期字段。点击后任务页面、项目详情页的日期都会同步更新。建议确认排期无延期后再执行。</p>
-                  </div>
-                </div>
-
                 <Button
                   onClick={() => applyMutation.mutate()}
                   disabled={!schedule.tasks.length || applyMutation.isPending}
