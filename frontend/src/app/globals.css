@@ -287,4 +287,19 @@
       0 0 24px -8px oklch(0.6 0.12 265 / 22%),
       0 0 42px -14px oklch(0.52 0.1 225 / 14%);
   }
+
+  /* 日期选择器暗色模式适配 */
+  .dark input[type="date"] {
+    color-scheme: dark;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.5;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 0.8;
+  }
 }

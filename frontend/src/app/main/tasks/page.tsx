@@ -203,12 +203,17 @@ function TasksPageContent() {
         </div>
 
         <div className={filterBoxCls}>
-          <CalendarDays className="h-3.5 w-3.5 text-muted-foreground" />
-          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-            className={cn(filterBoxInner, 'w-24')} />
-          <span className="text-[11px] text-muted-foreground/40">~</span>
-          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-            className={cn(filterBoxInner, 'w-24')} />
+          <CalendarDays className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            从
+            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+              className={cn(filterBoxInner, 'w-[110px] rounded-md border border-transparent px-1.5 py-0.5 hover:border-border hover:bg-accent/50 focus:border-indigo-300 focus:bg-card transition-colors cursor-pointer')} />
+          </label>
+          <label className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            到
+            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+              className={cn(filterBoxInner, 'w-[110px] rounded-md border border-transparent px-1.5 py-0.5 hover:border-border hover:bg-accent/50 focus:border-indigo-300 focus:bg-card transition-colors cursor-pointer')} />
+          </label>
         </div>
 
         {hasActiveFilters && (
