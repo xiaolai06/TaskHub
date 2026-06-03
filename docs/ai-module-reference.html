@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskFlow+ AI 模块技术文档</title>
+<style>
+  :root {
+    --bg: #0f0f14;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --text: #e0e0e8;
+    --muted: #8888a0;
+    --accent: #7c6cf0;
+    --accent2: #5ce0d8;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --blue: #60a5fa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 2rem;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; }
+  h2 { font-size: 1.4rem; color: var(--accent2); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.1rem; color: var(--text); margin: 1.5rem 0 0.5rem; }
+  h4 { font-size: 0.95rem; color: var(--muted); margin: 1rem 0 0.5rem; }
+  p { margin-bottom: 0.8rem; color: var(--muted); }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .card-title { font-weight: 600; color: var(--text); margin-bottom: 0.5rem; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  th { color: var(--accent); font-weight: 600; white-space: nowrap; }
+  td { color: var(--muted); }
+  tr:hover td { color: var(--text); }
+  code {
+    background: #252535;
+    color: var(--accent2);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+  pre {
+    background: #15151e;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 0.8rem 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; }
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .badge-green { background: #0f3a2a; color: var(--green); }
+  .badge-amber { background: #3a2a0f; color: var(--amber); }
+  .badge-blue { background: #0f2a3a; color: var(--blue); }
+  .badge-red { background: #3a0f0f; color: var(--red); }
+  .badge-purple { background: #2a0f3a; color: var(--accent); }
+  .arch-box {
+    background: #12121a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: var(--muted);
+    overflow-x: auto;
+    white-space: pre;
+    margin: 1rem 0;
+  }
+  .arch-box .hl { color: var(--accent); font-weight: 600; }
+  .arch-box .hl2 { color: var(--accent2); }
+  .arch-box .hl3 { color: var(--green); }
+  .arch-box .comment { color: #555; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    body { padding: 1rem; }
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .flow-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .flow-content { flex: 1; }
+  .flow-content strong { color: var(--text); }
+  ul { margin: 0.5rem 0 0.5rem 1.5rem; color: var(--muted); }
+  li { margin-bottom: 0.3rem; }
+  .toc { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin-left: 1.2rem; }
+  .toc li { margin-bottom: 0.4rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🤖 TaskFlow+ AI 模块技术文档</h1>
+<p class="subtitle">工具增强的 LLM 对话系统 · 31 个业务工具 · 流式响应 · 定时 AI 分析</p>
+
+<div class="toc">
+<strong>目录</strong>
+<ol>
+  <li><a href="#arch">整体架构</a></li>
+  <li><a href="#engine">AI 核心引擎</a></li>
+  <li><a href="#tools">工具系统（31 个工具）</a></li>
+  <li><a href="#prompts">提示词系统</a></li>
+  <li><a href="#memory">记忆系统</a></li>
+  <li><a href="#routes">API 路由</a></li>
+  <li><a href="#frontend">前端组件架构</a></li>
+  <li><a href="#cron">定时 AI 分析</a></li>
+  <li><a href="#dataflow">数据流 & 时序</a></li>
+  <li><a href="#files">文件清单</a></li>
+</ol>
+</div>
+
+<!-- ========== 1. 整体架构 ========== -->
+<h2 id="arch">一、整体架构</h2>
+
+<div class="arch-box"><span class="hl">┌─────────────────────────────────────────────────────────────┐</span>
+<span class="hl">│                      前端 (Next.js 16)                       │</span>
+<span class="hl">│                                                             │</span>
+<span class="hl">│</span>  <span class="hl2">AiPanel</span> ──→ <span class="hl2">useAiChat</span> ──→ SSE fetch ──→ <span class="hl3">逐字渲染</span>          <span class="hl">│</span>
+<span class="hl">│</span>  <span class="hl2">AiSidebar</span>: SmartDigest / QuickActions / CustomerTab        <span class="hl">│</span>
+<span class="hl">│</span>  <span class="hl2">ToolCallBar</span>: 工具调用状态展示                               <span class="hl">│</span>
+<span class="hl">│</span>  <span class="hl2">ModelSwitcher</span>: 动态切换 LLM 模型                           <span class="hl">│</span>
+<span class="hl">└──────────────────────┬──────────────────────────────────────┘</span>
+                       │ POST /api/llm/chat/stream (SSE)
+<span class="hl">┌──────────────────────▼──────────────────────────────────────┐</span>
+<span class="hl">│                    后端 (Express 5)                          │</span>
+<span class="hl">│                                                             │</span>
+<span class="hl">│</span>  <span class="hl2">llm.routes.ts</span> ──→ <span class="hl2">AIService</span> ──→ OpenAI SDK (流式)         <span class="hl">│</span>
+<span class="hl">│</span>       │                    │                                 <span class="hl">│</span>
+<span class="hl">│</span>       │              <span class="hl3">Function Calling 循环 (≤5轮)</span>            <span class="hl">│</span>
+<span class="hl">│</span>       │                    │                                 <span class="hl">│</span>
+<span class="hl">│</span>       │         <span class="hl2">ToolRegistry</span> (31 个工具)                     <span class="hl">│</span>
+<span class="hl">│</span>       │            ├── finance (5)                           <span class="hl">│</span>
+<span class="hl">│</span>       │            ├── work (11)                             <span class="hl">│</span>
+<span class="hl">│</span>       │            ├── client (6)                            <span class="hl">│</span>
+<span class="hl">│</span>       │            ├── goal (4)                              <span class="hl">│</span>
+<span class="hl">│</span>       │            ├── search (6)                            <span class="hl">│</span>
+<span class="hl">│</span>       │            └── schedule (5)                          <span class="hl">│</span>
+<span class="hl">│</span>       │                    │                                 <span class="hl">│</span>
+<span class="hl">│</span>  <span class="hl2">prompt-selector</span> ──→ 5 种系统提示词                          <span class="hl">│</span>
+<span class="hl">│</span>  <span class="hl2">memory-extractor</span> ──→ userMemory 表                         <span class="hl">│</span>
+<span class="hl">│</span>  <span class="hl2">cron-job.service</span> ──→ 8 个定时任务 (5 个 AI 分析)            <span class="hl">│</span>
+<span class="hl">└──────────────────────┬──────────────────────────────────────┘</span>
+                       │
+<span class="hl">┌──────────────────────▼──────────────────────────────────────┐</span>
+<span class="hl">│</span>  <span class="hl3">Prisma + SQLite</span>: Conversation / Setting / UserMemory       <span class="hl">│</span>
+<span class="hl">└─────────────────────────────────────────────────────────────┘</span></div>
+
+<!-- ========== 2. AI 核心引擎 ========== -->
+<h2 id="engine">二、AI 核心引擎</h2>
+<p>文件：<code>backend/src/services/ai.service.ts</code></p>
+
+<div class="card">
+<div class="card-title">AIService 类</div>
+<p>基于 OpenAI SDK 封装的核心引擎，负责 LLM 调用、工具循环、消息管理。</p>
+
+<table>
+<tr><th>方法</th><th>功能</th><th>说明</th></tr>
+<tr><td><code>init()</code></td><td>初始化</td><td>从 Setting 表读取 provider、api_key（AES 解密）、base_url、model</td></tr>
+<tr><td><code>registerTools()</code></td><td>注册工具</td><td>将 ToolDefinition[] 转为 OpenAI function calling 格式</td></tr>
+<tr><td><code>chat()</code></td><td>流式对话</td><td>AsyncGenerator，yield StreamEvent（text/tool_call/tool_result/done）</td></tr>
+<tr><td><code>trimMessages()</code></td><td>消息裁剪</td><td>保留 system + 最近 8 条，控制 4000 token 以内</td></tr>
+<tr><td><code>testConnection()</code></td><td>连接测试</td><td>发 "hi" 验证配置是否正确</td></tr>
+</table>
+</div>
+
+<div class="card">
+<div class="card-title">StreamEvent 类型</div>
+<pre><code>type StreamEvent =
+  | { type: 'text';        content: string }
+  | { type: 'tool_call';   name: string; args: Record&lt;string, unknown&gt; }
+  | { type: 'tool_result'; name: string; result: unknown }
+  | { type: 'done' };</code></pre>
+</div>
+
+<div class="card">
+<div class="card-title">Function Calling 循环</div>
+<div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><strong>发送消息</strong> + system prompt + 工具定义给 LLM</div></div>
+<div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><strong>流式读取</strong> LLM 响应，yield text 事件给前端逐字渲染</div></div>
+<div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><strong>检测 tool_calls</strong>：如有，执行对应 handler，yield tool_call + tool_result</div></div>
+<div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><strong>追加结果</strong>到 messages，回到步骤 1（最多 5 轮）</div></div>
+<div class="flow-step"><div class="flow-num">5</div><div class="flow-content"><strong>无 tool_calls</strong> 时 yield done，对话结束</div></div>
+</div>
+
+<div class="card">
+<div class="card-title">Mock 模式</div>
+<p>当 API Key 未配置时，AIService 自动降级为 Mock 模式：从数据库查询真实业务数据，返回结构化的模拟回复，不调用 LLM。开发阶段无需配置 AI 密钥即可测试工具。</p>
+</div>
+
+<!-- ========== 3. 工具系统 ========== -->
+<h2 id="tools">三、工具系统（31 个工具）</h2>
+
+<h3>3.1 工具接口</h3>
+<p>文件：<code>backend/src/ai/tools/types.ts</code></p>
+<pre><code>interface ToolDefinition {
+  name: string;                    // snake_case 标识符
+  description: string;             // 中文描述 + 触发条件
+  category: 'finance' | 'work' | 'client' | 'goal' | 'schedule';
+  access: 'read' | 'write';       // 读/写分离
+  requiresConfirmation: boolean;   // 写操作需用户确认
+  preferredModel: 'fast' | 'balanced' | 'powerful';
+  parameters: { type: 'object'; properties: Record&lt;string, {...}&gt;; required?: string[] };
+  handler: (args: Record&lt;string, unknown&gt;, userId: string) =&gt; Promise&lt;unknown&gt;;
+}</code></pre>
+
+<h3>3.2 工具总览</h3>
+
+<h4>💰 财务工具（5 个）</h4>
+<table>
+<tr><th>工具名</th><th>功能</th><th>读/写</th><th>数据源</th></tr>
+<tr><td><code>get_profit_analysis</code></td><td>项目报价 vs 实际成本，计算利润率</td><td><span class="badge badge-green">read</span></td><td>Project + CostRecord + Task.cost</td></tr>
+<tr><td><code>get_cash_flow</code></td><td>按月现金流，分类支出统计</td><td><span class="badge badge-green">read</span></td><td>CostRecord + Project(budget)</td></tr>
+<tr><td><code>get_cost_breakdown</code></td><td>成本明细，按类别/项目分组</td><td><span class="badge badge-green">read</span></td><td>CostRecord</td></tr>
+<tr><td><code>get_revenue_by_client</code></td><td>按客户统计收入排名</td><td><span class="badge badge-green">read</span></td><td>Project + Customer</td></tr>
+<tr><td><code>get_project_margin_ranking</code></td><td>项目利润排名（budget - cost）</td><td><span class="badge badge-green">read</span></td><td>Project + CostRecord</td></tr>
+</table>
+
+<h4>📋 工作工具（11 个）</h4>
+<table>
+<tr><th>工具名</th><th>功能</th><th>读/写</th></tr>
+<tr><td><code>get_today_focus</code></td><td>今日焦点任务，按优先级+截止日排序，标注 OVERDUE/DUE_TODAY</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>get_overdue_tasks</code></td><td>延期任务列表，含逾期天数</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>get_project_progress</code></td><td>项目完成进度（DONE/total %）</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>get_schedule</code></td><td>调用 scheduler.service 计算排期</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>create_task</code></td><td>创建任务，支持模糊匹配项目/负责人</td><td><span class="badge badge-amber">write</span></td></tr>
+<tr><td><code>update_task_status</code></td><td>更新任务状态或优先级</td><td><span class="badge badge-amber">write</span></td></tr>
+<tr><td><code>delete_task</code></td><td>删除任务（硬删除）</td><td><span class="badge badge-red">write</span></td></tr>
+<tr><td><code>log_time</code></td><td>记录工时，关联项目和任务</td><td><span class="badge badge-amber">write</span></td></tr>
+<tr><td><code>create_project</code></td><td>创建项目/订单，关联客户</td><td><span class="badge badge-amber">write</span></td></tr>
+<tr><td><code>update_project</code></td><td>更新项目信息</td><td><span class="badge badge-amber">write</span></td></tr>
+<tr><td><code>get_current_time</code></td><td>当前时间 + 相对日期（明天、下周一）</td><td><span class="badge badge-green">read</span></td></tr>
+</table>
+
+<h4>👥 客户工具（6 个）</h4>
+<table>
+<tr><th>工具名</th><th>功能</th><th>读/写</th></tr>
+<tr><td><code>create_customer</code> / <code>update_customer</code></td><td>客户 CRUD</td><td><span class="badge badge-amber">write</span></td></tr>
+<tr><td><code>get_client_follow_up</code></td><td>待跟进客户（&gt;14天 URGENT，&gt;7天需跟进）</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>get_client_insights</code></td><td>客户全景：信息+项目+沟通+金额</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>log_communication</code></td><td>记录客户沟通</td><td><span class="badge badge-amber">write</span></td></tr>
+<tr><td><code>get_client_ranking</code></td><td>客户价值排名</td><td><span class="badge badge-green">read</span></td></tr>
+</table>
+
+<h4>🎯 目标工具（4 个）</h4>
+<table>
+<tr><th>工具名</th><th>功能</th><th>读/写</th></tr>
+<tr><td><code>get_goal_progress</code></td><td>目标完成进度（含里程碑）</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>get_weekly_review</code></td><td>本周工作总结（任务/工时/成本）</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>suggest_weekly_plan</code></td><td>生成下周工作计划</td><td><span class="badge badge-green">read</span></td></tr>
+<tr><td><code>get_business_health</code></td><td>四维健康度评分（财务/客户/项目/目标）</td><td><span class="badge badge-green">read</span></td></tr>
+</table>
+
+<h4>🔍 搜索工具（6 个）</h4>
+<table>
+<tr><th>工具名</th><th>功能</th><th>数据源</th></tr>
+<tr><td><code>search_web</code></td><td>通用搜索</td><td>Tavily / SerpAPI</td></tr>
+<tr><td><code>github_trending</code></td><td>GitHub 热门项目</td><td>GitHub Search API</td></tr>
+<tr><td><code>hacker_news</code></td><td>Hacker News 热帖</td><td>HN Firebase API</td></tr>
+<tr><td><code>npm_search</code></td><td>npm 包搜索</td><td>npm Registry API</td></tr>
+<tr><td><code>exchange_rate</code></td><td>汇率查询</td><td>open.er-api.com</td></tr>
+<tr><td><code>dev_to</code> / <code>product_hunt</code></td><td>技术文章 / 产品发现</td><td>Dev.to API / PH GraphQL</td></tr>
+</table>
+
+<h4>📅 排期智能工具（5 个）</h4>
+<table>
+<tr><th>工具名</th><th>功能</th><th>核心算法</th></tr>
+<tr><td><code>assess_complexity</code></td><td>任务复杂度评估（1-10 分）</td><td>关键词匹配 + 历史工时偏差</td></tr>
+<tr><td><code>evaluate_insertion</code></td><td>插单模拟：新任务对排期的影响</td><td>排期重算 + 延期天数计算</td></tr>
+<tr><td><code>suggest_rebalance</code></td><td>排期重平衡建议</td><td>检测延期/冲突/超载</td></tr>
+<tr><td><code>get_schedule_advice</code></td><td>排期问答（能完成吗？先做哪个？）</td><td>优先级评分 + 时间窗口分析</td></tr>
+<tr><td><code>get_historical_accuracy</code></td><td>预估 vs 实际工时偏差分析</td><td>统计学习用户预估模式</td></tr>
+</table>
+
+<!-- ========== 4. 提示词系统 ========== -->
+<h2 id="prompts">四、提示词系统</h2>
+
+<h3>4.1 智能路由</h3>
+<p>文件：<code>backend/src/ai/prompt-selector.ts</code></p>
+<p>根据用户消息的关键词自动选择系统提示词：</p>
+
+<div class="grid-3">
+<div class="card">
+<div class="card-title">🔧 创建类</div>
+<p>关键词：创建/新建/添加/加入/记录</p>
+<p>提示词：<code>system-create.txt</code></p>
+<p>智能填充规则 + 确认格式</p>
+</div>
+<div class="card">
+<div class="card-title">📊 分析类</div>
+<p>关键词：分析/评估/健康/利润/排名/报告</p>
+<p>提示词：<code>system-analyze.txt</code></p>
+<p>多维度分析 + 表格输出</p>
+</div>
+<div class="card">
+<div class="card-title">📅 排期类</div>
+<p>关键词：排期/安排/计划/时间线/甘特</p>
+<p>提示词：<code>system-schedule.txt</code></p>
+<p>排期规则 + 时间线解释</p>
+</div>
+<div class="card">
+<div class="card-title">🔍 搜索类</div>
+<p>关键词：搜索/查一下/最新/趋势/行业</p>
+<p>提示词：<code>system-search.txt</code></p>
+<p>7 种搜索工具决策树</p>
+</div>
+<div class="card">
+<div class="card-title">💬 默认</div>
+<p>其他所有消息</p>
+<p>提示词：<code>system-default.txt</code></p>
+<p>工具使用指南 + 回复规范</p>
+</div>
+</div>
+
+<h3>4.2 提示词文件清单</h3>
+<table>
+<tr><th>文件</th><th>用途</th><th>场景</th></tr>
+<tr><td><code>system-default.txt</code></td><td>默认系统提示</td><td>通用对话</td></tr>
+<tr><td><code>system-create.txt</code></td><td>创建操作专用</td><td>用户说"创建/新建"</td></tr>
+<tr><td><code>system-analyze.txt</code></td><td>分析操作专用</td><td>用户说"分析/报告"</td></tr>
+<tr><td><code>system-schedule.txt</code></td><td>排期操作专用</td><td>用户说"排期/安排"</td></tr>
+<tr><td><code>system-search.txt</code></td><td>搜索操作专用</td><td>用户说"搜索/查一下"</td></tr>
+<tr><td><code>system-morning.txt</code></td><td>晨间简报</td><td>定时任务 cron job</td></tr>
+<tr><td><code>system-client-radar.txt</code></td><td>客户雷达</td><td>定时任务 cron job</td></tr>
+<tr><td><code>system-finance-pulse.txt</code></td><td>财务脉搏</td><td>定时任务 cron job</td></tr>
+<tr><td><code>health-check.txt</code></td><td>业务体检</td><td>定时任务 cron job</td></tr>
+<tr><td><code>weekly-report.txt</code></td><td>自动周报</td><td>定时任务 cron job</td></tr>
+<tr><td><code>memory-extract.txt</code></td><td>记忆提取</td><td>定时任务 cron job</td></tr>
+<tr><td><code>system-template.ts</code></td><td>动态 Prompt 构建器</td><td>注入业务上下文</td></tr>
+</table>
+
+<!-- ========== 5. 记忆系统 ========== -->
+<h2 id="memory">五、记忆系统</h2>
+<p>文件：<code>backend/src/ai/memory-extractor.ts</code></p>
+
+<div class="card">
+<div class="card-title">双通道记忆提取</div>
+<div class="grid-2">
+<div>
+<h4>通道 1：正则匹配（实时）</h4>
+<ul>
+<li>取最近 20 条对话消息</li>
+<li>4 个正则模式匹配关键信息</li>
+<li>存入 <code>userMemory</code> 表</li>
+<li>首次 confidence=0.5，重复 +0.1</li>
+</ul>
+</div>
+<div>
+<h4>通道 2：AI 提取（每周日）</h4>
+<ul>
+<li>cron job <code>weekly-memory</code> 触发</li>
+<li>发送对话给 LLM 提取偏好/决策</li>
+<li>输出 JSON 数组：category/key/value</li>
+<li>存入记忆库供后续对话参考</li>
+</ul>
+</div>
+</div>
+</div>
+
+<table>
+<tr><th>正则模式</th><th>提取的记忆</th><th>category</th></tr>
+<tr><td><code>/每天工作(\d+)小时/</code></td><td>每日工作时长习惯</td><td>daily_hours</td></tr>
+<tr><td><code>/优先级[是为]高/i</code></td><td>优先级偏好</td><td>priority_preference</td></tr>
+<tr><td><code>/简洁|简短/i</code></td><td>回复风格偏好</td><td>reply_style</td></tr>
+<tr><td><code>/报价|成本|花费|花钱/i</code></td><td>成本意识</td><td>cost_conscious</td></tr>
+</table>
+
+<!-- ========== 6. API 路由 ========== -->
+<h2 id="routes">六、API 路由</h2>
+<p>文件：<code>backend/src/routes/llm.routes.ts</code> · 前缀：<code>/api/llm</code></p>
+
+<table>
+<tr><th>方法</th><th>路径</th><th>功能</th><th>说明</th></tr>
+<tr><td><span class="badge badge-blue">POST</span></td><td><code>/chat/stream</code></td><td>SSE 流式对话</td><td>核心接口，逐字推送 + 工具调用状态</td></tr>
+<tr><td><span class="badge badge-blue">POST</span></td><td><code>/chat</code></td><td>非流式对话</td><td>收集完整文本后返回</td></tr>
+<tr><td><span class="badge badge-green">GET</span></td><td><code>/conversations</code></td><td>会话列表</td><td>按 sessionId 分组</td></tr>
+<tr><td><span class="badge badge-green">GET</span></td><td><code>/conversations/weekly</code></td><td>本周对话</td><td>供 n8n 周报/记忆总结</td></tr>
+<tr><td><span class="badge badge-green">GET</span></td><td><code>/conversations/:id</code></td><td>会话详情</td><td>获取消息历史</td></tr>
+<tr><td><span class="badge badge-red">DELETE</span></td><td><code>/conversations/:id</code></td><td>删除会话</td><td>级联删除消息</td></tr>
+<tr><td><span class="badge badge-green">GET</span></td><td><code>/tools</code></td><td>工具列表</td><td>返回工具元数据</td></tr>
+</table>
+
+<h3>SSE 流式对话流程</h3>
+<pre><code>// 前端 useAiChat.ts
+const response = await fetch('/api/llm/chat/stream', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ message, sessionId }),
+  signal: abortController.signal,
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  const chunk = decoder.decode(value);
+  // 解析 "data: {...}" 格式的 SSE 事件
+  const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+  for (const line of lines) {
+    const event = JSON.parse(line.slice(6));
+    // event.type: 'text' | 'tool_call' | 'tool_result' | 'done'
+  }
+}</code></pre>
+
+<!-- ========== 7. 前端组件架构 ========== -->
+<h2 id="frontend">七、前端组件架构</h2>
+<p>目录：<code>frontend/src/components/features/ai/</code>（18 个文件）</p>
+
+<div class="arch-box"><span class="hl">AiPanel</span> (主面板, 860px)
+├── <span class="hl2">AiSidebar</span> (左侧 320px)
+│   ├── Tab: 概览 → <span class="hl3">SmartDigest</span> + <span class="hl3">QuickActions</span> + <span class="hl3">ProjectMiniList</span>
+│   ├── Tab: 客户 → <span class="hl3">CustomerTab</span>
+│   ├── Tab: 排期 → <span class="hl3">ScheduleQuickActions</span>
+│   ├── Tab: 历史 → <span class="hl3">HistoryTab</span>
+│   └── 底部: <span class="hl3">ModelSwitcher</span>
+└── 对话区 (右侧)
+    ├── <span class="hl2">EmptyState</span> (欢迎页)
+    ├── <span class="hl2">MessageBubble</span> × N
+    │   ├── <span class="hl3">ToolCallBar</span> (工具调用进度)
+    │   └── <span class="hl3">MarkdownRenderer</span> (内容渲染)
+    ├── <span class="hl2">LoadingIndicator</span> (思考动画)
+    └── <span class="hl2">ChatInput</span> (输入框 + 快捷建议)</div>
+
+<div class="grid-2">
+<div class="card">
+<div class="card-title">AiPanel.tsx — 主面板</div>
+<ul>
+<li>右侧滑出，860px 宽</li>
+<li>左右分栏：AiSidebar + 对话区</li>
+<li>消息列表 <code>memo</code> 优化</li>
+<li>快捷键：Escape 关闭，Cmd+N 新对话</li>
+<li>写操作后自动 invalidate React Query</li>
+</ul>
+</div>
+<div class="card">
+<div class="card-title">useAiChat.ts — 核心 Hook</div>
+<ul>
+<li>SSE 流式接收 + 手动解析</li>
+<li>AbortController 中断支持</li>
+<li>写操作工具完成后自动缓存失效</li>
+<li>会话管理：加载/列表/删除</li>
+<li>工具状态追踪（calling/done/error）</li>
+</ul>
+</div>
+</div>
+
+<div class="grid-2">
+<div class="card">
+<div class="card-title">MessageBubble.tsx</div>
+<ul>
+<li>用户消息：indigo 背景，右对齐</li>
+<li>AI 消息：白底，左对齐，Markdown 渲染</li>
+<li>工具调用：上方 ToolCallBar</li>
+<li>操作按钮：复制、重新生成</li>
+<li>20 个工具图标+标签映射</li>
+</ul>
+</div>
+<div class="card">
+<div class="card-title">ChatInput.tsx</div>
+<ul>
+<li>时间感知快捷建议（早晨/午间/傍晚/深夜）</li>
+<li>Enter 发送，Loading 态禁用</li>
+<li>停止/发送按钮动态切换</li>
+<li>模型切换 toast 提示</li>
+</ul>
+</div>
+</div>
+
+<h3>快捷操作</h3>
+<div class="grid-2">
+<div class="card">
+<div class="card-title">QuickActions — 3 个业务快捷</div>
+<ul>
+<li>📰 今日简报 — 待办/风险/建议</li>
+<li>⚠️ 风险扫描 — 延期任务 + 成本预警</li>
+<li>📋 周计划 — 排期+优先级安排</li>
+</ul>
+</div>
+<div class="card">
+<div class="card-title">ScheduleQuickActions — 5 个排期快捷</div>
+<ul>
+<li>🔴 延期任务</li>
+<li>🎯 今日焦点</li>
+<li>📊 排期健康度</li>
+<li>⚡ 插单评估</li>
+<li>🕐 什么时候有空</li>
+</ul>
+</div>
+</div>
+
+<!-- ========== 8. 定时 AI 分析 ========== -->
+<h2 id="cron">八、定时 AI 分析</h2>
+<p>文件：<code>backend/src/services/cron-job.service.ts</code> + <code>backend/src/jobs/*.job.ts</code></p>
+
+<table>
+<tr><th>任务名</th><th>Cron</th><th>类型</th><th>提示词</th><th>功能</th></tr>
+<tr><td>🔔 到期提醒</td><td><code>0 8 * * *</code></td><td><span class="badge badge-blue">NOTIFY</span></td><td>—</td><td>检测延期任务，发通知</td></tr>
+<tr><td>💰 成本预警</td><td><code>0 10 * * *</code></td><td><span class="badge badge-blue">NOTIFY</span></td><td>—</td><td>成本 &gt; 80% 报价时预警</td></tr>
+<tr><td>☀️ 晨间简报</td><td><code>0 8 * * *</code></td><td><span class="badge badge-purple">AI</span></td><td>system-morning</td><td>每日行动建议（300 字）</td></tr>
+<tr><td>📡 客户雷达</td><td><code>0 9 * * *</code></td><td><span class="badge badge-purple">AI</span></td><td>system-client-radar</td><td>红/黄/绿客户预警</td></tr>
+<tr><td>📊 订单利润</td><td><code>0 10 * * *</code></td><td><span class="badge badge-purple">AI</span></td><td>system-finance-pulse</td><td>成本异常 + 预算预警</td></tr>
+<tr><td>📝 自动周报</td><td><code>0 9 * * 1</code></td><td><span class="badge badge-purple">AI</span></td><td>weekly-report</td><td>周一自动生成周报</td></tr>
+<tr><td>🧠 记忆沉淀</td><td><code>0 20 * * 0</code></td><td><span class="badge badge-purple">AI</span></td><td>memory-extract</td><td>周日提取对话记忆</td></tr>
+<tr><td>🫀 业务体检</td><td><code>0 10 * * 0</code></td><td><span class="badge badge-purple">AI</span></td><td>health-check</td><td>周日四维健康评分</td></tr>
+</table>
+
+<div class="card">
+<div class="card-title">AI Job 执行模式</div>
+<div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><strong>node-cron 调度</strong> — 按 cron 表达式定时触发</div></div>
+<div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><strong>查询业务数据</strong> — 从 Prisma 获取任务/客户/财务/对话数据</div></div>
+<div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><strong>创建 AIService</strong> — init() 后调 chat() 发送 system prompt + 数据 JSON</div></div>
+<div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><strong>收集 AI 回复</strong> — 通过 notificationService.create() 存为站内通知</div></div>
+<div class="flow-step"><div class="flow-num">5</div><div class="flow-content"><strong>邮件通知</strong> — 部分 job（晨间简报、周报）支持 SMTP 邮件发送</div></div>
+</div>
+
+<!-- ========== 9. 数据流 ========== -->
+<h2 id="dataflow">九、数据流 & 时序</h2>
+
+<h3>用户对话完整时序</h3>
+<div class="arch-box"><span class="hl">用户</span> 输入消息
+  │
+  ▼
+<span class="hl2">ChatInput</span> → <span class="hl2">useAiChat.sendMessage()</span>
+  │
+  ▼
+<span class="hl2">fetch POST /api/llm/chat/stream</span>  (SSE)
+  │
+  ▼
+<span class="hl2">llm.routes.ts</span>
+  ├── <span class="hl3">selectSystemPrompt()</span> — 关键词匹配 → 5 种提示词之一
+  ├── <span class="hl3">AIService.init()</span> — 读取 Setting 表配置
+  ├── <span class="hl3">AIService.registerTools()</span> — 31 个工具
+  └── <span class="hl3">AIService.chat()</span> — AsyncGenerator
+        │
+        ├── yield <span class="hl">{ type: 'text' }</span> → SSE → <span class="hl2">MessageBubble</span> 逐字渲染
+        ├── yield <span class="hl">{ type: 'tool_call' }</span> → SSE → <span class="hl2">ToolCallBar</span> 显示调用中
+        ├── <span class="hl3">tool.handler(args, userId)</span> — 执行数据库操作
+        ├── yield <span class="hl">{ type: 'tool_result' }</span> → SSE → <span class="hl2">ToolCallBar</span> 显示完成
+        └── yield <span class="hl">{ type: 'done' }</span> → SSE → 保存到 Conversation 表
+  │
+  ▼
+<span class="hl2">useAiChat</span> — 写操作工具完成后 → <span class="hl3">qc.invalidateQueries()</span>
+  │
+  ▼
+<span class="hl2">React Query</span> 自动刷新相关列表（项目/任务/客户...）</div>
+
+<!-- ========== 10. 文件清单 ========== -->
+<h2 id="files">十、文件清单</h2>
+
+<h3>后端核心</h3>
+<table>
+<tr><th>路径</th><th>说明</th></tr>
+<tr><td><code>services/ai.service.ts</code></td><td>AI 核心引擎（AIService 类）</td></tr>
+<tr><td><code>ai/tools/types.ts</code></td><td>工具标准接口定义</td></tr>
+<tr><td><code>ai/tools/registry.ts</code></td><td>工具注册中心（31 个工具）</td></tr>
+<tr><td><code>ai/prompt-selector.ts</code></td><td>智能提示词选择器</td></tr>
+<tr><td><code>ai/memory-extractor.ts</code></td><td>对话记忆提取</td></tr>
+<tr><td><code>routes/llm.routes.ts</code></td><td>LLM 路由（7 个端点）</td></tr>
+<tr><td><code>validators/llm.schema.ts</code></td><td>请求 Zod 校验</td></tr>
+<tr><td><code>services/cron-job.service.ts</code></td><td>8 个系统预置定时任务</td></tr>
+</table>
+
+<h3>后端工具（31 个）</h3>
+<table>
+<tr><th>目录</th><th>文件</th></tr>
+<tr><td><code>ai/tools/</code></td><td>get-profit-analysis · get-cash-flow · get-cost-breakdown · get-revenue-by-client · get-project-margin-ranking</td></tr>
+<tr><td></td><td>get-today-focus · get-overdue-tasks · get-project-progress · get-schedule · create-task · update-task-status · delete-task · log-time · create-project · update-project · get-current-time</td></tr>
+<tr><td></td><td>create-customer · update-customer · get-client-follow-up · get-client-insights · log-communication · get-client-ranking</td></tr>
+<tr><td></td><td>get-goal-progress · get-weekly-review · suggest-weekly-plan · get-business-health</td></tr>
+<tr><td></td><td>search-web · github-trending · hacker-news · npm-search · exchange-rate · dev-to · product-hunt</td></tr>
+<tr><td></td><td>complexity-assessment · insertion-evaluation · rebalance-suggest · schedule-advice · historical-accuracy</td></tr>
+</table>
+
+<h3>后端提示词（12 个）</h3>
+<table>
+<tr><td><code>prompts/</code></td><td>system-default · system-create · system-analyze · system-schedule · system-search · system-morning · system-client-radar · system-finance-pulse · health-check · weekly-report · memory-extract · system-template.ts</td></tr>
+</table>
+
+<h3>后端定时任务（8 个）</h3>
+<table>
+<tr><td><code>jobs/</code></td><td>morning-briefing · finance-pulse · client-radar · weekly-report · weekly-memory · health-check · cost-alert · due-reminder</td></tr>
+</table>
+
+<h3>前端组件（18 个）</h3>
+<table>
+<tr><td><code>components/features/ai/</code></td><td>AiPanel · AiSidebar · ChatInput · MessageBubble · ToolCallBar · ToolConfirmDialog · QuickActions · ScheduleQuickActions · SmartDigest · ModelSwitcher · EmptyState · CustomerTab · HistoryTab · ProjectMiniList · MarkdownRenderer · LoadingIndicator · ChatPanel(TODO) · ToolResult(TODO)</td></tr>
+</table>
+
+<h3>前端 Hook</h3>
+<table>
+<tr><td><code>hooks/useAiChat.ts</code></td><td>SSE 流式对话核心 Hook</td></tr>
+</table>
+
+<h3>前端页面</h3>
+<table>
+<tr><td><code>app/main/ai/page.tsx</code></td><td>定时任务管理页面（非对话页）</td></tr>
+</table>
+
+</div>
+</body>
+</html>
