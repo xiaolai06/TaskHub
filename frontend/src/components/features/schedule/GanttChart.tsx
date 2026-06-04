@@ -119,7 +119,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
         <CalendarDays className="h-12 w-12 mb-3" />
         <p className="text-sm font-medium">暂无排期数据</p>
-        <p className="text-xs mt-1">请先为项目添加任务</p>
+        <p className="text-xs mt-1">请先在任务中填写「实际工时」，排期视图只显示已记录实际工时的任务</p>
       </div>
     );
   }

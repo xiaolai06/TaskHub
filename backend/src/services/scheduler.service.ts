@@ -143,9 +143,10 @@ export async function calculateSchedule(
     if (!project) throw new NotFoundError('项目');
   }
 
-  // 查询未完成任务（排除 DONE + 排除归档项目）
+  // 查询未完成任务（排除 DONE + 排除归档项目 + 只排有实际工时的任务）
   const where: Record<string, unknown> = {
     status: { not: 'DONE' },
+    actualHours: { not: null },
     project: { ownerId: userId, status: { not: 'ARCHIVED' } },
   };
   if (projectId) where.projectId = projectId;
@@ -362,6 +363,7 @@ export async function detectDelays(
 
   const where: Record<string, unknown> = {
     status: { notIn: ['DONE'] },
+    actualHours: { not: null },
     dueDate: { lt: today },
     project: { ownerId: userId, status: { not: 'ARCHIVED' } },
   };
@@ -412,6 +414,7 @@ export async function detectConflicts(
 
   const taskWhere: Record<string, unknown> = {
     status: { notIn: ['DONE'] },
+    actualHours: { not: null },
     startDate: { not: null },
     dueDate: { not: null },
     project: { ownerId: userId, status: { not: 'ARCHIVED' } },
