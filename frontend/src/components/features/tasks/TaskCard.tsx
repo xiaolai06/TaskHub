@@ -23,7 +23,9 @@ const priorityLabel: Record<string, string> = {
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function formatCost(fen: number | null | undefined): string {

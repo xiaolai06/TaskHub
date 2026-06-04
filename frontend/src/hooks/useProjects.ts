@@ -112,7 +112,10 @@ export function useArchiveProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.patch(`/projects/${id}/archive`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [QUERY_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+    },
   });
 }
 
@@ -120,6 +123,9 @@ export function useDeleteProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.delete(`/projects/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [QUERY_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+    },
   });
 }

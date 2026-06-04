@@ -96,16 +96,16 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
     )}>
       {/* Logo + 折叠按钮 */}
       <div className={cn(
-        'flex h-16 shrink-0 items-center border-b border-border',
+        'flex h-14 shrink-0 items-center border-b border-border',
         collapsed ? 'justify-center px-2' : 'gap-3 px-5',
       )}>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600">
-          <span className="text-base font-bold text-white">T</span>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600">
+          <span className="text-sm font-bold text-white">H</span>
         </div>
         {!collapsed && (
-          <div className="flex-1">
-            <h1 className="text-base font-bold text-foreground">TaskFlow+</h1>
-            <p className="text-[11px] text-muted-foreground">智能项目管理</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-sm font-bold text-foreground">智汇轻营</h1>
+            <p className="text-[10px] text-muted-foreground">TaskHub</p>
           </div>
         )}
         <button

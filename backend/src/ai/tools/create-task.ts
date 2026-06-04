@@ -1,6 +1,14 @@
 import { prisma } from '../../server';
 import { ToolDefinition } from './types';
 
+/** 安全解析日期字符串，无效日期返回 null */
+function parseDate(value: unknown): Date | null {
+  if (!value || typeof value !== 'string') return null;
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
 export const createTaskTool: ToolDefinition = {
   name: 'create_task',
   description:
@@ -29,6 +37,16 @@ export const createTaskTool: ToolDefinition = {
     required: ['title'],
   },
   handler: async (args, userId) => {
+    // 输入校验
+    const title = typeof args.title === 'string' ? args.title.trim() : '';
+    if (!title) return { error: '任务标题不能为空' };
+    if (title.length > 200) return { error: '任务标题不能超过 200 个字符' };
+
+    const estimatedHours = typeof args.estimatedHours === 'number' && args.estimatedHours >= 0
+      ? args.estimatedHours : 1;
+    const cost = typeof args.cost === 'number' && args.cost >= 0
+      ? Math.round(args.cost * 100) : 0;
+
     let projectId = args.projectId as string | undefined;
     if (!projectId && args.projectName) {
       const project = await prisma.project.findFirst({ where: { ownerId: userId, name: { contains: args.projectName as string }, status: 'ACTIVE' } });
@@ -46,29 +64,33 @@ export const createTaskTool: ToolDefinition = {
     if (project.status === 'COMPLETED') return { error: '项目已完成，不能创建新任务' };
 
     let assigneeId: string | undefined;
+    let assigneeWarning = '';
     if (args.assigneeName) {
       const user = await prisma.user.findFirst({ where: { name: { contains: args.assigneeName as string } } });
       if (user) assigneeId = user.id;
+      else assigneeWarning = `${args.assigneeName}（未找到，未分配）`;
     }
 
     let parentId: string | undefined;
+    let parentWarning = '';
     if (args.parentTitle) {
       const parent = await prisma.task.findFirst({ where: { projectId, title: { contains: args.parentTitle as string } } });
       if (parent) parentId = parent.id;
+      else parentWarning = `${args.parentTitle}（未找到，作为顶层任务）`;
     }
 
     const task = await prisma.task.create({
       data: {
-        title: args.title as string,
+        title,
         projectId,
-        description: (args.description as string) || undefined,
+        description: (args.description as string)?.trim()?.slice(0, 1000) || undefined,
         priority: (args.priority as string) || 'MEDIUM',
-        estimatedHours: (args.estimatedHours as number) ?? 1,
-        startDate: args.startDate ? new Date(args.startDate as string) : null,
-        dueDate: args.dueDate ? new Date(args.dueDate as string) : null,
+        estimatedHours,
+        startDate: parseDate(args.startDate),
+        dueDate: parseDate(args.dueDate),
         assigneeId,
         parentId,
-        cost: args.cost ? Math.round((args.cost as number) * 100) : 0,
+        cost,
         costNote: (args.costNote as string) || undefined,
         status: 'TODO',
       },
@@ -82,8 +104,9 @@ export const createTaskTool: ToolDefinition = {
       工时: `${task.estimatedHours}h`,
     };
     if (task.dueDate) details['截止'] = task.dueDate.toISOString().split('T')[0];
-    if (parentId) details['父任务'] = args.parentTitle as string;
     if (args.description) details['描述'] = (args.description as string).slice(0, 30);
+    if (assigneeWarning) details['负责人'] = assigneeWarning;
+    if (parentWarning) details['父任务'] = parentWarning;
     return { success: true, action: '创建任务', summary: `已创建任务「${task.title}」`, details };
   },
 };

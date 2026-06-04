@@ -86,7 +86,7 @@ function DroppableColumn({
   onClick?: (task: Task) => void;
 }) {
   return (
-    <div className="flex min-w-[280px] flex-1 flex-col">
+    <div className="flex flex-col">
       {/* 列头 */}
       <div className="mb-2 flex items-center justify-between px-1 pb-2">
         <div className="flex items-center gap-2">
@@ -184,7 +184,7 @@ export function TaskBoard({ tasks, onStatusChange, onEdit, onDelete, onClick }: 
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex gap-5 overflow-x-auto pb-2">
+      <div className="grid grid-cols-4 gap-4">
         {columns.map((col) => (
           <DroppableColumnWrapper
             key={col.key}

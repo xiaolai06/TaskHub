@@ -5,6 +5,13 @@ import { X, Loader2 } from 'lucide-react';
 import type { Task, CreateTaskInput } from '@/hooks/useTasks';
 import type { Project } from '@/hooks/useProjects';
 
+/** 安全地将日期字符串转为 YYYY-MM-DD 格式，无效日期返回空字符串 */
+function safeDateValue(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString().split('T')[0];
+}
+
 const statusOptions = [
   { value: 'TODO', label: '待办' },
   { value: 'IN_PROGRESS', label: '进行中' },
@@ -64,7 +71,7 @@ export function TaskForm({
       setCost(editTask.cost ? String(editTask.cost / 100) : '');
       setCostNote(editTask.costNote || '');
       setBlockedReason(editTask.blockedReason || '');
-      setDueDate(editTask.dueDate ? editTask.dueDate.split('T')[0] : '');
+      setDueDate(editTask.dueDate ? safeDateValue(editTask.dueDate) : '');
       setProjectId(editTask.projectId);
     } else {
       reset();

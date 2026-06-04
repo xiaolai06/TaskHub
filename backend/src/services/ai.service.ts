@@ -23,11 +23,20 @@ interface AIConfig {
 // ═══ Token 估算 ═══
 
 function estimateTokens(text: string): number {
-  return Math.ceil(text.length * 0.5); // 中文约 0.5 token/字
+  const cjk = (text.match(/[一-鿿぀-ゟ゠-ヿ]/g) || []).length;
+  const ratio = text.length > 0 ? cjk / text.length : 0;
+  const avgCharsPerToken = ratio > 0.5 ? 1.5 : 3.5;
+  return Math.ceil(text.length / avgCharsPerToken);
 }
 
 function countMessagesTokens(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): number {
-  return messages.reduce((t, m) => t + estimateTokens(typeof m.content === 'string' ? m.content : JSON.stringify(m.content || '')) + 10, 0);
+  return messages.reduce((t, m) => {
+    const contentTokens = estimateTokens(typeof m.content === 'string' ? m.content : JSON.stringify(m.content || ''));
+    const toolTokens = 'tool_calls' in m && m.tool_calls
+      ? estimateTokens(JSON.stringify(m.tool_calls))
+      : 0;
+    return t + contentTokens + toolTokens + 10;
+  }, 0);
 }
 
 // ═══ 工具结果截断 ═══
@@ -38,7 +47,7 @@ function truncateResult(result: unknown, maxChars = 500): unknown {
   if (Array.isArray(result)) {
     return { data: result.slice(0, 5), total: result.length, showing: 5, note: `共 ${result.length} 条，显示前 5 条` };
   }
-  return result;
+  return { preview: str.slice(0, maxChars) + '...(已截断)', truncated: true };
 }
 
 // ═══ 裁剪 messages ═══
@@ -51,6 +60,14 @@ function trimMessages(messages: OpenAI.Chat.Completions.ChatCompletionMessagePar
   const nonSystem = messages.filter(m => m.role !== 'system');
   const trimmed = nonSystem.slice(-8); // 保留最近 4 轮（8 条）
   return [...systemMsgs, ...trimmed];
+}
+
+// ═══ 脱敏 ═══
+
+function sanitizeErrorMessage(msg: string): string {
+  return msg
+    .replace(/sk[-_][A-Za-z0-9]{6,}/g, '***')
+    .replace(/Bearer\s+[A-Za-z0-9._-]{10,}/g, 'Bearer ***');
 }
 
 // ═══ AIService 类 ═══
@@ -73,26 +90,38 @@ export class AIService {
     });
     const get = (key: string) => settings.find(s => s.key === key)?.value;
     const provider = get('provider');
-    const apiKeyEnc = get('api_key');
-    if (!provider || !apiKeyEnc) return false;
+    if (!provider) return false;
+
+    // 一次查询 AI_PROVIDER 表，复用结果
+    const providerRow = await prisma.setting.findFirst({
+      where: { userId: this.userId, category: 'AI_PROVIDER', key: provider },
+    });
+    let parsed: Record<string, unknown> = {};
+    if (providerRow) {
+      try { parsed = JSON.parse(providerRow.value); } catch { /* ignore */ }
+    }
+
+    // API Key：优先 'AI' 分类，其次 AI_PROVIDER 表
+    let apiKeyEnc = get('api_key');
+    if (!apiKeyEnc && typeof parsed.apiKey === 'string') {
+      apiKeyEnc = parsed.apiKey;
+    }
+    if (!apiKeyEnc) return false;
 
     let apiKey: string;
     try { apiKey = decrypt(apiKeyEnc); } catch { return false; }
 
-    // 动态获取 baseUrl（从用户配置的 AI_PROVIDER 或预置列表）
-    let baseUrl = get('base_url');
+    // baseUrl：优先 'AI' 分类，其次 AI_PROVIDER，最后预置列表
+    let baseUrl = get('base_url') || (typeof parsed.baseUrl === 'string' ? parsed.baseUrl : '');
     if (!baseUrl) {
       baseUrl = await getDynamicBaseUrl(this.userId, provider);
     }
 
-    this.config = {
-      provider,
-      apiKey,
-      baseUrl,
-      model: get('default_model') || 'deepseek-chat',
-      powerfulModel: get('powerful_model') || get('default_model') || 'deepseek-chat',
-    };
+    // 模型名：优先 'AI' 分类，其次 AI_PROVIDER
+    const defaultModel = get('default_model') || (typeof parsed.defaultModel === 'string' && parsed.defaultModel ? parsed.defaultModel : 'deepseek-chat');
+    const powerfulModel = get('powerful_model') || (typeof parsed.powerfulModel === 'string' && parsed.powerfulModel ? parsed.powerfulModel : defaultModel);
 
+    this.config = { provider, apiKey, baseUrl, model: defaultModel, powerfulModel };
     this.client = new OpenAI({ apiKey, baseURL: this.config.baseUrl });
     return true;
   }
@@ -109,7 +138,6 @@ export class AIService {
     messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
     model?: string;
   }): AsyncGenerator<StreamEvent> {
-    // Mock 模式
     if (!this.client || !this.config) {
       yield* this.mockChat(options.messages);
       return;
@@ -119,63 +147,69 @@ export class AIService {
       const model = options.model || this.config.model;
       const tools = this.tools.map(t => ({ type: 'function' as const, function: { name: t.name, description: t.description, parameters: t.parameters } }));
       let messages = trimMessages([...options.messages]);
-    let maxLoops = 5;
+      let maxLoops = 5;
 
-    while (maxLoops > 0) {
-      maxLoops--;
+      while (maxLoops > 0) {
+        maxLoops--;
 
-      const stream = await this.client.chat.completions.create({
-        model, messages, tools, stream: true, temperature: 0.7, max_tokens: 2048,
-      }) as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
+        const stream = await this.client.chat.completions.create({
+          model, messages, tools, stream: true, temperature: 0.7, max_tokens: 2048,
+        }) as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
-      let fullContent = '';
-      const toolCalls: Array<{ id: string; type: string; function: { name: string; arguments: string } }> = [];
+        let fullContent = '';
+        const toolCalls: Array<{ id: string; type: string; function: { name: string; arguments: string } }> = [];
 
-      for await (const chunk of stream) {
-        const delta = chunk.choices[0]?.delta;
-        if (delta?.content) { fullContent += delta.content; yield { type: 'text', content: delta.content }; }
-        if (delta?.tool_calls) {
-          for (const tc of delta.tool_calls) {
-            const idx = tc.index ?? 0;
-            if (!toolCalls[idx]) toolCalls[idx] = { id: '', type: 'function', function: { name: '', arguments: '' } };
-            if (tc.id) toolCalls[idx].id = tc.id;
-            if (tc.function?.name) toolCalls[idx].function.name += tc.function.name;
-            if (tc.function?.arguments) toolCalls[idx].function.arguments += tc.function.arguments;
+        for await (const chunk of stream) {
+          const delta = chunk.choices[0]?.delta;
+          if (delta?.content) { fullContent += delta.content; yield { type: 'text', content: delta.content }; }
+          if (delta?.tool_calls) {
+            for (const tc of delta.tool_calls) {
+              const idx = tc.index ?? 0;
+              if (!toolCalls[idx]) toolCalls[idx] = { id: '', type: 'function', function: { name: '', arguments: '' } };
+              if (tc.id) toolCalls[idx].id = tc.id;
+              if (tc.function?.name) toolCalls[idx].function.name += tc.function.name;
+              if (tc.function?.arguments) toolCalls[idx].function.arguments += tc.function.arguments;
+            }
           }
         }
-      }
 
-      if (toolCalls.length === 0) { yield { type: 'done' }; return; }
+        if (toolCalls.length === 0) { yield { type: 'done' }; return; }
 
-      // 加入 assistant 消息
-      messages.push({ role: 'assistant', content: fullContent || null, tool_calls: toolCalls as any });
+        messages.push({ role: 'assistant', content: fullContent || null, tool_calls: toolCalls as unknown as OpenAI.Chat.Completions.ChatCompletionMessageToolCall[] });
 
-      // 执行工具
-      for (const tc of toolCalls) {
-        let args: Record<string, unknown> = {};
-        try { args = JSON.parse(tc.function.arguments); } catch { /* ignore */ }
-        yield { type: 'tool_call', name: tc.function.name, args };
+        for (const tc of toolCalls) {
+          let args: Record<string, unknown>;
+          try {
+            args = JSON.parse(tc.function.arguments);
+          } catch {
+            const parseError = { error: `参数解析失败，原始内容: ${tc.function.arguments.slice(0, 200)}` };
+            yield { type: 'tool_call', name: tc.function.name, args: {} };
+            yield { type: 'tool_result', name: tc.function.name, result: parseError };
+            messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(parseError) });
+            continue;
+          }
+          yield { type: 'tool_call', name: tc.function.name, args };
 
-        const tool = this.toolMap.get(tc.function.name);
-        let result: unknown;
-        if (tool) {
-          try { result = await tool.handler(args, this.userId); }
-          catch (err) { result = { error: err instanceof Error ? err.message : '工具执行失败' }; }
-        } else {
-          result = { error: `未知工具: ${tc.function.name}` };
+          const tool = this.toolMap.get(tc.function.name);
+          let result: unknown;
+          if (tool) {
+            try { result = await tool.handler(args, this.userId); }
+            catch (err) { result = { error: err instanceof Error ? err.message : '工具执行失败' }; }
+          } else {
+            result = { error: `未知工具: ${tc.function.name}` };
+          }
+          const truncated = truncateResult(result);
+          yield { type: 'tool_result', name: tc.function.name, result: truncated };
+          messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(truncated) });
         }
-        const truncated = truncateResult(result);
-        yield { type: 'tool_result', name: tc.function.name, result: truncated };
-
-        messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(truncated) });
       }
-    }
 
-    yield { type: 'done' };
-  } catch (apiErr: unknown) {
-    yield { type: 'text', content: `AI 调用失败: ${apiErr instanceof Error ? apiErr.message : '未知错误'}。请检查 API Key 是否正确。` };
-    yield { type: 'done' };
-  }
+      yield { type: 'done' };
+    } catch (apiErr: unknown) {
+      const rawMsg = apiErr instanceof Error ? apiErr.message : '未知错误';
+      yield { type: 'text', content: `AI 调用失败: ${sanitizeErrorMessage(rawMsg)}。请检查 API Key 是否正确。` };
+      yield { type: 'done' };
+    }
   }
 
   /** Mock 对话 */
@@ -215,7 +249,7 @@ export class AIService {
       });
       return { success: true, message: `连接成功 (${this.config.model})` };
     } catch (err) {
-      return { success: false, message: `连接失败: ${err instanceof Error ? err.message : '未知错误'}` };
+      return { success: false, message: `连接失败: ${sanitizeErrorMessage(err instanceof Error ? err.message : '未知错误')}` };
     }
   }
 }

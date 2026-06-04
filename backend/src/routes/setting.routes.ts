@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as settingService from '../services/setting.service';
+import * as notificationService from '../services/notification.service';
 import { success, error } from '../utils/response';
 
 const router = Router();
@@ -17,12 +18,12 @@ router.get('/ai/providers', async (req: Request, res: Response, next: NextFuncti
 // POST /ai/providers — 添加/更新供应商
 router.post('/ai/providers', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, label, baseUrl, apiKey } = req.body;
+    const { name, label, baseUrl, apiKey, defaultModel, powerfulModel } = req.body;
     if (!name || !baseUrl) {
       error(res, 'VALIDATION_ERROR', '请提供供应商名称和 API 地址', 400);
       return;
     }
-    const result = await settingService.saveProvider(req.userId!, { name, label, baseUrl, apiKey });
+    const result = await settingService.saveProvider(req.userId!, { name, label, baseUrl, apiKey, defaultModel, powerfulModel });
     success(res, result, '供应商已保存');
   } catch (err) { next(err); }
 });
@@ -81,6 +82,41 @@ router.post('/ai/test', async (req: Request, res: Response, next: NextFunction) 
   } catch (err) { next(err); }
 });
 
+// GET /ai/all-models — 从所有已配置供应商批量获取模型
+router.get('/ai/all-models', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const providers = await settingService.getProviders(req.userId!);
+    const results: Array<{ provider: string; label: string; models: { id: string; name: string; tier: string }[]; error?: string }> = [];
+
+    await Promise.allSettled(
+      providers
+        .filter(p => p.apiKey && p.apiKey !== '***')
+        .map(async (p) => {
+          try {
+            const result = await settingService.fetchModelsFromProvider(req.userId!, p.name, p.apiKey, p.baseUrl);
+            results.push({
+              provider: p.name,
+              label: p.label,
+              models: result.models,
+              error: result.error || undefined,
+            });
+          } catch (err) {
+            results.push({
+              provider: p.name,
+              label: p.label,
+              models: [],
+              error: err instanceof Error ? err.message : '获取失败',
+            });
+          }
+        }),
+    );
+
+    // 按供应商名字排序，保持顺序稳定
+    results.sort((a, b) => a.provider.localeCompare(b.provider));
+    success(res, results);
+  } catch (err) { next(err); }
+});
+
 // ═══ 会话管理 ═══
 
 router.get('/sessions', async (req: Request, res: Response, next: NextFunction) => {
@@ -96,6 +132,24 @@ router.delete('/sessions/:id', async (req: Request, res: Response, next: NextFun
     await settingService.deleteSession(req.userId!, id);
     success(res, { deleted: true });
   } catch (err) { next(err); }
+});
+
+// ═══ 邮件测试 ═══
+
+// POST /email/test — 发送测试邮件
+router.post('/email/test', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { to } = req.body;
+    if (!to || typeof to !== 'string' || !to.includes('@')) {
+      error(res, 'VALIDATION_ERROR', '请提供有效的收件邮箱地址', 400);
+      return;
+    }
+    const result = await notificationService.sendTestEmail(to.trim(), req.userId!);
+    success(res, result, '测试邮件已发送');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '发送失败';
+    error(res, 'EMAIL_SEND_FAILED', `邮件发送失败: ${msg}`, 502);
+  }
 });
 
 // ═══ 通用配置 CRUD ═══

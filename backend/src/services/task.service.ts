@@ -9,9 +9,9 @@ export async function findAll(userId: string, filters: TaskQueryInput) {
     sortBy = 'priority', sortOrder = 'asc',
   } = filters;
 
-  // 构建 where 条件
+  // 构建 where 条件（排除归档项目）
   const where: Prisma.TaskWhereInput = {
-    project: { ownerId: userId },
+    project: { ownerId: userId, status: { not: 'ARCHIVED' } },
   };
 
   if (status) where.status = status;

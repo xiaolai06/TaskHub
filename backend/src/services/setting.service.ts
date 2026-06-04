@@ -6,10 +6,12 @@ import { encrypt, decrypt } from './encryption.service';
 //   value = JSON({ name, label, baseUrl, apiKey(加密), createdAt })
 
 interface ProviderInfo {
-  name: string;      // 唯一标识: deepseek / openai / xiaomi / custom_xxx
-  label: string;     // 显示名: DeepSeek / OpenAI / 小米MiMo
-  baseUrl: string;   // API 地址
-  apiKey: string;    // 解密后的 API Key
+  name: string;        // 唯一标识: deepseek / openai / xiaomi / custom_xxx
+  label: string;       // 显示名: DeepSeek / OpenAI / 小米MiMo
+  baseUrl: string;     // API 地址
+  apiKey: string;      // 解密后的 API Key
+  defaultModel: string;  // 该供应商的默认模型
+  powerfulModel: string; // 该供应商的复杂任务模型
 }
 
 // ═══ 通用供应商预置（仅作初始参考，用户可删可改） ═══
@@ -59,6 +61,8 @@ export async function getProviders(userId: string): Promise<ProviderInfo[]> {
         label: parsed.label || row.key,
         baseUrl: parsed.baseUrl || '',
         apiKey,
+        defaultModel: parsed.defaultModel || '',
+        powerfulModel: parsed.powerfulModel || '',
       });
     } catch {}
   }
@@ -76,7 +80,7 @@ export async function getAvailableProviders(userId: string) {
   const all = [...configured];
   for (const p of PRESET_PROVIDERS) {
     if (!configuredNames.has(p.name)) {
-      all.push({ name: p.name, label: p.label, baseUrl: p.baseUrl, apiKey: '' });
+      all.push({ name: p.name, label: p.label, baseUrl: p.baseUrl, apiKey: '', defaultModel: '', powerfulModel: '' });
     }
   }
 
@@ -87,12 +91,14 @@ export async function getAvailableProviders(userId: string) {
 
 export async function saveProvider(
   userId: string,
-  data: { name: string; label?: string; baseUrl: string; apiKey?: string },
+  data: { name: string; label?: string; baseUrl: string; apiKey?: string; defaultModel?: string; powerfulModel?: string },
 ) {
   const value = JSON.stringify({
     label: data.label || data.name,
     baseUrl: data.baseUrl,
     apiKey: data.apiKey ? encrypt(data.apiKey) : undefined,
+    defaultModel: data.defaultModel || '',
+    powerfulModel: data.powerfulModel || '',
   });
 
   await prisma.setting.upsert({

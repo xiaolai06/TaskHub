@@ -201,13 +201,13 @@ export function Header({ onOpenAi }: HeaderProps) {
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-border bg-card/95 px-5 backdrop-blur-md">
       {/* 左侧：时间 + 祝福语 + 主题切换 */}
       <div className="flex items-center gap-3">
-        <div className="flex shrink-0 items-center gap-1.5 font-mono text-sm text-slate-500 tabular-nums">
+        <div className="flex shrink-0 items-center gap-1.5 font-mono text-[15px] text-slate-500 tabular-nums">
           <Clock className="h-4 w-4 text-slate-400" />
           <LiveClock />
         </div>
         <div className="h-5 w-px shrink-0 bg-slate-200" />
-        <span className="text-sm text-slate-500">
-          {user?.name ? getGreeting(user.name, customGreetings) : '欢迎使用 TaskFlow+'}
+        <span className="text-[15px] text-slate-500">
+          {user?.name ? getGreeting(user.name, customGreetings) : '欢迎使用 智汇轻营'}
         </span>
         {/* 主题切换按钮 */}
         <button
