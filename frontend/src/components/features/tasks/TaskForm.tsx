@@ -62,6 +62,7 @@ export function TaskForm({
   const isEdit = !!editTask;
 
   useEffect(() => {
+    if (!open) return;
     if (editTask) {
       setTitle(editTask.title);
       setDescription(editTask.description || '');
@@ -76,11 +77,10 @@ export function TaskForm({
       setProjectId(editTask.projectId);
     } else {
       reset();
-      // 优先用 projectId prop（SubtaskList 传入），其次 defaultProjectId（项目详情页传入）
       const pid = projectIdProp || defaultProjectId;
       if (pid) setProjectId(pid);
     }
-  }, [editTask, defaultProjectId, projectIdProp]);
+  }, [open]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
