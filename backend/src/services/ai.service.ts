@@ -147,7 +147,7 @@ export class AIService {
       const model = options.model || this.config.model;
       const tools = this.tools.map(t => ({ type: 'function' as const, function: { name: t.name, description: t.description, parameters: t.parameters } }));
       let messages = trimMessages([...options.messages]);
-      let maxLoops = 5;
+      let maxLoops = 10;
 
       while (maxLoops > 0) {
         maxLoops--;

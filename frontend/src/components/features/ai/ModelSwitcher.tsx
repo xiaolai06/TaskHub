@@ -29,6 +29,8 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
   const [loading, setLoading] = useState(true);
   const [activeProvider, setActiveProvider] = useState('deepseek');
   const [viewProvider, setViewProvider] = useState<string | null>(null);
+  // 记录用户手动选择的模型和供应商（优先于 allModels 查找）
+  const [userSelected, setUserSelected] = useState<{ id: string; name: string; provider: string } | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
   const requestIdRef = useRef(0);
@@ -78,14 +80,17 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
   const currentGroup = providersWithModels.find(g => g.provider === currentViewProvider);
   const displayModels = currentGroup?.models ?? [];
 
-  // 选中模型信息
+  // 选中模型信息（优先用用户手动选择的记录，其次从 allModels 查找）
   const currentModel = useMemo(() => {
+    if (userSelected && userSelected.id === selectedModel) {
+      return { id: userSelected.id, name: userSelected.name, providerLabel: providersWithModels.find(g => g.provider === userSelected.provider)?.label || userSelected.provider };
+    }
     for (const g of allModels) {
       const found = g.models.find(m => m.id === selectedModel);
       if (found) return { ...found, providerLabel: g.label };
     }
     return null;
-  }, [allModels, selectedModel]);
+  }, [allModels, selectedModel, userSelected, providersWithModels]);
 
   const displayName = currentModel?.name || '默认模型';
   const displayId = currentModel?.id || '';
@@ -143,7 +148,11 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
                     const isSelected = selectedModel === m.id;
                     return (
                       <button key={m.id} ref={isSelected ? selectedRef : undefined}
-                        onClick={() => { onSelect(m.id, currentViewProvider); setOpen(false); setViewProvider(null); }}
+                        onClick={() => {
+                          setUserSelected({ id: m.id, name: m.name, provider: currentViewProvider });
+                          onSelect(m.id, currentViewProvider);
+                          setOpen(false); setViewProvider(null);
+                        }}
                         className={cn('flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors',
                           isSelected ? 'bg-indigo-50 dark:bg-indigo-950/40' : 'hover:bg-accent')}>
                         <span className={cn('flex-1 truncate text-[12px]',
