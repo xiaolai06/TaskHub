@@ -65,12 +65,14 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   const [activeSessionId, setActiveSessionId] = useState('default');
   const [sessions, setSessions] = useState<Array<{ sessionId: string; messageCount: number; lastMessage: Date; title?: string }>>([]);
   const [selectedModel, setSelectedModel] = useState<string | undefined>(undefined);
+  const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined);
   const [modelToast, setModelToast] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 模型切换 toast
-  const handleModelSelect = useCallback((modelId: string | undefined) => {
+  const handleModelSelect = useCallback((modelId: string | undefined, provider?: string) => {
     setSelectedModel(modelId);
+    setSelectedProvider(provider);
     setModelToast(modelId ? '已切换模型' : '已恢复默认模型');
     setTimeout(() => setModelToast(null), 2000);
   }, []);
@@ -80,7 +82,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     const content = text || input.trim();
     if (!content || isLoading) return;
     setInput('');
-    await sendMessage(content, activeSessionId, selectedModel);
+    await sendMessage(content, activeSessionId, selectedModel, selectedProvider);
     getSessions().then(setSessions).catch(() => {});
   }, [input, isLoading, sendMessage, activeSessionId, selectedModel, getSessions]);
 

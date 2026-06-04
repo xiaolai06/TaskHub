@@ -13,16 +13,16 @@ const router = Router();
 // ═══ POST /chat/stream — SSE 流式对话 ═══
 router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Response) => {
   try {
-    const { message, sessionId, model } = req.body;
+    const { message, sessionId, model, provider } = req.body;
 
     // SSE 响应头
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' });
 
     function send(event: unknown) { res.write(`data: ${JSON.stringify(event)}\n\n`); }
 
-    // 初始化 AI
+    // 初始化 AI（如果前端指定了供应商，使用指定的；否则用默认的）
     const ai = new AIService(req.userId!);
-    const initialized = await ai.init();
+    const initialized = await ai.init(provider);
     const tools = getAllTools();
     ai.registerTools(tools);
 
@@ -81,7 +81,7 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
 router.post('/chat', validate(chatSchema), async (req: Request, res: Response, next) => {
   try {
     const ai = new AIService(req.userId!);
-    const initialized = await ai.init();
+    const initialized = await ai.init(req.body.provider);
     ai.registerTools(getAllTools());
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       { role: 'system', content: selectSystemPrompt(req.body.message, initialized) },

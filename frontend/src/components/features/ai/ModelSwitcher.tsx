@@ -20,7 +20,7 @@ interface AllModelsResult {
 
 interface ModelSwitcherProps {
   selectedModel?: string;
-  onSelect: (modelId: string | undefined) => void;
+  onSelect: (modelId: string | undefined, provider?: string) => void;
 }
 
 export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
@@ -143,7 +143,7 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
                     const isSelected = selectedModel === m.id;
                     return (
                       <button key={m.id} ref={isSelected ? selectedRef : undefined}
-                        onClick={() => { onSelect(m.id); setOpen(false); setViewProvider(null); }}
+                        onClick={() => { onSelect(m.id, currentViewProvider); setOpen(false); setViewProvider(null); }}
                         className={cn('flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors',
                           isSelected ? 'bg-indigo-50 dark:bg-indigo-950/40' : 'hover:bg-accent')}>
                         <span className={cn('flex-1 truncate text-[12px]',

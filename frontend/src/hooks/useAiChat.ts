@@ -48,6 +48,7 @@ export function useAiChat() {
     message: string,
     sessionId: string = 'default',
     model?: string,
+    provider?: string,
   ): Promise<void> => {
     // 如果有正在进行的请求，先中断
     abortRef.current?.abort();
@@ -74,7 +75,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ message, sessionId, model }),
+        body: JSON.stringify({ message, sessionId, model, provider }),
         signal: controller.signal,
       });
 

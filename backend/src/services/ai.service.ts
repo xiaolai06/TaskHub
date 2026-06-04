@@ -83,13 +83,13 @@ export class AIService {
     this.userId = userId;
   }
 
-  /** 从 Setting 表读取 AI 配置 */
-  async init(): Promise<boolean> {
+  /** 从 Setting 表读取 AI 配置，providerOverride 可指定使用哪个供应商 */
+  async init(providerOverride?: string): Promise<boolean> {
     const settings = await prisma.setting.findMany({
       where: { userId: this.userId, category: 'AI' },
     });
     const get = (key: string) => settings.find(s => s.key === key)?.value;
-    const provider = get('provider');
+    const provider = providerOverride || get('provider');
     if (!provider) return false;
 
     // 一次查询 AI_PROVIDER 表，复用结果

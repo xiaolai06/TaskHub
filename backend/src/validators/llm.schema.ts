@@ -4,6 +4,7 @@ export const chatSchema = z.object({
   message: z.string().min(1, '消息不能为空').max(2000, '消息不能超过 2000 字'),
   sessionId: z.string().optional().default('default'),
   model: z.string().optional(),
+  provider: z.string().optional(),
 });
 
 export type ChatInput = z.infer<typeof chatSchema>;
