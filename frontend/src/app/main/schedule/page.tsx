@@ -75,14 +75,29 @@ function ScheduleContent() {
     },
   });
 
-  // 智能安排：发送到 AI 面板
+  // 智能安排：发送到 AI 青板，包含项目描述作为排期依据
+  const hasScheduleData = schedule && schedule.tasks.length > 0;
+  const hasProjectDesc = selectedProject?.description;
+
   async function handleAiSchedule() {
     if (!effectiveProjectId) return;
     setAiLoading(true);
     try {
-      const res = await api.post<{ data?: { content?: string } }>('/llm/chat', {
-        message: `请帮我分析项目「${selectedProject?.name || ''}」的排期：当前每日工时上限 ${dailyHourLimit}h，${schedule?.summary.totalTasks ?? 0} 个任务共 ${schedule?.summary.totalHours ?? 0}h，延期 ${schedule?.summary.delayedTasks ?? 0} 个，冲突 ${schedule?.summary.conflictDays ?? 0} 天。请给出具体的排期优化建议，包括哪些任务应该优先、是否需要调整工时上限、预计完成时间是否合理。`,
-      });
+      const parts = [`请帮我分析项目「${selectedProject?.name || ''}」的排期：`];
+      parts.push(`当前每日工时上限 ${dailyHourLimit}h，${schedule?.summary.totalTasks ?? 0} 个任务共 ${schedule?.summary.totalHours ?? 0}h，延期 ${schedule?.summary.delayedTasks ?? 0} 个，冲突 ${schedule?.summary.conflictDays ?? 0} 天。`);
+
+      if (hasProjectDesc) {
+        parts.push(`\n项目说明：${selectedProject.description}`);
+        parts.push('\n请结合项目说明，分析任务拆分是否合理、工时估算是否准确、有没有遗漏的任务。');
+      }
+
+      if (!hasScheduleData) {
+        parts.push('\n当前没有已记录实际工时的任务，无法自动排期。请根据项目说明，帮我拆解任务并给出排期建议。');
+      }
+
+      parts.push('\n请给出具体的排期优化建议，包括哪些任务应该优先、是否需要调整工时上限、预计完成时间是否合理。');
+
+      await api.post('/llm/chat', { message: parts.join('') });
       toast.success('AI 排期建议已生成');
     } catch {
       toast.error('AI 排期请求失败，请检查 AI 配置');
@@ -140,7 +155,7 @@ function ScheduleContent() {
           <WandSparkles className="h-3.5 w-3.5" />插单模拟
         </button>
 
-        <button onClick={handleAiSchedule} disabled={aiLoading} className={cn(toolBtnCls, 'text-indigo-600 border-indigo-200 bg-indigo-50 hover:bg-indigo-100')}>
+        <button onClick={handleAiSchedule} disabled={aiLoading || !effectiveProjectId} className={cn(toolBtnCls, 'text-indigo-600 border-indigo-200 bg-indigo-50 hover:bg-indigo-100', !effectiveProjectId && 'opacity-50 cursor-not-allowed')}>
           {aiLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
           智能安排
         </button>
