@@ -151,7 +151,7 @@ function ScheduleContent() {
           重新计算
         </button>
 
-        <button onClick={() => setInsertionOpen(true)} disabled={!projectId} className={cn(toolBtnCls, !projectId ? 'opacity-50 cursor-not-allowed' : '')}>
+        <button onClick={() => setInsertionOpen(true)} className={toolBtnCls}>
           <WandSparkles className="h-3.5 w-3.5" />插单模拟
         </button>
 

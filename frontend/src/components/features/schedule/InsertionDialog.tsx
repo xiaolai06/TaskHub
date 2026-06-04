@@ -31,6 +31,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useInsertionSimulation, type InsertionResult } from '@/hooks/useSchedule';
+import { useProjectList } from '@/hooks/useProjects';
 
 // ======================== 常量 ========================
 
@@ -55,15 +56,19 @@ export function InsertionDialog({ projectId, open, onOpenChange }: InsertionDial
   const [estimatedHours, setEstimatedHours] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [result, setResult] = useState<InsertionResult | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(projectId || '');
 
   const mutation = useInsertionSimulation();
+  const { data: projectList } = useProjectList({ limit: 100, status: 'ACTIVE' });
+  const projects = projectList?.data || [];
+  const effectivePid = selectedProjectId || projectId;
 
   const handleSubmit = () => {
-    if (!title.trim() || !estimatedHours) return;
+    if (!title.trim() || !estimatedHours || !effectivePid) return;
 
     mutation.mutate(
       {
-        projectId,
+        projectId: effectivePid,
         newTask: {
           title: title.trim(),
           priority,
@@ -106,6 +111,18 @@ export function InsertionDialog({ projectId, open, onOpenChange }: InsertionDial
         {!result ? (
           /* ====== 表单阶段 ====== */
           <div className="space-y-4 py-2">
+            {/* 全部项目模式下显示项目选择器 */}
+            {!projectId && projects.length > 0 && (
+              <div className="space-y-2">
+                <Label>选择项目 *</Label>
+                <Select value={selectedProjectId} onValueChange={(v) => setSelectedProjectId(v || '')}>
+                  <SelectTrigger><SelectValue placeholder="请选择项目" /></SelectTrigger>
+                  <SelectContent>
+                    {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="title">任务标题 *</Label>
               <Input
@@ -307,7 +324,7 @@ export function InsertionDialog({ projectId, open, onOpenChange }: InsertionDial
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!title.trim() || !estimatedHours || mutation.isPending}
+                disabled={!title.trim() || !estimatedHours || !effectivePid || mutation.isPending}
               >
                 {mutation.isPending && (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
