@@ -6,11 +6,11 @@ import { api } from '@/lib/api';
 
 /** AI 写操作工具执行后需失效的缓存 key */
 const WRITE_TOOL_CACHE_MAP: Record<string, string[]> = {
-  create_project: ['projects', 'dashboard'],
-  update_project: ['projects', 'dashboard'],
-  create_task: ['tasks', 'projects', 'dashboard'],
-  update_task_status: ['tasks', 'projects', 'dashboard'],
-  delete_task: ['tasks', 'projects', 'dashboard'],
+  create_project: ['projects', 'dashboard', 'header'],
+  update_project: ['projects', 'dashboard', 'header'],
+  create_task: ['tasks', 'projects', 'dashboard', 'header'],
+  update_task_status: ['tasks', 'projects', 'dashboard', 'header'],
+  delete_task: ['tasks', 'projects', 'dashboard', 'header'],
   log_time: ['projects', 'dashboard'],
   log_communication: ['customers', 'dashboard'],
 };

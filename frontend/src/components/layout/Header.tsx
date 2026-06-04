@@ -138,16 +138,16 @@ export function Header({ onOpenAi }: HeaderProps) {
     setTheme(resolved === 'light' ? 'dark' : 'light');
   }
 
-  // 待办任务用 React Query，AI 创建任务后自动刷新
+  // 待办任务用 React Query，AI 创建任务后自动刷新（独立 key，避免与 DashboardPage 缓存冲突）
   const { data: quickTasksData } = useQuery({
-    queryKey: ['dashboard'],
+    queryKey: ['header', 'recent-tasks'],
     queryFn: async () => {
       const res = await api.get<{ tasks: QuickTask[] }>('/dashboard/recent-activity');
-      return res.tasks?.slice(0, 5) ?? [];
+      return (Array.isArray(res?.tasks) ? res.tasks : []).slice(0, 5);
     },
     staleTime: 10_000,
   });
-  const quickTasks = quickTasksData ?? [];
+  const quickTasks = Array.isArray(quickTasksData) ? quickTasksData : [];
 
   useEffect(() => {
     api.get<Array<{ content: string }>>('/greetings')
