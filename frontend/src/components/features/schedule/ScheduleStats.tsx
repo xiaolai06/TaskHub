@@ -157,7 +157,7 @@ export function ScheduleStats({ schedule, delays, conflicts }: ScheduleStatsProp
           icon={<ListChecks className="h-5 w-5" />}
           label="待排任务"
           value={summary.totalTasks}
-          sub={`${summary.totalHours}h 总工时`}
+          sub={`${summary.totalHours}h 总工时（实际优先）`}
           variant="default"
           details={Object.entries(taskDetails).map(([k, v]) => ({ label: priorityLabel[k] || k, value: `${v} 个` }))}
         />

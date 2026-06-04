@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // ======================== 排期计算 ========================
 export const calculateScheduleSchema = z.object({
-  projectId: z.string().min(1, '项目 ID 不能为空'),
+  projectId: z.string().optional().default(''),
   dailyHourLimit: z
     .number()
     .min(1, '每日工时上限至少 1 小时')
@@ -38,14 +38,14 @@ export type InsertionSimulationInput = z.infer<typeof insertionSimulationSchema>
 
 // ======================== 延期查询 ========================
 export const delayQuerySchema = z.object({
-  projectId: z.string().min(1, '项目 ID 不能为空'),
+  projectId: z.string().optional().default(''),
 });
 
 export type DelayQueryInput = z.infer<typeof delayQuerySchema>;
 
 // ======================== 冲突查询 ========================
 export const conflictQuerySchema = z.object({
-  projectId: z.string().min(1, '项目 ID 不能为空'),
+  projectId: z.string().optional().default(''),
   dailyHourLimit: z
     .number()
     .min(1)

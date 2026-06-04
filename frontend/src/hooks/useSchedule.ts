@@ -10,6 +10,8 @@ export interface ScheduledTask {
   title: string;
   priority: string;
   estimatedHours: number;
+  actualHours: number | null;
+  effectiveHours: number;
   scheduledStart: string;
   scheduledEnd: string;
   originalDueDate: string | null;
@@ -17,6 +19,8 @@ export interface ScheduledTask {
   delayDays: number;
   isConflict: boolean;
   status: string;
+  projectId: string;
+  projectName: string;
 }
 
 export interface DailyWorkload {
@@ -98,29 +102,29 @@ export interface InsertionInput {
 
 // ======================== Hooks ========================
 
-/** 计算项目排期 */
+/** 计算项目排期（projectId 为空时计算全部活跃项目） */
 export function useSchedule(projectId: string, dailyHourLimit = 8) {
   return useQuery<ScheduleData>({
     queryKey: [QUERY_KEY, 'calculate', projectId, dailyHourLimit],
     queryFn: () =>
       api.post<ScheduleData>('/scheduler/calculate', {
-        projectId,
+        ...(projectId ? { projectId } : {}),
         dailyHourLimit,
       }),
-    enabled: !!projectId,
+    enabled: true,
   });
 }
 
-/** 查询延期任务 */
+/** 查询延期任务（projectId 为空时查全部） */
 export function useDelays(projectId: string) {
   return useQuery<DelayedTask[]>({
     queryKey: [QUERY_KEY, 'delays', projectId],
     queryFn: () => api.get<DelayedTask[]>(`/scheduler/delays/${projectId}`),
-    enabled: !!projectId,
+    enabled: true,
   });
 }
 
-/** 查询冲突 */
+/** 查询冲突（projectId 为空时查全部） */
 export function useConflicts(projectId: string, dailyHourLimit = 8) {
   return useQuery<ConflictData>({
     queryKey: [QUERY_KEY, 'conflicts', projectId, dailyHourLimit],
@@ -128,7 +132,7 @@ export function useConflicts(projectId: string, dailyHourLimit = 8) {
       api.get<ConflictData>(
         `/scheduler/conflicts/${projectId}?dailyHourLimit=${dailyHourLimit}`,
       ),
-    enabled: !!projectId,
+    enabled: true,
   });
 }
 

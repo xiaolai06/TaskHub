@@ -254,6 +254,9 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                           {task.isDelayed && (
                             <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
                           )}
+                          {task.projectName && (
+                            <span className="text-[10px] text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 rounded px-1 py-0.5 flex-shrink-0 truncate max-w-[60px]">{task.projectName}</span>
+                          )}
                           <span
                             className={`text-xs truncate ${
                               task.isDelayed ? 'text-red-600 font-medium' : 'text-foreground/80'
@@ -272,7 +275,8 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                       <TooltipContent side="right" className="text-xs">
                         <p className="font-medium">{task.title}</p>
                         <p className="text-muted-foreground">
-                          {task.estimatedHours}h · {task.scheduledStart} ~ {task.scheduledEnd}
+                          {task.effectiveHours}h · {task.scheduledStart} ~ {task.scheduledEnd}
+                          {task.actualHours ? ` (实际${task.actualHours}h/预估${task.estimatedHours}h)` : ''}
                         </p>
                         {task.isDelayed && (
                           <p className="text-red-500">
@@ -309,7 +313,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                     }}
                   >
                     <Clock className="h-3 w-3 flex-shrink-0 opacity-60" />
-                    <span className="truncate">{task.estimatedHours}h</span>
+                    <span className="truncate">{task.effectiveHours}h</span>
                     {task.isDelayed && (
                       <span className="text-red-500 flex-shrink-0">+{task.delayDays}d</span>
                     )}

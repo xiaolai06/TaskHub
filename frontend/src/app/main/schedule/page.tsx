@@ -40,7 +40,8 @@ function ScheduleContent() {
 
   const { data: projectList, isLoading: projectsLoading } = useProjectList({ limit: 100, status: 'ACTIVE' });
   const projects = projectList?.data || [];
-  const effectiveProjectId = projectId || projects[0]?.id || '';
+  const effectiveProjectId = projectId ?? (projects[0]?.id || '');
+  const isAllProjects = projectId === '';
   const selectedProject = useMemo(
     () => projects.find((project) => project.id === effectiveProjectId),
     [projects, effectiveProjectId],
@@ -116,6 +117,7 @@ function ScheduleContent() {
           onChange={(event) => setProjectId(event.target.value)}
           className={toolBtnCls}
         >
+          <option value="">全部项目</option>
           {projects.map((project) => (
             <option key={project.id} value={project.id}>{project.name}</option>
           ))}
@@ -134,7 +136,7 @@ function ScheduleContent() {
           重新计算
         </button>
 
-        <button onClick={() => setInsertionOpen(true)} className={toolBtnCls}>
+        <button onClick={() => setInsertionOpen(true)} disabled={!projectId} className={cn(toolBtnCls, !projectId ? 'opacity-50 cursor-not-allowed' : '')}>
           <WandSparkles className="h-3.5 w-3.5" />插单模拟
         </button>
 
@@ -163,7 +165,7 @@ function ScheduleContent() {
             <div className="rounded-xl border border-border bg-card p-4">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-sm font-semibold text-foreground">{selectedProject?.name || '当前项目'}</h2>
+                  <h2 className="text-sm font-semibold text-foreground">{selectedProject?.name || '全部项目'}</h2>
                   <p className="text-[11px] text-muted-foreground">
                     计划周期 {formatDate(schedule.summary.projectStart)} ~ {formatDate(schedule.summary.projectEnd)}
                   </p>

@@ -12,9 +12,12 @@ interface TaskInput {
   title: string;
   priority: string;
   estimatedHours: number;
+  actualHours: number | null;
   startDate: string | null;
   dueDate: string | null;
   status: string;
+  projectId: string;
+  projectName: string;
 }
 
 interface ScheduledTask {
@@ -22,6 +25,8 @@ interface ScheduledTask {
   title: string;
   priority: string;
   estimatedHours: number;
+  actualHours: number | null;
+  effectiveHours: number;
   scheduledStart: string;
   scheduledEnd: string;
   originalDueDate: string | null;
@@ -29,6 +34,8 @@ interface ScheduledTask {
   delayDays: number;
   isConflict: boolean;
   status: string;
+  projectId: string;
+  projectName: string;
 }
 
 interface DailyWorkload {
@@ -97,7 +104,9 @@ function sortByPriorityAndDueDate(tasks: TaskInput[]): TaskInput[] {
     if (!a.dueDate && b.dueDate) return 1;
 
     // 都没有截止日期按工时升序（小任务先做）
-    return a.estimatedHours - b.estimatedHours;
+    const aH = a.actualHours ?? a.estimatedHours;
+    const bH = b.actualHours ?? b.estimatedHours;
+    return aH - bH;
   });
 }
 
@@ -126,37 +135,51 @@ export async function calculateSchedule(
 ): Promise<ScheduleResult> {
   const { projectId, dailyHourLimit } = input;
 
-  // 校验项目归属
-  const project = await prisma.project.findFirst({
-    where: { id: projectId, ownerId: userId },
-  });
-  if (!project) throw new NotFoundError('项目');
+  // 如果指定了项目，校验归属；否则查所有活跃项目
+  if (projectId) {
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, ownerId: userId },
+    });
+    if (!project) throw new NotFoundError('项目');
+  }
 
-  // 查询所有未完成任务（排除 DONE）
+  // 查询未完成任务（排除 DONE + 排除归档项目）
+  const where: Record<string, unknown> = {
+    status: { not: 'DONE' },
+    project: { ownerId: userId, status: { not: 'ARCHIVED' } },
+  };
+  if (projectId) where.projectId = projectId;
+
   const rawTasks = await prisma.task.findMany({
-    where: {
-      projectId,
-      status: { not: 'DONE' },
-    },
+    where,
     select: {
       id: true,
       title: true,
       priority: true,
       estimatedHours: true,
+      actualHours: true,
       startDate: true,
       dueDate: true,
       status: true,
+      projectId: true,
+      project: { select: { name: true } },
     },
     orderBy: { createdAt: 'asc' },
   });
 
-  const tasks = rawTasks.map((t) => ({
-    ...t,
+  const tasks: TaskInput[] = rawTasks.map((t) => ({
+    id: t.id,
+    title: t.title,
+    priority: t.priority,
+    estimatedHours: t.estimatedHours,
+    actualHours: t.actualHours,
     startDate: t.startDate ? toDateStr(t.startDate) : null,
     dueDate: t.dueDate ? toDateStr(t.dueDate) : null,
+    status: t.status,
+    projectId: t.projectId,
+    projectName: t.project.name,
   }));
 
-  // 默认跳过周末
   return buildSchedule(tasks, dailyHourLimit, true);
 }
 
@@ -193,7 +216,8 @@ function buildSchedule(
   let cursorDate = skipWeekends ? skipToNextWorkday(new Date(today)) : new Date(today);
 
   for (const task of sorted) {
-    const remaining = task.estimatedHours;
+    const remaining = task.actualHours ?? task.estimatedHours;
+    const effectiveHours = remaining;
     let firstDay: Date | null = null;
     let lastDay: Date | null = null;
     let left = remaining;
@@ -272,6 +296,8 @@ function buildSchedule(
       title: task.title,
       priority: task.priority,
       estimatedHours: task.estimatedHours,
+      actualHours: task.actualHours,
+      effectiveHours,
       scheduledStart,
       scheduledEnd,
       originalDueDate: task.dueDate,
@@ -279,6 +305,8 @@ function buildSchedule(
       delayDays,
       isConflict,
       status: task.status,
+      projectId: task.projectId,
+      projectName: task.projectName,
     });
   }
 
@@ -295,7 +323,7 @@ function buildSchedule(
     });
   }
 
-  const totalHours = scheduled.reduce((s, t) => s + t.estimatedHours, 0);
+  const totalHours = scheduled.reduce((s, t) => s + t.effectiveHours, 0);
   const delayedTasks = scheduled.filter((t) => t.isDelayed).length;
   const conflictDays = dailyWorkload.filter((d) => d.isOverloaded).length;
 
@@ -322,27 +350,34 @@ export async function detectDelays(
   userId: string,
   projectId: string,
 ) {
-  const project = await prisma.project.findFirst({
-    where: { id: projectId, ownerId: userId },
-  });
-  if (!project) throw new NotFoundError('项目');
+  if (projectId) {
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, ownerId: userId },
+    });
+    if (!project) throw new NotFoundError('项目');
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const where: Record<string, unknown> = {
+    status: { notIn: ['DONE'] },
+    dueDate: { lt: today },
+    project: { ownerId: userId, status: { not: 'ARCHIVED' } },
+  };
+  if (projectId) where.projectId = projectId;
+
   const delayedTasks = await prisma.task.findMany({
-    where: {
-      projectId,
-      status: { notIn: ['DONE'] },
-      dueDate: { lt: today },
-    },
+    where,
     select: {
       id: true,
       title: true,
       priority: true,
       dueDate: true,
       estimatedHours: true,
+      actualHours: true,
       status: true,
+      project: { select: { name: true } },
     },
     orderBy: { dueDate: 'asc' },
   });
@@ -354,7 +389,9 @@ export async function detectDelays(
     dueDate: t.dueDate ? toDateStr(t.dueDate) : null,
     overdueDays: t.dueDate ? diffDays(t.dueDate, today) : 0,
     estimatedHours: t.estimatedHours,
+    actualHours: t.actualHours,
     status: t.status,
+    projectName: t.project.name,
   }));
 }
 
@@ -366,19 +403,23 @@ export async function detectConflicts(
 ) {
   const { projectId, dailyHourLimit } = input;
 
-  const project = await prisma.project.findFirst({
-    where: { id: projectId, ownerId: userId },
-  });
-  if (!project) throw new NotFoundError('项目');
+  if (projectId) {
+    const project = await prisma.project.findFirst({
+      where: { id: projectId, ownerId: userId },
+    });
+    if (!project) throw new NotFoundError('项目');
+  }
 
-  // 查询有 startDate 和 dueDate 的任务，检测时间段重叠
+  const taskWhere: Record<string, unknown> = {
+    status: { notIn: ['DONE'] },
+    startDate: { not: null },
+    dueDate: { not: null },
+    project: { ownerId: userId, status: { not: 'ARCHIVED' } },
+  };
+  if (projectId) taskWhere.projectId = projectId;
+
   const tasksWithDates = await prisma.task.findMany({
-    where: {
-      projectId,
-      status: { notIn: ['DONE'] },
-      startDate: { not: null },
-      dueDate: { not: null },
-    },
+    where: taskWhere,
     select: {
       id: true,
       title: true,
@@ -482,17 +523,27 @@ export async function insertionSimulation(
       title: true,
       priority: true,
       estimatedHours: true,
+      actualHours: true,
       startDate: true,
       dueDate: true,
       status: true,
+      projectId: true,
+      project: { select: { name: true } },
     },
     orderBy: { createdAt: 'asc' },
   });
 
-  const tasks = rawTasks.map((t) => ({
-    ...t,
+  const tasks: TaskInput[] = rawTasks.map((t) => ({
+    id: t.id,
+    title: t.title,
+    priority: t.priority,
+    estimatedHours: t.estimatedHours,
+    actualHours: t.actualHours,
     startDate: t.startDate ? toDateStr(t.startDate) : null,
     dueDate: t.dueDate ? toDateStr(t.dueDate) : null,
+    status: t.status,
+    projectId: t.projectId,
+    projectName: t.project.name,
   }));
 
   // 加入新任务（用临时 ID）
@@ -501,9 +552,12 @@ export async function insertionSimulation(
     title: newTask.title,
     priority: newTask.priority,
     estimatedHours: newTask.estimatedHours,
+    actualHours: null,
     startDate: newTask.startDate ?? null,
     dueDate: newTask.dueDate ?? null,
     status: 'TODO',
+    projectId,
+    projectName: '(新任务)',
   };
   tasks.push(virtualTask);
 
