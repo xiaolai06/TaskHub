@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -127,22 +128,28 @@ export function Header({ onOpenAi }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { theme, setTheme, resolved } = useTheme();
-  const [quickTasks, setQuickTasks] = useState<QuickTask[]>([]);
   const [customGreetings, setCustomGreetings] = useState<string[]>([]);
   const [showTasks, setShowTasks] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const taskRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
 
-  // 主题切换：light ↔ dark
   function toggleTheme() {
     setTheme(resolved === 'light' ? 'dark' : 'light');
   }
 
+  // 待办任务用 React Query，AI 创建任务后自动刷新
+  const { data: quickTasksData } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: async () => {
+      const res = await api.get<{ tasks: QuickTask[] }>('/dashboard/recent-activity');
+      return res.tasks?.slice(0, 5) ?? [];
+    },
+    staleTime: 10_000,
+  });
+  const quickTasks = quickTasksData ?? [];
+
   useEffect(() => {
-    api.get<{ tasks: QuickTask[] }>('/dashboard/recent-activity')
-      .then((res) => setQuickTasks(res.tasks?.slice(0, 5) ?? []))
-      .catch((err) => { console.warn('加载待办任务失败:', err); });
     api.get<Array<{ content: string }>>('/greetings')
       .then((res) => setCustomGreetings(res.map((g) => g.content)))
       .catch(() => {});

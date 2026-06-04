@@ -686,6 +686,7 @@ function EmailConfig() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [configLoaded, setConfigLoaded] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   // 测试发送
   const [testTo, setTestTo] = useState('');
@@ -751,20 +752,27 @@ function EmailConfig() {
 
   return (
     <div className="space-y-5">
-      {/* 配置指南 */}
-      <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 px-4 py-3 dark:border-indigo-800/50 dark:bg-indigo-950/20">
-        <h3 className="mb-2 text-sm font-semibold text-indigo-700 dark:text-indigo-400">📧 SMTP 配置指南</h3>
-        <div className="space-y-1.5 text-xs leading-relaxed text-indigo-600/80 dark:text-indigo-400/70">
-          <p><b>QQ 邮箱：</b>登录 mail.qq.com → 设置 → 账户 → POP3/SMTP 服务 → 开启 → 生成授权码</p>
-          <p><b>163 邮箱：</b>登录 mail.163.com → 设置 → POP3/SMTP/IMAP → 开启 SMTP → 设置授权码</p>
-          <p><b>Gmail：</b>需开启两步验证 → Google 账号 → 应用专用密码 → 生成密码</p>
-          <p className="pt-1 text-indigo-500 dark:text-indigo-400">⚠️ 密码栏填写的是<b>授权码</b>，不是邮箱登录密码。配置保存后可发送到<b>任意邮箱</b>。</p>
+      {/* 配置指南（折叠） */}
+      <button onClick={() => setShowGuide(!showGuide)}
+        className="flex w-full items-center gap-2 rounded-lg border border-indigo-100 bg-indigo-50/50 px-3 py-2 text-left text-xs font-medium text-indigo-600 transition-colors hover:bg-indigo-50 dark:border-indigo-800/50 dark:bg-indigo-950/20 dark:text-indigo-400 dark:hover:bg-indigo-950/30">
+        <span>📧</span>
+        <span className="flex-1">如何获取 SMTP 授权码？（QQ / 163 / Gmail）</span>
+        <span className="text-indigo-400">{showGuide ? '▲' : '▼'}</span>
+      </button>
+      {showGuide && (
+        <div className="rounded-lg border border-indigo-100 bg-indigo-50/30 px-4 py-3 dark:border-indigo-800/50 dark:bg-indigo-950/20">
+          <div className="space-y-1.5 text-xs leading-relaxed text-indigo-600/80 dark:text-indigo-400/70">
+            <p><b>QQ 邮箱：</b>登录 mail.qq.com → 设置 → 账户 → POP3/SMTP 服务 → 开启 → 生成授权码</p>
+            <p><b>163 邮箱：</b>登录 mail.163.com → 设置 → POP3/SMTP/IMAP → 开启 SMTP → 设置授权码</p>
+            <p><b>Gmail：</b>需开启两步验证 → Google 账号 → 应用专用密码 → 生成密码</p>
+            <p className="pt-1 text-indigo-500">⚠️ 密码栏填写的是<b>授权码</b>，不是邮箱登录密码。配置保存后可发送到<b>任意邮箱</b>。</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* SMTP 服务器 + 端口 */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground/70">SMTP 服务器</label>
           <input type="text" value={host} onChange={(e) => setHost(e.target.value)}
             placeholder="smtp.qq.com" className={inputCls} />
