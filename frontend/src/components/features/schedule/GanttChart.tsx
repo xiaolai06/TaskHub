@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   Clock,
 } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import type { ScheduledTask, DailyWorkload } from '@/hooks/useSchedule';
 
 // ======================== 常量 ========================
@@ -272,16 +273,35 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                           </Badge>
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="text-xs">
-                        <p className="font-medium">{task.title}</p>
-                        <p className="text-muted-foreground">
-                          {task.effectiveHours}h · {task.scheduledStart} ~ {task.scheduledEnd}
-                          {task.actualHours ? ` (实际${task.actualHours}h/预估${task.estimatedHours}h)` : ''}
-                        </p>
+                      <TooltipContent side="right" className="w-64 text-xs space-y-1.5">
+                        <p className="font-semibold text-sm">{task.title}</p>
+                        {task.projectName && (
+                          <p className="text-indigo-500">📁 {task.projectName}</p>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={`text-[10px] px-1 py-0 ${colors.text} ${colors.border}`}>
+                            {PRIORITY_LABELS[task.priority] ?? task.priority}
+                          </Badge>
+                          <span className="text-muted-foreground">{task.status === 'TODO' ? '待办' : task.status === 'IN_PROGRESS' ? '进行中' : task.status === 'BLOCKED' ? '阻塞' : task.status}</span>
+                        </div>
+                        <Separator />
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                          <span className="text-muted-foreground">工时</span>
+                          <span>{task.effectiveHours}h{task.actualHours ? ` (实际${task.actualHours}h)` : ''}</span>
+                          <span className="text-muted-foreground">排期</span>
+                          <span>{task.scheduledStart} ~ {task.scheduledEnd}</span>
+                          {task.originalDueDate && (
+                            <>
+                              <span className="text-muted-foreground">截止日</span>
+                              <span className={task.isDelayed ? 'text-red-500 font-medium' : ''}>{task.originalDueDate}</span>
+                            </>
+                          )}
+                        </div>
                         {task.isDelayed && (
-                          <p className="text-red-500">
-                            延期 {task.delayDays} 天（截止 {task.originalDueDate}）
-                          </p>
+                          <p className="text-red-500 font-medium">⚠️ 延期 {task.delayDays} 天</p>
+                        )}
+                        {task.isConflict && (
+                          <p className="text-orange-500 font-medium">⚠️ 工时冲突</p>
                         )}
                       </TooltipContent>
                       </Tooltip>

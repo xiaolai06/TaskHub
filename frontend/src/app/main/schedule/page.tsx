@@ -155,7 +155,7 @@ function ScheduleContent() {
           <WandSparkles className="h-3.5 w-3.5" />插单模拟
         </button>
 
-        <button onClick={handleAiSchedule} disabled={aiLoading || !effectiveProjectId} className={cn(toolBtnCls, 'text-indigo-600 border-indigo-200 bg-indigo-50 hover:bg-indigo-100', !effectiveProjectId && 'opacity-50 cursor-not-allowed')}>
+        <button onClick={handleAiSchedule} disabled={aiLoading || !effectiveProjectId || !hasScheduleData} className={cn(toolBtnCls, 'text-indigo-600 border-indigo-200 bg-indigo-50 hover:bg-indigo-100', (!effectiveProjectId || !hasScheduleData) && 'opacity-50 cursor-not-allowed')} title={!hasScheduleData ? '暂无排期数据，请先在任务中填写实际工时' : ''}>
           {aiLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
           智能安排
         </button>
