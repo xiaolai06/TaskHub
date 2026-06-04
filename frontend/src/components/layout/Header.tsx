@@ -331,7 +331,7 @@ export function Header({ onOpenAi }: HeaderProps) {
                 </div>
               )}
               <div className="border-t px-4 py-2">
-                <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部任务 →</button>
+                <a href="/main/tasks" className="text-xs font-medium text-indigo-600 hover:text-indigo-700">查看全部任务 →</a>
               </div>
             </div>
           )}
