@@ -69,12 +69,15 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined);
   const [modelToast, setModelToast] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // 用 ref 保存最新的 model/provider，避免 useCallback 闭包捕获旧值
+  const modelRef = useRef<{ id?: string; provider?: string }>({});
 
   // 模型切换 toast
   const handleModelSelect = useCallback((modelId: string | undefined, provider?: string, modelName?: string) => {
     setSelectedModel(modelId);
     setSelectedProvider(provider);
     setSelectedModelName(modelName);
+    modelRef.current = { id: modelId, provider };
     setModelToast(modelId ? `已切换: ${modelName || modelId}` : '已恢复默认模型');
     setTimeout(() => setModelToast(null), 2000);
   }, []);
@@ -84,9 +87,10 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     const content = text || input.trim();
     if (!content || isLoading) return;
     setInput('');
-    await sendMessage(content, activeSessionId, selectedModel, selectedProvider);
+    const { id: currentModel, provider: currentProvider } = modelRef.current;
+    await sendMessage(content, activeSessionId, currentModel, currentProvider);
     getSessions().then(setSessions).catch(() => {});
-  }, [input, isLoading, sendMessage, activeSessionId, selectedModel, getSessions]);
+  }, [input, isLoading, sendMessage, activeSessionId, getSessions]);
 
   // 停止
   const handleStop = useCallback(() => stopGeneration(), [stopGeneration]);
@@ -104,10 +108,10 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
       const prevUser = prev[idx - 1];
       if (prevUser.role !== 'user') return prev;
       const newMsgs = prev.slice(0, idx);
-      sendMessage(prevUser.content, activeSessionId, selectedModel);
+      sendMessage(prevUser.content, activeSessionId, modelRef.current.id, modelRef.current.provider);
       return newMsgs;
     });
-  }, [setMessages, sendMessage, activeSessionId, selectedModel]);
+  }, [setMessages, sendMessage, activeSessionId]);
 
   // 客户点击
   const handleCustomerClick = useCallback((name: string) => {
