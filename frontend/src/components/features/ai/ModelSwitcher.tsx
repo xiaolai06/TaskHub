@@ -82,17 +82,23 @@ export function ModelSwitcher({ selectedModel, selectedModelName, onSelect }: Mo
   // 选中模型信息（优先用父组件传入的 modelName，其次从 allModels 查找）
   const currentModel = useMemo(() => {
     if (selectedModel && selectedModelName) {
-      return { id: selectedModel, name: selectedModelName };
+      // 还需要找到对应的 provider label
+      for (const g of allModels) {
+        const found = g.models.find(m => m.id === selectedModel);
+        if (found) return { id: found.id, name: found.name, providerLabel: g.label };
+      }
+      return { id: selectedModel, name: selectedModelName, providerLabel: undefined };
     }
     for (const g of allModels) {
       const found = g.models.find(m => m.id === selectedModel);
-      if (found) return { id: found.id, name: found.name };
+      if (found) return { id: found.id, name: found.name, providerLabel: g.label };
     }
     return null;
   }, [allModels, selectedModel, selectedModelName]);
 
   const displayName = currentModel?.name || '默认模型';
   const displayId = currentModel?.id || '';
+  const displayProvider = currentModel?.providerLabel;
 
   return (
     <div className="relative border-t border-border px-3 py-2">
@@ -100,7 +106,12 @@ export function ModelSwitcher({ selectedModel, selectedModelName, onSelect }: Mo
         className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-muted">
         <Zap className="h-3.5 w-3.5 shrink-0 text-indigo-500" />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-medium text-foreground/70 truncate">{displayName}</p>
+          <p className="text-[11px] font-medium text-foreground/70 truncate">
+            {displayName}
+            {displayProvider && displayId && (
+              <span className="ml-1 text-[10px] font-normal text-muted-foreground/60">· {displayProvider}</span>
+            )}
+          </p>
           {displayId && <p className="text-[10px] text-muted-foreground truncate">{displayId}</p>}
         </div>
         {loading
@@ -130,6 +141,16 @@ export function ModelSwitcher({ selectedModel, selectedModelName, onSelect }: Mo
 
             {/* 模型列表 — 只显示当前选中供应商的模型 */}
             <div ref={listRef} className="max-h-[260px] overflow-y-auto">
+              {/* 恢复默认按钮 */}
+              {selectedModel && (
+                <div className="px-1.5 pt-1.5">
+                  <button onClick={() => { onSelect(undefined, undefined, undefined); setOpen(false); setViewProvider(null); }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-accent">
+                    <span className="flex-1 truncate text-[12px] text-muted-foreground">🔄 恢复默认模型</span>
+                  </button>
+                </div>
+              )}
+
               {loading && allModels.length === 0 ? (
                 <div className="flex items-center justify-center gap-2 py-6">
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

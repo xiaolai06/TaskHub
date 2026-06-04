@@ -26,6 +26,12 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
     const tools = getAllTools();
     ai.registerTools(tools);
 
+    // 检测供应商是否匹配（前端请求的 vs 实际使用的）
+    const resolvedProvider = ai.getProvider();
+    if (provider && resolvedProvider && provider !== resolvedProvider) {
+      send({ type: 'text', content: `⚠️ 供应商 "${provider}" 未配置，已自动切换到 "${resolvedProvider}"。\n请在设置页面添加该供应商的 API Key。\n\n` });
+    }
+
     // 系统提示（根据用户消息自动选择）
     const basePrompt = selectSystemPrompt(message, initialized);
     const toolListHint = tools.map(t => `- \`${t.name}\`: ${t.description}`).join('\n');
@@ -83,15 +89,23 @@ router.post('/chat', validate(chatSchema), async (req: Request, res: Response, n
     const ai = new AIService(req.userId!);
     const initialized = await ai.init(req.body.provider);
     ai.registerTools(getAllTools());
+
+    // 检测供应商匹配
+    const resolvedProvider = ai.getProvider();
+    let prefix = '';
+    if (req.body.provider && resolvedProvider && req.body.provider !== resolvedProvider) {
+      prefix = `⚠️ 供应商 "${req.body.provider}" 未配置，已自动切换到 "${resolvedProvider}"。\n\n`;
+    }
+
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
       { role: 'system', content: selectSystemPrompt(req.body.message, initialized) },
       { role: 'user', content: req.body.message },
     ];
     let fullText = '';
-    for await (const event of ai.chat({ messages })) {
+    for await (const event of ai.chat({ messages, model: req.body.model })) {
       if (event.type === 'text') fullText += event.content;
     }
-    success(res, { reply: fullText });
+    success(res, { reply: prefix + fullText });
   } catch (err) { next(err); }
 });
 

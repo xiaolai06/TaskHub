@@ -83,6 +83,16 @@ export class AIService {
     this.userId = userId;
   }
 
+  /** 获取当前实际使用的供应商名称 */
+  getProvider(): string | null {
+    return this.config?.provider ?? null;
+  }
+
+  /** 获取当前默认模型名 */
+  getModel(): string | null {
+    return this.config?.model ?? null;
+  }
+
   /** 从 Setting 表读取 AI 配置，providerOverride 可指定使用哪个供应商 */
   async init(providerOverride?: string): Promise<boolean> {
     const settings = await prisma.setting.findMany({
@@ -90,36 +100,70 @@ export class AIService {
     });
     const get = (key: string) => settings.find(s => s.key === key)?.value;
     const provider = providerOverride || get('provider');
-    if (!provider) return false;
+    if (!provider) {
+      console.warn(`[AI] 用户 ${this.userId} 未配置 AI 供应商`);
+      return false;
+    }
 
     // 一次查询 AI_PROVIDER 表，复用结果
     const providerRow = await prisma.setting.findFirst({
       where: { userId: this.userId, category: 'AI_PROVIDER', key: provider },
     });
+
+    // 如果请求的供应商不存在于 AI_PROVIDER 表，回退到 'AI' 分类的默认供应商
+    if (!providerRow && providerOverride) {
+      console.warn(`[AI] 供应商 "${provider}" 未在 AI_PROVIDER 表中找到配置，回退到默认供应商`);
+      const fallbackProvider = get('provider');
+      if (fallbackProvider && fallbackProvider !== provider) {
+        console.warn(`[AI] 回退到默认供应商: "${fallbackProvider}"`);
+        return this.init(); // 递归调用，不传 override
+      }
+    }
     let parsed: Record<string, unknown> = {};
     if (providerRow) {
       try { parsed = JSON.parse(providerRow.value); } catch { /* ignore */ }
     }
 
-    // API Key：优先 'AI' 分类，其次 AI_PROVIDER 表
-    let apiKeyEnc = get('api_key');
-    if (!apiKeyEnc && typeof parsed.apiKey === 'string') {
-      apiKeyEnc = parsed.apiKey;
+    // ═══ 关键逻辑：切换供应商时，优先用该供应商自己的配置 ═══
+    // providerOverride 说明用户明确指定了供应商，应以 AI_PROVIDER 表的配置为准
+    // 没有 override 时，用 'AI' 分类的全局默认配置
+    const isSwitch = !!providerOverride;
+
+    // API Key：切换供应商时优先 AI_PROVIDER，否则优先 'AI' 分类
+    let apiKeyEnc: string | undefined;
+    if (isSwitch) {
+      apiKeyEnc = (typeof parsed.apiKey === 'string' ? parsed.apiKey : undefined) || get('api_key');
+    } else {
+      apiKeyEnc = get('api_key') || (typeof parsed.apiKey === 'string' ? parsed.apiKey : undefined);
     }
     if (!apiKeyEnc) return false;
 
     let apiKey: string;
     try { apiKey = decrypt(apiKeyEnc); } catch { return false; }
 
-    // baseUrl：优先 'AI' 分类，其次 AI_PROVIDER，最后预置列表
-    let baseUrl = get('base_url') || (typeof parsed.baseUrl === 'string' ? parsed.baseUrl : '');
+    // baseUrl：切换供应商时优先 AI_PROVIDER，否则优先 'AI' 分类
+    let baseUrl: string;
+    if (isSwitch) {
+      baseUrl = (typeof parsed.baseUrl === 'string' && parsed.baseUrl ? parsed.baseUrl : '') || get('base_url') || '';
+    } else {
+      baseUrl = get('base_url') || (typeof parsed.baseUrl === 'string' && parsed.baseUrl ? parsed.baseUrl : '');
+    }
     if (!baseUrl) {
       baseUrl = await getDynamicBaseUrl(this.userId, provider);
     }
 
-    // 模型名：优先 'AI' 分类，其次 AI_PROVIDER
-    const defaultModel = get('default_model') || (typeof parsed.defaultModel === 'string' && parsed.defaultModel ? parsed.defaultModel : 'deepseek-chat');
-    const powerfulModel = get('powerful_model') || (typeof parsed.powerfulModel === 'string' && parsed.powerfulModel ? parsed.powerfulModel : defaultModel);
+    // 模型名：切换供应商时优先 AI_PROVIDER，否则优先 'AI' 分类
+    let defaultModel: string;
+    let powerfulModel: string;
+    if (isSwitch) {
+      defaultModel = (typeof parsed.defaultModel === 'string' && parsed.defaultModel ? parsed.defaultModel : '') || get('default_model') || 'deepseek-chat';
+      powerfulModel = (typeof parsed.powerfulModel === 'string' && parsed.powerfulModel ? parsed.powerfulModel : '') || get('powerful_model') || defaultModel;
+    } else {
+      defaultModel = get('default_model') || (typeof parsed.defaultModel === 'string' && parsed.defaultModel ? parsed.defaultModel : 'deepseek-chat');
+      powerfulModel = get('powerful_model') || (typeof parsed.powerfulModel === 'string' && parsed.powerfulModel ? parsed.powerfulModel : defaultModel);
+    }
+
+    console.log(`[AI] init: provider=${provider}, baseUrl=${baseUrl}, model=${defaultModel}, isSwitch=${isSwitch}`);
 
     this.config = { provider, apiKey, baseUrl, model: defaultModel, powerfulModel };
     this.client = new OpenAI({ apiKey, baseURL: this.config.baseUrl });
@@ -207,7 +251,8 @@ export class AIService {
       yield { type: 'done' };
     } catch (apiErr: unknown) {
       const rawMsg = apiErr instanceof Error ? apiErr.message : '未知错误';
-      yield { type: 'text', content: `AI 调用失败: ${sanitizeErrorMessage(rawMsg)}。请检查 API Key 是否正确。` };
+      const providerInfo = this.config ? `（供应商: ${this.config.provider}, 模型: ${options.model || this.config.model}）` : '';
+      yield { type: 'text', content: `AI 调用失败${providerInfo}: ${sanitizeErrorMessage(rawMsg)}。请检查模型是否与当前供应商匹配。` };
       yield { type: 'done' };
     }
   }
