@@ -20,17 +20,16 @@ interface AllModelsResult {
 
 interface ModelSwitcherProps {
   selectedModel?: string;
-  onSelect: (modelId: string | undefined, provider?: string) => void;
+  selectedModelName?: string;
+  onSelect: (modelId: string | undefined, provider?: string, modelName?: string) => void;
 }
 
-export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
+export function ModelSwitcher({ selectedModel, selectedModelName, onSelect }: ModelSwitcherProps) {
   const [open, setOpen] = useState(false);
   const [allModels, setAllModels] = useState<AllModelsResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeProvider, setActiveProvider] = useState('deepseek');
   const [viewProvider, setViewProvider] = useState<string | null>(null);
-  // 记录用户手动选择的模型和供应商（优先于 allModels 查找）
-  const [userSelected, setUserSelected] = useState<{ id: string; name: string; provider: string } | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const selectedRef = useRef<HTMLButtonElement>(null);
   const requestIdRef = useRef(0);
@@ -80,17 +79,17 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
   const currentGroup = providersWithModels.find(g => g.provider === currentViewProvider);
   const displayModels = currentGroup?.models ?? [];
 
-  // 选中模型信息（优先用用户手动选择的记录，其次从 allModels 查找）
+  // 选中模型信息（优先用父组件传入的 modelName，其次从 allModels 查找）
   const currentModel = useMemo(() => {
-    if (userSelected && userSelected.id === selectedModel) {
-      return { id: userSelected.id, name: userSelected.name, providerLabel: providersWithModels.find(g => g.provider === userSelected.provider)?.label || userSelected.provider };
+    if (selectedModel && selectedModelName) {
+      return { id: selectedModel, name: selectedModelName };
     }
     for (const g of allModels) {
       const found = g.models.find(m => m.id === selectedModel);
-      if (found) return { ...found, providerLabel: g.label };
+      if (found) return { id: found.id, name: found.name };
     }
     return null;
-  }, [allModels, selectedModel, userSelected, providersWithModels]);
+  }, [allModels, selectedModel, selectedModelName]);
 
   const displayName = currentModel?.name || '默认模型';
   const displayId = currentModel?.id || '';
@@ -149,8 +148,7 @@ export function ModelSwitcher({ selectedModel, onSelect }: ModelSwitcherProps) {
                     return (
                       <button key={m.id} ref={isSelected ? selectedRef : undefined}
                         onClick={() => {
-                          setUserSelected({ id: m.id, name: m.name, provider: currentViewProvider });
-                          onSelect(m.id, currentViewProvider);
+                          onSelect(m.id, currentViewProvider, m.name);
                           setOpen(false); setViewProvider(null);
                         }}
                         className={cn('flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors',

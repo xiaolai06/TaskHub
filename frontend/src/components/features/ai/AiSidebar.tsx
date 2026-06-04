@@ -31,7 +31,8 @@ interface AiSidebarProps {
 
   // 模型
   selectedModel?: string;
-  onModelSelect: (modelId: string | undefined) => void;
+  selectedModelName?: string;
+  onModelSelect: (modelId: string | undefined, provider?: string, modelName?: string) => void;
 
   open: boolean;
 }
@@ -56,6 +57,7 @@ export function AiSidebar({
   onDeleteSession,
   onNewSession,
   selectedModel,
+  selectedModelName,
   onModelSelect,
   open,
 }: AiSidebarProps) {
@@ -112,7 +114,7 @@ export function AiSidebar({
       </div>
 
       {/* 模型切换器 */}
-      <ModelSwitcher selectedModel={selectedModel} onSelect={onModelSelect} />
+      <ModelSwitcher selectedModel={selectedModel} selectedModelName={selectedModelName} onSelect={onModelSelect} />
     </div>
   );
 }

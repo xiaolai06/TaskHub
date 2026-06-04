@@ -65,15 +65,17 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   const [activeSessionId, setActiveSessionId] = useState('default');
   const [sessions, setSessions] = useState<Array<{ sessionId: string; messageCount: number; lastMessage: Date; title?: string }>>([]);
   const [selectedModel, setSelectedModel] = useState<string | undefined>(undefined);
+  const [selectedModelName, setSelectedModelName] = useState<string | undefined>(undefined);
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined);
   const [modelToast, setModelToast] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 模型切换 toast
-  const handleModelSelect = useCallback((modelId: string | undefined, provider?: string) => {
+  const handleModelSelect = useCallback((modelId: string | undefined, provider?: string, modelName?: string) => {
     setSelectedModel(modelId);
     setSelectedProvider(provider);
-    setModelToast(modelId ? '已切换模型' : '已恢复默认模型');
+    setSelectedModelName(modelName);
+    setModelToast(modelId ? `已切换: ${modelName || modelId}` : '已恢复默认模型');
     setTimeout(() => setModelToast(null), 2000);
   }, []);
 
@@ -211,6 +213,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
             onDeleteSession={handleDeleteSession}
             onNewSession={handleNewSession}
             selectedModel={selectedModel}
+            selectedModelName={selectedModelName}
             onModelSelect={handleModelSelect}
             open={open}
           />
