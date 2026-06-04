@@ -43,6 +43,8 @@ interface ProviderInfo {
   label: string;
   baseUrl: string;
   apiKey: string;
+  defaultModel: string;
+  powerfulModel: string;
 }
 
 // ========== AI 配置 ==========
@@ -76,34 +78,43 @@ function AIConfig() {
     api.get<ProviderInfo[]>('/settings/ai/providers')
       .then(providers => {
         setProviders(providers);
-        // 自动选中第一个已配置的
-        const configured = providers.find(p => p.apiKey);
-        if (configured) setSelectedProvider(configured.name);
+        // 自动选中当前激活供应商
+        api.get<Record<string, string>>('/settings/ai')
+          .then((res) => {
+            const active = res.provider || 'deepseek';
+            setSelectedProvider(active);
+            fillFromProvider(providers, active);
+          })
+          .catch(() => {
+            const configured = providers.find(p => p.apiKey);
+            if (configured) { setSelectedProvider(configured.name); fillFromProvider(providers, configured.name); }
+          });
       })
       .catch(() => {});
   }, []);
 
-  // 加载当前配置
-  useEffect(() => {
-    api.get<Record<string, string>>('/settings/ai')
-      .then((res) => {
-        if (res.provider) setSelectedProvider(res.provider);
-        if (res.base_url) setBaseUrl(res.base_url);
-        if (res.default_model) setDefaultModel(res.default_model);
-        if (res.powerful_model) setPowerfulModel(res.powerful_model);
-        if (res.api_key && res.api_key !== '***') setApiKey(res.api_key);
-      })
-      .catch(() => {});
-  }, []);
-
-  // 切换供应商时自动填充 baseUrl
-  useEffect(() => {
-    const p = providers.find(p => p.name === selectedProvider);
-    if (p) {
-      if (!baseUrl) setBaseUrl(p.baseUrl);
-      if (p.apiKey && p.apiKey !== '***' && !apiKey) setApiKey(p.apiKey);
+  // 从供应商列表中填充表单（切换时完全替换，不留旧数据）
+  function fillFromProvider(list: ProviderInfo[], name: string) {
+    const p = list.find(x => x.name === name);
+    if (!p) {
+      setApiKey(''); setBaseUrl(''); setDefaultModel(''); setPowerfulModel(''); setModels([]);
+      return;
     }
-  }, [selectedProvider, providers]);
+    setApiKey(p.apiKey && p.apiKey !== '***' ? p.apiKey : '');
+    setBaseUrl(p.baseUrl || '');
+    setDefaultModel(p.defaultModel || '');
+    setPowerfulModel(p.powerfulModel || '');
+    setModels([]);
+    setShowKey(false);
+    setTestResult(null);
+    setFetchMsg('');
+  }
+
+  // 切换供应商
+  function switchProvider(target: string) {
+    setSelectedProvider(target);
+    fillFromProvider(providers, target);
+  }
 
   async function handleTest() {
     setTesting(true);
@@ -145,18 +156,38 @@ function AIConfig() {
     setSaving(true);
     setSaved(false);
     try {
-      await api.post('/settings/batch', {
-        settings: [
-          { category: 'AI', key: 'provider', value: selectedProvider },
-          { category: 'AI', key: 'api_key', value: apiKey, encrypted: true },
-          { category: 'AI', key: 'base_url', value: baseUrl },
-          { category: 'AI', key: 'default_model', value: defaultModel },
-          { category: 'AI', key: 'powerful_model', value: powerfulModel },
-        ],
+      // 1. 保存当前供应商的完整配置到 AI_PROVIDER 表
+      await api.post('/settings/ai/providers', {
+        name: selectedProvider,
+        baseUrl,
+        apiKey,
+        defaultModel,
+        powerfulModel,
       });
+      // 2. 设置当前激活供应商
+      await api.post('/settings/batch', {
+        settings: [{ category: 'AI', key: 'provider', value: selectedProvider }],
+      });
+      // 3. 刷新供应商列表
+      const pList = await api.get<ProviderInfo[]>('/settings/ai/providers');
+      setProviders(pList);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {} finally { setSaving(false); }
+  }
+
+  // 删除自定义供应商
+  async function handleDeleteProvider(name: string) {
+    if (!confirm(`确定删除供应商「${name}」？`)) return;
+    try {
+      await api.delete(`/settings/ai/providers/${name}`);
+      const pList = await api.get<ProviderInfo[]>('/settings/ai/providers');
+      setProviders(pList);
+      if (selectedProvider === name && pList.length > 0) {
+        setSelectedProvider(pList[0].name);
+        fillFromProvider(pList, pList[0].name);
+      }
+    } catch {}
   }
 
   async function handleAddProvider() {
@@ -184,18 +215,25 @@ function AIConfig() {
       <div className="flex gap-2">
         <div className="flex-1">
           <label className="mb-1 block text-xs font-medium text-foreground/70">AI 供应商</label>
-          <select value={selectedProvider} onChange={(e) => setSelectedProvider(e.target.value)} className={selectCls}>
+          <select value={selectedProvider} onChange={(e) => switchProvider(e.target.value)} className={selectCls}>
             {providers.map(p => (
               <option key={p.name} value={p.name}>{p.label}{p.apiKey ? ' ✓' : ''}</option>
             ))}
           </select>
         </div>
-        <div className="flex items-end">
+        <div className="flex items-end gap-1">
           <button onClick={() => setAddProviderOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground transition-colors hover:border-indigo-300 hover:text-indigo-500 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground transition-colors hover:border-indigo-300 hover:text-indigo-500"
             title="添加自定义供应商">
             <Plus className="h-4 w-4" />
           </button>
+          {!['deepseek', 'openai', 'ollama', 'anthropic', 'mistral', 'groq', 'together', 'zhipu', 'qwen', 'moonshot', 'minimax', 'stepfun', 'doubao', 'yi', 'siliconflow', 'fireworks', 'cerebras', 'cohere', 'deepinfra', 'novita', 'perplexity', 'xai', 'baidu'].includes(selectedProvider) && (
+            <button onClick={() => handleDeleteProvider(selectedProvider)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 text-red-400 transition-colors hover:border-red-400 hover:bg-red-50 hover:text-red-600 dark:border-red-800 dark:hover:bg-red-950/30"
+              title="删除此供应商">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 
