@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ComponentType } from 'react';
+import { useMemo, useState, type ComponentType } from 'react';
 import { AlertTriangle, CheckSquare, Clock, DollarSign, FolderKanban, Loader2, TrendingUp, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api, ApiError } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
 
 interface DashboardStats {
   projectCount: number;
@@ -150,37 +151,31 @@ function StatCard({
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
-  const [projects, setProjects] = useState<ProjectSummary[]>([]);
-  const [customers, setCustomers] = useState<CustomerSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: async () => {
+      const [statsRes, tasksRes, projectsRes, customersRes] = await Promise.all([
+        api.get<{ stats: DashboardStats }>('/dashboard/summary'),
+        api.get<{ tasks: RecentTask[] }>('/dashboard/recent-activity'),
+        api.get<{ projects: ProjectSummary[] }>('/dashboard/project-stats'),
+        api.get<{ customers: CustomerSummary[] }>('/dashboard/customer-stats'),
+      ]);
+      return {
+        stats: statsRes.stats,
+        recentTasks: tasksRes.tasks,
+        projects: projectsRes.projects,
+        customers: customersRes.customers,
+      };
+    },
+    staleTime: 10_000,
+  });
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const [statsRes, tasksRes, projectsRes, customersRes] = await Promise.all([
-          api.get<{ stats: DashboardStats }>('/dashboard/summary'),
-          api.get<{ tasks: RecentTask[] }>('/dashboard/recent-activity'),
-          api.get<{ projects: ProjectSummary[] }>('/dashboard/project-stats'),
-          api.get<{ customers: CustomerSummary[] }>('/dashboard/customer-stats'),
-        ]);
-
-        setStats(statsRes.stats);
-        setRecentTasks(tasksRes.tasks);
-        setProjects(projectsRes.projects);
-        setCustomers(customersRes.customers);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof ApiError ? err.message : '加载仪表盘失败');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    load();
-  }, []);
+  const stats = data?.stats ?? null;
+  const recentTasks = data?.recentTasks ?? [];
+  const projects = data?.projects ?? [];
+  const customers = data?.customers ?? [];
+  const loading = isLoading;
+  const errMsg = error ? (error instanceof ApiError ? error.message : '加载仪表盘失败') : null;
 
   const pendingTasks = useMemo(() => {
     if (!stats) return 0;
@@ -195,11 +190,11 @@ export default function DashboardPage() {
     );
   }
 
-  if (error || !stats) {
+  if (errMsg || !stats) {
     return (
       <div className="flex flex-col items-center justify-center py-32">
         <AlertTriangle className="h-10 w-10 text-red-300" />
-        <p className="mt-4 text-sm text-red-500">{error || '加载仪表盘失败'}</p>
+        <p className="mt-4 text-sm text-red-500">{errMsg || '加载仪表盘失败'}</p>
         <button
           type="button"
           onClick={() => window.location.reload()}
