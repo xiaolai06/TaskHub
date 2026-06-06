@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智汇轻营 — AI 功能实现说明文档</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --muted: #64748b;
+      --accent: #4f46e5;
+      --accent-light: #eef2ff;
+      --green: #059669;
+      --green-light: #ecfdf5;
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --blue: #2563eb;
+      --blue-light: #eff6ff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--accent); }
+    h2 { font-size: 1.35rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); color: var(--text); }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: var(--accent); }
+    h4 { font-size: 0.95rem; font-weight: 600; margin: 1rem 0 0.5rem; color: var(--text); }
+    p { margin-bottom: 0.75rem; }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      vertical-align: middle;
+    }
+    .badge-read { background: var(--green-light); color: var(--green); }
+    .badge-write { background: var(--red-light); color: var(--red); }
+    .badge-fast { background: var(--blue-light); color: var(--blue); }
+    .badge-balanced { background: var(--amber-light); color: var(--amber); }
+    .badge-powerful { background: var(--red-light); color: var(--red); }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.9rem; }
+    th { background: var(--accent-light); color: var(--accent); text-align: left; padding: 10px 12px; font-weight: 600; border: 1px solid var(--border); }
+    td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #be185d; }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin: 0.75rem 0 1.25rem;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-header .icon { font-size: 1.2rem; }
+    .card-header .name { font-weight: 700; font-size: 1rem; }
+    .card-header .desc { color: var(--muted); font-size: 0.85rem; }
+    .param-list { margin: 0.5rem 0; }
+    .param-item { display: flex; gap: 0.5rem; margin-bottom: 0.25rem; font-size: 0.875rem; }
+    .param-name { font-weight: 600; color: var(--accent); min-width: 140px; font-family: monospace; }
+    .param-type { color: var(--muted); font-size: 0.8rem; }
+    .param-required { color: var(--red); font-size: 0.75rem; font-weight: 600; }
+    .flow-box {
+      background: var(--accent-light);
+      border: 1px solid #c7d2fe;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .flow-num {
+      background: var(--accent);
+      color: white;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .section-nav {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .section-nav ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 2rem; }
+    .section-nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    .section-nav a:hover { text-decoration: underline; }
+    .toc-num { color: var(--muted); margin-right: 0.3rem; }
+    .prompt-block {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 0.75rem 0 1.25rem;
+      font-size: 0.875rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .highlight { background: #fef3c7; padding: 1px 4px; border-radius: 3px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } body { padding: 1rem; } }
+    .arch-diagram {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      font-family: monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+    .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.75rem; margin-right: 4px; }
+    .tag-fee { background: #dbeafe; color: #1d4ed8; }
+    .tag-free { background: #dcfce7; color: #15803d; }
+    .tag-key { background: #fef3c7; color: #92400e; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+<h1>🤖 智汇轻营 — AI 功能实现说明文档</h1>
+<p class="subtitle">完整描述 AI 模块的架构设计、提示词策略、工具调用机制、前端交互流程</p>
+
+<!-- ===== 目录 ===== -->
+<div class="section-nav">
+  <ul>
+    <li><a href="#arch"><span class="toc-num">1.</span>系统架构总览</a></li>
+    <li><a href="#flow"><span class="toc-num">2.</span>请求完整流转路径</a></li>
+    <li><a href="#prompt"><span class="toc-num">3.</span>提示词系统设计</a></li>
+    <li><a href="#tools"><span class="toc-num">4.</span>工具调用机制</a></li>
+    <li><a href="#catalog"><span class="toc-num">5.</span>完整工具目录（33 个）</a></li>
+    <li><a href="#frontend"><span class="toc-num">6.</span>前端 AI 组件</a></li>
+    <li><a href="#config"><span class="toc-num">7.</span>多供应商配置</a></li>
+    <li><a href="#security"><span class="toc-num">8.</span>安全与限制</a></li>
+    <li><a href="#extend"><span class="toc-num">9.</span>扩展指南</a></li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="arch">1. 系统架构总览</h2>
+
+<div class="arch-diagram">
+┌─────────────────────────────────────────────────────────────┐
+│                     前端 (Next.js 16)                        │
+│  AiPanel ─ useAiChat ─ SSE Stream ─ MarkdownRenderer        │
+│  ModelSwitcher │ ToolCallBar │ ToolConfirmDialog             │
+└────────────────────────┬────────────────────────────────────┘
+                         │  POST /llm/chat/stream (SSE)
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   后端 (Express 5)                           │
+│  llm.routes.ts ─ AIService ─ OpenAI SDK (兼容)              │
+│      │                                                       │
+│      ├─ prompt-selector.ts  → 选择系统提示词                  │
+│      ├─ registry.ts         → 33 个工具注册                   │
+│      ├─ memory-extractor.ts → 用户偏好提取                    │
+│      └─ encryption.service  → API Key AES 加解密             │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+     Prisma/SQLite    外部 API     LLM Provider
+     (本地数据库)    (搜索/趋势)   (DeepSeek/OpenAI/...)
+</div>
+
+<h3>核心文件清单</h3>
+<table>
+  <tr><th>层级</th><th>文件</th><th>职责</th></tr>
+  <tr><td>配置</td><td><code>backend/src/config.ts</code></td><td>环境变量（provider/apiKey/baseUrl/model）</td></tr>
+  <tr><td>服务</td><td><code>backend/src/services/ai.service.ts</code></td><td>AIService 类 — 初始化、流式对话、工具执行循环</td></tr>
+  <tr><td>路由</td><td><code>backend/src/routes/llm.routes.ts</code></td><td>HTTP 接口：chat/stream、conversations、tools</td></tr>
+  <tr><td>校验</td><td><code>backend/src/validators/llm.schema.ts</code></td><td>Zod 校验：message 最长 2000 字</td></tr>
+  <tr><td>工具注册</td><td><code>backend/src/ai/tools/registry.ts</code></td><td>33 个工具的注册中心</td></tr>
+  <tr><td>工具类型</td><td><code>backend/src/ai/tools/types.ts</code></td><td>ToolDefinition 接口定义</td></tr>
+  <tr><td>提示词选择</td><td><code>backend/src/ai/prompt-selector.ts</code></td><td>关键词匹配 → 选择系统提示词</td></tr>
+  <tr><td>提示词文件</td><td><code>backend/src/prompts/system-*.txt</code></td><td>5 个对话提示词 + 3 个定时任务提示词</td></tr>
+  <tr><td>记忆提取</td><td><code>backend/src/ai/memory-extractor.ts</code></td><td>从对话中提取用户偏好</td></tr>
+  <tr><td>前端 Hook</td><td><code>frontend/src/hooks/useAiChat.ts</code></td><td>SSE 流式客户端、工具调用状态管理</td></tr>
+  <tr><td>前端面板</td><td><code>frontend/src/components/features/ai/AiPanel.tsx</code></td><td>主 AI 面板（860px 右侧滑入）</td></tr>
+  <tr><td>模型切换</td><td><code>frontend/src/components/features/ai/ModelSwitcher.tsx</code></td><td>多供应商模型选择器</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="flow">2. 请求完整流转路径</h2>
+
+<div class="flow-box">
+  <div class="flow-step"><span class="flow-num">1</span><span>用户在 AiPanel 输入消息，按回车发送</span></div>
+  <div class="flow-step"><span class="flow-num">2</span><span><code>useAiChat</code> 发送 <code>POST /llm/chat/stream</code>，携带 <code>{ message, sessionId, model?, provider? }</code></span></div>
+  <div class="flow-step"><span class="flow-num">3</span><span>路由层通过 Zod 校验，设置 SSE 头（<code>text/event-stream</code>）</span></div>
+  <div class="flow-step"><span class="flow-num">4</span><span>初始化 AIService：<code>new AIService(userId).init(provider)</code></span></div>
+  <div class="flow-step"><span class="flow-num">5</span><span>从数据库读取 AI 配置（API Key 解密、Base URL 解析），创建 OpenAI 客户端</span></div>
+  <div class="flow-step"><span class="flow-num">6</span><span><code>prompt-selector</code> 根据关键词匹配选择系统提示词</span></div>
+  <div class="flow-step"><span class="flow-num">7</span><span>路由层追加工具清单提示 + 时间解释指令到系统提示词末尾</span></div>
+  <div class="flow-step"><span class="flow-num">8</span><span>从数据库加载最近 10 条历史消息作为上下文</span></div>
+  <div class="flow-step"><span class="flow-num">9</span><span>用户消息保存到数据库（Conversation 表）</span></div>
+  <div class="flow-step"><span class="flow-num">10</span><span>进入 <strong>Agentic 工具循环</strong>（最多 10 轮）：
+    <br>• 发送流式请求给 LLM，携带全部 33 个工具定义
+    <br>• 收集 text delta 和 tool_call delta
+    <br>• 如有 tool_call → 通过 toolMap 查找并执行 → 结果截断到 500 字符 → 追加到消息
+    <br>• 再次请求 LLM（带上工具结果）→ 循环直到无 tool_call
+  </span></div>
+  <div class="flow-step"><span class="flow-num">11</span><span>流式事件通过 SSE 推送给前端：<code>text</code> / <code>tool_call</code> / <code>tool_result</code> / <code>done</code></span></div>
+  <div class="flow-step"><span class="flow-num">12</span><span>AI 回复保存到数据库，发送 <code>[DONE]</code> 终止</span></div>
+  <div class="flow-step"><span class="flow-num">13</span><span>前端收到 <code>done</code> 后，如涉及写工具，自动刷新 React Query 缓存</span></div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="prompt">3. 提示词系统设计</h2>
+
+<h3>3.1 提示词选择机制</h3>
+<p><code>prompt-selector.ts</code> 使用<strong>正则关键词匹配</strong>，根据用户消息内容自动路由到最合适的系统提示词：</p>
+
+<table>
+  <tr><th>匹配关键词</th><th>提示词文件</th><th>角色定位</th></tr>
+  <tr><td><code>创建 | 新建 | 添加 | 加入 | 记录</code></td><td><code>system-create.txt</code></td><td>创建管理助手（项目/任务/客户）</td></tr>
+  <tr><td><code>分析 | 怎么样 | 评估 | 健康 | 利润</code></td><td><code>system-analyze.txt</code></td><td>数据分析助手（财务/项目/客户）</td></tr>
+  <tr><td><code>排期 | 安排 | 计划 | 什么时候 | 工期</code></td><td><code>system-schedule.txt</code></td><td>排期规划助手（时间/甘特图）</td></tr>
+  <tr><td><code>搜索 | 查一下 | 最新 | 趋势 | 行情</code></td><td><code>system-search.txt</code></td><td>信息搜索助手（联网 + 本地）</td></tr>
+  <tr><td>（以上都不匹配）</td><td><code>system-default.txt</code></td><td>通用助手（综合能力）</td></tr>
+</table>
+
+<p>路由层还会在选定提示词后追加两段内容：</p>
+<ul>
+  <li><strong>工具清单提示</strong>：列出所有可用工具的名称和描述，帮助 LLM 了解可用能力</li>
+  <li><strong>时间解释指令</strong>：要求 AI 在用户提到"今天""明天""下周"等相对时间时，必须先调用 <code>get_current_time</code></li>
+</ul>
+
+<h3>3.2 五个提示词详细说明</h3>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">💬</span>
+    <span class="name">system-default.txt</span>
+    <span class="desc">— 通用助手（99 行，最全面）</span>
+  </div>
+  <p>定义角色为"TaskFlow+ 智能助手，帮助一人公司老板管理项目、任务、客户和财务"。</p>
+  <h4>核心规则（7 条）：</h4>
+  <ol>
+    <li><strong>如实回答</strong> — 工具返回什么就说什么，不编造</li>
+    <li><strong>工具策略</strong> — 优先用工具查数据，不凭记忆回答</li>
+    <li><strong>参数处理</strong> — 有默认值直接填，必填字段无法推断才追问</li>
+    <li><strong>写操作确认</strong> — 先说明要做什么，等用户确认再执行</li>
+    <li><strong>回复风格</strong> — 简洁直接，用 Markdown，金额用 ¥ 格式</li>
+    <li><strong>列表限制</strong> — 不超过 5 条，超出用"共 X 条，前 5 条"</li>
+    <li><strong>禁止行为</strong> — 不编造数据、不过度追问、不用模糊回答</li>
+  </ol>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">📝</span>
+    <span class="name">system-create.txt</span>
+    <span class="desc">— 创建管理助手（68 行）</span>
+  </div>
+  <p>专注于创建和管理操作，定义了 3 步工作流程：<strong>理解意图 → 智能填充 → 确认执行</strong>。</p>
+  <h4>智能推断规则：</h4>
+  <ul>
+    <li><strong>项目推断</strong>：用户没指定项目 → 查找最近活跃项目自动关联</li>
+    <li><strong>优先级推断</strong>："紧急/马上/今天必须" → URGENT，"重要/优先" → HIGH，"不急" → LOW</li>
+    <li><strong>日期推断</strong>："今天" → 调用 get_current_time，"明天" → +1 天，"月底" → 当月最后一天</li>
+  </ul>
+  <h4>确认格式示例：</h4>
+  <pre><code>将创建以下任务，请确认：
+
+📋 **任务标题**
+- 项目：XX 项目
+- 优先级：🔴 HIGH
+- 工时：4h
+- 截止：2026-06-05
+
+确认创建？</code></pre>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">📊</span>
+    <span class="name">system-analyze.txt</span>
+    <span class="desc">— 数据分析助手（75 行）</span>
+  </div>
+  <p>专注于业务数据分析，要求<strong>先查数据再分析</strong>，多维度综合评估。</p>
+  <h4>四个分析维度：</h4>
+  <div class="grid-2">
+    <div><strong>💰 财务维度</strong><br>收入来源、成本构成、利润率（目标 >30%）、现金流趋势</div>
+    <div><strong>📋 项目维度</strong><br>各项目进度、利润率排名、逾期任务、预算使用率</div>
+    <div><strong>👥 客户维度</strong><br>客户价值排名、活跃度、跟进状态</div>
+    <div><strong>🎯 目标维度</strong><br>目标完成进度、是否在轨、距截止天数</div>
+  </div>
+  <h4>输出格式：</h4>
+  <pre><code>📊 分析报告
+
+## 核心指标
+| 指标 | 数值 | 状态 |
+|------|------|------|
+| 本月收入 | ¥XX | ✅ 正常 |
+| 本月成本 | ¥XX | ⚠️ 偏高 |
+| 利润率 | XX% | ✅ 健康 |
+
+## 详细分析
+[按维度展开，每个维度有数据支撑]
+
+## ⚠️ 风险提示
+- [具体风险，用数据说明]
+
+## 💡 建议
+- [具体可执行的建议]</code></pre>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">📅</span>
+    <span class="name">system-schedule.txt</span>
+    <span class="desc">— 排期规划助手（41 行）</span>
+  </div>
+  <p>专注于排期和时间规划，列出全部 5 个排期智能工具。</p>
+  <h4>排期规则：</h4>
+  <ul>
+    <li>URGENT → 排最前面 → HIGH → MEDIUM → LOW</li>
+    <li>同优先级按截止日期升序</li>
+    <li>每人每天最多工作 8 小时</li>
+  </ul>
+  <h4>回复风格：</h4>
+  <ul>
+    <li>按时间先后组织信息</li>
+    <li>延期任务标注天数："逾期 <strong>3</strong> 天"</li>
+    <li>给出明确执行建议："今天先做首页设计（预计 8h），明天开始前端开发"</li>
+  </ul>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🔍</span>
+    <span class="name">system-search.txt</span>
+    <span class="desc">— 信息搜索助手（83 行）</span>
+  </div>
+  <p>结合外部搜索和本地数据，定义了搜索工具决策树。</p>
+  <h4>搜索工具决策树：</h4>
+  <pre><code>技术选型/开源项目  → github_trending
+技术文章/教程      → dev_to
+npm 包/前端工具    → npm_search
+科技新闻/创投      → hacker_news
+新产品/SaaS       → product_hunt
+货币汇率          → exchange_rate
+其他/通用         → search_web（兜底）</code></pre>
+  <h4>关键要求：</h4>
+  <ul>
+    <li>查询词要精准，加时间/角色/地域限定</li>
+    <li>复杂问题拆解为多步（外部搜索 + 本地数据结合）</li>
+    <li>回答必须和用户业务挂钩，标注数据来源</li>
+  </ul>
+</div>
+
+<h3>3.3 定时任务提示词（3 个）</h3>
+<table>
+  <tr><th>提示词</th><th>触发时机</th><th>内容</th></tr>
+  <tr><td><code>system-morning.txt</code></td><td>每日早间定时任务</td><td>生成每日简报：今日待办、逾期任务、风险预警</td></tr>
+  <tr><td><code>system-client-radar.txt</code></td><td>每周定时任务</td><td>客户跟进雷达：14天+ 未联系客户预警</td></tr>
+  <tr><td><code>system-finance-pulse.txt</code></td><td>每月定时任务</td><td>财务脉搏：本月收支、利润率、异常提醒</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="tools">4. 工具调用机制</h2>
+
+<h3>4.1 ToolDefinition 接口</h3>
+<pre><code>interface ToolDefinition {
+  name: string;           // 工具唯一标识
+  description: string;    // 中文描述，LLM 用来判断何时调用
+  category: 'finance' | 'work' | 'client' | 'goal' | 'schedule';
+  parameters: {
+    type: 'object';
+    properties: Record&lt;string, {
+      type: string;       // string / number / enum
+      description?: string;
+      enum?: string[];
+      default?: unknown;
+    }&gt;;
+    required?: string[];
+  };
+  handler: (args, userId) =&gt; Promise&lt;unknown&gt;;  // 实际执行函数
+  access: 'read' | 'write';     // 读操作直接执行，写操作需确认
+  requiresConfirmation: boolean; // 写工具均为 true
+  preferredModel: 'fast' | 'balanced' | 'powerful';
+}</code></pre>
+
+<h3>4.2 Agentic 工具循环</h3>
+<p>AI 不是简单的问答，而是一个<strong>多轮工具调用循环</strong>：</p>
+<div class="flow-box">
+  <div class="flow-step"><span class="flow-num">1</span><span>用户消息 + 系统提示词 + 历史上下文 → 发送给 LLM</span></div>
+  <div class="flow-step"><span class="flow-num">2</span><span>LLM 分析后决定：直接回答 <strong>或</strong> 调用工具</span></div>
+  <div class="flow-step"><span class="flow-num">3</span><span>如调用工具 → 后端执行 handler → 结果截断 500 字符 → 追加到消息</span></div>
+  <div class="flow-step"><span class="flow-num">4</span><span>LLM 看到工具结果后决定：继续调用其他工具 <strong>或</strong> 生成最终回答</span></div>
+  <div class="flow-step"><span class="flow-num">5</span><span>循环直到 LLM 不再调用工具（最多 10 轮）</span></div>
+</div>
+
+<h3>4.3 工具注册表（registry.ts）</h3>
+<p>所有 33 个工具在 <code>registry.ts</code> 中统一注册，提供以下查询方法：</p>
+<pre><code>TOTAL_TOOLS                    // 33
+getAllTools()                   // 返回全部工具
+getTool(name)                  // 按名称查找
+getToolsByCategory(category)   // 按分类筛选
+getWriteTools()                // 筛选写操作工具</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="catalog">5. 完整工具目录（33 个）</h2>
+
+<!-- ===== 5.1 财务工具 ===== -->
+<h3>5.1 💰 财务工具（5 个）</h3>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">💰</span>
+    <span class="name">get_profit_analysis</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：分析订单利润，对比报价与实际成本</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">projectId?</span><span class="param-type">string — 指定项目，不传则分析全部</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：遍历 ACTIVE 项目，汇总 <code>costRecord.amount</code> + <code>task.cost</code>，计算 <code>budget - cost = profit</code> 和利润率。金额除以 100 转换为元。按利润率降序排列。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">💰</span>
+    <span class="name">get_cash_flow</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：查询月度现金流（收入/支出/净额）</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">month?</span><span class="param-type">string — YYYY-MM 格式，默认当月</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：按月筛选 costRecord，按 category 分组统计支出；汇总已完结项目预算作为收入。返回总额、分类明细、收入来源项目。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">💰</span>
+    <span class="name">get_cost_breakdown</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：成本明细分析（按分类和项目分组）</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">projectId?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">month?</span><span class="param-type">string — YYYY-MM</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">💰</span>
+    <span class="name">get_revenue_by_client</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：按客户统计收入排名</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">limit?</span><span class="param-type">number — 返回数量</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：遍历客户，汇总项目预算，统计活跃/总项目数。按总收入降序。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">💰</span>
+    <span class="name">get_project_margin_ranking</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：项目利润率排名</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">status?</span><span class="param-type">enum: ACTIVE / COMPLETED / ARCHIVED</span></div>
+  </div>
+</div>
+
+<!-- ===== 5.2 工作工具 ===== -->
+<h3>5.2 📋 工作工具（10 个）</h3>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">📋</span>
+    <span class="name">get_today_focus</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：获取今日工作焦点（待办/进行中/阻塞任务）</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">topN?</span><span class="param-type">number — 默认 5</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：查询 TODO/IN_PROGRESS/BLOCKED 任务，按优先级 + 截止日期排序。标记 OVERDUE、DUE_TODAY、BLOCKED 状态。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">📋</span>
+    <span class="name">get_overdue_tasks</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：获取逾期任务列表</p>
+  <p><strong>实现逻辑</strong>：查找所有非 DONE 状态且 dueDate < 今天的任务，计算逾期天数。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">📋</span>
+    <span class="name">get_project_progress</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：查询项目完成进度</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">projectId?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">projectName?</span><span class="param-type">string — 模糊匹配</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：统计项目下 total/done/in-progress/blocked 任务数，计算完成百分比。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">✅</span>
+    <span class="name">create_task</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：创建新任务</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">title</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">description?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">priority?</span><span class="param-type">enum: URGENT / HIGH / MEDIUM / LOW</span></div>
+    <div class="param-item"><span class="param-name">estimatedHours?</span><span class="param-type">number</span></div>
+    <div class="param-item"><span class="param-name">startDate?</span><span class="param-type">string — YYYY-MM-DD</span></div>
+    <div class="param-item"><span class="param-name">dueDate?</span><span class="param-type">string — YYYY-MM-DD</span></div>
+    <div class="param-item"><span class="param-name">projectId?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">projectName?</span><span class="param-type">string — 模糊匹配项目</span></div>
+    <div class="param-item"><span class="param-name">assigneeName?</span><span class="param-type">string — 模糊匹配负责人</span></div>
+    <div class="param-item"><span class="param-name">parentTitle?</span><span class="param-type">string — 模糊匹配父任务</span></div>
+    <div class="param-item"><span class="param-name">cost?</span><span class="param-type">number — 元</span></div>
+    <div class="param-item"><span class="param-name">costNote?</span><span class="param-type">string</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：校验 title（最长 200 字）。通过 ID 或模糊名称匹配项目，无指定则关联最近活跃项目。匹配负责人和父任务。默认状态 TODO。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">✅</span>
+    <span class="name">update_task_status</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：更新任务状态或优先级</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">taskId?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">taskTitle?</span><span class="param-type">string — 模糊匹配</span></div>
+    <div class="param-item"><span class="param-name">status?</span><span class="param-type">enum: TODO / IN_PROGRESS / DONE / BLOCKED</span></div>
+    <div class="param-item"><span class="param-name">priority?</span><span class="param-type">enum</span></div>
+    <div class="param-item"><span class="param-name">blockedReason?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">projectName?</span><span class="param-type">string — 辅助定位</span></div>
+  </div>
+  <p><strong>特殊逻辑</strong>：设置 DONE 时自动填充 <code>completedAt</code> 时间戳。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🗑️</span>
+    <span class="name">delete_task</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：删除任务（不可恢复）</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">taskId?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">taskTitle?</span><span class="param-type">string — 模糊匹配</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">⏱️</span>
+    <span class="name">log_time</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：记录工作工时</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">hours</span><span class="param-type">number</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">projectName?</span><span class="param-type">string — 模糊匹配</span></div>
+    <div class="param-item"><span class="param-name">taskTitle?</span><span class="param-type">string — 模糊匹配</span></div>
+    <div class="param-item"><span class="param-name">date?</span><span class="param-type">string — 默认今天</span></div>
+    <div class="param-item"><span class="param-name">description?</span><span class="param-type">string</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">📅</span>
+    <span class="name">get_schedule</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：查询项目排期/甘特图</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">projectId?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">projectName?</span><span class="param-type">string — 模糊匹配</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：调用 <code>scheduler.service.calculateSchedule()</code>，返回前 5 个任务的排期详情 + 汇总（总工时、延期任务数、项目结束日期）。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🏗️</span>
+    <span class="name">create_project</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：创建新项目/订单</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">name</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">description?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">type?</span><span class="param-type">string — 开发/设计/运营/咨询/营销</span></div>
+    <div class="param-item"><span class="param-name">budget?</span><span class="param-type">number — 元（存入时 ×100 转分）</span></div>
+    <div class="param-item"><span class="param-name">startDate?</span><span class="param-type">string — 默认今天</span></div>
+    <div class="param-item"><span class="param-name">endDate?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">customerName?</span><span class="param-type">string — 模糊匹配客户</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">✏️</span>
+    <span class="name">update_project</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：更新项目信息</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">projectId?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">projectName?</span><span class="param-type">string — 模糊匹配</span></div>
+    <div class="param-item"><span class="param-name">name? / status? / budget? / type? / description? / endDate?</span><span class="param-type">可选更新字段</span></div>
+  </div>
+</div>
+
+<!-- ===== 5.3 客户工具 ===== -->
+<h3>5.3 👥 客户工具（6 个）</h3>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">👥</span>
+    <span class="name">get_client_follow_up</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：获取需要跟进的客户</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">limit?</span><span class="param-type">number — 默认 5</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：查找 ACTIVE/VIP 客户的最近沟通记录，计算距今天数。标记 URGENT（>14天）、NEEDS_FOLLOW_UP（>7天）。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">👥</span>
+    <span class="name">get_client_insights</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：客户 360° 视图</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">clientName</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+  </div>
+  <p><strong>返回</strong>：客户信息、项目列表、总收入、活跃项目数、最近 3 条沟通记录。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">👥</span>
+    <span class="name">get_client_ranking</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：客户价值排名（按项目总金额）</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">👥</span>
+    <span class="name">create_customer</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：创建新客户</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">name</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">email? / phone? / company? / address? / industry? / notes?</span><span class="param-type">可选</span></div>
+    <div class="param-item"><span class="param-name">status?</span><span class="param-type">enum: ACTIVE / VIP / INACTIVE / LEAD</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">👥</span>
+    <span class="name">update_customer</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：更新客户信息</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">customerName</span><span class="param-type">string — 模糊匹配</span> <span class="param-required">必填</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">💬</span>
+    <span class="name">log_communication</span>
+    <span class="badge badge-write">写入</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：记录客户沟通</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">clientName</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">content</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">type?</span><span class="param-type">enum: EMAIL / PHONE / MEETING / CHAT / OTHER</span></div>
+    <div class="param-item"><span class="param-name">nextFollowAt?</span><span class="param-type">string — 下次跟进时间</span></div>
+  </div>
+</div>
+
+<!-- ===== 5.4 目标工具 ===== -->
+<h3>5.4 🎯 目标工具（4 个）</h3>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🎯</span>
+    <span class="name">get_goal_progress</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：目标完成进度</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">type?</span><span class="param-type">enum: MONTHLY / QUARTERLY / YEARLY</span></div>
+  </div>
+  <p><strong>返回</strong>：活跃目标及其里程碑、当前值/目标值、完成百分比。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🎯</span>
+    <span class="name">get_weekly_review</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：本周工作总结</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">weekStart?</span><span class="param-type">string — 周一日期</span></div>
+  </div>
+  <p><strong>返回</strong>：完成任务数、工时记录、花费记录。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🎯</span>
+    <span class="name">suggest_weekly_plan</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：生成下周工作计划</p>
+  <p><strong>实现逻辑</strong>：获取未完成任务 + 调度器预览，生成建议计划。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🏥</span>
+    <span class="name">get_business_health</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：经营健康度评估</p>
+  <p><strong>实现逻辑</strong>：计算 4 维度评分（财务/客户/项目/目标，0-100 分），返回整体评级（健康/需注意/危险）和具体风险点。</p>
+</div>
+
+<!-- ===== 5.5 搜索/外部工具 ===== -->
+<h3>5.5 🔍 搜索 / 外部工具（7 个）</h3>
+
+<table>
+  <tr><th>工具名</th><th>领域</th><th>数据源</th><th>费用</th><th>参数</th></tr>
+  <tr>
+    <td><code>search_web</code></td><td>通用搜索</td><td>Tavily / SerpAPI</td>
+    <td><span class="tag tag-key">需 Key</span></td>
+    <td><code>query</code>(必填), <code>maxResults?</code></td>
+  </tr>
+  <tr>
+    <td><code>github_trending</code></td><td>开源项目</td><td>GitHub Search API</td>
+    <td><span class="tag tag-free">免费</span></td>
+    <td><code>language?</code>, <code>since?</code>(daily/weekly/monthly), <code>topN?</code></td>
+  </tr>
+  <tr>
+    <td><code>hacker_news</code></td><td>科技创投</td><td>Firebase API</td>
+    <td><span class="tag tag-free">免费</span></td>
+    <td><code>category?</code>(top/ask/show/job), <code>topN?</code></td>
+  </tr>
+  <tr>
+    <td><code>npm_search</code></td><td>npm 包</td><td>registry.npmjs.org</td>
+    <td><span class="tag tag-free">免费</span></td>
+    <td><code>query</code>(必填), <code>topN?</code></td>
+  </tr>
+  <tr>
+    <td><code>exchange_rate</code></td><td>汇率</td><td>open.er-api.com (ECB)</td>
+    <td><span class="tag tag-free">免费</span></td>
+    <td><code>from</code>(必填), <code>to?</code>, <code>amount?</code></td>
+  </tr>
+  <tr>
+    <td><code>dev_to</code></td><td>技术文章</td><td>dev.to API</td>
+    <td><span class="tag tag-free">免费</span></td>
+    <td><code>tag?</code>, <code>sortBy?</code>(hot/top/latest), <code>topN?</code></td>
+  </tr>
+  <tr>
+    <td><code>product_hunt</code></td><td>新产品</td><td>Product Hunt GraphQL</td>
+    <td><span class="tag tag-key">需 Key</span></td>
+    <td><code>since?</code>(today/week/month), <code>topN?</code></td>
+  </tr>
+</table>
+
+<!-- ===== 5.6 系统工具 ===== -->
+<h3>5.6 ⚙️ 系统工具（1 个）</h3>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">⚙️</span>
+    <span class="name">get_current_time</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-fast">fast</span>
+  </div>
+  <p><strong>描述</strong>：获取当前日期时间</p>
+  <p><strong>返回</strong>：格式化日期时间、星期几、明天日期、下周一日期、时间戳。</p>
+  <p><strong>重要性</strong>：所有涉及相对时间（"今天""明天""下周"）的请求，AI 必须先调用此工具获取准确日期。</p>
+</div>
+
+<!-- ===== 5.7 排期智能工具 ===== -->
+<h3>5.7 🧠 排期智能工具（5 个）</h3>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🧠</span>
+    <span class="name">assess_complexity</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：评估项目/任务复杂度</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">description</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">projectId? / taskId?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">techStack?</span><span class="param-type">string — 技术栈描述</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：关键词复杂度分析。基础分 5 分，高复杂度关键词（"部署""并发"）加分，低复杂度关键词（"样式""文案"）减分。映射到等级（low/medium/high/extreme）和工时乘数（0.8x-1.6x）。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🧠</span>
+    <span class="name">evaluate_insertion</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：评估新任务插入对排期的影响</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">projectId</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">newTaskTitle</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">newTaskHours</span><span class="param-type">number</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">newTaskPriority?</span><span class="param-type">enum</span></div>
+    <div class="param-item"><span class="param-name">newTaskDueDate?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">dailyHourLimit?</span><span class="param-type">number — 默认 8</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：计算原始排期 → 模拟插入新任务 → 对比各任务结束日期 → 找出受影响任务 → 返回影响评估和建议。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🧠</span>
+    <span class="name">suggest_rebalance</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：检测排期问题并建议调整</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">projectId</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">dailyHourLimit?</span><span class="param-type">number — 默认 8</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：调用 <code>detectDelays()</code> 和 <code>detectConflicts()</code>，生成带严重级别（low/medium/high）的调整建议。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🧠</span>
+    <span class="name">get_schedule_advice</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：回答排期相关问题</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">question</span><span class="param-type">string</span> <span class="param-required">必填</span></div>
+    <div class="param-item"><span class="param-name">projectId? / targetDate?</span><span class="param-type">string</span></div>
+    <div class="param-item"><span class="param-name">dailyHourLimit?</span><span class="param-type">number — 默认 8</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：关键词识别问题类型（"能完成吗？""先做哪个？""什么时候有空？"），结合排期数据回答。含优先级评分系统（紧急权重 + 截止日期紧迫度 + 快赢加分）。</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="icon">🧠</span>
+    <span class="name">get_historical_accuracy</span>
+    <span class="badge badge-read">读取</span>
+    <span class="badge badge-balanced">balanced</span>
+  </div>
+  <p><strong>描述</strong>：分析历史工时估算准确度</p>
+  <div class="param-list">
+    <div class="param-item"><span class="param-name">projectId?</span><span class="param-type">string</span></div>
+  </div>
+  <p><strong>实现逻辑</strong>：查询有 actualHours 的已完成任务，计算平均偏差、准确率、高估/低估次数。按项目分组，给出项目级乘数建议。</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="frontend">6. 前端 AI 组件</h2>
+
+<h3>6.1 组件架构</h3>
+<table>
+  <tr><th>组件</th><th>文件</th><th>职责</th></tr>
+  <tr><td><strong>AiPanel</strong></td><td><code>AiPanel.tsx</code></td><td>主面板（860px 右侧滑入），管理会话、消息、模型选择</td></tr>
+  <tr><td><strong>AiSidebar</strong></td><td><code>AiSidebar.tsx</code></td><td>4 Tab 侧边栏：概览/客户/排期/历史</td></tr>
+  <tr><td><strong>ChatInput</strong></td><td><code>ChatInput.tsx</code></td><td>输入框 + 时段感知建议标签 + 发送/停止按钮</td></tr>
+  <tr><td><strong>MessageBubble</strong></td><td><code>MessageBubble.tsx</code></td><td>消息气泡（用户蓝底/AI 白底+边框），Markdown 渲染</td></tr>
+  <tr><td><strong>ToolCallBar</strong></td><td><code>ToolCallBar.tsx</code></td><td>工具调用状态条（可展开，显示每个工具执行状态）</td></tr>
+  <tr><td><strong>ToolConfirmDialog</strong></td><td><code>ToolConfirmDialog.tsx</code></td><td>写操作确认卡片（显示工具名+参数，确认/取消）</td></tr>
+  <tr><td><strong>ModelSwitcher</strong></td><td><code>ModelSwitcher.tsx</code></td><td>多供应商模型切换器（Tab 切换供应商，显示 tier 标签）</td></tr>
+  <tr><td><strong>SmartDigest</strong></td><td><code>SmartDigest.tsx</code></td><td>智能摘要卡片（待办数/月收入/客户数，点击触发简报）</td></tr>
+  <tr><td><strong>EmptyState</strong></td><td><code>EmptyState.tsx</code></td><td>空状态（时段问候 + AI 自我介绍）</td></tr>
+  <tr><td><strong>MarkdownRenderer</strong></td><td><code>MarkdownRenderer.tsx</code></td><td>轻量 Markdown 渲染器（标题/代码块/表格/列表/引用/加粗/链接）</td></tr>
+  <tr><td><strong>useAiChat</strong></td><td><code>useAiChat.ts</code></td><td>SSE 流式 Hook（消息状态/工具事件/会话管理/缓存刷新）</td></tr>
+</table>
+
+<h3>6.2 SSE 流式通信协议</h3>
+<pre><code>// 前端发送
+POST /llm/chat/stream
+{
+  "message": "帮我分析一下本月利润",
+  "sessionId": "optional-session-id",
+  "model": "optional-model-override",
+  "provider": "optional-provider-override"
+}
+
+// 后端返回 SSE 事件流
+event: tool_call
+data: {"name":"get_profit_analysis","args":{}}
+
+event: tool_result
+data: {"name":"get_profit_analysis","result":{...}}
+
+event: text
+data: {"content":"📊 根据数据分析...\n\n## 核心指标\n..."}
+
+event: done
+data: {}
+
+// 终止符
+data: [DONE]</code></pre>
+
+<h3>6.3 时段感知建议</h3>
+<table>
+  <tr><th>时段</th><th>建议标签</th></tr>
+  <tr><td>早晨（6-11点）</td><td>📋 每日简报 / 📌 今日待办 / ⚠️ 风险扫描</td></tr>
+  <tr><td>下午（12-17点）</td><td>➕ 创建任务 / ⏱️ 记录工时 / 📞 跟进客户</td></tr>
+  <tr><td>晚间（18-23点）</td><td>📊 今日总结 / 📅 明日计划 / 💰 财务速览</td></tr>
+</table>
+
+<h3>6.4 写工具缓存刷新</h3>
+<p>当 AI 调用写工具（create_task、update_task_status 等）完成后，<code>useAiChat</code> 自动调用 <code>queryClient.invalidateQueries()</code> 刷新对应的 React Query 缓存，确保 UI 数据实时更新。</p>
+
+<!-- ============================================================ -->
+<h2 id="config">7. 多供应商配置</h2>
+
+<h3>7.1 支持的供应商（23 个预设）</h3>
+<table>
+  <tr><th>供应商</th><th>默认 Base URL</th><th>说明</th></tr>
+  <tr><td>DeepSeek</td><td><code>https://api.deepseek.com</code></td><td>默认供应商，性价比高</td></tr>
+  <tr><td>OpenAI</td><td><code>https://api.openai.com/v1</code></td><td>GPT-4o / o1 / o3</td></tr>
+  <tr><td>Ollama</td><td><code>http://localhost:11434/v1</code></td><td>本地模型，无需 API Key</td></tr>
+  <tr><td>Mistral AI</td><td><code>https://api.mistral.ai/v1</code></td><td></td></tr>
+  <tr><td>Groq</td><td><code>https://api.groq.com/openai/v1</code></td><td>超快推理</td></tr>
+  <tr><td>Together AI</td><td><code>https://api.together.xyz/v1</code></td><td></td></tr>
+  <tr><td>xAI (Grok)</td><td><code>https://api.x.ai/v1</code></td><td></td></tr>
+  <tr><td>智谱 GLM</td><td><code>https://open.bigmodel.cn/api/paas/v4</code></td><td>国产大模型</td></tr>
+  <tr><td>通义千问</td><td><code>https://dashscope.aliyuncs.com/compatible-mode/v1</code></td><td>阿里云</td></tr>
+  <tr><td>月之暗面 Kimi</td><td><code>https://api.moonshot.cn/v1</code></td><td></td></tr>
+  <tr><td>豆包</td><td><code>https://ark.cn-beijing.volces.com/api/v3</code></td><td>字节跳动</td></tr>
+  <tr><td>硅基流动</td><td><code>https://api.siliconflow.cn/v1</code></td><td>国内聚合</td></tr>
+  <tr><td>MiniMax</td><td><code>https://api.minimax.chat/v1</code></td><td></td></tr>
+  <tr><td>阶跃星辰</td><td><code>https://api.stepfun.com/v1</code></td><td></td></tr>
+  <tr><td>零一万物</td><td><code>https://api.lingyiwanwu.com/v1</code></td><td></td></tr>
+  <tr><td>（其余 8 个）</td><td colspan="2">Perplexity / Fireworks / Cerebras / Cohere / DeepInfra / Novita / 百度文心 / ...</td></tr>
+</table>
+
+<h3>7.2 配置存储</h3>
+<p>所有配置存储在数据库 <code>Setting</code> 表中：</p>
+<table>
+  <tr><th>category</th><th>key</th><th>value</th><th>说明</th></tr>
+  <tr><td><code>AI</code></td><td><code>provider</code></td><td><code>deepseek</code></td><td>当前激活供应商</td></tr>
+  <tr><td><code>AI_PROVIDER</code></td><td><code>{name}</code></td><td><code>{label, baseUrl, apiKey(加密), defaultModel, powerfulModel}</code></td><td>每个供应商的完整配置</td></tr>
+  <tr><td><code>SEARCH</code></td><td><code>provider</code></td><td><code>tavily</code></td><td>搜索供应商</td></tr>
+  <tr><td><code>SEARCH</code></td><td><code>api_key</code></td><td>（AES 加密）</td><td>搜索 API Key</td></tr>
+</table>
+<p><strong>API Key 安全</strong>：使用 AES-256-GCM 加密存储，运行时解密。密钥来自 <code>ENCRYPTION_KEY</code> 环境变量。</p>
+
+<!-- ============================================================ -->
+<h2 id="security">8. 安全与限制</h2>
+
+<table>
+  <tr><th>机制</th><th>说明</th></tr>
+  <tr><td>API Key 加密</td><td>AES-256-GCM，存储格式 <code>iv:authTag:ciphertext</code></td></tr>
+  <tr><td>消息长度限制</td><td>单条消息最长 2000 字符（Zod 校验）</td></tr>
+  <tr><td>上下文窗口</td><td>自动截断，保留系统消息 + 最近 8 条（约 4000 token）</td></tr>
+  <tr><td>工具结果截断</td><td>单个工具结果最长 500 字符，数组只保留前 5 条</td></tr>
+  <tr><td>工具循环上限</td><td>最多 10 轮工具调用，防止无限循环</td></tr>
+  <tr><td>写操作确认</td><td>所有写工具 <code>requiresConfirmation: true</code>，前端弹出确认对话框</td></tr>
+  <tr><td>错误脱敏</td><td><code>sanitizeErrorMessage()</code> 从错误信息中剥离 API Key</td></tr>
+  <tr><td>Mock 模式</td><td>未配置 API Key 时自动降级为直接查询数据库</td></tr>
+  <tr><td>用户隔离</td><td>所有数据查询均带 <code>userId</code> 过滤，不同用户数据完全隔离</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="extend">9. 扩展指南</h2>
+
+<h3>9.1 添加新工具</h3>
+<ol>
+  <li>在 <code>backend/src/ai/tools/</code> 下创建 <code>new-tool.ts</code></li>
+  <li>实现 <code>ToolDefinition</code> 接口（name/description/parameters/handler/access）</li>
+  <li>在 <code>registry.ts</code> 的 <code>allTools</code> 数组中注册</li>
+  <li>（可选）在相关 <code>system-*.txt</code> 提示词中提及新工具的用途</li>
+</ol>
+
+<h3>9.2 添加新提示词</h3>
+<ol>
+  <li>在 <code>backend/src/prompts/</code> 下创建 <code>system-xxx.txt</code></li>
+  <li>在 <code>prompt-selector.ts</code> 的 <code>routes</code> 数组中添加关键词匹配规则</li>
+</ol>
+
+<h3>9.3 添加新供应商</h3>
+<ol>
+  <li>在 <code>setting.service.ts</code> 的 <code>PRESET_PROVIDERS</code> 数组中添加预设</li>
+  <li>（可选）在 <code>getFallbackModels()</code> 中添加该供应商的常见模型名</li>
+  <li>用户也可通过前端设置页面的"添加供应商"自行添加自定义供应商</li>
+</ol>
+
+<h3>9.4 用户记忆提取</h3>
+<p><code>memory-extractor.ts</code> 使用正则从对话中提取用户偏好，存储到 <code>UserMemory</code> 表。当前支持：</p>
+<ul>
+  <li>工作习惯：每天工作 N 小时</li>
+  <li>优先级偏好：默认优先级</li>
+  <li>回复风格：简洁/详细</li>
+  <li>成本意识：关注报价/成本</li>
+</ul>
+<p>置信度从 0.5 开始，每次重复检测 +0.1。可扩展正则模式以支持更多偏好类型。</p>
+
+<hr style="margin: 3rem 0 1.5rem; border: none; border-top: 2px solid var(--border);">
+<p style="text-align: center; color: var(--muted); font-size: 0.85rem;">
+  文档生成时间：2026-06-04 &nbsp;|&nbsp; 智汇轻营 AI 模块 v1.0 &nbsp;|&nbsp; 共 33 个工具 · 5 个对话提示词 · 23 个预设供应商
+</p>
+
+</div>
+</body>
+</html>

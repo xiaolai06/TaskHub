@@ -1,18 +1,8 @@
 import cron from 'node-cron';
-import fs from 'fs';
-import path from 'path';
 import { prisma } from '../server';
 import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
-
-function loadPrompt(filename: string, fallback: string): string {
-  try {
-    return fs.readFileSync(path.resolve(__dirname, `../prompts/${filename}`), 'utf-8');
-  } catch {
-    console.warn(`[finance-pulse] Prompt file ${filename} not found, using fallback`);
-    return fallback;
-  }
-}
+import { loadPrompt } from '../utils/prompt-loader';
 
 const PROMPT = loadPrompt(
   'system-finance-pulse.txt',

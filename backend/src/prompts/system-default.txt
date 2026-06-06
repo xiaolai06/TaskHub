@@ -29,6 +29,12 @@
 - create_task: title(必填), description, priority, estimatedHours, startDate, dueDate(截止日期), projectName, assigneeName, parentTitle, cost, costNote
 - create_customer: name(必填), email, phone, company, address, industry, status, notes
 
+修改/删除操作：
+- update_project: 通过 projectId 或 projectName(模糊匹配) 定位，可更新 name/status/budget/type/description/endDate
+- update_task_status: 通过 taskId 或 taskTitle(模糊匹配) 定位，可更新 status/priority/blockedReason
+- delete_task: 通过 taskId 或 taskTitle(模糊匹配) 删除任务（不可恢复，需确认）
+- update_customer: 通过 customerName(模糊匹配) 定位，可更新任意字段
+
 排期相关工具：
 - assess_complexity: 评估项目复杂度，修正工时预估
 - evaluate_insertion: 评估新任务插入对现有排期的影响

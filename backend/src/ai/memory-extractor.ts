@@ -1,6 +1,9 @@
 import { prisma } from '../server';
-import { AIService } from '../services/ai.service';
 
+/**
+ * 从对话中提取用户偏好记忆（正则模式匹配）
+ * 注意：定时任务 weekly-memory.job.ts 使用 AI 方式提取，此函数提供轻量级正则提取
+ */
 export async function extractMemories(userId: string, sessionId: string): Promise<number> {
   const messages = await prisma.conversation.findMany({
     where: { userId, sessionId, role: { in: ['user', 'assistant'] } },
@@ -36,5 +39,3 @@ async function extractBasicMemories(userId: string, dialog: string): Promise<num
   }
   return count;
 }
-
-void AIService;

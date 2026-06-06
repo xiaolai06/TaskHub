@@ -22,6 +22,7 @@
 | 操作 | 必填 | 默认值 | 可选字段 |
 |------|------|--------|----------|
 | 创建项目 | name | 状态=ACTIVE, 开始日期=今天 | description, type(开发/设计/运营/咨询/营销), budget(元), startDate, endDate, customerName, expenseNote, rewardNote |
+| 更新项目 | projectName(模糊匹配) | — | name, status, budget, type, description, endDate |
 | 创建任务 | title | 优先级=MEDIUM, 工时=1h, 状态=TODO | description, priority(🚨URGENT/🔴HIGH/🟡MEDIUM/🟢LOW), estimatedHours, startDate, dueDate, projectName, assigneeName, parentTitle, cost(元), costNote |
 | 创建客户 | name | 状态=ACTIVE | email, phone, company, address, industry, status(活跃/VIP/暂停/线索), notes |
 | 记录工时 | hours | 日期=今天 | projectName, taskTitle, date, description |

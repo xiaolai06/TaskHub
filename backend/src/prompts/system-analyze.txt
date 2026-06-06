@@ -65,6 +65,7 @@
 | get_business_health | 四维健康度 | 问整体状况 |
 | get_goal_progress | 目标进度 | 问目标完成情况 |
 | get_weekly_review | 周报 | 问本周总结 |
+| get_client_ranking | 客户价值排行榜 | 问哪个客户贡献最多收入 |
 
 ## 回复风格
 - 用数字说话："利润率 **36%**，高于行业平均"

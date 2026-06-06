@@ -1,18 +1,8 @@
 import cron from 'node-cron';
-import fs from 'fs';
-import path from 'path';
 import { prisma } from '../server';
 import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
-
-function loadPrompt(filename: string, fallback: string): string {
-  try {
-    return fs.readFileSync(path.resolve(__dirname, `../prompts/${filename}`), 'utf-8');
-  } catch {
-    console.warn(`[client-radar] Prompt file ${filename} not found, using fallback`);
-    return fallback;
-  }
-}
+import { loadPrompt } from '../utils/prompt-loader';
 const PROMPT = loadPrompt('system-client-radar.txt', '你是客户关系管理助手，请分析客户动态。');
 
 cron.schedule('0 9 * * *', async () => {

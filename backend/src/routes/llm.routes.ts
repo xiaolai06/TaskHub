@@ -4,7 +4,7 @@ import { validate } from '../middleware/validate';
 import { chatSchema } from '../validators/llm.schema';
 import { AIService } from '../services/ai.service';
 import { success } from '../utils/response';
-import { getAllTools, TOTAL_TOOLS } from '../ai/tools/registry';
+import { getAllTools } from '../ai/tools/registry';
 import { selectSystemPrompt } from '../ai/prompt-selector';
 import OpenAI from 'openai';
 

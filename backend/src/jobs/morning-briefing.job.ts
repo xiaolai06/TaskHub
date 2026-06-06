@@ -1,19 +1,9 @@
 import cron from 'node-cron';
-import fs from 'fs';
-import path from 'path';
 import { prisma } from '../server';
 import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 import * as dashboardService from '../services/dashboard.service';
-
-function loadPrompt(filename: string, fallback: string): string {
-  try {
-    return fs.readFileSync(path.resolve(__dirname, `../prompts/${filename}`), 'utf-8');
-  } catch {
-    console.warn(`[morning-briefing] Prompt file ${filename} not found, using fallback`);
-    return fallback;
-  }
-}
+import { loadPrompt } from '../utils/prompt-loader';
 
 function briefBullets(text: string): string[] {
   const lines = text
