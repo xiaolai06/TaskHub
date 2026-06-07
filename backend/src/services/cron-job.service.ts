@@ -136,7 +136,7 @@ export async function ensureSystemJobs(userId: string) {
   let updated = 0;
   let removed = 0;
 
-  const validNames = SYSTEM_JOBS.map(j => j.name);
+  const validNames: string[] = SYSTEM_JOBS.map(j => j.name);
 
   // 1. 删除废弃的系统任务（如旧的"到期提醒"、重复的条目）
   const allSystem = await prisma.cronJob.findMany({

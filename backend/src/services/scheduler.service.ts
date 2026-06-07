@@ -10,6 +10,7 @@ import type {
 interface TaskInput {
   id: string;
   title: string;
+  description: string;
   priority: string;
   estimatedHours: number;
   actualHours: number | null;
@@ -23,6 +24,7 @@ interface TaskInput {
 interface ScheduledTask {
   id: string;
   title: string;
+  description: string;
   priority: string;
   estimatedHours: number;
   actualHours: number | null;
@@ -143,10 +145,9 @@ export async function calculateSchedule(
     if (!project) throw new NotFoundError('项目');
   }
 
-  // 查询未完成任务（排除 DONE + 排除归档项目 + 只排有实际工时的任务）
+  // 查询未完成任务（排除 DONE + 排除归档项目）
   const where: Record<string, unknown> = {
     status: { not: 'DONE' },
-    actualHours: { not: null },
     project: { ownerId: userId, status: { not: 'ARCHIVED' } },
   };
   if (projectId) where.projectId = projectId;
@@ -156,6 +157,7 @@ export async function calculateSchedule(
     select: {
       id: true,
       title: true,
+      description: true,
       priority: true,
       estimatedHours: true,
       actualHours: true,
@@ -171,6 +173,7 @@ export async function calculateSchedule(
   const tasks: TaskInput[] = rawTasks.map((t) => ({
     id: t.id,
     title: t.title,
+    description: t.description || '',
     priority: t.priority,
     estimatedHours: t.estimatedHours,
     actualHours: t.actualHours,
@@ -295,6 +298,7 @@ function buildSchedule(
     scheduled.push({
       id: task.id,
       title: task.title,
+      description: task.description,
       priority: task.priority,
       estimatedHours: task.estimatedHours,
       actualHours: task.actualHours,
@@ -524,6 +528,7 @@ export async function insertionSimulation(
     select: {
       id: true,
       title: true,
+      description: true,
       priority: true,
       estimatedHours: true,
       actualHours: true,
@@ -539,6 +544,7 @@ export async function insertionSimulation(
   const tasks: TaskInput[] = rawTasks.map((t) => ({
     id: t.id,
     title: t.title,
+    description: t.description || '',
     priority: t.priority,
     estimatedHours: t.estimatedHours,
     actualHours: t.actualHours,
@@ -553,6 +559,7 @@ export async function insertionSimulation(
   const virtualTask: TaskInput = {
     id: '__new_task__',
     title: newTask.title,
+    description: '',
     priority: newTask.priority,
     estimatedHours: newTask.estimatedHours,
     actualHours: null,

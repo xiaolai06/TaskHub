@@ -5,8 +5,8 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "TaskFlow+ 智能项目管理",
-  description: "面向一人公司的智能项目管理工具",
+  title: "智汇轻营 TaskHub — 智能订单执行工作台",
+  description: "面向一人公司的智能订单执行工作台",
 };
 
 export default function RootLayout({

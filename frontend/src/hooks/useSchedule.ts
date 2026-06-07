@@ -8,6 +8,7 @@ const QUERY_KEY = 'schedule';
 export interface ScheduledTask {
   id: string;
   title: string;
+  description: string;
   priority: string;
   estimatedHours: number;
   actualHours: number | null;

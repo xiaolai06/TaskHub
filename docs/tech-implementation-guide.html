@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智汇轻营 TaskFlow+ — 技术实现说明</title>
+  <style>
+    :root {
+      --bg: #f8fafc; --card: #fff; --border: #e2e8f0; --text: #1e293b;
+      --muted: #64748b; --accent: #4f46e5; --accent-light: #eef2ff;
+      --green: #059669; --green-light: #ecfdf5; --amber: #d97706; --amber-light: #fffbeb;
+      --red: #dc2626; --red-light: #fef2f2; --blue: #2563eb; --blue-light: #eff6ff;
+      --violet: #7c3aed; --violet-light: #f5f3ff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; padding: 2rem; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem; background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    h2 { font-size: 1.35rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); color: var(--text); }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: var(--accent); }
+    h4 { font-size: 0.95rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 0.75rem; }
+    .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.88rem; }
+    th { background: var(--accent-light); color: var(--accent); text-align: left; padding: 8px 12px; font-weight: 600; border: 1px solid var(--border); }
+    td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; color: #be185d; }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem; line-height: 1.6; margin: 0.75rem 0 1.25rem; }
+    pre code { background: none; color: inherit; padding: 0; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1rem 0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    .badge-green { background: var(--green-light); color: var(--green); }
+    .badge-blue { background: var(--blue-light); color: var(--blue); }
+    .badge-amber { background: var(--amber-light); color: var(--amber); }
+    .badge-violet { background: var(--violet-light); color: var(--violet); }
+    .arch-diagram { background: var(--card); border: 2px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; font-family: monospace; font-size: 0.85rem; line-height: 1.8; overflow-x: auto; margin: 1rem 0; }
+    .flow-box { background: var(--accent-light); border: 1px solid #c7d2fe; border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 0.9rem; }
+    .flow-step { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .flow-num { background: var(--accent); color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } body { padding: 1rem; } }
+    .section-nav { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1.5rem 0 2rem; }
+    .section-nav ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 2rem; }
+    .section-nav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    .section-nav a:hover { text-decoration: underline; }
+    .toc-num { color: var(--muted); margin-right: 0.3rem; }
+    .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.75rem; margin-right: 4px; }
+    .tag-req { background: #fee2e2; color: #991b1b; }
+    .tag-opt { background: #dbeafe; color: #1d4ed8; }
+    .tag-dep { background: #f3e8ff; color: #7c3aed; }
+    .highlight { background: #fef3c7; padding: 1px 4px; border-radius: 3px; }
+    hr { border: none; border-top: 2px solid var(--border); margin: 2.5rem 0; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+<h1>⚡ 智汇轻营 TaskFlow+ — 技术实现说明</h1>
+<p class="subtitle">完整描述系统架构、技术栈、数据模型、AI 引擎、安全机制、前后端实现细节</p>
+
+<div class="section-nav">
+  <ul>
+    <li><a href="#arch"><span class="toc-num">1.</span>系统架构总览</a></li>
+    <li><a href="#stack"><span class="toc-num">2.</span>技术栈与依赖</a></li>
+    <li><a href="#database"><span class="toc-num">3.</span>数据库模型设计（24 张表）</a></li>
+    <li><a href="#backend"><span class="toc-num">4.</span>后端架构实现</a></li>
+    <li><a href="#ai"><span class="toc-num">5.</span>AI 引擎实现</a></li>
+    <li><a href="#frontend"><span class="toc-num">6.</span>前端架构实现</a></li>
+    <li><a href="#security"><span class="toc-num">7.</span>安全机制</a></li>
+    <li><a href="#notify"><span class="toc-num">8.</span>推送通知系统</a></li>
+    <li><a href="#deploy"><span class="toc-num">9.</span>部署与配置</a></li>
+    <li><a href="#stack-reason"><span class="toc-num">10.</span>技术选型理由</a></li>
+    <li><a href="#innovation"><span class="toc-num">11.</span>项目创新点</a></li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="arch">1. 系统架构总览</h2>
+
+<div class="arch-diagram">
+┌──────────────────────────────────────────────────────────────────┐
+│                      前端 (Next.js 16 + React 19)                │
+│  AppLayout ─ Sidebar ─ Header ─ AiPanel ─ 页面路由              │
+│  React Query · Zustand · shadcn/ui · Tailwind CSS 4 · Recharts  │
+└───────────────────────────┬──────────────────────────────────────┘
+                            │  /api/* (Next.js Rewrite → localhost:3001)
+                            ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                     后端 (Express 5 + TypeScript)                 │
+│  ┌─────────┐  ┌──────────┐  ┌───────────┐  ┌──────────────────┐│
+│  │ 中间件   │→│ 路由层    │→│ 校验层     │→│ 服务层            ││
+│  │ CORS    │  │ 21 模块   │  │ Zod Schema│  │ Prisma Client    ││
+│  │ Auth    │  │ RESTful   │  │ 参数校验   │  │ 业务逻辑         ││
+│  │ RateLimit│  │           │  │           │  │                  ││
+│  └─────────┘  └──────────┘  └───────────┘  └──────────────────┘│
+│                            │                                     │
+│  ┌─────────────────────────┼─────────────────────────────────────┐│
+│  │ AI 引擎                  │                                     ││
+│  │ AIService · 40 工具 · 5 提示词 · SSE 流式 · 函数调用         ││
+│  └───────────────────────────────────────────────────────────────┘│
+└───────────────────────────┬──────────────────────────────────────┘
+                            │
+              ┌─────────────┼─────────────┐
+              ▼             ▼             ▼
+        Prisma/SQLite    外部 API     LLM Provider
+        (dev.db)        (搜索/趋势)   (DeepSeek/OpenAI/...)
+</div>
+
+<h3>开发环境端口</h3>
+<table>
+  <tr><th>服务</th><th>端口</th><th>说明</th></tr>
+  <tr><td>前端 Next.js</td><td>3002</td><td><code>next dev -p 3002</code>，Turbopack 启用</td></tr>
+  <tr><td>后端 Express</td><td>3001</td><td><code>tsx watch src/server.ts</code></td></tr>
+  <tr><td>Prisma Studio</td><td>5555</td><td><code>npx prisma studio</code> 可视化数据库</td></tr>
+</table>
+
+<h3>请求完整流转路径</h3>
+<div class="flow-box">
+  <div class="flow-step"><span class="flow-num">1</span><span>用户操作触发 <code>api.post('/tasks', data)</code></span></div>
+  <div class="flow-step"><span class="flow-num">2</span><span>Next.js Rewrite 将 <code>/api/tasks</code> 代理到 <code>localhost:3001/api/tasks</code></span></div>
+  <div class="flow-step"><span class="flow-num">3</span><span>Express 中间件链：CORS → JSON 解析 → Cookie 解析</span></div>
+  <div class="flow-step"><span class="flow-num">4</span><span>Auth 中间件：从 Cookie/Header 提取 JWT → 验证 → 注入 <code>req.userId</code>（临近过期自动续签）</span></div>
+  <div class="flow-step"><span class="flow-num">5</span><span>RateLimit 中间件：IP 滑动窗口，60 次/分钟</span></div>
+  <div class="flow-step"><span class="flow-num">6</span><span>路由 → Zod 校验 → Service 层 → Prisma → SQLite</span></div>
+  <div class="flow-step"><span class="flow-num">7</span><span>统一响应 <code>{ success: true, data: ... }</code></span></div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="stack">2. 技术栈与依赖</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">🔧 后端技术栈</div>
+    <table>
+      <tr><th>技术</th><th>版本</th><th>用途</th></tr>
+      <tr><td>Express</td><td>5.1.0</td><td>Web 框架</td></tr>
+      <tr><td>Prisma</td><td>6.9.0</td><td>ORM + 数据库迁移</td></tr>
+      <tr><td>SQLite</td><td>—</td><td>嵌入式数据库（单文件）</td></tr>
+      <tr><td>TypeScript</td><td>5.8.3</td><td>类型安全</td></tr>
+      <tr><td>Zod</td><td>3.25.23</td><td>输入校验</td></tr>
+      <tr><td>OpenAI SDK</td><td>4.104.0</td><td>AI 客户端（兼容多供应商）</td></tr>
+      <tr><td>jsonwebtoken</td><td>9.0.2</td><td>JWT 认证</td></tr>
+      <tr><td>bcryptjs</td><td>3.0.2</td><td>密码哈希</td></tr>
+      <tr><td>nodemailer</td><td>7.0.3</td><td>邮件发送</td></tr>
+      <tr><td>node-cron</td><td>4.2.1</td><td>定时任务调度</td></tr>
+      <tr><td>tsx</td><td>4.22.3</td><td>开发热重载</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title">🎨 前端技术栈</div>
+    <table>
+      <tr><th>技术</th><th>版本</th><th>用途</th></tr>
+      <tr><td>Next.js</td><td>16.2.6</td><td>React 框架（App Router）</td></tr>
+      <tr><td>React</td><td>19.2.4</td><td>UI 库</td></tr>
+      <tr><td>Tailwind CSS</td><td>v4</td><td>原子化 CSS</td></tr>
+      <tr><td>shadcn/ui</td><td>4.8.3</td><td>组件库（基于 Base UI）</td></tr>
+      <tr><td>React Query</td><td>5.100.14</td><td>服务端状态管理</td></tr>
+      <tr><td>Zustand</td><td>5.0.14</td><td>客户端状态管理</td></tr>
+      <tr><td>Recharts</td><td>3.8.1</td><td>数据可视化</td></tr>
+      <tr><td>Motion</td><td>12.40.0</td><td>动画引擎</td></tr>
+      <tr><td>Lucide</td><td>1.17.0</td><td>图标库</td></tr>
+      <tr><td>dnd-kit</td><td>—</td><td>拖拽排序</td></tr>
+      <tr><td>Sonner</td><td>2.0.7</td><td>Toast 通知</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="database">3. 数据库模型设计（24 张表）</h2>
+
+<p>使用 Prisma ORM + SQLite，所有金额字段以<strong>分（整数）</strong>存储避免浮点精度问题，前端 ÷100 显示为元。</p>
+
+<h3>3.1 核心业务模型</h3>
+<table>
+  <tr><th>#</th><th>模型</th><th>说明</th><th>关键字段</th><th>索引</th></tr>
+  <tr><td>1</td><td><strong>User</strong></td><td>用户（根实体）</td><td>email(唯一), password, name, role(ADMIN/USER), avatar</td><td>email</td></tr>
+  <tr><td>2</td><td><strong>Project</strong></td><td>项目/订单</td><td>name, status(ACTIVE/COMPLETED/ARCHIVED), budget(Int/分), type, ownerId, customerId</td><td>[ownerId, status], [customerId]</td></tr>
+  <tr><td>3</td><td><strong>Task</strong></td><td>任务（支持子任务）</td><td>title, status(TODO/IN_PROGRESS/DONE/BLOCKED), priority, estimatedHours, actualHours, cost(Int), parentId</td><td>[projectId, status], [dueDate], [parentId]</td></tr>
+  <tr><td>4</td><td><strong>CostRecord</strong></td><td>成本记录</td><td>amount(Int/分), category(LABOR/MATERIAL/OVERHEAD/OTHER), projectId, taskId</td><td>[projectId], [projectId, category]</td></tr>
+  <tr><td>5</td><td><strong>Customer</strong></td><td>客户</td><td>name, email, phone, company, status(ACTIVE/VIP/INACTIVE/LEAD)</td><td>[userId, status]</td></tr>
+  <tr><td>6</td><td><strong>Goal</strong></td><td>经营目标</td><td>type(MONTHLY/QUARTERLY/YEARLY), metricType(REVENUE/PROFIT/...), targetValue, currentValue, status</td><td>多字段复合索引</td></tr>
+  <tr><td>7</td><td><strong>Communication</strong></td><td>客户沟通记录</td><td>type(EMAIL/PHONE/MEETING/CHAT), content, nextFollowAt</td><td>[userId, customerId]</td></tr>
+</table>
+
+<h3>3.2 用户与配置模型</h3>
+<table>
+  <tr><th>#</th><th>模型</th><th>说明</th><th>关键字段</th></tr>
+  <tr><td>8</td><td><strong>Profile</strong></td><td>用户资料（1:1）</td><td>bio, phone, company, title, MBTI, tags(JSON)</td></tr>
+  <tr><td>9</td><td><strong>UserPreference</strong></td><td>偏好设置（1:1）</td><td>theme, language, emailNotify, webhookNotify, sidebarCollapsed</td></tr>
+  <tr><td>10</td><td><strong>Session</strong></td><td>登录会话</td><td>token(唯一), device, ip, expiresAt</td></tr>
+  <tr><td>11</td><td><strong>Setting</strong></td><td>通用配置（KV 存储）</td><td>userId, category, key, value, encrypted — 唯一约束 [userId, category, key]</td></tr>
+</table>
+
+<h3>3.3 AI 与数据模型</h3>
+<table>
+  <tr><th>#</th><th>模型</th><th>说明</th><th>关键字段</th></tr>
+  <tr><td>12</td><td><strong>Conversation</strong></td><td>AI 对话历史</td><td>sessionId, role(user/assistant/system/tool), toolName, toolResult, tokenCount</td></tr>
+  <tr><td>13</td><td><strong>UserMemory</strong></td><td>AI 长期记忆</td><td>category(PREFERENCE/HABIT/...), key, value, confidence(0-1), source</td></tr>
+  <tr><td>14</td><td><strong>AiInsight</strong></td><td>AI 洞察</td><td>type(TASK/PROJECT/FINANCE/...), severity(INFO/WARNING/CRITICAL)</td></tr>
+  <tr><td>15</td><td><strong>CronJob</strong></td><td>定时任务</td><td>cronExpr, action(NOTIFY/AI_ANALYSIS/WEBHOOK), config(JSON), aiModel, enabled</td></tr>
+</table>
+
+<h3>3.4 辅助模型</h3>
+<table>
+  <tr><th>#</th><th>模型</th><th>说明</th></tr>
+  <tr><td>16</td><td><strong>TimeEntry</strong></td><td>工时记录</td></tr>
+  <tr><td>17</td><td><strong>WorkTimer</strong></td><td>实时计时器</td></tr>
+  <tr><td>18</td><td><strong>TodayTodo</strong></td><td>每日待办</td></tr>
+  <tr><td>19</td><td><strong>Notification</strong></td><td>站内通知（6 种类型）</td></tr>
+  <tr><td>20</td><td><strong>Greeting</strong></td><td>时段问候语</td></tr>
+  <tr><td>21</td><td><strong>SearchResult</strong></td><td>搜索结果</td></tr>
+  <tr><td>22</td><td><strong>SavedResearch</strong></td><td>收藏的研究</td></tr>
+  <tr><td>23</td><td><strong>GoalProgressLog</strong></td><td>目标进度日志</td></tr>
+  <tr><td>24</td><td><strong>GoalMilestone</strong></td><td>目标里程碑</td></tr>
+</table>
+
+<h3>3.5 核心关系图</h3>
+<pre><code>User (根实体)
+  ├── 1:1 ── Profile, UserPreference
+  ├── 1:N ── Project ──→ Customer (可选)
+  │            ├── 1:N ── Task ──→ Task (自引用父子)
+  │            │            ├── 1:N ── CostRecord
+  │            │            └── 1:N ── TimeEntry
+  │            ├── 1:N ── CostRecord
+  │            └── 1:N ── Goal ──→ Milestone, ProgressLog
+  ├── 1:N ── Customer ──→ Communication
+  ├── 1:N ── Conversation (AI 对话)
+  ├── 1:N ── UserMemory (AI 记忆)
+  ├── 1:N ── Notification, CronJob, WorkTimer, TodayTodo
+  └── 1:N ── Session</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="backend">4. 后端架构实现</h2>
+
+<h3>4.1 中间件链</h3>
+<table>
+  <tr><th>顺序</th><th>中间件</th><th>实现</th></tr>
+  <tr><td>1</td><td>CORS</td><td>开发环境允许所有 localhost，生产环境限制 <code>config.frontendUrl</code>，<code>credentials: true</code></td></tr>
+  <tr><td>2</td><td>express.json</td><td>Body 解析，<code>limit: '10mb'</code></td></tr>
+  <tr><td>3</td><td>cookie-parser</td><td>解析 JWT Cookie</td></tr>
+  <tr><td>4</td><td>Auth</td><td>JWT 验证 + 静默续签（剩余 &lt;24h 自动刷新）</td></tr>
+  <tr><td>5</td><td>RateLimit</td><td>IP 滑动窗口：登录 5次/分钟，API 60次/分钟</td></tr>
+  <tr><td>6</td><td>Routes</td><td>21 个路由模块，统一挂载在 <code>/api</code></td></tr>
+  <tr><td>7</td><td>ErrorHandler</td><td>全局错误捕获，统一响应格式</td></tr>
+</table>
+
+<h3>4.2 路由模块（21 个）</h3>
+<table>
+  <tr><th>路径</th><th>模块</th><th>认证</th><th>说明</th></tr>
+  <tr><td><code>/api/health</code></td><td>内联</td><td>❌</td><td>健康检查</td></tr>
+  <tr><td><code>/api/auth/*</code></td><td>authRoutes</td><td>❌</td><td>登录/注册</td></tr>
+  <tr><td><code>/api/webhooks/*</code></td><td>webhookRoutes</td><td>❌</td><td>n8n 回调</td></tr>
+  <tr><td><code>/api/projects/*</code></td><td>projectRoutes</td><td>✅</td><td>项目 CRUD</td></tr>
+  <tr><td><code>/api/tasks/*</code></td><td>taskRoutes</td><td>✅</td><td>任务管理</td></tr>
+  <tr><td><code>/api/costs/*</code></td><td>costRoutes</td><td>✅</td><td>成本记录</td></tr>
+  <tr><td><code>/api/customers/*</code></td><td>customerRoutes</td><td>✅</td><td>客户 CRM</td></tr>
+  <tr><td><code>/api/goals/*</code></td><td>goalRoutes</td><td>✅</td><td>目标追踪</td></tr>
+  <tr><td><code>/api/scheduler/*</code></td><td>schedulerRoutes</td><td>✅</td><td>排期引擎</td></tr>
+  <tr><td><code>/api/dashboard/*</code></td><td>dashboardRoutes</td><td>✅</td><td>仪表盘数据</td></tr>
+  <tr><td><code>/api/reports/*</code></td><td>reportRoutes</td><td>✅</td><td>报表</td></tr>
+  <tr><td><code>/api/llm/*</code></td><td>llmRoutes</td><td>✅</td><td>AI 对话（SSE 流式）</td></tr>
+  <tr><td><code>/api/settings/*</code></td><td>settingRoutes</td><td>✅</td><td>系统设置</td></tr>
+  <tr><td><code>/api/notifications/*</code></td><td>notificationRoutes</td><td>✅</td><td>通知管理</td></tr>
+  <tr><td><code>/api/jobs/*</code></td><td>jobRoutes</td><td>✅</td><td>手动触发定时任务</td></tr>
+  <tr><td colspan="4" style="text-align:center;color:var(--muted)">... 其余 6 个模块（search, research, greetings, profile, preferences, cron-jobs, work）</td></tr>
+</table>
+
+<h3>4.3 统一响应格式</h3>
+<pre><code>// 成功
+{ "success": true, "data": { ... } }
+
+// 失败
+{ "success": false, "error": { "code": "VALIDATION_ERROR", "message": "..." } }</code></pre>
+
+<h3>4.4 服务层模式</h3>
+<pre><code>// 典型 Service 函数（以 task.service.ts 为例）
+export async function findAll(userId: string, filters: { page?: number; status?: string }) {
+  const { page = 1, status } = filters;
+  const where = {
+    project: { ownerId: userId, status: { not: 'ARCHIVED' } },
+    ...(status ? { status } : {}),
+  };
+  const [data, total] = await Promise.all([
+    prisma.task.findMany({ where, skip: (page - 1) * 20, take: 20 }),
+    prisma.task.count({ where }),
+  ]);
+  return { data, total, page };
+}</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="ai">5. AI 引擎实现</h2>
+
+<h3>5.1 架构概览</h3>
+<div class="card">
+  <p>基于 <strong>OpenAI SDK</strong> 的工具增强 LLM 对话系统，支持任意 OpenAI 兼容供应商（DeepSeek / OpenAI / Ollama 等）。采用 <strong>Agentic 工具循环</strong>模式：LLM 接收用户输入 → 决定调用工具 → 后端执行 → 结果返回 LLM → 循环最多 10 轮。</p>
+</div>
+
+<h3>5.2 AIService 核心流程</h3>
+<div class="flow-box">
+  <div class="flow-step"><span class="flow-num">1</span><span><code>init(provider?)</code> — 从数据库读取 AI 配置，解密 API Key，创建 OpenAI 客户端</span></div>
+  <div class="flow-step"><span class="flow-num">2</span><span><code>prompt-selector</code> — 关键词匹配选择系统提示词（5 种角色）</span></div>
+  <div class="flow-step"><span class="flow-num">3</span><span><code>chat()</code> — 流式请求，携带全部 40 个工具定义</span></div>
+  <div class="flow-step"><span class="flow-num">4</span><span>收集 text delta + tool_call delta</span></div>
+  <div class="flow-step"><span class="flow-num">5</span><span>如有 tool_call → 通过 toolMap 查找执行 → 结果截断 500 字符 → 追加到消息</span></div>
+  <div class="flow-step"><span class="flow-num">6</span><span>循环直到无 tool_call（最多 10 轮）</span></div>
+  <div class="flow-step"><span class="flow-num">7</span><span>SSE 事件流推送：<code>text</code> / <code>tool_call</code> / <code>tool_result</code> / <code>done</code></span></div>
+</div>
+
+<h3>5.3 工具系统（40 个工具）</h3>
+<table>
+  <tr><th>分类</th><th>数量</th><th>代表工具</th><th>读/写</th></tr>
+  <tr><td>💰 财务分析</td><td>5</td><td>get_profit_analysis, get_cash_flow, get_cost_breakdown, get_revenue_by_client, get_project_margin_ranking</td><td><span class="badge badge-green">读</span></td></tr>
+  <tr><td>📋 工作管理</td><td>10</td><td>create_task, update_task_status, delete_task, create_project, update_project, get_today_focus, get_overdue_tasks, get_project_progress, log_time, get_schedule</td><td><span class="badge badge-green">读</span> <span class="badge badge-amber">写</span></td></tr>
+  <tr><td>👥 客户管理</td><td>6</td><td>create_customer, update_customer, get_client_follow_up, get_client_insights, log_communication, get_client_ranking</td><td><span class="badge badge-green">读</span> <span class="badge badge-amber">写</span></td></tr>
+  <tr><td>🎯 目标管理</td><td>4</td><td>get_goal_progress, get_weekly_review, suggest_weekly_plan, get_business_health</td><td><span class="badge badge-green">读</span></td></tr>
+  <tr><td>🔍 外部搜索</td><td>7</td><td>search_web, github_trending, hacker_news, npm_search, exchange_rate, dev_to, product_hunt</td><td><span class="badge badge-green">读</span></td></tr>
+  <tr><td>🧠 排期智能</td><td>5</td><td>assess_complexity, evaluate_insertion, suggest_rebalance, get_schedule_advice, get_historical_accuracy</td><td><span class="badge badge-green">读</span></td></tr>
+  <tr><td>📨 通知推送</td><td>2</td><td><strong>send_email</strong>（Markdown→HTML），<strong>send_webhook</strong>（昵称查找）</td><td><span class="badge badge-amber">写</span></td></tr>
+  <tr><td>⚙️ 系统</td><td>1</td><td>get_current_time</td><td><span class="badge badge-green">读</span></td></tr>
+</table>
+
+<h3>5.4 提示词系统（5 个角色）</h3>
+<table>
+  <tr><th>匹配关键词</th><th>提示词</th><th>角色</th></tr>
+  <tr><td><code>创建|新建|添加|记录</code></td><td>system-create.txt</td><td>创建管理助手 — 3 步流程：理解意图→智能填充→确认执行</td></tr>
+  <tr><td><code>分析|评估|健康|利润</code></td><td>system-analyze.txt</td><td>数据分析助手 — 四维分析：财务/项目/客户/目标</td></tr>
+  <tr><td><code>排期|安排|计划|甘特</code></td><td>system-schedule.txt</td><td>排期规划助手 — 5 个排期智能工具</td></tr>
+  <tr><td><code>搜索|查一下|趋势</code></td><td>system-search.txt</td><td>信息搜索助手 — 7 个外部搜索工具 + 决策树</td></tr>
+  <tr><td>（默认）</td><td>system-default.txt</td><td>通用助手 — 最全面，含 7 条核心规则</td></tr>
+</table>
+
+<h3>5.5 定时任务系统（6 个）</h3>
+<table>
+  <tr><th>任务</th><th>调度</th><th>功能</th><th>推送渠道</th></tr>
+  <tr><td>🌅 晨间简报</td><td>每天 08:00</td><td>今日待办 + 逾期任务 + AI 建议</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>📡 客户雷达</td><td>每天 09:00</td><td>客户跟进提醒 + 关系健康度</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>💰 订单利润</td><td>每天 10:00</td><td>本月利润分析 + 成本预警</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>📊 自动周报</td><td>每周一 09:00</td><td>本周完成/新增 + AI 复盘</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>🫀 业务体检</td><td>每周日 10:00</td><td>四维健康度评估</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>🧠 记忆沉淀</td><td>每周日 20:00</td><td>从对话提取用户偏好记忆</td><td>站内</td></tr>
+</table>
+
+<h3>5.6 多供应商支持（23 个预设）</h3>
+<p>通过 <code>Setting</code> 表存储每个供应商的完整配置（API Key AES 加密、Base URL、默认模型、复杂模型），前端 ModelSwitcher 支持按供应商切换模型。</p>
+<table>
+  <tr><th>供应商</th><th>Base URL</th><th>说明</th></tr>
+  <tr><td>DeepSeek</td><td><code>api.deepseek.com</code></td><td>默认供应商</td></tr>
+  <tr><td>OpenAI</td><td><code>api.openai.com/v1</code></td><td>GPT-4o / o1 / o3</td></tr>
+  <tr><td>Ollama</td><td><code>localhost:11434/v1</code></td><td>本地模型</td></tr>
+  <tr><td>智谱 / 通义 / Kimi / 豆包</td><td>各官方 API</td><td>国产大模型</td></tr>
+  <tr><td colspan="3" style="text-align:center;color:var(--muted)">... 共 23 个预设 + 支持自定义添加</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="frontend">6. 前端架构实现</h2>
+
+<h3>6.1 页面路由</h3>
+<table>
+  <tr><th>路径</th><th>页面</th><th>说明</th></tr>
+  <tr><td><code>/auth-pages/login</code></td><td>登录页</td><td>邮箱密码登录，渐变动效背景</td></tr>
+  <tr><td><code>/auth-pages/register</code></td><td>注册页</td><td>邮箱注册</td></tr>
+  <tr><td><code>/main/dashboard</code></td><td>仪表盘</td><td>经营概览、KPI 卡片、图表</td></tr>
+  <tr><td><code>/main/projects</code></td><td>项目管理</td><td>项目列表 + 详情页 [id]</td></tr>
+  <tr><td><code>/main/tasks</code></td><td>任务看板</td><td>看板/列表双视图，两行工具栏</td></tr>
+  <tr><td><code>/main/customers</code></td><td>客户管理</td><td>客户 CRUD + 沟通记录</td></tr>
+  <tr><td><code>/main/goals</code></td><td>目标管理</td><td>经营目标追踪 + 进度卡片</td></tr>
+  <tr><td><code>/main/schedule</code></td><td>排期视图</td><td>甘特图 + 6 统计卡 + 插单模拟</td></tr>
+  <tr><td><code>/main/ai</code></td><td>AI 工作台</td><td>对话面板 + 侧边栏 + 定时任务配置</td></tr>
+  <tr><td><code>/main/reports</code></td><td>经营看板</td><td>财务报表、图表分析</td></tr>
+  <tr><td><code>/main/research</code></td><td>行业洞察</td><td>搜索 + 收藏研究</td></tr>
+  <tr><td><code>/main/settings</code></td><td>系统设置</td><td>8 个 Tab（AI/搜索/集成/邮件/推送/安全/数据）</td></tr>
+</table>
+
+<h3>6.2 布局架构</h3>
+<pre><code>AppLayout (h-screen, overflow-hidden)
+  ├── Sidebar (fixed left, w-260/w-68, Gemini 风格折叠)
+  ├── Main Content (动态 marginLeft, transition-all)
+  │     ├── Header (sticky, h-14, 时钟+问候+操作按钮)
+  │     └── &lt;main&gt; (scrollable, p-6)
+  └── AiPanel (fixed right, 860px 滑入面板)</code></pre>
+
+<h3>6.3 状态管理</h3>
+<table>
+  <tr><th>类型</th><th>工具</th><th>用途</th></tr>
+  <tr><td>服务端状态</td><td>React Query</td><td>API 数据缓存、自动重新获取、乐观更新</td></tr>
+  <tr><td>客户端状态</td><td>Zustand</td><td>认证状态（useAuth）、全局 UI 状态</td></tr>
+  <tr><td>主题状态</td><td>自定义 ThemeProvider</td><td>light/dark/system，localStorage 持久化</td></tr>
+  <tr><td>表单状态</td><td>React Hook Form + Zod</td><td>表单校验和提交</td></tr>
+</table>
+
+<h3>6.4 API 客户端</h3>
+<pre><code>// frontend/src/lib/api.ts
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
+// 自动 credentials: 'include'（Cookie 认证）
+// 401 自动跳转登录页
+// 网络错误提供详细诊断信息
+// 非 JSON 响应自动检测并提示后端未启动
+
+export const api = {
+  get: &lt;T&gt;(endpoint) =&gt; request&lt;T&gt;(endpoint),
+  post: &lt;T&gt;(endpoint, data) =&gt; request&lt;T&gt;(endpoint, { method: 'POST', body: JSON.stringify(data) }),
+  put: ..., patch: ..., delete: ...,
+};</code></pre>
+
+<h3>6.5 UI 设计规范</h3>
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">🎨 设计系统</div>
+    <ul>
+      <li>色彩：CSS 变量（oklch），支持 light/dark</li>
+      <li>组件：shadcn/ui（基于 Base UI）</li>
+      <li>图标：Lucide React</li>
+      <li>间距：非均匀节奏（大区块 > 小组件）</li>
+      <li>圆角：rounded-lg (8px) / rounded-xl (12px)</li>
+      <li>阴影：shadow-sm / shadow-lg 层次感</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">📱 交互规范</div>
+    <ul>
+      <li>所有可点击元素：hover + active + focus 状态</li>
+      <li>过渡动画：transition-all duration-200</li>
+      <li>加载态：Skeleton 骨架屏 / Spinner</li>
+      <li>空状态：图标 + 提示 + 引导按钮</li>
+      <li>错误态：红色提示，不静默失败</li>
+      <li>响应式：768px / 1024px 断点</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="security">7. 安全机制</h2>
+
+<table>
+  <tr><th>机制</th><th>实现</th></tr>
+  <tr><td>密码安全</td><td>bcryptjs 哈希，不可逆</td></tr>
+  <tr><td>认证</td><td>JWT（HTTP-only Cookie），7 天有效期，临近过期自动静默续签</td></tr>
+  <tr><td>API Key 加密</td><td>AES-256-GCM，格式 <code>iv:authTag:ciphertext</code>，密钥来自 ENCRYPTION_KEY</td></tr>
+  <tr><td>数据隔离</td><td>所有查询带 <code>userId</code> / <code>ownerId</code> 过滤，不同用户数据完全隔离</td></tr>
+  <tr><td>输入校验</td><td>Zod Schema 校验所有接口参数</td></tr>
+  <tr><td>限频</td><td>IP 滑动窗口：登录 5次/分钟，API 60次/分钟</td></tr>
+  <tr><td>CORS</td><td>开发允许 localhost，生产限制域名</td></tr>
+  <tr><td>错误脱敏</td><td><code>sanitizeErrorMessage()</code> 从错误信息中剥离 API Key</td></tr>
+  <tr><td>AI 工具安全</td><td>写操作 <code>requiresConfirmation: true</code>，前端弹出确认对话框</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="notify">8. 推送通知系统</h2>
+
+<h3>8.1 推送渠道</h3>
+<table>
+  <tr><th>渠道</th><th>存储</th><th>消息格式</th><th>配置</th></tr>
+  <tr><td>站内通知</td><td>Notification 表</td><td>JSON</td><td>始终启用</td></tr>
+  <tr><td>邮件</td><td>Setting (category=EMAIL)</td><td>HTML（Markdown 自动转换）</td><td>偏好设置开启 emailNotify</td></tr>
+  <tr><td>企业微信</td><td>Setting (category=NOTIFY, key=webhooks)</td><td>Markdown</td><td>推送管理配置 Webhook URL</td></tr>
+  <tr><td>飞书</td><td>同上</td><td>交互式卡片</td><td>同上</td></tr>
+  <tr><td>钉钉</td><td>同上</td><td>Markdown</td><td>同上</td></tr>
+</table>
+
+<h3>8.2 统一推送函数</h3>
+<pre><code>// backend/src/utils/push-helper.ts
+export async function pushReport({ userId, title, content, type, emailSummary }) {
+  // 1. 站内通知（始终）
+  await notificationService.create(userId, type, title, content);
+  // 2. 邮件（emailNotify=true 且有邮箱）
+  if (prefs.emailNotify && user.email && emailSummary) {
+    await notificationService.sendSummaryEmail(user.email, title, emailSummary);
+  }
+  // 3. Webhook（webhookNotify=true）
+  if (prefs.webhookNotify) {
+    const webhooks = JSON.parse(setting.value); // [{name, channel, url}]
+    for (const wh of webhooks) {
+      await notificationService.sendWebhook(wh.channel, {title, content}, wh.url);
+    }
+  }
+}</code></pre>
+
+<!-- ============================================================ -->
+<h2 id="deploy">9. 部署与配置</h2>
+
+<h3>9.1 环境变量</h3>
+<table>
+  <tr><th>变量</th><th>必须</th><th>说明</th></tr>
+  <tr><td><code>DATABASE_URL</code></td><td><span class="tag tag-req">必须</span></td><td><code>file:./dev.db</code></td></tr>
+  <tr><td><code>JWT_SECRET</code></td><td><span class="tag tag-req">必须</span></td><td>JWT 签名密钥</td></tr>
+  <tr><td><code>ENCRYPTION_KEY</code></td><td><span class="tag tag-req">必须</span></td><td>AES-256 加密密钥</td></tr>
+  <tr><td><code>PORT</code></td><td><span class="tag tag-opt">可选</span></td><td>后端端口，默认 3001</td></tr>
+  <tr><td><code>DEFAULT_AI_PROVIDER</code></td><td><span class="tag tag-opt">可选</span></td><td>默认 AI 供应商，默认 deepseek</td></tr>
+  <tr><td><code>DEFAULT_AI_API_KEY</code></td><td><span class="tag tag-opt">可选</span></td><td>默认 AI API Key</td></tr>
+  <tr><td><code>SMTP_HOST/USER/PASS</code></td><td><span class="tag tag-opt">可选</span></td><td>邮件发送配置</td></tr>
+  <tr><td><code>N8N_WEBHOOK_SECRET</code></td><td><span class="tag tag-opt">可选</span></td><td>n8n 回调密钥</td></tr>
+</table>
+
+<h3>9.2 启动命令</h3>
+<pre><code># 后端
+cd backend
+cp .env.example .env       # 配置环境变量
+npm install
+npx prisma db push          # 同步数据库
+npx prisma generate         # 生成 Prisma Client
+npm run dev                 # 启动开发服务器 (port 3001)
+
+# 前端
+cd frontend
+npm install
+npm run dev                 # 启动开发服务器 (port 3002)</code></pre>
+
+<h3>9.3 数据库操作</h3>
+<table>
+  <tr><th>操作</th><th>命令</th></tr>
+  <tr><td>同步 Schema</td><td><code>npx prisma db push</code></td></tr>
+  <tr><td>生成 Client</td><td><code>npx prisma generate</code></td></tr>
+  <tr><td>可视化浏览</td><td><code>npx prisma studio</code>（localhost:5555）</td></tr>
+  <tr><td>填充测试数据</td><td><code>npx prisma db seed</code></td></tr>
+  <tr><td>重置数据库</td><td><code>npx prisma db push --force-reset</code></td></tr>
+</table>
+
+<hr>
+
+<!-- ============================================================ -->
+<h2>10. 技术选型理由</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title">🟢 为什么选 Next.js 16 + React 19</div>
+    <ul>
+      <li><strong>App Router</strong>：文件系统路由，零配置，嵌套布局天然支持仪表盘的 Sidebar + Header 结构</li>
+      <li><strong>Server Components</strong>：首屏渲染不发送 JS，LCP 更快</li>
+      <li><strong>Turbopack</strong>：Rust 编写的打包器，冷启动 &lt;1s，HMR 接近即时</li>
+      <li><strong>React 19</strong>：use() Hook 简化异步数据读取，ref 回调清理，更小的包体积</li>
+      <li><strong>生态成熟</strong>：shadcn/ui、React Query、Next Auth 等高质量库全部原生支持</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🟢 为什么选 Express 5 + Prisma 6 + SQLite</div>
+    <ul>
+      <li><strong>Express 5</strong>：原生 async/await 错误处理，无需 express-async-errors 包装</li>
+      <li><strong>Prisma 6</strong>：类型安全的 ORM，Schema 即文档，迁移工具链完整</li>
+      <li><strong>SQLite</strong>：零运维成本，单文件数据库，适合一人公司场景（不需要部署 MySQL/PostgreSQL）</li>
+      <li><strong>开发效率</strong>：<code>prisma db push</code> 即时同步，<code>prisma studio</code> 可视化浏览</li>
+      <li><strong>性能足够</strong>：单用户场景下 SQLite 读写性能绰绰有余，WAL 模式支持并发读</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🟢 为什么选 OpenAI SDK 做 AI 接入</div>
+    <ul>
+      <li><strong>兼容性</strong>：OpenAI API 格式是事实标准，DeepSeek / 通义 / Ollama 等全部兼容</li>
+      <li><strong>Function Calling</strong>：原生支持工具调用协议，无需手写解析逻辑</li>
+      <li><strong>流式响应</strong>：SSE 流式传输，用户实时看到 AI 输出</li>
+      <li><strong>供应商切换</strong>：只需改 <code>baseURL</code> 和 <code>apiKey</code>，代码零修改</li>
+      <li><strong>社区资源</strong>：官方维护，文档完善，TypeScript 类型完整</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🟢 为什么选 Tailwind CSS 4 + shadcn/ui</div>
+    <ul>
+      <li><strong>Tailwind v4</strong>：CSS-first 配置，无需 tailwind.config.js，原生 CSS 变量支持</li>
+      <li><strong>shadcn/ui</strong>：不是组件库，是组件源码——直接复制到项目中，完全可控</li>
+      <li><strong>Base UI 底层</strong>：无样式原语组件，Headless 架构，无障碍访问原生支持</li>
+      <li><strong>设计一致性</strong>：统一的设计 token（色彩、间距、圆角），避免样式碎片化</li>
+      <li><strong>暗色模式</strong>：CSS 变量 + oklch 色彩空间，一套代码自动适配</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🟢 为什么选 Zustand + React Query</div>
+    <ul>
+      <li><strong>职责分离</strong>：React Query 管服务端状态（API 数据缓存），Zustand 管客户端状态（认证、UI）</li>
+      <li><strong>React Query</strong>：自动重新获取、乐观更新、后台刷新、缓存失效——API 数据层的最佳实践</li>
+      <li><strong>Zustand</strong>：无 Provider 包装、无样板代码、1KB 体积，比 Redux 轻 10 倍</li>
+      <li><strong>不重复存储</strong>：服务端数据不复制到客户端 store，避免数据不一致</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🟢 为什么选 Zod 做校验</div>
+    <ul>
+      <li><strong>前后端共享</strong>：同一套 Schema 定义可用于后端校验 + 前端表单 + TypeScript 类型推导</li>
+      <li><strong>声明式</strong>：链式 API 直观易读，错误信息可自定义（支持中文）</li>
+      <li><strong>性能</strong>：编译时优化，运行时校验开销极小</li>
+      <li><strong>生态</strong>：与 React Hook Form、tRPC、Express 中间件无缝集成</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<h2>11. 项目创新点</h2>
+
+<h3>11.1 🧠 AI Agent 工具调用架构</h3>
+<div class="card">
+  <p><strong>创新点</strong>：不是简单的"AI 聊天机器人"，而是一个 <strong>40 工具的 AI Agent</strong>。AI 可以直接操作数据库——创建任务、查询利润、分析客户、评估排期——所有操作通过 Function Calling 协议自动完成。</p>
+  <div class="grid-2" style="margin-top:0.75rem;">
+    <div>
+      <h4>传统方案</h4>
+      <ul>
+        <li>用户手动查数据 → 复制粘贴给 AI → AI 分析</li>
+        <li>AI 只能回答问题，不能执行操作</li>
+        <li>每次对话都是独立的，没有上下文记忆</li>
+      </ul>
+    </div>
+    <div>
+      <h4>我们的方案</h4>
+      <ul>
+        <li>用户说"分析一下本月利润" → AI 自动调用 5 个工具 → 直接给出结论</li>
+        <li>AI 可以创建任务、记录工时、推送消息（带确认机制）</li>
+        <li>UserMemory 长期记忆 + Conversation 上下文 = 越用越懂你</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h3>11.2 📅 智能排期引擎</h3>
+<div class="card">
+  <p><strong>创新点</strong>：不是简单的日历展示，而是一个带 <strong>AI 决策能力</strong>的排期系统。</p>
+  <ul>
+    <li><strong>复杂度评估</strong>（assess_complexity）：根据任务描述关键词 + 技术栈自动评估复杂度，修正工时预估</li>
+    <li><strong>插单模拟</strong>（evaluate_insertion）：模拟新任务插入后对现有排期的影响，展示受影响的任务列表</li>
+    <li><strong>冲突检测</strong>（suggest_rebalance）：自动检测延期任务和工时冲突，给出严重级别和调整建议</li>
+    <li><strong>历史学习</strong>（get_historical_accuracy）：分析用户过去的工时估算准确度，学习预估偏差模式</li>
+    <li><strong>优先级排序</strong>：URGENT → HIGH → MEDIUM → LOW，同优先级按截止日期升序，每人每天 8h 上限</li>
+  </ul>
+</div>
+
+<h3>11.3 📊 多维度经营健康度</h3>
+<div class="card">
+  <p><strong>创新点</strong>：不是单一指标看板，而是 <strong>财务 × 客户 × 项目 × 目标</strong>四维健康度评估。</p>
+  <ul>
+    <li><strong>get_business_health</strong>：计算 4 维度评分（0-100），返回整体评级（健康/需注意/危险）</li>
+    <li><strong>6 个定时任务</strong>：晨间简报、客户雷达、利润脉搏、周报、体检、记忆沉淀——覆盖经营全场景</li>
+    <li><strong>多渠道推送</strong>：站内通知 + 邮件（HTML 模板） + 企业微信/飞书/钉钉群机器人</li>
+  </ul>
+</div>
+
+<h3>11.4 📨 多渠道智能推送</h3>
+<div class="card">
+  <p><strong>创新点</strong>：不是简单的通知系统，而是 <strong>AI 可驱动的多渠道推送</strong>。</p>
+  <ul>
+    <li><strong>AI 工具</strong>：AI 对话中可直接发送邮件（Markdown 自动转 HTML）或推送群消息（通过昵称查找目标）</li>
+    <li><strong>定时推送</strong>：6 个定时任务自动触发，根据用户偏好决定推送渠道</li>
+    <li><strong>昵称映射</strong>：Webhook 通过昵称（如"项目群""客户群"）标识，AI 无需记忆 URL</li>
+    <li><strong>统一推送函数</strong>：<code>pushReport()</code> 一行代码完成站内 + 邮件 + Webhook 三通道推送</li>
+  </ul>
+</div>
+
+<h3>11.5 🔒 企业级安全设计</h3>
+<div class="card">
+  <p><strong>创新点</strong>：面向个人开发者，但安全标准对标企业级。</p>
+  <ul>
+    <li><strong>AES-256-GCM 加密</strong>：API Key 存储使用认证加密，带完整性校验，防篡改</li>
+    <li><strong>JWT 静默续签</strong>：剩余 &lt;24h 自动刷新 Token，用户无感知</li>
+    <li><strong>数据隔离</strong>：所有查询强制 <code>userId</code> 过滤，即使同一数据库也不会泄露他人数据</li>
+    <li><strong>写操作确认</strong>：AI 所有写工具（创建/修改/删除/发送）必须用户确认后才执行</li>
+    <li><strong>限频保护</strong>：IP 滑动窗口，防止暴力登录和 API 滥用</li>
+  </ul>
+</div>
+
+<h3>11.6 💰 零运维一人公司方案</h3>
+<div class="card">
+  <p><strong>创新点</strong>：技术选型<strong>专为一人公司/自由职业者</strong>优化——零运维、零成本、开箱即用。</p>
+  <div class="grid-2" style="margin-top:0.75rem;">
+    <div>
+      <h4>传统项目管理工具的痛点</h4>
+      <ul>
+        <li>Jira/Linear → 功能过剩，学习成本高</li>
+        <li>Notion → 缺少财务分析和 AI 能力</li>
+        <li>自建系统 → 需要运维 MySQL/Redis/Nginx</li>
+      </ul>
+    </div>
+    <div>
+      <h4>智汇轻营的解决方案</h4>
+      <ul>
+        <li>SQLite 单文件数据库，无需安装数据库服务</li>
+        <li>前后端分离但可单机部署，<code>npm run dev</code> 即启动</li>
+        <li>金额用整数（分）存储，避免浮点精度问题</li>
+        <li>AI 供应商可切换（本地 Ollama = 零 API 费用）</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<h3>11.7 🧩 模块化 AI 提示词系统</h3>
+<div class="card">
+  <p><strong>创新点</strong>：不是单一提示词，而是 <strong>关键词路由 + 角色切换</strong>的动态提示词系统。</p>
+  <ul>
+    <li><strong>prompt-selector</strong>：根据用户消息关键词自动选择最合适的提示词（创建/分析/排期/搜索/默认）</li>
+    <li><strong>5 种角色</strong>：每种角色有不同的工具推荐、输出格式、回复风格</li>
+    <li><strong>工具清单注入</strong>：路由层自动追加可用工具列表到提示词末尾，LLM 始终知道可用能力</li>
+    <li><strong>共享加载器</strong>：<code>utils/prompt-loader.ts</code> 带缓存，7 处调用共用一个实现</li>
+  </ul>
+</div>
+
+<hr>
+<p style="text-align:center;color:var(--muted);font-size:0.85rem;">
+  智汇轻营 TaskFlow+ 技术实现说明 v1.0 &nbsp;|&nbsp; 团队 Tipo &nbsp;|&nbsp; 冯鸣森 · 赖沛盛 · 黄思悦 · 金睿昕 &nbsp;|&nbsp; 2025
+</p>
+
+</div>
+</body>
+</html>

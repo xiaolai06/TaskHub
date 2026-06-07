@@ -44,10 +44,33 @@ function isValidResult(item: SearchResultItem): boolean {
   if (!item.title || item.title.length < 2 || item.title.length > 300) return false;
   if (!item.snippet || item.snippet.length < 10) return false;
   if (item.url && !item.url.startsWith('http')) return false;
-  // 过滤纯垃圾字符：不可打印字符超过 5% 就丢弃
+
   const combined = item.title + item.snippet;
+
+  // 1. 过滤纯垃圾字符：不可打印字符超过 5%
   const garbage = combined.match(/[^\x20-\x7E一-鿿　-〿＀-￯\n\r\t]/g);
   if (garbage && garbage.length > combined.length * 0.05) return false;
+
+  // 2. 过滤 PDF 下载 spam：标题或描述包含大量书名号 + PDF下载
+  const pdfSpam = (combined.match(/《[^》]+》/g) || []).length;
+  if (pdfSpam >= 3) return false;
+  if (combined.includes('PDF下载') && combined.includes('《')) return false;
+
+  // 3. 过滤重复字符：同一字符连续出现 5 次以上
+  if (/(.)\1{4,}/.test(combined)) return false;
+
+  // 4. 过滤高熵乱码：中文字符中相邻重复率极低（随机字符特征）
+  const cjk = combined.match(/[一-鿿]/g) || [];
+  if (cjk.length > 30) {
+    const unique = new Set(cjk).size;
+    const ratio = unique / cjk.length;
+    // 正常中文文本重复率较高（常用字），乱码几乎不重复
+    if (ratio > 0.85) return false;
+  }
+
+  // 5. 过滤百度云/网盘/下载链接 spam
+  if (/百度云|网盘|云盘|pan\.baidu|提取码/.test(combined)) return false;
+
   return true;
 }
 

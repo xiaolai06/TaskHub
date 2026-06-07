@@ -14,7 +14,7 @@ export default function AuthLayout({
           {children}
         </div>
         <p className="mt-5 text-center text-xs text-muted-foreground">
-          © 2026 TaskFlow+
+          © 2025 TaskHub
         </p>
       </div>
     </div>

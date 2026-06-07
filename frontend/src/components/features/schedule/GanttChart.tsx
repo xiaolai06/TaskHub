@@ -15,6 +15,7 @@ import {
   ZoomOut,
   AlertTriangle,
   Clock,
+  FolderOpen,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import type { ScheduledTask, DailyWorkload } from '@/hooks/useSchedule';
@@ -120,7 +121,7 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
         <CalendarDays className="h-12 w-12 mb-3" />
         <p className="text-sm font-medium">暂无排期数据</p>
-        <p className="text-xs mt-1">请先在任务中填写「实际工时」，排期视图只显示已记录实际工时的任务</p>
+        <p className="text-xs mt-1">请先在任务中填写「预估工时」，排期视图将根据工时自动安排</p>
       </div>
     );
   }
@@ -245,18 +246,15 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
               >
                 {/* 任务名称 */}
                 <div
-                  className="flex-shrink-0 border-r flex items-center gap-2 px-3 overflow-hidden"
+                  className="flex-shrink-0 border-r flex items-center gap-1.5 px-3 overflow-hidden"
                   style={{ width: labelWidth }}
                 >
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
-                        <span className="flex items-center gap-2 min-w-0 cursor-default">
+                        <span className="flex items-center gap-1.5 min-w-0 cursor-default">
                           {task.isDelayed && (
                             <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />
-                          )}
-                          {task.projectName && (
-                            <span className="text-[10px] text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 rounded px-1 py-0.5 flex-shrink-0 truncate max-w-[60px]">{task.projectName}</span>
                           )}
                           <span
                             className={`text-xs truncate ${
@@ -265,48 +263,71 @@ export function GanttChart({ tasks, dailyWorkload }: GanttChartProps) {
                           >
                             {task.title}
                           </span>
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] px-1 py-0 flex-shrink-0 ${colors.text} ${colors.border}`}
-                          >
-                            {PRIORITY_LABELS[task.priority] ?? task.priority}
-                          </Badge>
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent side="right" className="w-64 text-xs space-y-1.5">
-                        <p className="font-semibold text-sm">{task.title}</p>
-                        {task.projectName && (
-                          <p className="text-indigo-500">📁 {task.projectName}</p>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className={`text-[10px] px-1 py-0 ${colors.text} ${colors.border}`}>
-                            {PRIORITY_LABELS[task.priority] ?? task.priority}
-                          </Badge>
-                          <span className="text-muted-foreground">{task.status === 'TODO' ? '待办' : task.status === 'IN_PROGRESS' ? '进行中' : task.status === 'BLOCKED' ? '阻塞' : task.status}</span>
-                        </div>
-                        <Separator />
-                        <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                          <span className="text-muted-foreground">工时</span>
-                          <span>{task.effectiveHours}h{task.actualHours ? ` (实际${task.actualHours}h)` : ''}</span>
-                          <span className="text-muted-foreground">排期</span>
-                          <span>{task.scheduledStart} ~ {task.scheduledEnd}</span>
-                          {task.originalDueDate && (
-                            <>
-                              <span className="text-muted-foreground">截止日</span>
-                              <span className={task.isDelayed ? 'text-red-500 font-medium' : ''}>{task.originalDueDate}</span>
-                            </>
+                      <TooltipContent
+                        side="right"
+                        sideOffset={8}
+                        className="w-72 p-0 bg-card text-foreground border border-border shadow-xl overflow-hidden"
+                      >
+                        {/* 标题区 */}
+                        <div className="px-4 pt-3 pb-2 bg-muted/40">
+                          <p className="text-sm font-semibold text-foreground leading-snug">{task.title}</p>
+                          {task.projectName && (
+                            <p className="mt-1 flex items-center gap-1.5 text-[12px] text-indigo-600">
+                              <FolderOpen className="h-3.5 w-3.5" />
+                              {task.projectName}
+                            </p>
+                          )}
+                          {task.description && (
+                            <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{task.description}</p>
                           )}
                         </div>
-                        {task.isDelayed && (
-                          <p className="text-red-500 font-medium">⚠️ 延期 {task.delayDays} 天</p>
-                        )}
-                        {task.isConflict && (
-                          <p className="text-orange-500 font-medium">⚠️ 工时冲突</p>
-                        )}
+
+                        {/* 信息区 */}
+                        <div className="px-4 py-2.5 space-y-2">
+                          {/* 标签行 */}
+                          <div className="flex items-center gap-1.5">
+                            <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium border ${colors.text} ${colors.border} ${colors.bg}`}>
+                              {PRIORITY_LABELS[task.priority] ?? task.priority}
+                            </span>
+                            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                              {task.status === 'TODO' ? '待办' : task.status === 'IN_PROGRESS' ? '进行中' : task.status === 'BLOCKED' ? '阻塞' : task.status}
+                            </span>
+                            {task.isDelayed && (
+                              <span className="rounded bg-red-100 dark:bg-red-950/40 px-1.5 py-0.5 text-[10px] font-medium text-red-600 dark:text-red-400">
+                                延期 {task.delayDays} 天
+                              </span>
+                            )}
+                            {task.isConflict && (
+                              <span className="rounded bg-orange-100 dark:bg-orange-950/40 px-1.5 py-0.5 text-[10px] font-medium text-orange-600 dark:text-orange-400">
+                                工时冲突
+                              </span>
+                            )}
+                          </div>
+
+                          {/* 数据网格 */}
+                          <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-[12px]">
+                            <span className="text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />工时</span>
+                            <span className="font-medium">{task.effectiveHours}h
+                              {task.actualHours ? <span className="text-muted-foreground font-normal ml-1">(实际 {task.actualHours}h)</span> : <span className="text-muted-foreground font-normal ml-1">(预估)</span>}
+                            </span>
+
+                            <span className="text-muted-foreground flex items-center gap-1"><CalendarDays className="h-3 w-3" />排期</span>
+                            <span className="font-medium">{task.scheduledStart} ~ {task.scheduledEnd}</span>
+
+                            {task.originalDueDate && (
+                              <>
+                                <span className="text-muted-foreground">截止</span>
+                                <span className={task.isDelayed ? 'text-red-500 font-medium' : 'font-medium'}>{task.originalDueDate}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
                       </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
 
                 {/* 甘特条 */}
                 <div

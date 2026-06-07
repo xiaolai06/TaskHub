@@ -86,6 +86,15 @@ function ScheduleContent() {
       const parts = [`请帮我分析项目「${selectedProject?.name || ''}」的排期：`];
       parts.push(`当前每日工时上限 ${dailyHourLimit}h，${schedule?.summary.totalTasks ?? 0} 个任务共 ${schedule?.summary.totalHours ?? 0}h，延期 ${schedule?.summary.delayedTasks ?? 0} 个，冲突 ${schedule?.summary.conflictDays ?? 0} 天。`);
 
+      // 附上任务清单（含描述和工时）
+      if (schedule?.tasks?.length) {
+        parts.push('\n\n任务清单：');
+        for (const t of schedule.tasks) {
+          const desc = t.description ? ` — ${t.description.slice(0, 80)}` : '';
+          parts.push(`\n- ${t.title}（${t.effectiveHours}h，${t.priority}，${t.scheduledStart}~${t.scheduledEnd}）${desc}`);
+        }
+      }
+
       if (hasProjectDesc) {
         parts.push(`\n项目说明：${selectedProject.description}`);
         parts.push('\n请结合项目说明，分析任务拆分是否合理、工时估算是否准确、有没有遗漏的任务。');

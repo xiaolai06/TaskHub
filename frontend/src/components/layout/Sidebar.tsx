@@ -107,7 +107,7 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
           collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
         )}>
           <span className="text-sm font-bold text-foreground whitespace-nowrap leading-tight">智汇轻营</span>
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap leading-tight">TaskFlow+</span>
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap leading-tight">TaskHub</span>
         </div>
         {/* 展开时显示收起按钮 */}
         {!collapsed && (

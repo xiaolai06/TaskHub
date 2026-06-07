@@ -61,10 +61,10 @@ export default function LoginPage() {
       {/* 品牌 */}
       <div className="text-center">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          TaskFlow+
+          智汇轻营
         </h1>
         <p className="mt-1.5 text-base text-slate-400">
-          智能项目管理，一人公司的高效工作台
+          TaskHub — 智能订单执行工作台
         </p>
       </div>
 

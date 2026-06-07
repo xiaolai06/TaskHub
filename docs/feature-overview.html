@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智汇轻营 TaskFlow+ — 功能简介</title>
+  <style>
+    :root {
+      --bg: #f8fafc; --card: #fff; --border: #e2e8f0; --text: #0f172a;
+      --muted: #64748b; --accent: #4f46e5; --accent-light: #eef2ff;
+      --green: #059669; --green-light: #ecfdf5; --amber: #d97706; --amber-light: #fffbeb;
+      --red: #dc2626; --red-light: #fef2f2; --blue: #2563eb; --blue-light: #eff6ff;
+      --violet: #7c3aed; --violet-light: #f5f3ff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+
+    /* Hero */
+    .hero { text-align: center; padding: 3rem 2rem 2rem; margin-bottom: 2rem; }
+    .hero-logo { display: inline-flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .hero-logo-icon { width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; color: white; box-shadow: 0 8px 24px rgba(79,70,229,0.3); }
+    .hero-title { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { font-size: 1.1rem; color: var(--muted); margin-top: 0.5rem; }
+    .hero-desc { max-width: 600px; margin: 1rem auto 0; color: var(--muted); font-size: 0.95rem; }
+    .hero-tags { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .hero-tag { padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .hero-tag-ai { background: var(--violet-light); color: var(--violet); }
+    .hero-tag-pm { background: var(--blue-light); color: var(--blue); }
+    .hero-tag-fin { background: var(--green-light); color: var(--green); }
+    .hero-tag-push { background: var(--amber-light); color: var(--amber); }
+
+    /* Section */
+    h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 0.5rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: var(--accent); }
+
+    /* Cards */
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    @media (max-width: 700px) { .feature-grid { grid-template-columns: 1fr; } }
+    .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s; }
+    .feature-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .feature-card-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .feature-card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .feature-card-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+    .feature-card-list { list-style: none; margin-top: 0.5rem; }
+    .feature-card-list li { font-size: 0.85rem; color: var(--muted); padding: 2px 0; padding-left: 1.2em; position: relative; }
+    .feature-card-list li::before { content: '✦'; position: absolute; left: 0; color: var(--accent); font-size: 0.7rem; }
+
+    /* Full width card */
+    .feature-full { grid-column: 1 / -1; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.88rem; }
+    th { background: var(--accent-light); color: var(--accent); text-align: left; padding: 8px 12px; font-weight: 600; border: 1px solid var(--border); }
+    td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+
+    /* Badge */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 4px; }
+    .badge-new { background: #dcfce7; color: #15803d; }
+    .badge-ai { background: #f3e8ff; color: #7c3aed; }
+    .badge-core { background: #dbeafe; color: #1d4ed8; }
+
+    /* Highlight box */
+    .highlight-box { background: linear-gradient(135deg, var(--accent-light), #f5f3ff); border: 1px solid #c7d2fe; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; }
+    .highlight-box-title { font-weight: 700; font-size: 1rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 1.5rem 0; }
+    @media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; }
+    .stat-num { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-label { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* Divider */
+    hr { border: none; border-top: 2px solid var(--border); margin: 2.5rem 0; }
+
+    /* Footer */
+    .footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 2rem 0; }
+
+    /* Flow */
+    .flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; flex-wrap: wrap; }
+    .flow-step { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 0.85rem; font-weight: 500; }
+    .flow-arrow { color: var(--accent); font-weight: 700; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-logo">
+    <div class="hero-logo-icon">T</div>
+  </div>
+  <h1 class="hero-title">智汇轻营 TaskFlow+</h1>
+  <p class="hero-sub">面向一人公司 / 自由职业者的智能订单执行工作台</p>
+  <p class="hero-desc">
+    集项目管理、任务排期、客户关系、财务分析、AI 智能助手于一体。
+    不是又一个项目管理工具——而是你的 <strong>AI 经营合伙人</strong>。
+  </p>
+  <div class="hero-tags">
+    <span class="hero-tag hero-tag-ai">🤖 AI Agent 40 工具</span>
+    <span class="hero-tag hero-tag-pm">📋 项目全流程</span>
+    <span class="hero-tag hero-tag-fin">💰 经营分析</span>
+    <span class="hero-tag hero-tag-push">📨 多渠道推送</span>
+  </div>
+</div>
+
+<!-- 数据概览 -->
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-num">24</div><div class="stat-label">数据表</div></div>
+  <div class="stat-card"><div class="stat-num">40</div><div class="stat-label">AI 工具</div></div>
+  <div class="stat-card"><div class="stat-num">21</div><div class="stat-label">API 模块</div></div>
+  <div class="stat-card"><div class="stat-num">12</div><div class="stat-label">功能页面</div></div>
+</div>
+
+<!-- ==================== 1. AI 智能助手 ==================== -->
+<h2>🤖 AI 智能助手</h2>
+
+<div class="highlight-box">
+  <div class="highlight-box-title">不只是聊天——是一个能操作你业务数据的 AI Agent</div>
+  <p style="font-size:0.9rem;color:var(--muted);">
+    基于 OpenAI 兼容协议，支持 DeepSeek / OpenAI / Ollama 等 23+ 供应商。
+    AI 通过 Function Calling 自动调用 40 个工具，直接查询数据库、创建任务、发送邮件、推送群消息。
+  </p>
+</div>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-card-icon">💬</div>
+    <div class="feature-card-title">智能对话 <span class="badge badge-ai">AI</span></div>
+    <div class="feature-card-desc">SSE 流式响应，实时看到 AI 思考和输出。支持 Markdown 渲染、代码高亮、表格展示。</div>
+    <ul class="feature-card-list">
+      <li>自然语言交互，无需记忆命令</li>
+      <li>上下文记忆，越聊越懂你</li>
+      <li>多轮工具调用（最多 10 轮）</li>
+      <li>写操作需确认，防误操作</li>
+    </ul>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">🧠</div>
+    <div class="feature-card-title">智能提示词路由 <span class="badge badge-ai">AI</span></div>
+    <div class="feature-card-desc">根据你的问题自动切换 AI 角色——创建助手、分析助手、排期助手、搜索助手。</div>
+    <ul class="feature-card-list">
+      <li>5 种专业角色，针对性回答</li>
+      <li>关键词自动匹配，无需手动切换</li>
+      <li>工具清单自动注入，AI 始终知道可用能力</li>
+    </ul>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">🔧</div>
+    <div class="feature-card-title">40 个业务工具 <span class="badge badge-core">核心</span></div>
+    <div class="feature-card-desc">覆盖财务(5)、工作(10)、客户(6)、目标(4)、搜索(7)、排期(5)、通知(2)、系统(1)。</div>
+    <ul class="feature-card-list">
+      <li>读操作直接执行，写操作需用户确认</li>
+      <li>模糊名称匹配（无需记 ID）</li>
+      <li>工具结果自动截断（500 字符）</li>
+    </ul>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">💾</div>
+    <div class="feature-card-title">长期记忆系统 <span class="badge badge-ai">AI</span></div>
+    <div class="feature-card-desc">AI 从对话中自动提取你的偏好和习惯，存储到数据库，下次对话自动加载。</div>
+    <ul class="feature-card-list">
+      <li>每周自动沉淀记忆（定时任务）</li>
+      <li>置信度评分（越聊越准确）</li>
+      <li>支持偏好/习惯/财务/项目等分类</li>
+    </ul>
+  </div>
+</div>
+
+<h3>AI 工具全景</h3>
+<table>
+  <tr><th>分类</th><th>数量</th><th>代表工具</th><th>能力</th></tr>
+  <tr><td>💰 财务分析</td><td>5</td><td>利润分析、现金流、成本拆解、客户收入排名、项目利润率</td><td>读取</td></tr>
+  <tr><td>📋 工作管理</td><td>10</td><td>创建/修改/删除任务、项目、今日焦点、逾期任务、排期查询、工时记录</td><td>读写</td></tr>
+  <tr><td>👥 客户管理</td><td>6</td><td>创建/修改客户、跟进提醒、360°视图、沟通记录、价值排名</td><td>读写</td></tr>
+  <tr><td>🎯 目标管理</td><td>4</td><td>目标进度、周报、周计划、经营健康度</td><td>读取</td></tr>
+  <tr><td>🔍 外部搜索</td><td>7</td><td>网页搜索、GitHub 热门、Hacker News、npm 搜索、汇率、Dev.to、Product Hunt</td><td>读取</td></tr>
+  <tr><td>🧠 排期智能</td><td>5</td><td>复杂度评估、插单模拟、冲突检测、排期建议、历史准确度</td><td>读取</td></tr>
+  <tr><td>📨 通知推送</td><td>2</td><td>发送邮件（Markdown→HTML）、推送群消息（昵称查找）</td><td>写入</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 2. 项目管理 ==================== -->
+<h2>📋 项目管理</h2>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-card-icon">📁</div>
+    <div class="feature-card-title">项目全生命周期</div>
+    <div class="feature-card-desc">从创建到归档，管理订单的完整生命周期。</div>
+    <ul class="feature-card-list">
+      <li>状态流转：进行中 → 已完成 → 已归档</li>
+      <li>关联客户、预算、类型标签</li>
+      <li>项目详情页：任务列表 + 成本 + 进度</li>
+      <li>归档后自动从下拉列表移除</li>
+    </ul>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">✅</div>
+    <div class="feature-card-title">任务看板</div>
+    <div class="feature-card-desc">看板 / 列表双视图，拖拽排序，优先级色彩标记。</div>
+    <ul class="feature-card-list">
+      <li>4 列看板：待办 / 进行中 / 已完成 / 阻塞</li>
+      <li>两行工具栏：视图切换 + 搜索 + 筛选条件</li>
+      <li>项目筛选自动排除已归档项目</li>
+      <li>子任务支持（自引用父子关系）</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 3. 排期引擎 ==================== -->
+<h2>📅 智能排期引擎</h2>
+
+<div class="feature-grid">
+  <div class="feature-card feature-full">
+    <div class="feature-card-icon">📊</div>
+    <div class="feature-card-title">不只是日历——是带 AI 决策能力的排期系统</div>
+    <div class="feature-card-desc">
+      甘特图可视化 + 6 项统计指标 + 插单模拟 + 冲突检测 + AI 智能安排。
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1rem;">
+      <div>
+        <strong>基础能力</strong>
+        <ul class="feature-card-list">
+          <li>甘特图时间线展示</li>
+          <li>优先级自动排序</li>
+          <li>每日 8h 工时上限</li>
+          <li>6 项统计卡片</li>
+        </ul>
+      </div>
+      <div>
+        <strong>智能分析</strong>
+        <ul class="feature-card-list">
+          <li>复杂度自动评估</li>
+          <li>工时预估修正</li>
+          <li>延期任务检测</li>
+          <li>冲突天数识别</li>
+        </ul>
+      </div>
+      <div>
+        <strong>AI 辅助</strong>
+        <ul class="feature-card-list">
+          <li>插单影响模拟</li>
+          <li>排期建议生成</li>
+          <li>历史准确度学习</li>
+          <li>一键智能安排</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 4. 客户管理 ==================== -->
+<h2>👥 客户关系管理</h2>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-card-icon">📋</div>
+    <div class="feature-card-title">客户档案</div>
+    <div class="feature-card-desc">完整的客户信息管理，支持多状态分类。</div>
+    <ul class="feature-card-list">
+      <li>状态：活跃 / VIP / 暂停 / 线索</li>
+      <li>关联项目和沟通记录</li>
+      <li>公司、行业、联系方式</li>
+    </ul>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">📞</div>
+    <div class="feature-card-title">沟通记录</div>
+    <div class="feature-card-desc">记录每次客户沟通，设置下次跟进时间。</div>
+    <ul class="feature-card-list">
+      <li>类型：邮件 / 电话 / 会议 / 聊天</li>
+      <li>自动计算距今天数</li>
+      <li>AI 可直接记录沟通</li>
+    </ul>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">📊</div>
+    <div class="feature-card-title">价值分析</div>
+    <div class="feature-card-desc">客户价值排名，按项目总金额排序。</div>
+    <ul class="feature-card-list">
+      <li>客户 360° 视图</li>
+      <li>总收入统计</li>
+      <li>跟进提醒（>7天 / >14天）</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 5. 财务分析 ==================== -->
+<h2>💰 经营财务分析</h2>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-card-icon">📈</div>
+    <div class="feature-card-title">利润分析</div>
+    <div class="feature-card-desc">对比报价与实际成本，计算每个项目的利润率。</div>
+    <ul class="feature-card-list">
+      <li>利润率排名（降序）</li>
+      <li>成本构成拆解（人工/材料/管理/其他）</li>
+      <li>金额以"分"存储，避免浮点精度问题</li>
+    </ul>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">💵</div>
+    <div class="feature-card-title">现金流</div>
+    <div class="feature-card-desc">月度收入/支出/净额，按分类统计。</div>
+    <ul class="feature-card-list">
+      <li>收入来源（已完结项目预算）</li>
+      <li>支出分类明细</li>
+      <li>月度趋势对比</li>
+    </ul>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">🎯</div>
+    <div class="feature-card-title">目标追踪</div>
+    <div class="feature-card-desc">设定经营目标，自动追踪进度。</div>
+    <ul class="feature-card-list">
+      <li>6 种指标：收入/利润/新订单/项目数/交付率/里程碑</li>
+      <li>月度/季度/年度目标</li>
+      <li>自动风险预警（AT_RISK）</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 6. 定时任务 ==================== -->
+<h2>⏰ 定时智能报告</h2>
+
+<div class="highlight-box">
+  <div class="highlight-box-title">6 个自动化定时任务，覆盖经营全场景</div>
+  <p style="font-size:0.9rem;color:var(--muted);">
+    每个任务自动触发 AI 分析，生成报告后推送到站内通知 + 邮件 + 企业微信/飞书/钉钉群。
+    可在 AI 工作台中手动触发测试，配置执行时间和 AI 模型。
+  </p>
+</div>
+
+<table>
+  <tr><th>任务</th><th>频率</th><th>功能</th><th>推送</th></tr>
+  <tr><td>🌅 晨间简报</td><td>每天 08:00</td><td>今日待办 + 逾期任务 + AI 建议</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>📡 客户雷达</td><td>每天 09:00</td><td>客户跟进提醒 + 关系健康度</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>💰 订单利润</td><td>每天 10:00</td><td>本月利润分析 + 成本预警</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>📊 自动周报</td><td>每周一 09:00</td><td>本周完成/新增 + AI 复盘</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>🫀 业务体检</td><td>每周日 10:00</td><td>四维健康度评估（财务/客户/项目/目标）</td><td>站内 + 邮件 + Webhook</td></tr>
+  <tr><td>🧠 记忆沉淀</td><td>每周日 20:00</td><td>从对话提取用户偏好，存储为长期记忆</td><td>站内</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 7. 推送通知 ==================== -->
+<h2>📨 多渠道推送通知</h2>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-card-icon">🔔</div>
+    <div class="feature-card-title">站内通知</div>
+    <div class="feature-card-desc">6 种通知类型，未读计数，一键全部已读。</div>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">📧</div>
+    <div class="feature-card-title">邮件推送</div>
+    <div class="feature-card-desc">精美 HTML 模板，支持 Markdown 自动转 HTML。SMTP 配置支持 QQ/163/Gmail。</div>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">💬</div>
+    <div class="feature-card-title">群机器人推送</div>
+    <div class="feature-card-desc">支持企业微信 / 飞书 / 钉钉 / Slack。通过昵称管理多个推送目标。</div>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">🤖</div>
+    <div class="feature-card-title">AI 驱动推送</div>
+    <div class="feature-card-desc">AI 对话中可直接发送邮件或推送群消息，通过昵称查找目标，带确认机制。</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 8. 其他功能 ==================== -->
+<h2>🧩 更多功能</h2>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-card-icon">📊</div>
+    <div class="feature-card-title">经营仪表盘</div>
+    <div class="feature-card-desc">KPI 卡片、图表、待办列表、近期活动，一页掌握经营全貌。</div>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">🔍</div>
+    <div class="feature-card-title">行业洞察</div>
+    <div class="feature-card-desc">GitHub 热门、Hacker News、npm 搜索、汇率查询、Dev.to 文章、Product Hunt 新品。</div>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">👤</div>
+    <div class="feature-card-title">个人中心</div>
+    <div class="feature-card-desc">个人资料、偏好设置（主题/语言/通知开关）、登录设备管理。</div>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">⏱️</div>
+    <div class="feature-card-title">工时管理</div>
+    <div class="feature-card-desc">实时计时器、工时记录、绑定任务和项目、Header 快捷入口。</div>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">🌙</div>
+    <div class="feature-card-title">暗色模式</div>
+    <div class="feature-card-desc">浅色 / 深色 / 跟随系统，CSS 变量 + oklch 色彩空间，一键切换。</div>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">📱</div>
+    <div class="feature-card-title">响应式设计</div>
+    <div class="feature-card-desc">适配 768px / 1024px 断点，Sidebar 可折叠，所有页面自适应。</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 9. 系统设置 ==================== -->
+<h2>⚙️ 系统设置</h2>
+
+<table>
+  <tr><th>Tab</th><th>功能</th><th>说明</th></tr>
+  <tr><td>🤖 AI 配置</td><td>AI 供应商管理</td><td>23+ 预设供应商，支持自定义添加。每个供应商独立配置 API Key/URL/模型。同名校验。</td></tr>
+  <tr><td>🔍 搜索配置</td><td>搜索 API 设置</td><td>Tavily / SerpAPI，高级搜索参数（主题/深度/时间/国家/域名过滤）</td></tr>
+  <tr><td>🔗 集成管理</td><td>n8n Webhook</td><td>n8n 自动化工作流回调地址配置</td></tr>
+  <tr><td>📧 邮件设置</td><td>SMTP 配置</td><td>SMTP 服务器/端口/账号/授权码，授权码获取指南，测试发送</td></tr>
+  <tr><td>📨 推送管理</td><td>群机器人 Webhook</td><td>多渠道推送目标管理（昵称+渠道+URL），增删查改+测试，防重复</td></tr>
+  <tr><td>🛡️ 安全设置</td><td>会话管理</td><td>登录设备列表，踢出设备</td></tr>
+  <tr><td>💾 数据管理</td><td>数据导出</td><td>CSV 导出（项目/客户），清除缓存，账号注销</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 技术亮点 ==================== -->
+<h2>🏆 技术亮点</h2>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem;">AES-256</div><div class="stat-label">API Key 加密</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem;">JWT</div><div class="stat-label">静默续签认证</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem;">Zod</div><div class="stat-label">全接口校验</div></div>
+  <div class="stat-card"><div class="stat-num" style="font-size:1.5rem;">SSE</div><div class="stat-label">流式 AI 响应</div></div>
+</div>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="feature-card-title">零运维部署</div>
+    <div class="feature-card-desc">SQLite 单文件数据库，无需安装 MySQL/PostgreSQL。<code>npm run dev</code> 一键启动前后端。</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-card-title">数据隔离</div>
+    <div class="feature-card-desc">所有查询强制 userId 过滤，即使同一数据库也不会泄露他人数据。</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-card-title">多供应商 AI</div>
+    <div class="feature-card-desc">支持 DeepSeek/OpenAI/Ollama 等 23+ 供应商，可切换本地 Ollama 零 API 费用。</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-card-title">统一响应格式</div>
+    <div class="feature-card-desc"><code>{ success, data?, error? }</code> 全接口一致，前端错误处理统一。</div>
+  </div>
+</div>
+
+<hr>
+
+<div class="footer">
+  <p><strong>智汇轻营 TaskFlow+</strong> — 面向一人公司的智能订单执行工作台</p>
+  <p>团队 Tipo · 冯鸣森 · 赖沛盛 · 黄思悦 · 金睿昕 · 2025</p>
+</div>
+
+</div>
+</body>
+</html>

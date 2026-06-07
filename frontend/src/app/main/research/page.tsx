@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import {
   Loader2, Search, Star, Bookmark, ExternalLink, Newspaper, Tag, X,
   TrendingUp, Globe, Code, MessageSquare, Sparkles, RotateCw, ChevronRight,
-  Clock, Trash2,
+  Clock, Trash2, ChevronDown,
 } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/features/ai/MarkdownRenderer';
 
@@ -48,6 +48,7 @@ export default function ResearchPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('briefing');
   const [searchQuery, setSearchQuery] = useState('');
   const [tagFilter, setTagFilter] = useState('');
+  const [expandedIdx, setExpandedIdx] = useState<Set<number>>(new Set());
   const qc = useQueryClient();
 
   // ═══ 搜索 ═══
@@ -259,6 +260,15 @@ export default function ResearchPage() {
               <div className="space-y-2">
                 {results.map((item, i) => {
                   const cfg = SOURCE_CONFIG[item.source] || { icon: Globe, label: item.source, color: 'bg-muted text-foreground/70' };
+                  const isExpanded = expandedIdx.has(i);
+                  const isLong = item.snippet.length > 100;
+                  const toggleExpand = () => {
+                    setExpandedIdx(prev => {
+                      const next = new Set(prev);
+                      if (next.has(i)) next.delete(i); else next.add(i);
+                      return next;
+                    });
+                  };
                   return (
                     <div key={i}
                       className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-indigo-200 hover:shadow-sm">
@@ -283,7 +293,17 @@ export default function ResearchPage() {
                               <span className="text-[10px] text-muted-foreground">{item.extra}</span>
                             )}
                           </div>
-                          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">{item.snippet}</p>
+                          <p className={cn(
+                            'mt-1 text-[12px] leading-relaxed text-muted-foreground',
+                            !isExpanded && isLong && 'line-clamp-2',
+                          )}>{item.snippet}</p>
+                          {isLong && (
+                            <button onClick={toggleExpand}
+                              className="mt-1 flex items-center gap-0.5 text-[11px] text-indigo-500 hover:text-indigo-600">
+                              {isExpanded ? '收起' : '展开全部'}
+                              <ChevronDown className={cn('h-3 w-3 transition-transform', isExpanded && 'rotate-180')} />
+                            </button>
+                          )}
                           {item.url && (
                             <a href={item.url} target="_blank" rel="noreferrer"
                               className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-muted-foreground transition-colors hover:text-indigo-500">
