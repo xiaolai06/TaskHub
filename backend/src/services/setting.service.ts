@@ -422,6 +422,28 @@ export async function getSessions(userId: string) {
   });
 }
 
+/** 获取 Webhook URL */
+export async function getWebhookUrl(channel: string): Promise<string | null> {
+  const key = `${channel.toUpperCase()}_WEBHOOK`;
+  const setting = await prisma.setting.findFirst({
+    where: { category: 'NOTIFY', key, userId: 'system' },
+  });
+  return setting?.value || null;
+}
+
+/** 测试群机器人 Webhook */
+export async function testWebhook(channel: string) {
+  const { sendWebhook } = await import('./notification.service');
+  const result = await sendWebhook(channel, {
+    title: 'TaskFlow 连接测试',
+    content: `✅ ${channel} 群机器人推送测试成功！\n\n此消息来自 智汇轻营 系统设置页的测试功能。`,
+  });
+  if (result.skipped) {
+    throw new Error(`${channel} Webhook 未配置，请先填写 Webhook URL`);
+  }
+  return result;
+}
+
 /** 踢出设备 */
 export async function deleteSession(userId: string, sessionId: string) {
   await prisma.session.deleteMany({ where: { id: sessionId, userId } });

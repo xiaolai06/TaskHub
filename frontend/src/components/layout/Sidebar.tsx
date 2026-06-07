@@ -14,11 +14,10 @@ import {
   Calendar,
   Sparkles,
   ChevronDown,
-  ChevronsLeft,
-  ChevronsRight,
+  PanelLeftClose,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface NavGroup {
   label: string;
@@ -80,62 +79,63 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
   function toggleGroup(label: string) {
     setCollapsedGroups((prev) => {
       const next = new Set(prev);
-      if (next.has(label)) {
-        next.delete(label);
-      } else {
-        next.add(label);
-      }
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
       return next;
     });
   }
 
   return (
     <aside className={cn(
-      'fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border bg-card transition-all duration-300 ease-in-out',
-      collapsed ? 'w-[72px]' : 'w-[272px]',
+      'fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border bg-card transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+      collapsed ? 'w-[68px]' : 'w-[260px]',
     )}>
-      {/* Logo + 折叠按钮 */}
-      <div className={cn(
-        'flex h-14 shrink-0 items-center border-b border-border',
-        collapsed ? 'justify-center px-2' : 'gap-3 px-5',
-      )}>
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600">
-          <span className="text-sm font-bold text-white">H</span>
+      {/* Logo — 点击切换收起/展开 */}
+      <button
+        onClick={onToggleCollapse}
+        className={cn(
+          'flex h-14 shrink-0 items-center border-b border-border transition-all duration-300 hover:bg-accent/50',
+          collapsed ? 'justify-center px-2' : 'gap-3 px-4',
+        )}
+        title={collapsed ? '展开侧边栏' : '收起侧边栏'}
+      >
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm shadow-indigo-500/20">
+          <span className="text-sm font-bold text-white">T</span>
         </div>
+        <div className={cn(
+          'flex flex-col overflow-hidden transition-all duration-300',
+          collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
+        )}>
+          <span className="text-sm font-bold text-foreground whitespace-nowrap leading-tight">智汇轻营</span>
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap leading-tight">TaskFlow+</span>
+        </div>
+        {/* 展开时显示收起按钮 */}
         {!collapsed && (
-          <div className="flex-1 min-w-0">
-            <h1 className="text-sm font-bold text-foreground">智汇轻营</h1>
-            <p className="text-[10px] text-muted-foreground">TaskHub</p>
+          <div className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+            <PanelLeftClose className="h-4 w-4" />
           </div>
         )}
-        <button
-          onClick={onToggleCollapse}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-          title={collapsed ? '展开侧边栏' : '收起侧边栏'}
-        >
-          {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
-        </button>
-      </div>
+      </button>
 
       {/* 导航 */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 overflow-y-auto px-2.5 py-3">
         {navGroups.map((group) => {
-          const isCollapsed = collapsed || collapsedGroups.has(group.label);
+          const isGroupHidden = collapsed || collapsedGroups.has(group.label);
           return (
-            <div key={group.label} className="mb-2">
+            <div key={group.label} className="mb-1.5">
               {/* 分组标题 */}
               {!collapsed && (
                 <button
                   onClick={() => toggleGroup(group.label)}
                   aria-expanded={!collapsedGroups.has(group.label)}
-                  className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors hover:bg-accent"
+                  className="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left transition-colors hover:bg-accent/50"
                 >
-                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
                     {group.label}
                   </span>
                   <ChevronDown
                     className={cn(
-                      'h-3.5 w-3.5 text-muted-foreground transition-transform',
+                      'h-3 w-3 text-muted-foreground/50 transition-transform duration-200',
                       collapsedGroups.has(group.label) && '-rotate-90',
                     )}
                   />
@@ -144,7 +144,7 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
 
               {/* 分组项 */}
               {!collapsedGroups.has(group.label) && (
-                <div className={cn('mt-1 space-y-0.5', collapsed && 'px-0')}>
+                <div className={cn('mt-0.5', collapsed ? 'space-y-1.5' : 'space-y-0.5')}>
                   {group.items.map((item) => {
                     const isActive = item.href === '/main/dashboard'
                       ? pathname === '/main/dashboard'
@@ -156,18 +156,27 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
                         href={item.href}
                         title={collapsed ? item.label : undefined}
                         className={cn(
-                          'flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-150',
-                          collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
+                          'group relative flex items-center rounded-lg text-[13px] font-medium transition-all duration-200',
+                          collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-3 py-2',
                           isActive
-                            ? 'border-l-[3px] border-l-indigo-500 bg-indigo-50 pl-[9px] text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400'
-                            : 'border-l-[3px] border-l-transparent pl-[9px] text-muted-foreground hover:bg-accent hover:text-foreground',
+                            ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300'
+                            : 'text-foreground/60 hover:bg-accent hover:text-foreground',
                         )}
                       >
+                        {/* 活跃指示条 */}
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-indigo-500" />
+                        )}
                         <item.icon className={cn(
-                          'h-[18px] w-[18px] shrink-0',
-                          isActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-muted-foreground',
+                          'h-[18px] w-[18px] shrink-0 transition-colors duration-200',
+                          isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-muted-foreground group-hover:text-foreground',
                         )} />
-                        {!collapsed && item.label}
+                        <span className={cn(
+                          'overflow-hidden whitespace-nowrap transition-all duration-300',
+                          collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
+                        )}>
+                          {item.label}
+                        </span>
                       </Link>
                     );
                   })}
@@ -179,28 +188,25 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
       </nav>
 
       {/* 底部 AI 入口 */}
-      <div className={cn('border-t border-border', collapsed ? 'p-2' : 'p-4')}>
+      <div className={cn('border-t border-border', collapsed ? 'p-2' : 'p-3')}>
         <button
           onClick={onOpenAi}
           title={collapsed ? 'AI 助手' : undefined}
           className={cn(
             'flex w-full items-center rounded-xl border border-indigo-100 bg-indigo-50/50 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm dark:border-indigo-800/40 dark:bg-indigo-950/30 dark:hover:border-indigo-700/50 dark:hover:bg-indigo-950/50',
-            collapsed ? 'justify-center px-2 py-3' : 'gap-3 px-4 py-3.5',
+            collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-3.5 py-2.5',
           )}
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 dark:bg-indigo-950/50">
-            <Sparkles className="h-[18px] w-[18px] text-indigo-600 dark:text-indigo-400" />
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950/50">
+            <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           </div>
-          {!collapsed && (
-            <div>
-              <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-400">
-                AI 助手
-              </p>
-              <p className="text-[11px] text-indigo-400 dark:text-indigo-500">
-                ⌘J 展开对话
-              </p>
-            </div>
-          )}
+          <div className={cn(
+            'overflow-hidden transition-all duration-300',
+            collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
+          )}>
+            <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-400 whitespace-nowrap">AI 助手</p>
+            <p className="text-[11px] text-indigo-400 dark:text-indigo-500 whitespace-nowrap">⌘J 展开对话</p>
+          </div>
         </button>
       </div>
     </aside>

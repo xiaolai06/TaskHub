@@ -21,6 +21,7 @@ interface Preferences {
   projectNotify: boolean;
   systemNotify: boolean;
   emailNotify: boolean;
+  webhookNotify: boolean;
   dndStart: string;
   dndEnd: string;
   sidebarCollapsed: boolean;
@@ -406,6 +407,7 @@ export default function PreferencesPage() {
             <Toggle label="项目进度通知" desc="项目状态变更时通知" checked={prefs.projectNotify} onChange={(v) => update({ projectNotify: v })} />
             <Toggle label="系统消息推送" desc="系统公告、报表生成等" checked={prefs.systemNotify} onChange={(v) => update({ systemNotify: v })} />
             <Toggle label="邮件通知" desc="发送邮件摘要（需配置邮箱）" checked={prefs.emailNotify} onChange={(v) => update({ emailNotify: v })} />
+            <Toggle label="推送通知" desc="推送到企业微信/飞书/钉钉（需配置 Webhook）" checked={prefs.webhookNotify} onChange={(v) => update({ webhookNotify: v })} />
           </div>
         )}
 

@@ -98,8 +98,8 @@ export async function createFromN8n(payload: N8nNotificationPayload) {
   return create(payload.userId, payload.type, payload.title, payload.content, payload.relatedId);
 }
 
-export async function sendWebhook(channel: string, data: Record<string, unknown>) {
-  const webhookUrl = await getWebhookUrl(channel);
+export async function sendWebhook(channel: string, data: Record<string, unknown>, directUrl?: string) {
+  const webhookUrl = directUrl || await getWebhookUrl(channel);
   if (!webhookUrl) return { sent: false, channel, skipped: true };
 
   const body = formatWebhookPayload(channel, data);

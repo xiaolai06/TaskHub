@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-const PROMPT_DIR = path.resolve(__dirname, '../../prompts');
+const PROMPT_DIR = path.resolve(__dirname, '../prompts');
 
 const promptCache = new Map<string, string>();
 

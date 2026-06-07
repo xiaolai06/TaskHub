@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { prisma } from '../server';
 import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
+import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
 const PROMPT = loadPrompt('memory-extract.txt', '从以下对话中提取关键信息。');
 
@@ -48,7 +49,12 @@ cron.schedule('0 20 * * 0', async () => {
           stored++;
         }
         if (stored > 0) {
-          await notificationService.create(user.id, 'AI_REPORT', '🧠 记忆沉淀', `从本周 ${conversations.length} 条对话中提炼了 ${stored} 条记忆。`);
+          await pushReport({
+            userId: user.id,
+            title: '🧠 记忆沉淀',
+            content: `从本周 ${conversations.length} 条对话中提炼了 ${stored} 条记忆。`,
+            type: 'AI_REPORT',
+          });
         }
       } catch (e) { console.error(`[weekly-memory] 用户 ${user.id} 失败:`, e); }
     }

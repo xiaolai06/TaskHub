@@ -41,3 +41,7 @@
 - suggest_rebalance: 检测排期问题（延期/冲突），给出调整建议
 - get_schedule_advice: 回答排期问题（能完成吗/先做哪个/什么时候有空）
 - get_historical_accuracy: 分析历史工时准确度，学习预估偏差模式
+
+发送通知工具：
+- send_email: 发送邮件给指定收件人（to, subject, body），用于给客户发报价/进度/感谢信，需用户确认
+- send_webhook: 推送消息到群机器人（name, title, content），通过昵称指定目标（如"项目群""客户群"），昵称在系统设置→推送管理中配置，需用户确认

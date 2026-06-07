@@ -9,6 +9,7 @@ import { CustomerTab } from './CustomerTab';
 import { HistoryTab } from './HistoryTab';
 import { ModelSwitcher } from './ModelSwitcher';
 import { ScheduleQuickActions } from './ScheduleQuickActions';
+import { JobConfigPanel } from './JobConfigPanel';
 
 type TabKey = 'overview' | 'customers' | 'history' | 'schedule';
 
@@ -90,6 +91,9 @@ export function AiSidebar({
             <QuickActions onAction={onQuickAction} />
             <div className="border-t border-border/60 pt-3">
               <ProjectMiniList projects={projects} />
+            </div>
+            <div className="border-t border-border/60 pt-3">
+              <JobConfigPanel />
             </div>
           </div>
         )}

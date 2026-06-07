@@ -2,8 +2,51 @@ import cron from 'node-cron';
 import { prisma } from '../server';
 import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
+import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
 const PROMPT = loadPrompt('system-client-radar.txt', '你是客户关系管理助手，请分析客户动态。');
+
+export async function runClientRadar(userId: string): Promise<string> {
+  const customers = await prisma.customer.findMany({ where: { userId }, select: { id: true, name: true, company: true, status: true } });
+  const communications = await prisma.communication.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, take: 50, select: { customerId: true, content: true, createdAt: true } });
+
+  const today = new Date();
+  const clientData = customers.map(c => {
+    const lastComm = communications.find(com => com.customerId === c.id);
+    const daysSince = lastComm ? Math.floor((today.getTime() - lastComm.createdAt.getTime()) / 86400000) : 999;
+    return { name: c.name, company: c.company, status: c.status, lastContactDays: daysSince, lastContent: lastComm?.content?.slice(0, 50) || '' };
+  });
+
+  const data = JSON.stringify({ customers: clientData, totalCustomers: customers.length });
+  const ai = new AIService(userId);
+  if (!await ai.init()) {
+    throw new Error(`user ${userId} has no AI config`);
+  }
+  let result = '';
+  for await (const event of ai.chat({ messages: [{ role: 'system', content: PROMPT }, { role: 'user', content: data }] })) {
+    if (event.type === 'text') result += event.content;
+  }
+  if (result) {
+    await pushReport({
+      userId,
+      title: '📡 客户雷达',
+      content: result,
+      type: 'AI_INSIGHT',
+      emailSummary: {
+        preheader: '客户跟进提醒和关系健康度分析',
+        headline: '客户雷达',
+        intro: '以下是客户关系健康度分析和跟进建议。',
+        sections: [
+          { title: 'AI 分析', bullets: result.split('\n').filter(l => l.trim()).slice(0, 10) },
+          { title: '需关注客户', bullets: clientData.filter(c => c.lastContactDays > 7).map(c => `${c.name} — ${c.lastContactDays} 天未联系`) },
+        ],
+        ctaLabel: '打开 TaskFlow',
+        ctaUrl: '/main/customers',
+      },
+    });
+  }
+  return result;
+}
 
 cron.schedule('0 9 * * *', async () => {
   console.log('[client-radar] 开始...');
@@ -15,28 +58,9 @@ cron.schedule('0 9 * * *', async () => {
     for (const user of users) {
       try {
         if (user.preferences && !user.preferences.systemNotify) continue;
-
-        const customers = await prisma.customer.findMany({ where: { userId: user.id }, select: { id: true, name: true, company: true, status: true } });
-        const communications = await prisma.communication.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' }, take: 50, select: { customerId: true, content: true, createdAt: true } });
-        if (customers.length === 0) continue;
-
-        const today = new Date();
-        const clientData = customers.map(c => {
-          const lastComm = communications.find(com => com.customerId === c.id);
-          const daysSince = lastComm ? Math.floor((today.getTime() - lastComm.createdAt.getTime()) / 86400000) : 999;
-          return { name: c.name, company: c.company, status: c.status, lastContactDays: daysSince, lastContent: lastComm?.content?.slice(0, 50) || '' };
-        });
-
-        const data = JSON.stringify({ customers: clientData, totalCustomers: customers.length });
-        const ai = new AIService(user.id);
-        if (!await ai.init()) { console.log(`[client-radar] 用户 ${user.id} 无 AI 配置`); continue; }
-        let result = '';
-        for await (const event of ai.chat({ messages: [{ role: 'system', content: PROMPT }, { role: 'user', content: data }] })) {
-          if (event.type === 'text') result += event.content;
-        }
-        if (result) {
-          await notificationService.create(user.id, 'AI_INSIGHT', '📡 客户雷达', result);
-        }
+        const customerCount = await prisma.customer.count({ where: { userId: user.id } });
+        if (customerCount === 0) continue;
+        await runClientRadar(user.id);
       } catch (e) { console.error(`[client-radar] 用户 ${user.id} 失败:`, e); }
     }
     console.log(`[client-radar] 完成`);

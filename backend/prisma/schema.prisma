@@ -272,6 +272,7 @@ model UserPreference {
   projectNotify   Boolean  @default(true)
   systemNotify    Boolean  @default(true)
   emailNotify     Boolean  @default(false)
+  webhookNotify   Boolean  @default(false)
   dndStart        String?
   dndEnd          String?
   sidebarCollapsed Boolean @default(false)
@@ -471,6 +472,7 @@ model CronJob {
   lastRunAt  DateTime?
   lastStatus String?                      // success / error
   lastResult String?                      // 上次执行结果摘要
+  aiModel    String?                      // 指定 AI 模型（空=使用默认模型）
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)

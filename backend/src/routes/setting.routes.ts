@@ -152,6 +152,34 @@ router.post('/email/test', async (req: Request, res: Response, next: NextFunctio
   }
 });
 
+// ═══ Webhook 测试 ═══
+
+// POST /webhook/test — 测试群机器人推送（支持直接传 URL 或从 DB 读取）
+router.post('/webhook/test', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { channel, url } = req.body;
+    if (!channel) {
+      error(res, 'VALIDATION_ERROR', '请指定推送渠道', 400);
+      return;
+    }
+    // 优先用传入的 URL，否则从 DB 读取
+    const webhookUrl = url || await settingService.getWebhookUrl(channel);
+    if (!webhookUrl) {
+      error(res, 'WEBHOOK_NOT_CONFIGURED', `${channel} Webhook 未配置，请先填写 URL`, 400);
+      return;
+    }
+    const { sendWebhook } = await import('../services/notification.service');
+    const result = await sendWebhook(channel, {
+      title: 'TaskFlow 连接测试',
+      content: `✅ ${channel} 推送测试成功！\n\n此消息来自 智汇轻营 系统设置。`,
+    }, webhookUrl);
+    success(res, result, '测试消息已发送');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '发送失败';
+    error(res, 'WEBHOOK_TEST_FAILED', msg, 502);
+  }
+});
+
 // ═══ 通用配置 CRUD ═══
 
 router.get('/:category', async (req: Request, res: Response, next: NextFunction) => {

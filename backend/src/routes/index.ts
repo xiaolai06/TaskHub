@@ -21,6 +21,7 @@ import greetingRoutes from './greeting.routes';
 import profileRoutes from './profile.routes';
 import preferenceRoutes from './preference.routes';
 import cronJobRoutes from './cron-job.routes';
+import jobRoutes from './job.routes';
 import workRoutes from './work.routes';
 
 // 导入认证中间件（需要登录才能访问的接口加这个）
@@ -55,6 +56,7 @@ router.use('/greetings', auth, apiLimit, greetingRoutes);    // /api/greetings/*
 router.use('/profile', auth, apiLimit, profileRoutes);      // /api/profile/*
 router.use('/preferences', auth, apiLimit, preferenceRoutes); // /api/preferences/*
 router.use('/cron-jobs', auth, apiLimit, cronJobRoutes);      // /api/cron-jobs/*
+router.use('/jobs', auth, apiLimit, jobRoutes);              // /api/jobs/*（手动触发）
 router.use('/work', auth, apiLimit, workRoutes);            // /api/work/*
 
 export default router;

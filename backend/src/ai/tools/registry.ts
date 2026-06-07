@@ -24,6 +24,9 @@ import { insertionEvaluationTool } from './insertion-evaluation';
 import { rebalanceSuggestTool } from './rebalance-suggest';
 import { scheduleAdviceTool } from './schedule-advice';
 import { historicalAccuracyTool } from './historical-accuracy';
+// 通知推送工具
+import { sendEmailTool } from './send-email';
+import { sendWebhookTool } from './send-webhook';
 
 const allTools: ToolDefinition[] = [
   // 💰 finance
@@ -40,6 +43,8 @@ const allTools: ToolDefinition[] = [
   exchangeRateTool, devToTool, productHuntTool,
   // 🕐 system
   getCurrentTimeTool,
+  // 📨 通知推送
+  sendEmailTool, sendWebhookTool,
   // 📅 schedule intelligence
   complexityAssessmentTool, insertionEvaluationTool, rebalanceSuggestTool, scheduleAdviceTool,
   historicalAccuracyTool,

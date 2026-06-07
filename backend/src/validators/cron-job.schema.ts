@@ -11,6 +11,7 @@ export const createCronJobSchema = z.object({
 
 export const updateCronJobSchema = createCronJobSchema.partial().extend({
   enabled: z.boolean().optional(),
+  aiModel: z.string().optional(),
 });
 
 export const cronJobFiltersSchema = z.object({

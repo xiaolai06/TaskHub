@@ -12,6 +12,7 @@ export interface CronJob {
   config: string;
   enabled: boolean;
   isSystem: boolean;
+  aiModel: string | null;
   lastRunAt: string | null;
   lastStatus: string | null;
   lastResult: string | null;
@@ -62,5 +63,22 @@ export function useInitSystemJobs() {
   return useMutation({
     mutationFn: () => api.post('/cron-jobs/system/init'),
     onSuccess: () => qc.invalidateQueries({ queryKey: [QUERY_KEY] }),
+  });
+}
+
+export function useRunJob() {
+  return useMutation({
+    mutationFn: (name: string) => api.post<{ result?: string; label?: string }>(`/jobs/${name}/run`),
+  });
+}
+
+export interface TestNotifyResult {
+  results: Array<{ channel: string; ok: boolean; msg: string }>;
+  allOk: boolean;
+}
+
+export function useTestNotify() {
+  return useMutation({
+    mutationFn: (id: string) => api.post<TestNotifyResult>(`/cron-jobs/${id}/test-notify`),
   });
 }

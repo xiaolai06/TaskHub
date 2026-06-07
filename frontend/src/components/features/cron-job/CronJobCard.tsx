@@ -67,6 +67,13 @@ export function CronJobCard({
             <p className="mt-1.5 text-[12px] text-muted-foreground">{config.description}</p>
           )}
 
+          {job.aiModel && (
+            <p className="mt-1 flex items-center gap-1 text-[11px] text-indigo-500">
+              <Tag className="h-3 w-3" />
+              模型: {job.aiModel}
+            </p>
+          )}
+
           {job.lastRunAt && (
             <p className="mt-1 text-[11px] text-muted-foreground">
               上次执行: {new Date(job.lastRunAt).toLocaleString('zh-CN')}
