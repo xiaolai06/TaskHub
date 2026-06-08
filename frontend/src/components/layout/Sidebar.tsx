@@ -13,57 +13,33 @@ import {
   Target,
   Calendar,
   Sparkles,
-  ChevronDown,
   PanelLeftClose,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
-interface NavGroup {
+interface NavItem {
+  href: string;
   label: string;
-  items: {
-    href: string;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-  }[];
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;       // light mode icon color
+  darkColor: string;   // dark mode icon color
+  activeBg: string;    // light active bg
+  darkActiveBg: string;// dark active bg
+  activeText: string;  // light active text
+  darkActiveText: string;
 }
 
-const navGroups: NavGroup[] = [
-  {
-    label: '概览',
-    items: [
-      { href: '/main/dashboard', label: '仪表盘', icon: LayoutDashboard },
-    ],
-  },
-  {
-    label: '工作',
-    items: [
-      { href: '/main/projects', label: '项目管理', icon: FolderKanban },
-      { href: '/main/tasks', label: '任务看板', icon: CheckSquare },
-      { href: '/main/customers', label: '客户管理', icon: Users },
-      { href: '/main/goals', label: '目标管理', icon: Target },
-      { href: '/main/schedule', label: '排期视图', icon: Calendar },
-    ],
-  },
-  {
-    label: 'AI',
-    items: [
-      { href: '/main/ai', label: 'AI 工作台', icon: Sparkles },
-    ],
-  },
-  {
-    label: '洞察',
-    items: [
-      { href: '/main/reports', label: '经营看板', icon: BarChart3 },
-      { href: '/main/research', label: '行业洞察', icon: Search },
-    ],
-  },
-  {
-    label: '设置',
-    items: [
-      { href: '/main/settings', label: '系统设置', icon: Settings },
-    ],
-  },
+const navItems: NavItem[] = [
+  { href: '/main/dashboard', label: '仪表盘', icon: LayoutDashboard, color: 'text-blue-600', darkColor: 'dark:text-blue-400', activeBg: 'bg-blue-50', darkActiveBg: 'dark:bg-blue-950/50', activeText: 'text-blue-700', darkActiveText: 'dark:text-blue-300' },
+  { href: '/main/projects', label: '项目管理', icon: FolderKanban, color: 'text-violet-600', darkColor: 'dark:text-violet-400', activeBg: 'bg-violet-50', darkActiveBg: 'dark:bg-violet-950/50', activeText: 'text-violet-700', darkActiveText: 'dark:text-violet-300' },
+  { href: '/main/tasks', label: '任务看板', icon: CheckSquare, color: 'text-cyan-600', darkColor: 'dark:text-cyan-400', activeBg: 'bg-cyan-50', darkActiveBg: 'dark:bg-cyan-950/50', activeText: 'text-cyan-700', darkActiveText: 'dark:text-cyan-300' },
+  { href: '/main/customers', label: '客户管理', icon: Users, color: 'text-emerald-600', darkColor: 'dark:text-emerald-400', activeBg: 'bg-emerald-50', darkActiveBg: 'dark:bg-emerald-950/50', activeText: 'text-emerald-700', darkActiveText: 'dark:text-emerald-300' },
+  { href: '/main/goals', label: '目标管理', icon: Target, color: 'text-amber-600', darkColor: 'dark:text-amber-400', activeBg: 'bg-amber-50', darkActiveBg: 'dark:bg-amber-950/50', activeText: 'text-amber-700', darkActiveText: 'dark:text-amber-300' },
+  { href: '/main/schedule', label: '排期视图', icon: Calendar, color: 'text-rose-600', darkColor: 'dark:text-rose-400', activeBg: 'bg-rose-50', darkActiveBg: 'dark:bg-rose-950/50', activeText: 'text-rose-700', darkActiveText: 'dark:text-rose-300' },
+  { href: '/main/ai', label: 'AI 工作台', icon: Sparkles, color: 'text-indigo-600', darkColor: 'dark:text-indigo-400', activeBg: 'bg-indigo-50', darkActiveBg: 'dark:bg-indigo-950/50', activeText: 'text-indigo-700', darkActiveText: 'dark:text-indigo-300' },
+  { href: '/main/reports', label: '经营看板', icon: BarChart3, color: 'text-teal-600', darkColor: 'dark:text-teal-400', activeBg: 'bg-teal-50', darkActiveBg: 'dark:bg-teal-950/50', activeText: 'text-teal-700', darkActiveText: 'dark:text-teal-300' },
+  { href: '/main/research', label: '行业洞察', icon: Search, color: 'text-orange-600', darkColor: 'dark:text-orange-400', activeBg: 'bg-orange-50', darkActiveBg: 'dark:bg-orange-950/50', activeText: 'text-orange-700', darkActiveText: 'dark:text-orange-300' },
+  { href: '/main/settings', label: '系统设置', icon: Settings, color: 'text-slate-500', darkColor: 'dark:text-slate-400', activeBg: 'bg-slate-100', darkActiveBg: 'dark:bg-slate-800/50', activeText: 'text-slate-700', darkActiveText: 'dark:text-slate-300' },
 ];
 
 interface SidebarProps {
@@ -74,42 +50,31 @@ interface SidebarProps {
 
 export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-
-  function toggleGroup(label: string) {
-    setCollapsedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
-      return next;
-    });
-  }
 
   return (
     <aside className={cn(
       'fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-border bg-card transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
-      collapsed ? 'w-[68px]' : 'w-[260px]',
+      collapsed ? 'w-[66px]' : 'w-[210px]',
     )}>
       {/* Logo — 点击切换收起/展开 */}
       <button
         onClick={onToggleCollapse}
         className={cn(
-          'flex h-14 shrink-0 items-center border-b border-border transition-all duration-300 hover:bg-accent/50',
-          collapsed ? 'justify-center px-2' : 'gap-3 px-4',
+          'flex shrink-0 items-center border-b border-border transition-all duration-300 hover:bg-accent/50',
+          collapsed ? 'h-14 justify-center px-2' : 'h-14 gap-3 px-4',
         )}
         title={collapsed ? '展开侧边栏' : '收起侧边栏'}
       >
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm shadow-indigo-500/20">
-          <span className="text-sm font-bold text-white">T</span>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/20">
+          <span className="text-[15px] font-black text-white leading-none">T</span>
         </div>
         <div className={cn(
-          'flex flex-col overflow-hidden transition-all duration-300',
+          'flex flex-col items-start justify-center overflow-hidden transition-all duration-300',
           collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
         )}>
-          <span className="text-sm font-bold text-foreground whitespace-nowrap leading-tight">智汇轻营</span>
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap leading-tight">TaskHub</span>
+          <span className="text-[15px] font-extrabold text-foreground whitespace-nowrap leading-none tracking-tight">智汇轻营</span>
+          <span className="mt-1.5 text-[11px] font-medium text-muted-foreground/70 whitespace-nowrap leading-none tracking-wide">TaskHub</span>
         </div>
-        {/* 展开时显示收起按钮 */}
         {!collapsed && (
           <div className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
             <PanelLeftClose className="h-4 w-4" />
@@ -117,96 +82,61 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
         )}
       </button>
 
-      {/* 导航 */}
-      <nav className="flex-1 overflow-y-auto px-2.5 py-3">
-        {navGroups.map((group) => {
-          const isGroupHidden = collapsed || collapsedGroups.has(group.label);
+      {/* 导航 — 扁平列表 */}
+      <nav className={cn('flex-1 overflow-y-auto px-2', collapsed ? 'space-y-2 py-3' : 'space-y-2 py-3')}>
+        {navItems.map((item) => {
+          const isActive = item.href === '/main/dashboard'
+            ? pathname === '/main/dashboard'
+            : pathname.startsWith(item.href) && item.href !== '/main/dashboard';
+
           return (
-            <div key={group.label} className="mb-1.5">
-              {/* 分组标题 */}
-              {!collapsed && (
-                <button
-                  onClick={() => toggleGroup(group.label)}
-                  aria-expanded={!collapsedGroups.has(group.label)}
-                  className="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left transition-colors hover:bg-accent/50"
-                >
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-                    {group.label}
-                  </span>
-                  <ChevronDown
-                    className={cn(
-                      'h-3 w-3 text-muted-foreground/50 transition-transform duration-200',
-                      collapsedGroups.has(group.label) && '-rotate-90',
-                    )}
-                  />
-                </button>
+            <Link
+              key={item.href}
+              href={item.href}
+              title={collapsed ? item.label : undefined}
+              className={cn(
+                'group relative flex items-center rounded-lg text-[13px] font-medium transition-all duration-200',
+                collapsed ? 'justify-center h-9 w-9 mx-auto' : 'gap-2.5 px-3 py-2',
+                isActive
+                  ? cn(item.activeBg, item.activeText, item.darkActiveBg, item.darkActiveText)
+                  : 'text-foreground/60 hover:bg-accent hover:text-foreground',
               )}
-
-              {/* 分组项 */}
-              {!collapsedGroups.has(group.label) && (
-                <div className={cn('mt-0.5', collapsed ? 'space-y-1.5' : 'space-y-0.5')}>
-                  {group.items.map((item) => {
-                    const isActive = item.href === '/main/dashboard'
-                      ? pathname === '/main/dashboard'
-                      : pathname.startsWith(item.href) && item.href !== '/main/dashboard';
-
-                    return (
-                      <Link
-                        key={item.href + item.label}
-                        href={item.href}
-                        title={collapsed ? item.label : undefined}
-                        className={cn(
-                          'group relative flex items-center rounded-lg text-[13px] font-medium transition-all duration-200',
-                          collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-3 py-2',
-                          isActive
-                            ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300'
-                            : 'text-foreground/60 hover:bg-accent hover:text-foreground',
-                        )}
-                      >
-                        {/* 活跃指示条 */}
-                        {isActive && (
-                          <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-indigo-500" />
-                        )}
-                        <item.icon className={cn(
-                          'h-[18px] w-[18px] shrink-0 transition-colors duration-200',
-                          isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-muted-foreground group-hover:text-foreground',
-                        )} />
-                        <span className={cn(
-                          'overflow-hidden whitespace-nowrap transition-all duration-300',
-                          collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
-                        )}>
-                          {item.label}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
+            >
+              {isActive && (
+                <div className={cn('absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full', item.color)} />
               )}
-            </div>
+              <item.icon className={cn(
+                'h-[18px] w-[18px] shrink-0 transition-colors duration-200',
+                isActive ? cn(item.color, item.darkColor) : 'text-muted-foreground group-hover:text-foreground',
+              )} />
+              <span className={cn(
+                'overflow-hidden whitespace-nowrap transition-all duration-300',
+                collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
+              )}>
+                {item.label}
+              </span>
+            </Link>
           );
         })}
       </nav>
 
       {/* 底部 AI 入口 */}
-      <div className={cn('border-t border-border', collapsed ? 'p-2' : 'p-3')}>
+      <div className={cn('shrink-0 border-t border-border', collapsed ? 'px-2 py-3' : 'px-3 py-3')}>
         <button
           onClick={onOpenAi}
           title={collapsed ? 'AI 助手' : undefined}
           className={cn(
-            'flex w-full items-center rounded-xl border border-indigo-100 bg-indigo-50/50 transition-all duration-200 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm dark:border-indigo-800/40 dark:bg-indigo-950/30 dark:hover:border-indigo-700/50 dark:hover:bg-indigo-950/50',
-            collapsed ? 'justify-center h-10 w-10 mx-auto' : 'gap-2.5 px-3.5 py-2.5',
+            'flex w-full items-center rounded-lg bg-indigo-500/10 text-indigo-600 transition-all duration-200 hover:bg-indigo-500/15 dark:bg-indigo-500/10 dark:text-indigo-400 dark:hover:bg-indigo-500/20',
+            collapsed ? 'justify-center h-9 w-9 mx-auto' : 'gap-2.5 px-3 py-2',
           )}
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950/50">
-            <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <div className={cn(
-            'overflow-hidden transition-all duration-300',
+          <Sparkles className="h-[18px] w-[18px] shrink-0" />
+          <span className={cn(
+            'overflow-hidden whitespace-nowrap text-[13px] font-semibold transition-all duration-300',
             collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
           )}>
-            <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-400 whitespace-nowrap">AI 助手</p>
-            <p className="text-[11px] text-indigo-400 dark:text-indigo-500 whitespace-nowrap">⌘J 展开对话</p>
-          </div>
+            AI 助手
+          </span>
         </button>
       </div>
     </aside>

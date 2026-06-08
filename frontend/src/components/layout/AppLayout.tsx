@@ -38,8 +38,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
         onToggleCollapse={toggleSidebar}
       />
       <div
-        className="relative flex min-w-0 flex-1 flex-col transition-all duration-300 ease-in-out"
-        style={{ marginLeft: sidebarCollapsed ? '72px' : '272px', zIndex: 1 }}
+        className="relative flex min-w-0 flex-1 flex-col transition-[margin] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        style={{ marginLeft: sidebarCollapsed ? '66px' : '210px', zIndex: 1 }}
       >
         <Header onOpenAi={() => setAiOpen(true)} />
         <main className="min-w-0 flex-1 overflow-y-auto">

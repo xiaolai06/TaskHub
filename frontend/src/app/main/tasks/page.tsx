@@ -171,10 +171,10 @@ function TasksPageContent() {
 
       {/* 第二行：项目 + 状态 + 优先级 + 日期 + 清除 */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className={cn(filterBoxCls, 'w-36')}>
+        <div className={cn(filterBoxCls, 'w-36 overflow-hidden')}>
           <FolderKanban className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}
-            className={cn(filterBoxInner, 'pr-1')}>
+            className={cn(filterBoxInner, 'w-full truncate appearance-none pr-4')}>
             <option value="">全部项目</option>
             {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
