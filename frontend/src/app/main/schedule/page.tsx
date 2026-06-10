@@ -133,7 +133,7 @@ function ScheduleContent() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4">
+    <div className="mx-auto max-w-7xl space-y-4 page-enter">
       {/* 工具栏 */}
       <div className="flex flex-wrap items-center gap-2">
         <select

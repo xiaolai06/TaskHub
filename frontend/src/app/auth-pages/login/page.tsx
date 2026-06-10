@@ -64,7 +64,7 @@ export default function LoginPage() {
           智汇轻营
         </h1>
         <p className="mt-1.5 text-base text-slate-400">
-          TaskHub — 智能订单执行工作台
+          TaskHub — 让订单流转更高效
         </p>
       </div>
 

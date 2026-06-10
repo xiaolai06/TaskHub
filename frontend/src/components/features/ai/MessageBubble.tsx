@@ -45,7 +45,24 @@ const TOOL_INFO: Record<string, { icon: string; label: string }> = {
   get_goal_progress: { icon: '🎯', label: '目标进度' },
   get_weekly_review: { icon: '📝', label: '周报' },
   suggest_weekly_plan: { icon: '📝', label: '周计划' },
+  create_project: { icon: '📁', label: '创建项目' },
+  update_project: { icon: '✏️', label: '更新项目' },
+  delete_project: { icon: '🗑️', label: '删除项目' },
   get_business_health: { icon: '🏥', label: '业务健康' },
+  get_current_time: { icon: '🕐', label: '获取时间' },
+  undo_last_tool: { icon: '↩️', label: '撤销操作' },
+  send_email: { icon: '📧', label: '发送邮件' },
+  send_webhook: { icon: '🔗', label: '发送通知' },
+  delete_task: { icon: '🗑️', label: '删除任务' },
+  delete_project: { icon: '🗑️', label: '删除项目' },
+  assess_complexity: { icon: '🧮', label: '复杂度评估' },
+  evaluate_insertion: { icon: '📊', label: '插单评估' },
+  suggest_rebalance: { icon: '⚖️', label: '重平衡建议' },
+  get_schedule_advice: { icon: '💡', label: '排期建议' },
+  get_historical_accuracy: { icon: '📈', label: '工时准确度' },
+  create_customer: { icon: '👤', label: '创建客户' },
+  update_customer: { icon: '✏️', label: '更新客户' },
+  update_project: { icon: '✏️', label: '更新项目' },
 };
 
 interface MessageBubbleProps {
@@ -73,6 +90,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
 
   // 工具调用耗时模拟
   const toolDoneCount = toolItems.filter(t => t.status === 'done').length;
+  const hasRealToolCalls = toolItems.some(t => t.status === 'done');
 
   return (
     <div className={cn('flex gap-3 group', isUser && 'flex-row-reverse')}>
@@ -105,7 +123,16 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
             {isUser ? (
               <p className="whitespace-pre-wrap">{message.content}</p>
             ) : (
-              <MarkdownRenderer content={message.content} />
+              <>
+                {/* 假成功检测：AI 说成功但没调工具 */}
+                {!isUser && !hasRealToolCalls && /创建成功|已创建|✅/.test(message.content) && (
+                  <div className="mb-2 flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+                    <span>⚠️</span>
+                    <span>AI 可能未实际执行操作，请刷新页面确认数据是否已创建</span>
+                  </div>
+                )}
+                <MarkdownRenderer content={message.content} />
+              </>
             )}
           </div>
         )}

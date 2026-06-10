@@ -54,7 +54,7 @@ export default function CustomersPage() {
   function clearDateFilter() { setStartDate(''); setEndDate(''); }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 page-enter">
       {/* ── 统计卡片 ── */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[

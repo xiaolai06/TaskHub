@@ -101,7 +101,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
   if (loading) return <div className="flex items-center justify-center py-32"><Loader2 className="h-8 w-8 animate-spin text-indigo-500" /></div>;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5">
+    <div className="mx-auto max-w-5xl space-y-5 page-enter">
       {/* 视图切换 + 日期 */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-0.5">
@@ -152,7 +152,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
                     </span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-muted">
-                    <div className={cn('h-full rounded-full', barColors[i % 6])} style={{ width: `${Math.max(0, Math.min(100, r.margin + 20))}%` }} />
+                    <div className={cn('h-full rounded-full progress-animate', barColors[i % 6])} style={{ width: `${Math.max(0, Math.min(100, r.margin + 20))}%` }} />
                   </div>
                 </div>
               ))}
@@ -173,7 +173,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
                     <span className="font-mono text-muted-foreground">{fmtYuan(s.amount)} · {s.percent}%</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-amber-400" style={{ width: `${s.percent}%` }} />
+                    <div className="h-full rounded-full bg-amber-400 progress-animate" style={{ width: `${s.percent}%` }} />
                   </div>
                 </div>
               ))}

@@ -54,7 +54,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   const { user } = useAuth();
   const {
     messages, isLoading,
-    sendMessage, stopGeneration,
+    sendMessage, stopGeneration, regenerate,
     loadHistory, getSessions, deleteSession, setMessages,
   } = useAiChat();
 
@@ -68,6 +68,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   const [selectedModelName, setSelectedModelName] = useState<string | undefined>(undefined);
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined);
   const [modelToast, setModelToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // 用 ref 保存最新的 model/provider，避免 useCallback 闭包捕获旧值
   const modelRef = useRef<{ id?: string; provider?: string }>({});
@@ -79,7 +80,8 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     setSelectedModelName(modelName);
     modelRef.current = { id: modelId, provider };
     setModelToast(modelId ? `已切换: ${modelName || modelId}` : '已恢复默认模型');
-    setTimeout(() => setModelToast(null), 2000);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setModelToast(null), 2000);
   }, []);
 
   // 发送消息
@@ -102,16 +104,9 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
 
   // 重新生成
   const handleRegenerateMsg = useCallback((msg: ChatMessage) => {
-    setMessages(prev => {
-      const idx = prev.findIndex(m => m.id === msg.id);
-      if (idx <= 0) return prev;
-      const prevUser = prev[idx - 1];
-      if (prevUser.role !== 'user') return prev;
-      const newMsgs = prev.slice(0, idx);
-      sendMessage(prevUser.content, activeSessionId, modelRef.current.id, modelRef.current.provider);
-      return newMsgs;
-    });
-  }, [setMessages, sendMessage, activeSessionId]);
+    const { id: currentModel, provider: currentProvider } = modelRef.current;
+    regenerate(msg.id, activeSessionId, currentModel, currentProvider);
+  }, [regenerate, activeSessionId]);
 
   // 客户点击
   const handleCustomerClick = useCallback((name: string) => {
@@ -152,6 +147,11 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // 清理 toast 定时器
+  useEffect(() => {
+    return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
+  }, []);
 
   // 加载会话列表
   useEffect(() => {

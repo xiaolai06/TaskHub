@@ -1,4 +1,5 @@
 import { ToolDefinition } from './types';
+import { fetchWithTimeout } from './fetch-with-timeout';
 
 // ═══ GitHub Trending 工具（Search API 版） ═══
 // GitHub Trending 页面是 JS 动态渲染的，HTML 直接抓取只能拿到空骨架
@@ -41,7 +42,7 @@ async function fetchTrending(params: {
 
   const url = `${GITHUB_API}/search/repositories?q=${encodeURIComponent(q)}&sort=stars&order=desc&per_page=${topN}`;
 
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     headers: {
       'Accept': 'application/vnd.github.v3+json',
       'User-Agent': 'TaskFlow-AI/1.0',

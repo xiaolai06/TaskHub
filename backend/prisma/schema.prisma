@@ -39,6 +39,7 @@ model User {
   cronJobs       CronJob[]
   workTimers     WorkTimer[]
   todayTodos     TodayTodo[]
+  toolExecutions ToolExecutionLog[]
 }
 
 // ======================== 个人资料 ========================
@@ -296,6 +297,17 @@ model Setting {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, category, key])
+}
+
+// ======================== 工具执行日志 ========================
+model ToolExecutionLog {
+  id         String   @id @default(cuid())
+  userId     String
+  toolName   String
+  args       String              // JSON
+  result     String              // JSON
+  executedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ======================== 目标管理 ========================

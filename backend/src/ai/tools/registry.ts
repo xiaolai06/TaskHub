@@ -27,6 +27,7 @@ import { historicalAccuracyTool } from './historical-accuracy';
 // 通知推送工具
 import { sendEmailTool } from './send-email';
 import { sendWebhookTool } from './send-webhook';
+import { undoLastToolTool } from './undo-last-tool';
 
 const allTools: ToolDefinition[] = [
   // 💰 finance
@@ -44,7 +45,7 @@ const allTools: ToolDefinition[] = [
   // 🕐 system
   getCurrentTimeTool,
   // 📨 通知推送
-  sendEmailTool, sendWebhookTool,
+  sendEmailTool, sendWebhookTool, undoLastToolTool,
   // 📅 schedule intelligence
   complexityAssessmentTool, insertionEvaluationTool, rebalanceSuggestTool, scheduleAdviceTool,
   historicalAccuracyTool,

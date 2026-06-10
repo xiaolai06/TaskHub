@@ -169,8 +169,7 @@ function JobCard({ job, models, webhooks, onToggle }: {
     } catch (e) {
       setTestRes([{ channel: '错误', ok: false, msg: e instanceof Error ? e.message : '测试失败' }]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [job.id]);
+  }, [job.id, tMut]);
 
   return (
     <div className={cn('rounded-lg border bg-card', job.enabled ? 'border-border' : 'opacity-50')}>

@@ -132,7 +132,7 @@ function TasksPageContent() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 page-enter">
       {/* 第一行：看板/列表 + 搜索框（长） + 任务数 + 新建 */}
       <div className="flex items-center gap-2">
         <div className="flex h-9 w-36 shrink-0 items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">

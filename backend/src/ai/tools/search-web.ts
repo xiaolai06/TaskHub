@@ -29,7 +29,7 @@ async function getSearchConfig(userId: string): Promise<SearchConfig> {
   let apiKey = '';
   const rawKey = map.get('api_key');
   if (rawKey) {
-    try { apiKey = decrypt(rawKey); } catch { apiKey = rawKey; }
+    try { apiKey = decrypt(rawKey); } catch { console.warn('[Search] API Key 解密失败，请重新配置'); apiKey = ''; }
   }
 
   let parsedCfg: Record<string, any> = {};

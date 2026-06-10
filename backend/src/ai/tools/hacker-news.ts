@@ -1,4 +1,5 @@
 import { ToolDefinition } from './types';
+import { fetchWithTimeout } from './fetch-with-timeout';
 
 // ═══ Hacker News API ═══
 // 官方 Firebase API: hacker-news.firebaseio.com
@@ -18,11 +19,11 @@ interface HNItem {
 }
 
 async function fetchTopStories(maxResults = 10): Promise<HNItem[]> {
-  const ids = await fetch(`${HN_API}/topstories.json`).then(r => r.json()) as number[];
+  const ids = await fetchWithTimeout(`${HN_API}/topstories.json`).then(r => r.json()) as number[];
   const topIds = ids.slice(0, maxResults);
   const items = await Promise.all(
     topIds.map(id =>
-      fetch(`${HN_API}/item/${id}.json`).then(r => r.json())
+      fetchWithTimeout(`${HN_API}/item/${id}.json`).then(r => r.json())
     )
   );
   return items as HNItem[];
@@ -30,11 +31,11 @@ async function fetchTopStories(maxResults = 10): Promise<HNItem[]> {
 
 async function fetchCategory(category: 'ask' | 'show' | 'job', maxResults = 10) {
   // askstories, showstories, jobstories
-  const ids = await fetch(`${HN_API}/${category}stories.json`).then(r => r.json()) as number[];
+  const ids = await fetchWithTimeout(`${HN_API}/${category}stories.json`).then(r => r.json()) as number[];
   const topIds = ids.slice(0, maxResults);
   const items = await Promise.all(
     topIds.map(id =>
-      fetch(`${HN_API}/item/${id}.json`).then(r => r.json())
+      fetchWithTimeout(`${HN_API}/item/${id}.json`).then(r => r.json())
     )
   );
   return items as HNItem[];

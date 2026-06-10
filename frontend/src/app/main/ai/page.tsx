@@ -129,7 +129,7 @@ export default function AiWorkbenchPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl page-enter">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-bold text-foreground">定时任务</h1>

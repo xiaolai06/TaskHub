@@ -8,9 +8,11 @@ import { api } from '@/lib/api';
 const WRITE_TOOL_CACHE_MAP: Record<string, string[]> = {
   create_project: ['projects', 'dashboard', 'header'],
   update_project: ['projects', 'dashboard', 'header'],
+  delete_project: ['projects', 'dashboard', 'header'],
   create_task: ['tasks', 'projects', 'dashboard', 'header'],
   update_task_status: ['tasks', 'projects', 'dashboard', 'header'],
   delete_task: ['tasks', 'projects', 'dashboard', 'header'],
+  undo_last_tool: ['projects', 'tasks', 'customers', 'costs', 'dashboard', 'header'],
   log_time: ['projects', 'dashboard'],
   log_communication: ['customers', 'dashboard'],
 };
@@ -20,6 +22,7 @@ export interface ToolCallEvent {
   args: Record<string, unknown>;
   result?: unknown;
   status: 'calling' | 'done' | 'error';
+  toolCallId?: string;
 }
 
 export interface ChatMessage {
@@ -37,6 +40,65 @@ export interface ChatSession {
   title?: string;
 }
 
+/** 生成唯一 ID */
+function uid(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/** SSE 流式消费共享逻辑 */
+async function consumeSSEStream(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  aiId: string,
+  opts: {
+    onText: (content: string) => void;
+    onToolCall: (name: string, args: Record<string, unknown>, id: string, tools: ToolCallEvent[]) => void;
+    onToolResult: (name: string, result: unknown, tools: ToolCallEvent[]) => void;
+    onDone: (tools: ToolCallEvent[]) => void;
+  },
+): Promise<void> {
+  const decoder = new TextDecoder();
+  let buffer = '';
+  const tools: ToolCallEvent[] = [];
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6);
+      if (data === '[DONE]') { opts.onDone(tools); return; }
+      try {
+        const event = JSON.parse(data);
+        switch (event.type) {
+          case 'text':
+            opts.onText(event.content);
+            break;
+          case 'tool_call':
+            tools.push({ name: event.name, args: event.args, status: 'calling', toolCallId: event.id });
+            opts.onToolCall(event.name, event.args, event.id, [...tools]);
+            break;
+          case 'tool_result':
+            for (const t of tools) {
+              if (t.name === event.name) { t.result = event.result; t.status = 'done'; }
+            }
+            opts.onToolResult(event.name, event.result, [...tools]);
+            break;
+          case 'done':
+            opts.onDone([...tools]);
+            return;
+        }
+      } catch { /* parse failure — skip */ }
+    }
+  }
+  opts.onDone([...tools]);
+}
+
 export function useAiChat() {
   const qc = useQueryClient();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -44,100 +106,73 @@ export function useAiChat() {
   const [currentToolCalls, setCurrentToolCalls] = useState<ToolCallEvent[]>([]);
   const abortRef = useRef<AbortController | null>(null);
 
+  /** 启动 SSE 请求并消费流 */
+  const startStream = useCallback(async (
+    message: string,
+    sessionId: string,
+    aiId: string,
+    model?: string,
+    provider?: string,
+    showStopMsg = true,
+  ): Promise<void> => {
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const res = await fetch(`${API_BASE}/llm/chat/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ message, sessionId, model, provider }),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const reader = res.body!.getReader();
+
+    await consumeSSEStream(reader, aiId, {
+      onText: (content) => {
+        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: m.content + content } : m));
+      },
+      onToolCall: (_name, _args, _id, allTools) => {
+        setCurrentToolCalls(allTools);
+        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, toolCalls: allTools } : m));
+      },
+      onToolResult: (_name, _result, allTools) => {
+        setCurrentToolCalls(allTools);
+        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, toolCalls: allTools } : m));
+      },
+      onDone: (allTools) => {
+        for (const t of allTools) {
+          const keys = WRITE_TOOL_CACHE_MAP[t.name];
+          if (keys) keys.forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
+        }
+        setIsLoading(false);
+        setCurrentToolCalls([]);
+      },
+    });
+  }, [qc]);
+
   const sendMessage = useCallback(async (
     message: string,
     sessionId: string = 'default',
     model?: string,
     provider?: string,
   ): Promise<void> => {
-    // 如果有正在进行的请求，先中断
     abortRef.current?.abort();
-
     setIsLoading(true);
     setCurrentToolCalls([]);
 
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(), role: 'user', content: message, timestamp: new Date(),
-    };
+    const userMsg: ChatMessage = { id: uid(), role: 'user', content: message, timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
 
-    const aiId = (Date.now() + 1).toString();
+    const aiId = uid();
     const aiMsg: ChatMessage = { id: aiId, role: 'assistant', content: '', toolCalls: [], timestamp: new Date() };
     setMessages(prev => [...prev, aiMsg]);
 
-    const controller = new AbortController();
-    abortRef.current = controller;
-
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-// ...
-const res = await fetch(`${API_BASE}/llm/chat/stream`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ message, sessionId, model, provider }),
-        signal: controller.signal,
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const reader = res.body!.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      const tools: ToolCallEvent[] = [];
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const data = line.slice(6);
-          if (data === '[DONE]') {
-            setIsLoading(false);
-            setCurrentToolCalls([]);
-            return;
-          }
-          try {
-            const event = JSON.parse(data);
-            switch (event.type) {
-              case 'text':
-                setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: m.content + event.content } : m));
-                break;
-              case 'tool_call':
-                tools.push({ name: event.name, args: event.args, status: 'calling' });
-                setCurrentToolCalls([...tools]);
-                setMessages(prev => prev.map(m => m.id === aiId ? { ...m, toolCalls: [...tools] } : m));
-                break;
-              case 'tool_result':
-                for (const t of tools) {
-                  if (t.name === event.name) { t.result = event.result; t.status = 'done'; }
-                }
-                setCurrentToolCalls([...tools]);
-                setMessages(prev => prev.map(m => m.id === aiId ? { ...m, toolCalls: [...tools] } : m));
-                break;
-              case 'done':
-                // 写操作工具完成后失效缓存，列表实时刷新
-                for (const t of tools) {
-                  const keys = WRITE_TOOL_CACHE_MAP[t.name];
-                  if (keys) keys.forEach((k) => qc.invalidateQueries({ queryKey: [k] }));
-                }
-                setIsLoading(false);
-                setCurrentToolCalls([]);
-                return;
-            }
-          } catch { /* parse failure — skip */ }
-        }
-      }
-      setIsLoading(false);
-      setCurrentToolCalls([]);
+      await startStream(message, sessionId, aiId, model, provider, true);
     } catch (err: unknown) {
-      // 如果是主动中断，不显示错误
       if (err instanceof DOMException && err.name === 'AbortError') {
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: m.content + '\n\n_已停止生成_' } : m));
       } else {
@@ -146,7 +181,7 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
       setIsLoading(false);
       setCurrentToolCalls([]);
     }
-  }, [qc]);
+  }, [startStream]);
 
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
@@ -167,9 +202,48 @@ const res = await fetch(`${API_BASE}/llm/chat/stream`, {
     await api.delete(`/llm/conversations/${sessionId}`);
   }, []);
 
+  const regenerate = useCallback(async (
+    aiMessageId: string,
+    sessionId: string = 'default',
+    model?: string,
+    provider?: string,
+  ): Promise<void> => {
+    abortRef.current?.abort();
+
+    let lastUserMsg = '';
+    setMessages(prev => {
+      const idx = prev.findIndex(m => m.id === aiMessageId);
+      if (idx > 0 && prev[idx - 1].role === 'user') {
+        lastUserMsg = prev[idx - 1].content;
+      }
+      return prev.filter(m => m.id !== aiMessageId);
+    });
+
+    if (!lastUserMsg) return;
+
+    setIsLoading(true);
+    setCurrentToolCalls([]);
+
+    const aiId = uid();
+    const aiMsg: ChatMessage = { id: aiId, role: 'assistant', content: '', toolCalls: [], timestamp: new Date() };
+    setMessages(prev => [...prev, aiMsg]);
+
+    try {
+      await startStream(lastUserMsg, sessionId, aiId, model, provider, false);
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        // 不追加"已停止生成"，因为是重新生成触发的 abort
+      } else {
+        setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: `错误: ${err instanceof Error ? err.message : '通信失败'}` } : m));
+      }
+      setIsLoading(false);
+      setCurrentToolCalls([]);
+    }
+  }, [startStream]);
+
   return {
     messages, isLoading, currentToolCalls,
-    sendMessage, stopGeneration,
+    sendMessage, stopGeneration, regenerate,
     loadHistory, getSessions, deleteSession, setMessages,
   };
 }

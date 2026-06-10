@@ -1,4 +1,5 @@
 import { ToolDefinition } from './types';
+import { fetchWithTimeout } from './fetch-with-timeout';
 
 // ═══ NPM Registry API ═══
 // 官方 API: registry.npmjs.org
@@ -19,7 +20,7 @@ interface NPMPackage {
 async function searchPackages(query: string, size = 10): Promise<NPMPackage[]> {
   // npm search API
   const url = `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(query)}&size=${size}`;
-  const res = await fetch(url);
+  const res = await fetchWithTimeout(url);
   if (!res.ok) throw new Error(`NPM API HTTP ${res.status}`);
   const data = await res.json() as any;
   return (data.objects || []).map((obj: any) => ({

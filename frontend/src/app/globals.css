@@ -288,6 +288,54 @@
       0 0 42px -14px oklch(0.52 0.1 225 / 14%);
   }
 
+  .list-stagger {
+    animation: listEnter 0.35s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes listEnter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .empty-float {
+    animation: emptyFloat 2.5s ease-in-out infinite;
+  }
+
+  @keyframes emptyFloat {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .tab-content-enter {
+    animation: tabContentEnter 0.2s ease-out forwards;
+  }
+
+  @keyframes tabContentEnter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   /* 日期选择器暗色模式适配 */
   .dark input[type="date"] {
     color-scheme: dark;
@@ -302,4 +350,301 @@
   input[type="date"]::-webkit-calendar-picker-indicator:hover {
     opacity: 0.8;
   }
+}
+
+/* ═══ 登录页动态背景 ═══ */
+.auth-bg {
+  background: oklch(0.97 0.006 265);
+}
+
+.dark .auth-bg {
+  background: oklch(0.14 0.012 255);
+}
+
+/* 第一层：缓慢流动的渐变 */
+.auth-bg__gradient {
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(
+    135deg,
+    oklch(0.94 0.03 265) 0%,
+    oklch(0.97 0.01 220) 25%,
+    oklch(0.95 0.02 290) 50%,
+    oklch(0.96 0.015 240) 75%,
+    oklch(0.94 0.03 265) 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientFlow 20s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+.dark .auth-bg__gradient {
+  background: linear-gradient(
+    135deg,
+    oklch(0.2 0.04 265) 0%,
+    oklch(0.17 0.03 220) 25%,
+    oklch(0.19 0.035 290) 50%,
+    oklch(0.18 0.025 240) 75%,
+    oklch(0.2 0.04 265) 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientFlow 20s ease-in-out infinite;
+  opacity: 0.5;
+}
+
+/* 第二层：呼吸光斑 */
+.auth-bg__orb {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+.auth-bg__orb--1 {
+  width: 55vw;
+  height: 55vw;
+  max-width: 700px;
+  max-height: 700px;
+  top: -20%;
+  left: -15%;
+  background: radial-gradient(
+    circle at 45% 45%,
+    oklch(0.82 0.08 265 / 0.35) 0%,
+    oklch(0.88 0.05 265 / 0.15) 45%,
+    transparent 70%
+  );
+  animation: orbBreathe1 8s ease-in-out infinite;
+}
+
+.auth-bg__orb--2 {
+  width: 45vw;
+  height: 45vw;
+  max-width: 580px;
+  max-height: 580px;
+  bottom: -25%;
+  right: -15%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    oklch(0.80 0.07 230 / 0.3) 0%,
+    oklch(0.87 0.04 230 / 0.12) 45%,
+    transparent 70%
+  );
+  animation: orbBreathe2 10s ease-in-out infinite;
+}
+
+.dark .auth-bg__orb--1 {
+  background: radial-gradient(
+    circle at 45% 45%,
+    oklch(0.35 0.1 265 / 0.4) 0%,
+    oklch(0.25 0.06 265 / 0.15) 45%,
+    transparent 70%
+  );
+}
+
+.dark .auth-bg__orb--2 {
+  background: radial-gradient(
+    circle at 50% 50%,
+    oklch(0.32 0.08 230 / 0.35) 0%,
+    oklch(0.22 0.05 230 / 0.12) 45%,
+    transparent 70%
+  );
+}
+
+/* 第三层：细微网格纹理 — 增加立体感 */
+.auth-bg__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(oklch(0.7 0 0 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.7 0 0 / 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 20%, transparent 80%);
+  animation: gridPulse 6s ease-in-out infinite;
+}
+
+.dark .auth-bg__grid {
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+}
+
+/* 第四层：大号品牌虚影 */
+.auth-bg__logo-mark {
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  bottom: 3%;
+  right: 3%;
+  color: oklch(0.55 0.1 265 / 0.12);
+  animation: logoBreathe 12s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.dark .auth-bg__logo-mark {
+  color: oklch(0.5 0.12 265 / 0.06);
+}
+
+/* ── 动画 ── */
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+@keyframes orbBreathe1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(30px, 20px) scale(1.15);
+    opacity: 0.6;
+  }
+}
+
+@keyframes orbBreathe2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-25px, -30px) scale(1.12);
+    opacity: 0.55;
+  }
+}
+
+@keyframes gridPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes logoBreathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-bg__gradient,
+  .auth-bg__orb,
+  .auth-bg__grid,
+  .auth-bg__logo-mark {
+    animation: none !important;
+  }
+}
+
+/* ═══ 主应用背景光晕（保留给 AppLayout） ═══ */
+.bg-orbs {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.bg-orb--1 {
+  width: 400px;
+  height: 400px;
+  top: -15%;
+  left: -10%;
+  background: radial-gradient(
+    circle at 45% 45%,
+    oklch(0.85 0.06 265 / 0.2) 0%,
+    oklch(0.9 0.04 265 / 0.08) 45%,
+    transparent 70%
+  );
+  animation: orbBreathe1 12s ease-in-out infinite;
+}
+
+.bg-orb--2 {
+  width: 320px;
+  height: 320px;
+  bottom: -18%;
+  right: -8%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    oklch(0.83 0.05 230 / 0.18) 0%,
+    oklch(0.89 0.03 230 / 0.06) 45%,
+    transparent 70%
+  );
+  animation: orbBreathe2 14s ease-in-out infinite;
+}
+
+.bg-orb--3 {
+  width: 250px;
+  height: 250px;
+  top: 40%;
+  left: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    oklch(0.84 0.05 290 / 0.15) 0%,
+    oklch(0.9 0.03 290 / 0.05) 42%,
+    transparent 68%
+  );
+  animation: orbBreathe3 16s ease-in-out infinite;
+}
+
+@keyframes orbBreathe3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-20px, 25px) scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+.dark .bg-orb--1 {
+  background: radial-gradient(
+    circle at 45% 45%,
+    oklch(0.3 0.08 265 / 0.2) 0%,
+    oklch(0.2 0.05 265 / 0.08) 45%,
+    transparent 70%
+  );
+}
+
+.dark .bg-orb--2 {
+  background: radial-gradient(
+    circle at 50% 50%,
+    oklch(0.28 0.06 230 / 0.18) 0%,
+    oklch(0.18 0.04 230 / 0.06) 45%,
+    transparent 70%
+  );
+}
+
+.dark .bg-orb--3 {
+  background: radial-gradient(
+    circle at 50% 50%,
+    oklch(0.29 0.06 290 / 0.15) 0%,
+    oklch(0.19 0.04 290 / 0.05) 42%,
+    transparent 68%
+  );
 }

@@ -93,7 +93,7 @@ export function GoalCard({ goal, onEdit, onDelete, onCalculate }: GoalCardProps)
 
   return (
     <div className={cn(
-      'group rounded-xl border bg-white px-5 py-4 transition-all hover:shadow-sm',
+      'group rounded-xl border bg-white px-5 py-4 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5',
       isComplete ? 'border-slate-100 opacity-60' : isAtRisk ? 'border-red-200 bg-red-50/30' : 'border-slate-200',
     )}>
       {/* 头部：标题 + 状态 + 菜单 */}
@@ -180,7 +180,7 @@ export function GoalCard({ goal, onEdit, onDelete, onCalculate }: GoalCardProps)
 
         {/* 进度条 */}
         <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
-          <div className={cn('h-full rounded-full transition-all duration-500', barColor)}
+          <div className={cn('h-full rounded-full progress-animate', barColor)}
             style={{ width: `${Math.min(100, progress)}%` }} />
         </div>
 

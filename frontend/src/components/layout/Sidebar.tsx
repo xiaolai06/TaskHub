@@ -66,7 +66,13 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
         title={collapsed ? '展开侧边栏' : '收起侧边栏'}
       >
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-br from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/20">
-          <span className="text-[15px] font-black text-white leading-none">T</span>
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 3L20 7.5V16.5L12 21L4 16.5V7.5L12 3Z" />
+            <path d="M12 12L20 7.5" />
+            <path d="M12 12V21" />
+            <path d="M12 12L4 7.5" />
+            <circle cx="12" cy="12" r="2" fill="white" stroke="none" />
+          </svg>
         </div>
         <div className={cn(
           'flex flex-col items-start justify-center overflow-hidden transition-all duration-300',

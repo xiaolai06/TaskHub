@@ -101,7 +101,7 @@ export function GoalOverview({ data, isLoading }: Props) {
                 </p>
               )}
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                <div className={cn('h-full rounded-full transition-all', barColor)}
+                <div className={cn('h-full rounded-full progress-animate', barColor)}
                   style={{ width: `${Math.min(100, progress)}%` }} />
               </div>
               <p className="mt-1 text-[10px] text-slate-400">

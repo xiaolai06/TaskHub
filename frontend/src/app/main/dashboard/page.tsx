@@ -207,7 +207,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+    <div className="flex flex-col gap-4 page-enter">
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-6">
         <StatCard
           icon={FolderKanban}
@@ -290,7 +290,7 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-2">
                       <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-indigo-500"
+                          className="h-full rounded-full bg-indigo-500 progress-animate"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
@@ -376,7 +376,7 @@ export default function DashboardPage() {
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-emerald-500"
+                  className="h-full rounded-full bg-emerald-500 progress-animate"
                   style={{ width: `${stats.completionRate}%` }}
                 />
               </div>

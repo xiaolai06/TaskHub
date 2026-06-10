@@ -48,7 +48,7 @@ export function GoalProgress({
       <div className={cn('w-full overflow-hidden rounded-full bg-muted', barHeight)}>
         <div
           className={cn(
-            'rounded-full transition-all duration-500',
+            'rounded-full progress-animate',
             barHeight,
             isComplete ? 'bg-emerald-500' : percent >= 60 ? 'bg-indigo-500' : 'bg-amber-500',
           )}

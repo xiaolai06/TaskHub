@@ -1,4 +1,5 @@
 import { ToolDefinition } from './types';
+import { fetchWithTimeout } from './fetch-with-timeout';
 
 // ═══ Dev.to API ═══
 // 官方 API: dev.to/api
@@ -72,7 +73,7 @@ export const devToTool: ToolDefinition = {
         url = `${DEV_API}/articles?per_page=${topN}` + (tagParam ? `&${tagParam}` : '');
       }
 
-      const res = await fetch(url);
+      const res = await fetchWithTimeout(url);
       if (!res.ok) throw new Error(`Dev.to API HTTP ${res.status}`);
       const articles = await res.json() as DevArticle[];
 

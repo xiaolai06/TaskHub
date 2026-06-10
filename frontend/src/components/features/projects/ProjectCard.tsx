@@ -63,7 +63,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
   }, []);
 
   return (
-    <div className="group relative rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:border-border hover:shadow-md">
+    <div className="group relative rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-200 hover:border-border hover:shadow-md hover:-translate-y-0.5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-950/40">
@@ -171,7 +171,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
           <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
             <div
               className={cn(
-                'h-full rounded-full transition-all',
+                'h-full rounded-full progress-animate',
                 cost >= quote ? 'bg-red-500' : costRisk ? 'bg-amber-400' : 'bg-indigo-400',
               )}
               style={{ width: `${costRatio}%` }}

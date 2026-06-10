@@ -72,7 +72,7 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4">
+    <div className="mx-auto max-w-5xl space-y-4 page-enter">
       {/* 总览卡片 */}
       <GoalOverview data={overview} isLoading={isLoading} />
 

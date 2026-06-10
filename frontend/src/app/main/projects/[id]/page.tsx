@@ -158,7 +158,7 @@ export default function ProjectDetailPage({
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-6">
+    <div className="mx-auto max-w-[1400px] space-y-6 page-enter">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link href="/main/projects">

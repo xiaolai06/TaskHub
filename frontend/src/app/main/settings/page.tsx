@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import {
   Loader2, CheckCircle, AlertCircle, Bot, Link, Shield, Database,
   Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search, Plus, Mail, Send, Bell, Clock,
@@ -65,6 +66,7 @@ function AIConfig() {
   const [saved, setSaved] = useState(false);
   const [fetchingModels, setFetchingModels] = useState(false);
   const [fetchMsg, setFetchMsg] = useState('');
+  const [toolPermission, setToolPermission] = useState<'auto' | 'confirm'>('auto');
 
   // 自定义供应商弹窗
   const [addProviderOpen, setAddProviderOpen] = useState(false);
@@ -84,6 +86,7 @@ function AIConfig() {
             const active = res.provider || 'deepseek';
             setSelectedProvider(active);
             fillFromProvider(providers, active);
+            if (res.tool_permission) setToolPermission(res.tool_permission as 'auto' | 'confirm');
           })
           .catch(() => {
             const configured = providers.find(p => p.apiKey);
@@ -164,16 +167,19 @@ function AIConfig() {
         defaultModel,
         powerfulModel,
       });
-      // 2. 设置当前激活供应商
+      // 2. 设置当前激活供应商 + 工具权限
       await api.post('/settings/batch', {
-        settings: [{ category: 'AI', key: 'provider', value: selectedProvider }],
+        settings: [
+          { category: 'AI', key: 'provider', value: selectedProvider },
+          { category: 'AI', key: 'tool_permission', value: toolPermission },
+        ],
       });
       // 3. 刷新供应商列表
       const pList = await api.get<ProviderInfo[]>('/settings/ai/providers');
       setProviders(pList);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch {} finally { setSaving(false); }
+    } catch (e) { toast.error('保存失败: ' + (e instanceof Error ? e.message : '未知错误')); } finally { setSaving(false); }
   }
 
   // 删除自定义供应商
@@ -187,7 +193,7 @@ function AIConfig() {
         setSelectedProvider(pList[0].name);
         fillFromProvider(pList, pList[0].name);
       }
-    } catch {}
+    } catch (e) { toast.error('删除失败: ' + (e instanceof Error ? e.message : '未知错误')); }
   }
 
   async function handleAddProvider() {
@@ -201,7 +207,7 @@ function AIConfig() {
       setAddProviderOpen(false);
       setNewPName(''); setNewPLabel(''); setNewPUrl(''); setNewPKey('');
       setSelectedProvider(newPName);
-    } catch {}
+    } catch (e) { toast.error('添加失败: ' + (e instanceof Error ? e.message : '未知错误')); }
   }
 
   const inputCls = 'w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
@@ -304,6 +310,38 @@ function AIConfig() {
           <CheckCircle className="h-3.5 w-3.5" />配置已保存
         </div>
       )}
+
+      {/* 工具权限设置 */}
+      <div className="rounded-lg border border-border bg-card p-3">
+        <label className="mb-1.5 block text-xs font-medium text-foreground/70">写操作权限</label>
+        <p className="mb-2 text-[11px] text-muted-foreground">控制 AI 执行创建、修改、删除等操作时的行为</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setToolPermission('auto')}
+            className={cn(
+              'flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-all',
+              toolPermission === 'auto'
+                ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
+                : 'border-border text-muted-foreground hover:bg-accent',
+            )}
+          >
+            自动执行
+            <span className="mt-0.5 block text-[10px] font-normal opacity-70">AI 直接执行写操作</span>
+          </button>
+          <button
+            onClick={() => setToolPermission('confirm')}
+            className={cn(
+              'flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-all',
+              toolPermission === 'confirm'
+                ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
+                : 'border-border text-muted-foreground hover:bg-accent',
+            )}
+          >
+            确认后执行
+            <span className="mt-0.5 block text-[10px] font-normal opacity-70">写操作需点击确认</span>
+          </button>
+        </div>
+      </div>
 
       <div className="flex gap-2">
         <button onClick={handleTest} disabled={testing || !apiKey}
@@ -1130,7 +1168,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-4xl page-enter">
       <h1 className="mb-5 text-lg font-bold text-foreground">系统设置</h1>
 
       {/* 分类标签 */}

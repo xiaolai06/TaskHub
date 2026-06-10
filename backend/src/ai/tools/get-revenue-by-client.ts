@@ -21,12 +21,19 @@ export const getProjectMarginRankingTool: ToolDefinition = {
     const where: Record<string, unknown> = { ownerId: userId };
     if (args.status) where.status = args.status;
     const projects = await prisma.project.findMany({ where, include: { customer: { select: { name: true } } } });
-    const results = [];
-    for (const p of projects) {
-      const agg = await prisma.costRecord.aggregate({ where: { projectId: p.id }, _sum: { amount: true } });
-      const cost = agg._sum.amount || 0, budget = p.budget || 0, profit = budget - cost;
-      results.push({ projectName: p.name, client: p.customer?.name || '无', status: p.status, budget: budget / 100, cost: cost / 100, profit: profit / 100, margin: budget > 0 ? Math.round((profit / budget) * 100) + '%' : '-' });
-    }
-    return results.sort((a, b) => (b.profit as number) - (a.profit as number));
+    const projectIds = projects.map(p => p.id);
+
+    // 批量聚合替代 N+1 查询
+    const costAggs = projectIds.length > 0
+      ? await prisma.costRecord.groupBy({ by: ['projectId'], where: { projectId: { in: projectIds } }, _sum: { amount: true } })
+      : [];
+    const costMap = new Map(costAggs.map(a => [a.projectId, a._sum.amount || 0]));
+
+    return projects.map(p => {
+      const cost = costMap.get(p.id) || 0;
+      const budget = p.budget || 0;
+      const profit = budget - cost;
+      return { projectName: p.name, client: p.customer?.name || '无', status: p.status, budget: budget / 100, cost: cost / 100, profit: profit / 100, margin: budget > 0 ? Math.round((profit / budget) * 100) + '%' : '-' };
+    }).sort((a, b) => (b.profit as number) - (a.profit as number));
   },
 };

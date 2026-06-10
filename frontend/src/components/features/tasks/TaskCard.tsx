@@ -70,12 +70,12 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
     <div
       onClick={() => onClick?.(task)}
       className={cn(
-        'group relative flex h-[168px] flex-col rounded-xl border border-border/60 bg-card shadow-sm transition-all',
+        'group relative flex h-[168px] flex-col rounded-xl border border-border/60 bg-card shadow-sm transition-all duration-200',
         'border-l-[3px] pl-4 pr-3.5 py-3.5',
         getPriorityBorderColor(task.priority),
-        isDragging && 'shadow-xl scale-[1.03] rotate-[1.5deg] border-indigo-200',
+        isDragging && 'drag-active border-indigo-200',
         isDone && 'opacity-55',
-        onClick && 'cursor-pointer hover:border-border hover:shadow-md',
+        onClick && 'cursor-pointer hover:border-border hover:shadow-md hover:-translate-y-0.5',
       )}
     >
       {/* 顶部：标题 + 操作 — 固定 40px */}

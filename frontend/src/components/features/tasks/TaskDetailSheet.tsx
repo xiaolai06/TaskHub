@@ -169,7 +169,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
                 {/* 进度条 */}
                 <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-emerald-500 transition-all"
+                    className="h-full rounded-full bg-emerald-500 progress-animate"
                     style={{ width: `${children.length > 0 ? Math.round((doneCount / children.length) * 100) : 0}%` }}
                   />
                 </div>

@@ -145,7 +145,7 @@ export default function ResearchPage() {
   // ═══ 渲染 ═══
 
   return (
-    <div className="mx-auto max-w-4xl space-y-5">
+    <div className="mx-auto max-w-4xl space-y-5 page-enter">
       {/* Tab 切换 + 搜索栏一体 */}
       <div className="flex items-center gap-3">
         <div className="flex gap-1 rounded-lg border border-border bg-card p-0.5">

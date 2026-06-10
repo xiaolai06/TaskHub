@@ -221,7 +221,7 @@ export default function ProfilePage() {
   const selectCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6 page-enter">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold text-foreground">个人信息</h1>
         <div className="flex items-center gap-2 text-sm">

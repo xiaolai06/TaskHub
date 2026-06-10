@@ -32,6 +32,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-muted">
+      {/* 背景流动光晕 */}
+      <div className="bg-orbs bg-orbs--app">
+        <div className="bg-orb bg-orb--1" />
+        <div className="bg-orb bg-orb--2" />
+        <div className="bg-orb bg-orb--3" />
+      </div>
+
       <Sidebar
         onOpenAi={() => setAiOpen(true)}
         collapsed={sidebarCollapsed}

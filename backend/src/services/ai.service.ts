@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { z } from 'zod';
 import { prisma } from '../server';
 import { decrypt } from './encryption.service';
 import { getBaseUrl as getDynamicBaseUrl } from './setting.service';
@@ -8,7 +9,7 @@ import type { ToolDefinition } from '../ai/tools/types';
 
 export type StreamEvent =
   | { type: 'text'; content: string }
-  | { type: 'tool_call'; name: string; args: Record<string, unknown> }
+  | { type: 'tool_call'; id: string; name: string; args: Record<string, unknown> }
   | { type: 'tool_result'; name: string; result: unknown }
   | { type: 'done' };
 
@@ -18,6 +19,7 @@ interface AIConfig {
   baseUrl: string;
   model: string;
   powerfulModel: string;
+  toolPermission: 'auto' | 'confirm';
 }
 
 // ═══ Token 估算 ═══
@@ -58,8 +60,28 @@ function trimMessages(messages: OpenAI.Chat.Completions.ChatCompletionMessagePar
 
   const systemMsgs = messages.filter(m => m.role === 'system');
   const nonSystem = messages.filter(m => m.role !== 'system');
-  const trimmed = nonSystem.slice(-8); // 保留最近 4 轮（8 条）
-  return [...systemMsgs, ...trimmed];
+
+  // 从末尾开始保留，确保不拆散 tool_call + tool 配对
+  const kept: typeof nonSystem = [];
+  let i = nonSystem.length - 1;
+  while (i >= 0 && kept.length < 8) {
+    const msg = nonSystem[i];
+    if (msg.role === 'tool') {
+      // tool 消息必须跟它前面的 assistant(tool_calls) 一起保留
+      const group: typeof nonSystem = [msg];
+      i--;
+      while (i >= 0 && nonSystem[i].role === 'tool') { group.unshift(nonSystem[i]); i--; }
+      if (i >= 0 && nonSystem[i].role === 'assistant' && (nonSystem[i] as OpenAI.Chat.Completions.ChatCompletionAssistantMessageParam).tool_calls) {
+        group.unshift(nonSystem[i]); i--;
+      }
+      kept.unshift(...group);
+    } else {
+      kept.unshift(msg);
+      i--;
+    }
+  }
+
+  return [...systemMsgs, ...kept];
 }
 
 // ═══ 脱敏 ═══
@@ -68,6 +90,54 @@ function sanitizeErrorMessage(msg: string): string {
   return msg
     .replace(/sk[-_][A-Za-z0-9]{6,}/g, '***')
     .replace(/Bearer\s+[A-Za-z0-9._-]{10,}/g, 'Bearer ***');
+}
+
+// ═══ 工具参数校验 ═══
+
+function validateToolArgs(tool: ToolDefinition, args: Record<string, unknown>): { valid: boolean; errors?: string[] } {
+  const errors: string[] = [];
+  const { properties, required } = tool.parameters;
+  // 检查必填字段
+  if (required) {
+    for (const key of required) {
+      if (args[key] === undefined || args[key] === null || args[key] === '') {
+        errors.push(`缺少必填参数: ${key}`);
+      }
+    }
+  }
+  // 检查类型
+  for (const [key, value] of Object.entries(args)) {
+    const prop = properties[key];
+    if (!prop) continue;
+    if (prop.enum && !prop.enum.includes(String(value))) {
+      errors.push(`参数 ${key} 的值 "${value}" 不在允许范围: ${prop.enum.join(', ')}`);
+    }
+  }
+  if (tool.schema) {
+    const result = tool.schema.safeParse(args);
+    if (!result.success) {
+      errors.push(...result.error.issues.map(i => `${i.path.join('.')}: ${i.message}`));
+    }
+  }
+  return errors.length > 0 ? { valid: false, errors } : { valid: true };
+}
+
+// ═══ 执行日志写入 ═══
+
+async function logToolExecution(userId: string, toolName: string, args: Record<string, unknown>, result: unknown): Promise<void> {
+  try {
+    await prisma.toolExecutionLog.create({
+      data: {
+        userId,
+        toolName,
+        args: JSON.stringify(args),
+        result: JSON.stringify(result),
+        executedAt: new Date(),
+      },
+    });
+  } catch (err) {
+    console.warn('[AI] 执行日志写入失败:', err instanceof Error ? err.message : err);
+  }
 }
 
 // ═══ AIService 类 ═══
@@ -163,9 +233,11 @@ export class AIService {
       powerfulModel = get('powerful_model') || (typeof parsed.powerfulModel === 'string' && parsed.powerfulModel ? parsed.powerfulModel : defaultModel);
     }
 
-    console.log(`[AI] init: provider=${provider}, baseUrl=${baseUrl}, model=${defaultModel}, isSwitch=${isSwitch}`);
+    const redactedUrl = (() => { try { return new URL(baseUrl).hostname; } catch { return '***'; } })();
+    console.log(`[AI] init: provider=${provider}, host=${redactedUrl}, model=${defaultModel}, isSwitch=${isSwitch}`);
 
-    this.config = { provider, apiKey, baseUrl, model: defaultModel, powerfulModel };
+    const toolPermission = (get('tool_permission') as 'auto' | 'confirm') || 'auto';
+    this.config = { provider, apiKey, baseUrl, model: defaultModel, powerfulModel, toolPermission };
     this.client = new OpenAI({ apiKey, baseURL: this.config.baseUrl });
     return true;
   }
@@ -196,9 +268,23 @@ export class AIService {
       while (maxLoops > 0) {
         maxLoops--;
 
-        const stream = await this.client.chat.completions.create({
-          model, messages, tools, stream: true, temperature: 0.7, max_tokens: 2048,
-        }) as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
+        let stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
+        try {
+          stream = await this.client.chat.completions.create({
+            model, messages, tools, stream: true, temperature: 0.7, max_tokens: 2048,
+          }) as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
+        } catch (modelErr: unknown) {
+          // 主模型失败，尝试 fallback 到 powerfulModel
+          if (model !== this.config.powerfulModel) {
+            console.warn(`[AI] 模型 ${model} 失败，尝试 fallback 到 ${this.config.powerfulModel}`);
+            yield { type: 'text', content: `⚠️ 模型 \`${model}\` 不可用，已自动切换到 \`${this.config.powerfulModel}\`。\n\n` };
+            stream = await this.client.chat.completions.create({
+              model: this.config.powerfulModel, messages, tools, stream: true, temperature: 0.7, max_tokens: 2048,
+            }) as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
+          } else {
+            throw modelErr;
+          }
+        }
 
         let fullContent = '';
         const toolCalls: Array<{ id: string; type: string; function: { name: string; arguments: string } }> = [];
@@ -217,7 +303,14 @@ export class AIService {
           }
         }
 
-        if (toolCalls.length === 0) { yield { type: 'done' }; return; }
+        if (toolCalls.length === 0) {
+          // 兜底检测：AI 说成功但没调工具 → 插入警告
+          if (/已创建|创建成功|✅|已添加|已建立/.test(fullContent) && /create_|update_|delete_|log_/.test(fullContent) === false) {
+            const toolNames = this.tools.filter(t => t.access === 'write').map(t => t.name).join(', ');
+            yield { type: 'text', content: '\n\n⚠️ **注意**：以上回复可能未实际调用工具。如需真正创建数据，请明确告知我执行操作。\n' };
+          }
+          yield { type: 'done' }; return;
+        }
 
         messages.push({ role: 'assistant', content: fullContent || null, tool_calls: toolCalls as unknown as OpenAI.Chat.Completions.ChatCompletionMessageToolCall[] });
 
@@ -227,18 +320,34 @@ export class AIService {
             args = JSON.parse(tc.function.arguments);
           } catch {
             const parseError = { error: `参数解析失败，原始内容: ${tc.function.arguments.slice(0, 200)}` };
-            yield { type: 'tool_call', name: tc.function.name, args: {} };
+            yield { type: 'tool_call', id: tc.id, name: tc.function.name, args: {} };
             yield { type: 'tool_result', name: tc.function.name, result: parseError };
             messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(parseError) });
             continue;
           }
-          yield { type: 'tool_call', name: tc.function.name, args };
 
           const tool = this.toolMap.get(tc.function.name);
+
+          // 参数校验
+          if (tool) {
+            const validation = validateToolArgs(tool, args);
+            if (!validation.valid) {
+              const valError = { error: `参数校验失败: ${validation.errors!.join('; ')}` };
+              yield { type: 'tool_call', id: tc.id, name: tc.function.name, args };
+              yield { type: 'tool_result', name: tc.function.name, result: valError };
+              messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(valError) });
+              continue;
+            }
+          }
+
+          yield { type: 'tool_call', id: tc.id, name: tc.function.name, args };
+
           let result: unknown;
           if (tool) {
-            try { result = await tool.handler(args, this.userId); }
-            catch (err) { result = { error: err instanceof Error ? err.message : '工具执行失败' }; }
+            try {
+              result = await tool.handler(args, this.userId);
+              await logToolExecution(this.userId, tc.function.name, args, result);
+            } catch (err) { result = { error: err instanceof Error ? err.message : '工具执行失败' }; }
           } else {
             result = { error: `未知工具: ${tc.function.name}` };
           }
@@ -248,6 +357,9 @@ export class AIService {
         }
       }
 
+      if (maxLoops <= 0) {
+        yield { type: 'text', content: '\n\n⚠️ 已达到最大工具调用轮次（10轮），部分操作可能未完成。' };
+      }
       yield { type: 'done' };
     } catch (apiErr: unknown) {
       const rawMsg = apiErr instanceof Error ? apiErr.message : '未知错误';

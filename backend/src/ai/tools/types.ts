@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 // 工具标准接口
 export interface ToolDefinition {
   name: string;
@@ -12,4 +14,6 @@ export interface ToolDefinition {
   access: 'read' | 'write';
   requiresConfirmation: boolean;
   preferredModel: 'fast' | 'balanced' | 'powerful';
+  /** 可选的 Zod schema，用于校验工具参数 */
+  schema?: z.ZodType<Record<string, unknown>>;
 }

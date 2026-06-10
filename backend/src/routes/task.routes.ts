@@ -3,6 +3,7 @@ import { validate } from '../middleware/validate';
 import { createTaskSchema, updateTaskSchema, updateTaskStatusSchema, taskQuerySchema } from '../validators/task.schema';
 import * as taskService from '../services/task.service';
 import { success, error } from '../utils/response';
+import { prisma } from '../server';
 
 const router = Router();
 
@@ -30,6 +31,19 @@ router.get('/project/:projectId', async (req: Request, res: Response, next: Next
   } catch (err) {
     next(err);
   }
+});
+
+// GET /stats - 任务统计聚合（SmartDigest 用）
+router.get('/stats', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.userId!;
+    const now = new Date();
+    const [todoCount, overdueCount] = await Promise.all([
+      prisma.task.count({ where: { project: { ownerId: userId }, status: { in: ['TODO', 'IN_PROGRESS'] } } }),
+      prisma.task.count({ where: { project: { ownerId: userId }, status: { not: 'DONE' }, dueDate: { lt: now } } }),
+    ]);
+    success(res, { todoCount, overdueCount });
+  } catch (err) { next(err); }
 });
 
 // POST / - 创建任务

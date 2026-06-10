@@ -35,7 +35,28 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
     // 系统提示（根据用户消息自动选择）
     const basePrompt = selectSystemPrompt(message, initialized);
     const toolListHint = tools.map(t => `- \`${t.name}\`: ${t.description}`).join('\n');
-    const systemPrompt = `${basePrompt}\n\n## 可用工具（${tools.length}个）\n${toolListHint}\n\n## 时间说明\n当用户提到"今天"、"明天"、"下周"等相对时间时，必须先调用 get_current_time 工具获取准确日期，再进行计算。不要猜测日期。`;
+
+    // 读取用户记忆注入上下文
+    const memories = await prisma.userMemory.findMany({
+      where: { userId: req.userId! },
+      orderBy: { confidence: 'desc' },
+      take: 20,
+      select: { category: true, key: true, value: true, confidence: true },
+    });
+    const memoryHint = memories.length > 0
+      ? `\n\n## 用户记忆（你已了解的用户偏好和业务知识）\n${memories.map(m => `- [${m.category}] ${m.key}: ${m.value}`).join('\n')}\n在回答时参考这些记忆，让回复更个性化。`
+      : '';
+
+    // 读取工具权限设置，注入不同的行为指令
+    const permSetting = await prisma.setting.findFirst({
+      where: { userId: req.userId!, category: 'AI', key: 'tool_permission' },
+    });
+    const toolPerm = permSetting?.value || 'auto';
+    const permHint = toolPerm === 'confirm'
+      ? `\n\n## 写操作规则\n当用户要求创建、修改、删除数据时，先用文字说明你将要执行的操作（列出关键字段），然后询问用户"确认执行吗？"。只有当用户回复"确认""执行""是""好"等肯定词时，才调用工具执行。不要在用户确认前调用任何写操作工具。`
+      : `\n\n## 写操作规则\n当用户要求创建、修改、删除数据时，直接调用对应的工具执行。不要询问确认，不要只用文字描述。工具是唯一能写入数据的方式。`;
+
+    const systemPrompt = `${basePrompt}${memoryHint}${permHint}\n\n## 可用工具（${tools.length}个）\n${toolListHint}\n\n## 时间说明\n当用户提到"今天"、"明天"、"下周"等相对时间时，必须先调用 get_current_time 工具获取准确日期，再进行计算。不要猜测日期。`;
 
     // 构建 messages 数组，加载最近对话历史保持上下文连贯
     const sid = sessionId || 'default';
@@ -64,22 +85,34 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
 
     // 流式对话
     let fullText = '';
+    const toolContext: string[] = [];
     for await (const event of ai.chat({ messages, model })) {
-      send(event);
+      if (!res.destroyed) send(event);
       if (event.type === 'text') fullText += event.content;
+      if (event.type === 'tool_call') toolContext.push(`🔧 ${event.name}(${JSON.stringify(event.args).slice(0, 200)})`);
+      if (event.type === 'tool_result') toolContext.push(`✅ ${event.name}: ${JSON.stringify(event.result).slice(0, 200)}`);
     }
 
-    // 保存 AI 回复
-    if (fullText) {
-      await prisma.conversation.create({ data: { userId: req.userId!, sessionId: sid, role: 'assistant', content: fullText } });
+    // 保存 AI 回复（含工具上下文摘要）
+    if (fullText || toolContext.length > 0) {
+      const content = toolContext.length > 0
+        ? `${fullText}\n\n[工具调用]\n${toolContext.join('\n')}`
+        : fullText;
+      await prisma.conversation.create({ data: { userId: req.userId!, sessionId: sid, role: 'assistant', content } });
     }
 
-    send('[DONE]');
-    res.end();
+    if (!res.destroyed) {
+      send('[DONE]');
+      res.end();
+    }
   } catch (err) {
-    res.write(`data: ${JSON.stringify({ type: 'error', message: err instanceof Error ? err.message : '对话出错' })}\n\n`);
-    res.write('data: [DONE]\n\n');
-    res.end();
+    if (!res.destroyed) {
+      try {
+        res.write(`data: ${JSON.stringify({ type: 'error', message: err instanceof Error ? err.message : '对话出错' })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        res.end();
+      } catch { /* connection already closed */ }
+    }
   }
 });
 

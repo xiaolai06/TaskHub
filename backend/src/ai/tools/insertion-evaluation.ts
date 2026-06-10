@@ -50,7 +50,7 @@ export const insertionEvaluationTool: ToolDefinition = {
 
     // 2. 获取现有任务 + 新任务
     const rawTasks = await prisma.task.findMany({
-      where: { projectId, status: { not: 'DONE' } },
+      where: { projectId, status: { not: 'DONE' }, project: { ownerId: userId } },
       select: {
         id: true, title: true, priority: true,
         estimatedHours: true, startDate: true, dueDate: true, status: true,
@@ -78,19 +78,22 @@ export const insertionEvaluationTool: ToolDefinition = {
     // 3. 重新排期
     // 复用 buildSchedule 逻辑（简化版）
     const PRIORITY_ORDER: Record<string, number> = { URGENT: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+    const FAR_FUTURE = '9999-12-31';
     const sorted = [...tasks].sort((a, b) => {
       const pa = PRIORITY_ORDER[a.priority] ?? 2;
       const pb = PRIORITY_ORDER[b.priority] ?? 2;
       if (pa !== pb) return pa - pb;
-      if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      if (a.dueDate && !b.dueDate) return -1;
-      if (!a.dueDate && b.dueDate) return 1;
+      const da = a.dueDate || FAR_FUTURE;
+      const db = b.dueDate || FAR_FUTURE;
+      if (da !== db) return new Date(da).getTime() - new Date(db).getTime();
       return a.estimatedHours - b.estimatedHours;
     });
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const cursorDate = new Date(today);
+    const maxDate = new Date(today);
+    maxDate.setDate(maxDate.getDate() + 365); // 安全上限 1 年
     const workloadMap = new Map<string, number>();
     const taskEndMap = new Map<string, string>();
 
@@ -99,6 +102,7 @@ export const insertionEvaluationTool: ToolDefinition = {
       let lastDay = '';
 
       while (left > 0) {
+        if (cursorDate > maxDate) { lastDay = cursorDate.toISOString().split('T')[0]; break; }
         const dateStr = cursorDate.toISOString().split('T')[0];
         const currentHours = workloadMap.get(dateStr) || 0;
         const available = dailyHourLimit - currentHours;

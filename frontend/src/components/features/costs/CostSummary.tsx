@@ -39,7 +39,7 @@ export function CostSummary({ summary, quote }: { summary?: CostSummaryData; quo
                 <span>{formatYuan(item.amount)} · {item.percent}%</span>
               </div>
               <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-                <div className="h-full rounded-full bg-indigo-400" style={{ width: `${item.percent}%` }} />
+                <div className="h-full rounded-full bg-indigo-400 progress-animate" style={{ width: `${item.percent}%` }} />
               </div>
             </div>
           ))}

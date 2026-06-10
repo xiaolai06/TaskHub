@@ -122,6 +122,16 @@ export function MarkdownRenderer({ content }: { content: string }) {
   return <>{elements}</>;
 }
 
+/** 安全 URL 检查：只允许 http/https/mailto 协议 */
+function isSafeUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    return ['http:', 'https:', 'mailto:'].includes(u.protocol);
+  } catch {
+    return false;
+  }
+}
+
 /** 行内渲染：加粗、斜体、代码、链接 */
 function renderInline(text: string): React.ReactNode {
   // 简化处理：使用安全的文本渲染，不注入 HTML
@@ -166,7 +176,7 @@ function renderInline(text: string): React.ReactNode {
       case 'strong': return <strong key={i} className="font-semibold text-foreground">{p.text}</strong>;
       case 'em': return <em key={i} className="italic">{p.text}</em>;
       case 'code': return <code key={i} className="rounded bg-muted px-1 py-0.5 text-xs text-rose-600 font-mono">{p.text}</code>;
-      case 'link': return <a key={i} href={p.url} className="text-indigo-500 underline" target="_blank" rel="noreferrer">{p.text}</a>;
+      case 'link': return isSafeUrl(p.url || '') ? <a key={i} href={p.url} className="text-indigo-500 underline" target="_blank" rel="noreferrer">{p.text}</a> : <span key={i}>{p.text}</span>;
       default: return <span key={i}>{p.text}</span>;
     }
   })}</>;

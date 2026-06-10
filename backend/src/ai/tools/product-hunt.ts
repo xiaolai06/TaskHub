@@ -1,6 +1,7 @@
 import { ToolDefinition } from './types';
 import { prisma } from '../../server';
 import { decrypt } from '../../services/encryption.service';
+import { fetchWithTimeout } from './fetch-with-timeout';
 
 // ═══ Product Hunt API ═══
 // 官方 GraphQL API: api.producthunt.com/v2
@@ -85,7 +86,7 @@ export const productHuntTool: ToolDefinition = {
     `;
 
     try {
-      const res = await fetch(PH_API, {
+      const res = await fetchWithTimeout(PH_API, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

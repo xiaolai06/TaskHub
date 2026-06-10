@@ -39,36 +39,29 @@ export function SmartDigest({ onDigestClick, open }: SmartDigestProps) {
     setLoading(true);
     setError(false);
 
-    // 从仪表盘和任务 API 获取真实数据
+    // 从仪表盘和客户 API 获取数据（任务统计由后端聚合）
     Promise.all([
       api.get<any>('/dashboard/summary').catch(() => null),
-      api.get<any[]>('/tasks?limit=200').catch(() => []),
+      api.get<any>('/tasks/stats').catch(() => null),
       api.get<any[]>('/customers').catch(() => []),
     ])
-      .then(([dashSummary, tasks, customers]) => {
-        const taskArr = Array.isArray(tasks) ? tasks : (tasks as any)?.data || [];
+      .then(([dashSummary, taskStats, customers]) => {
         const custArr = Array.isArray(customers) ? customers : (customers as any)?.data || [];
 
-        const overdueCount = taskArr.filter((t: any) => {
-          if (t.status === 'DONE') return false;
-          if (!t.dueDate) return false;
-          return new Date(t.dueDate) < new Date();
-        }).length;
-        const todoCount = taskArr.filter((t: any) =>
-          t.status === 'TODO' || t.status === 'IN_PROGRESS'
-        ).length;
+        const overdueCount = taskStats?.overdueCount || 0;
+        const todoCount = taskStats?.todoCount || 0;
 
         // 从仪表盘数据中提取真实财务数据
-        const revenue = dashSummary?.monthIncome || dashSummary?.income || 0;
-        const expense = dashSummary?.monthExpense || dashSummary?.expense || 0;
+        const revenue = (dashSummary?.monthIncome || dashSummary?.income || 0) / 100;
+        const expense = (dashSummary?.monthExpense || dashSummary?.expense || 0) / 100;
         const profit = revenue - expense;
         const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
 
         setData({
           taskCount: todoCount,
           overdueCount,
-          monthlyRevenue: revenue,
-          monthlyProfit: profit,
+          monthlyRevenue: Math.round(revenue),
+          monthlyProfit: Math.round(profit),
           profitMargin: margin,
           followUpCount: custArr.length,
           urgentFollowUpCount: 0,

@@ -1,4 +1,5 @@
 import { ToolDefinition } from './types';
+import { fetchWithTimeout } from './fetch-with-timeout';
 
 // ═══ Exchange Rate API ═══
 // open.er-api.com — 免费无限制，无需 Key
@@ -61,7 +62,7 @@ export const exchangeRateTool: ToolDefinition = {
     const amount = (args.amount as number) || 1;
 
     try {
-      const res = await fetch(`${ER_API}/latest/${from}`);
+      const res = await fetchWithTimeout(`${ER_API}/latest/${from}`);
       if (!res.ok) throw new Error(`汇率 API HTTP ${res.status}`);
       const data = await res.json() as any;
 
