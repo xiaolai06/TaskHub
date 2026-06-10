@@ -48,11 +48,10 @@ export async function getStats(userId: string) {
   };
 }
 
-export async function getRecentTasks(userId: string, limit = 5) {
+export async function getRecentTasks(userId: string) {
   return prisma.task.findMany({
     where: { project: { ownerId: userId }, status: { not: 'DONE' } },
-    orderBy: [{ priority: 'asc' }, { dueDate: 'asc' }],
-    take: limit,
+    orderBy: [{ dueDate: 'asc' }, { priority: 'asc' }],
     select: {
       id: true,
       title: true,

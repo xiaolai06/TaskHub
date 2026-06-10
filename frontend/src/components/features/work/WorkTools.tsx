@@ -243,20 +243,20 @@ export function WorkTools() {
 
   return (
     <div className="relative flex items-center gap-1">
-      <button onClick={() => { setShowTimer(!showTimer); setShowTodo(false); }}
+      <button onClick={() => { setShowTimer(!showTimer); setShowTodo(false); }} onMouseDown={(e) => e.stopPropagation()}
         className={cn('flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-all hover:border-border hover:bg-muted active:scale-95',
           showTimer && 'border-indigo-300 bg-indigo-50 text-indigo-600')}>
         <Timer className="h-4 w-4" />计时
       </button>
 
-      <button onClick={() => { setShowTodo(!showTodo); setShowTimer(false); }}
+      <button onClick={() => { setShowTodo(!showTodo); setShowTimer(false); }} onMouseDown={(e) => e.stopPropagation()}
         className={cn('flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium transition-all hover:border-border hover:bg-muted active:scale-95',
           showTodo && 'border-indigo-300 bg-indigo-50 text-indigo-600')}>
         <ListTodo className="h-4 w-4" />任务
       </button>
 
-      {showTimer && <div className="absolute right-0 top-full z-30 mt-1"><TimerPanel onClose={() => setShowTimer(false)} /></div>}
-      {showTodo && <div className="absolute right-0 top-full z-30 mt-1"><TodoPanel onClose={() => setShowTodo(false)} /></div>}
+      {showTimer && <div className="absolute right-0 top-full z-30 mt-3"><TimerPanel onClose={() => setShowTimer(false)} /></div>}
+      {showTodo && <div className="absolute right-0 top-full z-30 mt-3"><TodoPanel onClose={() => setShowTodo(false)} /></div>}
     </div>
   );
 }

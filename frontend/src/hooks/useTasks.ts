@@ -181,6 +181,7 @@ export function useUpdateTaskStatus() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY] });
       qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['header', 'recent-tasks'] });
     },
   });
 }

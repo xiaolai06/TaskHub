@@ -648,3 +648,36 @@
     transparent 68%
   );
 }
+
+/* ── 全局滚动条：纤细、半透明 ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.7 0 0 / 0.25) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0 0 / 0.2);
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.6 0 0 / 0.35);
+}
+
+/* AI 面板内滚动条更纤细 */
+[data-ai-panel] *::-webkit-scrollbar {
+  width: 4px;
+}
+
+[data-ai-panel] *::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0 0 / 0.15);
+}

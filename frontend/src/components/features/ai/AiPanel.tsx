@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { Zap, X, Plus } from 'lucide-react';
+import { Sparkles, X, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useAiChat, type ChatMessage } from '@/hooks/useAiChat';
@@ -12,7 +12,7 @@ import { EmptyState } from './EmptyState';
 import { LoadingIndicator } from './LoadingIndicator';
 import { ChatInput } from './ChatInput';
 
-type TabKey = 'overview' | 'customers' | 'history' | 'schedule';
+type TabKey = 'overview' | 'customers' | 'history' | 'schedule' | 'projects' | 'jobs';
 
 // ═══ 消息列表（memo，避免输入时重渲染） ═══
 
@@ -181,16 +181,18 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
       )}
 
       <div
-        className="fixed right-0 top-0 z-50 flex h-screen w-[860px] flex-col bg-card shadow-2xl transition-transform duration-300 ease-in-out"
+        data-ai-panel
+        className="fixed right-0 top-0 z-50 flex h-screen w-[1060px] flex-col bg-card shadow-2xl transition-transform duration-300 ease-in-out"
         style={{ transform: open ? 'translateX(0)' : 'translateX(100%)' }}
       >
         {/* 顶部栏 */}
-        <div className="flex h-11 shrink-0 items-center justify-between border-b border-border bg-muted/50 px-3">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/10">
-              <Zap className="h-3 w-3 text-primary" />
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-border/60 bg-muted/40 px-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100">
+              <Sparkles className="h-4 w-4 text-indigo-500" />
             </div>
-            <span className="text-[13px] font-semibold text-foreground">AI 助手</span>
+            <span className="text-[15px] font-bold tracking-tight text-foreground">智汇轻营</span>
+            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-500">小语</span>
           </div>
           <div className="flex items-center gap-1">
             <button onClick={handleNewSession} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none" title="新对话 (⌘N)">

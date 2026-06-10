@@ -1,6 +1,6 @@
 'use client';
 
-import { Brain, Users, Clock, Calendar } from 'lucide-react';
+import { Brain, Users, Clock, Calendar, FolderKanban, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SmartDigest } from './SmartDigest';
 import { QuickActions } from './QuickActions';
@@ -11,7 +11,7 @@ import { ModelSwitcher } from './ModelSwitcher';
 import { ScheduleQuickActions } from './ScheduleQuickActions';
 import { JobConfigPanel } from './JobConfigPanel';
 
-type TabKey = 'overview' | 'customers' | 'history' | 'schedule';
+type TabKey = 'overview' | 'projects' | 'customers' | 'schedule' | 'history' | 'jobs';
 
 interface AiSidebarProps {
   activeTab: TabKey;
@@ -19,29 +19,24 @@ interface AiSidebarProps {
   onQuickAction: (text: string) => void;
   onCustomerClick: (name: string) => void;
   onDigestClick: () => void;
-
-  // 项目数据
   projects: Array<{ id: string; name: string; status: string; budget?: number; startDate?: string }>;
-
-  // 会话数据
   sessions: Array<{ sessionId: string; messageCount: number; lastMessage: Date; title?: string }>;
   activeSessionId: string;
   onSwitchSession: (sessionId: string) => void;
   onDeleteSession: (sessionId: string) => void;
   onNewSession: () => void;
-
-  // 模型
   selectedModel?: string;
   selectedModelName?: string;
   onModelSelect: (modelId: string | undefined, provider?: string, modelName?: string) => void;
-
   open: boolean;
 }
 
 const tabs: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { key: 'overview', label: '概览', icon: Brain },
+  { key: 'projects', label: '项目', icon: FolderKanban },
   { key: 'customers', label: '客户', icon: Users },
   { key: 'schedule', label: '排期', icon: Calendar },
+  { key: 'jobs', label: '定时', icon: Zap },
   { key: 'history', label: '历史', icon: Clock },
 ];
 
@@ -63,62 +58,81 @@ export function AiSidebar({
   open,
 }: AiSidebarProps) {
   return (
-    <div className="flex h-full w-[320px] shrink-0 flex-col border-r bg-muted/40">
-      {/* Tab 切换 */}
-      <div className="flex border-b px-2 pt-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => onTabChange(tab.key)}
-            className={cn(
-              'flex items-center gap-1.5 rounded-t-md px-3 py-2 text-[12px] font-medium transition-colors',
-              activeTab === tab.key
-                ? 'bg-card text-indigo-600 shadow-sm'
-                : 'text-muted-foreground hover:text-foreground/70',
-            )}
-          >
-            <tab.icon className="h-3.5 w-3.5" />
-            {tab.label}
-          </button>
-        ))}
+    <div className="flex h-full w-[270px] shrink-0 bg-muted/30">
+      {/* ── 竖向 Tab 列 ── */}
+      <div className="flex w-[46px] shrink-0 flex-col items-center gap-1.5 border-r border-border/15 py-3">
+        {tabs.map((tab) => {
+          const active = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => onTabChange(tab.key)}
+              title={tab.label}
+              className={cn(
+                'group relative flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-150',
+                active
+                  ? 'bg-indigo-50 text-indigo-600 shadow-sm'
+                  : 'text-muted-foreground/60 hover:bg-accent hover:text-foreground',
+              )}
+            >
+              <tab.icon className={cn('h-[16px] w-[16px]', active ? 'stroke-[2.2]' : 'stroke-[1.8]')} />
+              <span className="pointer-events-none absolute left-full z-10 ml-2.5 whitespace-nowrap rounded-lg bg-foreground/90 px-2.5 py-1 text-[11px] font-medium text-card opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Tab 内容 */}
-      <div className="flex-1 overflow-y-auto p-3">
-        {activeTab === 'overview' && (
-          <div className="space-y-3">
-            <SmartDigest onDigestClick={onDigestClick} open={open} />
-            <QuickActions onAction={onQuickAction} />
-            <div className="border-t border-border/60 pt-3">
-              <ProjectMiniList projects={projects} />
+      {/* ── Tab 内容 ── */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex-1 overflow-y-auto p-3">
+          {/* 概览：直接展示，不折叠 */}
+          {activeTab === 'overview' && (
+            <div className="space-y-4">
+              <SmartDigest onDigestClick={onDigestClick} open={open} />
+              <QuickActions onAction={onQuickAction} />
             </div>
-            <div className="border-t border-border/60 pt-3">
+          )}
+
+          {/* 项目：带展开任务 + 快捷提问 */}
+          {activeTab === 'projects' && (
+            <ProjectMiniList projects={projects} defaultOpen onQuickAction={onQuickAction} />
+          )}
+
+          {/* 客户 */}
+          {activeTab === 'customers' && (
+            <CustomerTab onCustomerClick={onCustomerClick} open={open} />
+          )}
+
+          {/* 排期 */}
+          {activeTab === 'schedule' && (
+            <ScheduleQuickActions onAction={onQuickAction} />
+          )}
+
+          {/* 定时任务：独立 Tab */}
+          {activeTab === 'jobs' && (
+            <div>
+              <p className="mb-3 px-1 text-[12px] font-bold text-foreground/80">⚡ 定时任务</p>
               <JobConfigPanel />
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'customers' && (
-          <CustomerTab onCustomerClick={onCustomerClick} open={open} />
-        )}
+          {/* 历史 */}
+          {activeTab === 'history' && (
+            <HistoryTab
+              sessions={sessions}
+              activeSessionId={activeSessionId}
+              onSwitchSession={onSwitchSession}
+              onDeleteSession={onDeleteSession}
+              onNewSession={onNewSession}
+            />
+          )}
+        </div>
 
-        {activeTab === 'schedule' && (
-          <ScheduleQuickActions onAction={onQuickAction} />
-        )}
-
-        {activeTab === 'history' && (
-          <HistoryTab
-            sessions={sessions}
-            activeSessionId={activeSessionId}
-            onSwitchSession={onSwitchSession}
-            onDeleteSession={onDeleteSession}
-            onNewSession={onNewSession}
-          />
-        )}
+        {/* 模型切换器 */}
+        <ModelSwitcher selectedModel={selectedModel} selectedModelName={selectedModelName} onSelect={onModelSelect} />
       </div>
-
-      {/* 模型切换器 */}
-      <ModelSwitcher selectedModel={selectedModel} selectedModelName={selectedModelName} onSelect={onModelSelect} />
     </div>
   );
 }

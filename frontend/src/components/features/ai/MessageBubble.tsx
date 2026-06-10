@@ -54,7 +54,6 @@ const TOOL_INFO: Record<string, { icon: string; label: string }> = {
   send_email: { icon: '📧', label: '发送邮件' },
   send_webhook: { icon: '🔗', label: '发送通知' },
   delete_task: { icon: '🗑️', label: '删除任务' },
-  delete_project: { icon: '🗑️', label: '删除项目' },
   assess_complexity: { icon: '🧮', label: '复杂度评估' },
   evaluate_insertion: { icon: '📊', label: '插单评估' },
   suggest_rebalance: { icon: '⚖️', label: '重平衡建议' },
@@ -62,7 +61,6 @@ const TOOL_INFO: Record<string, { icon: string; label: string }> = {
   get_historical_accuracy: { icon: '📈', label: '工时准确度' },
   create_customer: { icon: '👤', label: '创建客户' },
   update_customer: { icon: '✏️', label: '更新客户' },
-  update_project: { icon: '✏️', label: '更新项目' },
 };
 
 interface MessageBubbleProps {

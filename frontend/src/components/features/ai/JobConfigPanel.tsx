@@ -292,7 +292,6 @@ export function JobConfigPanel() {
   const updateMut = useUpdateCronJob();
   const [models, setModels] = useState<AIModel[]>([]);
   const [webhooks, setWebhooks] = useState<WH[]>([]);
-  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     let off = false;
@@ -307,13 +306,7 @@ export function JobConfigPanel() {
 
   return (
     <div className="space-y-1.5">
-      <button onClick={() => setCollapsed(!collapsed)}
-        className="flex w-full items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground/70">
-        {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-        <Zap className="h-3 w-3" />定时任务
-        <span className="ml-auto text-[9px] font-normal text-muted-foreground/50">{sj.filter(j => j.enabled).length}/{sj.length}</span>
-      </button>
-      {!collapsed && sj.map(job => (
+      {sj.map(job => (
         <JobCard key={job.id} job={job} models={models} webhooks={webhooks}
           onToggle={() => updateMut.mutate({ id: job.id, data: { enabled: !job.enabled } })} />
       ))}

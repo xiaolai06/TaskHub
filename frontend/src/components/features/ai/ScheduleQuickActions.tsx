@@ -1,6 +1,7 @@
 'use client';
 
 import { Calendar, AlertTriangle, TrendingUp, Clock, Zap } from 'lucide-react';
+import { CollapsibleSection } from './CollapsibleSection';
 
 interface ScheduleQuickActionsProps {
   onAction: (text: string) => void;
@@ -51,8 +52,7 @@ const scheduleActions = [
 
 export function ScheduleQuickActions({ onAction }: ScheduleQuickActionsProps) {
   return (
-    <div className="space-y-2">
-      <div className="text-xs font-medium text-muted-foreground mb-2">排期操作</div>
+    <CollapsibleSection title="排期操作" defaultOpen={false}>
       {scheduleActions.map((action) => (
         <button
           key={action.id}
@@ -66,6 +66,6 @@ export function ScheduleQuickActions({ onAction }: ScheduleQuickActionsProps) {
           </div>
         </button>
       ))}
-    </div>
+    </CollapsibleSection>
   );
 }
