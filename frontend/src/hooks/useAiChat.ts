@@ -34,13 +34,17 @@ export interface ChatMessage {
 }
 
 export interface ChatSession {
-  sessionId: string;
+  id: string;
+  title: string;
+  isPinned: boolean;
+  isDefault: boolean;
   messageCount: number;
-  lastMessage: Date;
-  title?: string;
+  lastMessage: string;
+  preview: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-/** 生成唯一 ID */
 function uid(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -109,7 +113,7 @@ export function useAiChat() {
   /** 启动 SSE 请求并消费流 */
   const startStream = useCallback(async (
     message: string,
-    sessionId: string,
+    conversationSessionId: string,
     aiId: string,
     model?: string,
     provider?: string,
@@ -123,7 +127,7 @@ export function useAiChat() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ message, sessionId, model, provider }),
+      body: JSON.stringify({ message, conversationSessionId, model, provider }),
       signal: controller.signal,
     });
 
@@ -155,7 +159,7 @@ export function useAiChat() {
 
   const sendMessage = useCallback(async (
     message: string,
-    sessionId: string = 'default',
+    conversationSessionId: string,
     model?: string,
     provider?: string,
   ): Promise<void> => {
@@ -171,7 +175,7 @@ export function useAiChat() {
     setMessages(prev => [...prev, aiMsg]);
 
     try {
-      await startStream(message, sessionId, aiId, model, provider, true);
+      await startStream(message, conversationSessionId, aiId, model, provider, true);
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: m.content + '\n\n_已停止生成_' } : m));
@@ -188,7 +192,7 @@ export function useAiChat() {
   }, []);
 
   const loadHistory = useCallback(async (sessionId: string) => {
-    const data = await api.get<Array<{ id: string; role: string; content: string; createdAt: string }>>(`/llm/conversations/${sessionId}`);
+    const data = await api.get<Array<{ id: string; role: string; content: string; createdAt: string }>>(`/llm/conversations/${sessionId}/messages`);
     setMessages(data.map(m => ({
       id: m.id, role: m.role as 'user' | 'assistant', content: m.content, timestamp: new Date(m.createdAt),
     })));
@@ -198,13 +202,21 @@ export function useAiChat() {
     return api.get<ChatSession[]>('/llm/conversations');
   }, []);
 
-  const deleteSession = useCallback(async (sessionId: string) => {
-    await api.delete(`/llm/conversations/${sessionId}`);
+  const createSession = useCallback(async (title?: string): Promise<ChatSession> => {
+    return api.post<ChatSession>('/llm/conversations', { title });
+  }, []);
+
+  const updateSession = useCallback(async (id: string, data: { title?: string; isPinned?: boolean }): Promise<ChatSession> => {
+    return api.patch<ChatSession>(`/llm/conversations/${id}`, data);
+  }, []);
+
+  const deleteSession = useCallback(async (id: string) => {
+    await api.delete(`/llm/conversations/${id}`);
   }, []);
 
   const regenerate = useCallback(async (
     aiMessageId: string,
-    sessionId: string = 'default',
+    conversationSessionId: string,
     model?: string,
     provider?: string,
   ): Promise<void> => {
@@ -229,10 +241,10 @@ export function useAiChat() {
     setMessages(prev => [...prev, aiMsg]);
 
     try {
-      await startStream(lastUserMsg, sessionId, aiId, model, provider, false);
+      await startStream(lastUserMsg, conversationSessionId, aiId, model, provider, false);
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
-        // 不追加"已停止生成"，因为是重新生成触发的 abort
+        // 不追加"已停止生成"
       } else {
         setMessages(prev => prev.map(m => m.id === aiId ? { ...m, content: `错误: ${err instanceof Error ? err.message : '通信失败'}` } : m));
       }
@@ -244,6 +256,6 @@ export function useAiChat() {
   return {
     messages, isLoading, currentToolCalls,
     sendMessage, stopGeneration, regenerate,
-    loadHistory, getSessions, deleteSession, setMessages,
+    loadHistory, getSessions, createSession, updateSession, deleteSession, setMessages,
   };
 }

@@ -2,9 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Sparkles, X, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { useAiChat, type ChatMessage } from '@/hooks/useAiChat';
+import { useAiChat, type ChatMessage, type ChatSession } from '@/hooks/useAiChat';
 import { useProjectList } from '@/hooks/useProjects';
 import { AiSidebar } from './AiSidebar';
 import { MessageBubble } from './MessageBubble';
@@ -12,16 +11,14 @@ import { EmptyState } from './EmptyState';
 import { LoadingIndicator } from './LoadingIndicator';
 import { ChatInput } from './ChatInput';
 
+const STORAGE_KEY = 'ai-last-session-id';
+
 type TabKey = 'overview' | 'customers' | 'history' | 'schedule' | 'projects' | 'jobs';
 
 // ═══ 消息列表（memo，避免输入时重渲染） ═══
 
 const MessageList = memo(function MessageList({
-  messages,
-  isLoading,
-  user,
-  onQuickAction,
-  onRegenerateMsg,
+  messages, isLoading, user, onQuickAction, onRegenerateMsg,
 }: {
   messages: ChatMessage[];
   isLoading: boolean;
@@ -32,7 +29,6 @@ const MessageList = memo(function MessageList({
   if (messages.length === 0 && !isLoading) {
     return <EmptyState onPromptClick={onQuickAction} />;
   }
-
   return (
     <div className="space-y-5">
       {messages.map((msg) => (
@@ -55,25 +51,58 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
   const {
     messages, isLoading,
     sendMessage, stopGeneration, regenerate,
-    loadHistory, getSessions, deleteSession, setMessages,
+    loadHistory, getSessions, createSession, updateSession, deleteSession, setMessages,
   } = useAiChat();
 
   const { data: projectData } = useProjectList({});
 
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
-  const [activeSessionId, setActiveSessionId] = useState('default');
-  const [sessions, setSessions] = useState<Array<{ sessionId: string; messageCount: number; lastMessage: Date; title?: string }>>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [isTempSession, setIsTempSession] = useState(false); // 新建未发消息的临时状态
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | undefined>(undefined);
   const [selectedModelName, setSelectedModelName] = useState<string | undefined>(undefined);
   const [selectedProvider, setSelectedProvider] = useState<string | undefined>(undefined);
   const [modelToast, setModelToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  // 用 ref 保存最新的 model/provider，避免 useCallback 闭包捕获旧值
   const modelRef = useRef<{ id?: string; provider?: string }>({});
+  const initializedRef = useRef(false);
 
-  // 模型切换 toast
+  // ── 刷新会话列表 ──
+  const refreshSessions = useCallback(() => {
+    getSessions().then(setSessions).catch(() => {});
+  }, [getSessions]);
+
+  // ── 打开面板：恢复上次会话 ──
+  useEffect(() => {
+    if (!open || initializedRef.current) return;
+    initializedRef.current = true;
+
+    refreshSessions();
+
+    const savedId = localStorage.getItem(STORAGE_KEY);
+    if (savedId) {
+      setActiveSessionId(savedId);
+      setIsTempSession(false);
+      loadHistory(savedId).catch(() => {
+        // 会话已被删，清空
+        setActiveSessionId(null);
+        localStorage.removeItem(STORAGE_KEY);
+      });
+    }
+  }, [open, loadHistory, refreshSessions]);
+
+  // ── 关闭面板：保存当前会话 ──
+  const handleClose = useCallback(() => {
+    if (activeSessionId && !isTempSession) {
+      localStorage.setItem(STORAGE_KEY, activeSessionId);
+    }
+    onClose();
+  }, [activeSessionId, isTempSession, onClose]);
+
+  // ── 模型切换 toast ──
   const handleModelSelect = useCallback((modelId: string | undefined, provider?: string, modelName?: string) => {
     setSelectedModel(modelId);
     setSelectedProvider(provider);
@@ -84,64 +113,92 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     toastTimerRef.current = setTimeout(() => setModelToast(null), 2000);
   }, []);
 
-  // 发送消息
+  // ── 发送消息（核心：临时会话首次发送时创建后端会话） ──
   const handleSend = useCallback(async (text?: string) => {
     const content = text || input.trim();
     if (!content || isLoading) return;
     setInput('');
-    const { id: currentModel, provider: currentProvider } = modelRef.current;
-    await sendMessage(content, activeSessionId, currentModel, currentProvider);
-    getSessions().then(setSessions).catch(() => {});
-  }, [input, isLoading, sendMessage, activeSessionId, getSessions]);
 
-  // 停止
+    let sessionId = activeSessionId;
+
+    // 临时会话：首次发消息，调后端创建
+    if (isTempSession || !sessionId) {
+      try {
+        const newSession = await createSession(content.slice(0, 30));
+        sessionId = newSession.id;
+        setActiveSessionId(sessionId);
+        setIsTempSession(false);
+        localStorage.setItem(STORAGE_KEY, sessionId);
+        refreshSessions();
+      } catch {
+        return;
+      }
+    }
+
+    const { id: currentModel, provider: currentProvider } = modelRef.current;
+    await sendMessage(content, sessionId!, currentModel, currentProvider);
+    refreshSessions();
+  }, [input, isLoading, activeSessionId, isTempSession, sendMessage, createSession, refreshSessions]);
+
   const handleStop = useCallback(() => stopGeneration(), [stopGeneration]);
 
-  // 快捷操作
   const handleQuickAction = useCallback((text: string) => {
     handleSend(text);
   }, [handleSend]);
 
-  // 重新生成
   const handleRegenerateMsg = useCallback((msg: ChatMessage) => {
+    if (!activeSessionId) return;
     const { id: currentModel, provider: currentProvider } = modelRef.current;
     regenerate(msg.id, activeSessionId, currentModel, currentProvider);
   }, [regenerate, activeSessionId]);
 
-  // 客户点击
   const handleCustomerClick = useCallback((name: string) => {
     handleSend(`帮我分析一下 ${name} 的情况`);
   }, [handleSend]);
 
-  // 今日数据
   const handleDigestClick = useCallback(() => {
     handleSend('帮我做一个今日简报');
   }, [handleSend]);
 
-  // 会话切换
+  // ── 切换会话 ──
   const handleSwitchSession = useCallback((sid: string) => {
     setActiveSessionId(sid);
+    setIsTempSession(false);
+    localStorage.setItem(STORAGE_KEY, sid);
     loadHistory(sid);
   }, [loadHistory]);
 
-  // 删除会话
+  // ── 删除会话 ──
   const handleDeleteSession = useCallback(async (sid: string) => {
     await deleteSession(sid);
     if (sid === activeSessionId) {
-      const newId = Date.now().toString();
-      setActiveSessionId(newId);
+      setActiveSessionId(null);
+      setIsTempSession(false);
       setMessages([]);
+      localStorage.removeItem(STORAGE_KEY);
     }
-    getSessions().then(setSessions).catch(() => {});
-  }, [deleteSession, activeSessionId, setMessages, getSessions]);
+    refreshSessions();
+  }, [deleteSession, activeSessionId, setMessages, refreshSessions]);
 
-  // 新建会话
+  // ── 新建会话（临时状态，不存后端） ──
   const handleNewSession = useCallback(() => {
-    const newId = Date.now().toString();
-    setActiveSessionId(newId);
+    setActiveSessionId(null);
+    setIsTempSession(true);
     setMessages([]);
     setActiveTab('overview');
   }, [setMessages]);
+
+  // ── 重命名会话 ──
+  const handleRenameSession = useCallback(async (sid: string, title: string) => {
+    await updateSession(sid, { title });
+    refreshSessions();
+  }, [updateSession, refreshSessions]);
+
+  // ── 置顶/取消置顶 ──
+  const handlePinSession = useCallback(async (sid: string, isPinned: boolean) => {
+    await updateSession(sid, { isPinned });
+    refreshSessions();
+  }, [updateSession, refreshSessions]);
 
   // 自动滚动
   useEffect(() => {
@@ -153,21 +210,16 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
   }, []);
 
-  // 加载会话列表
-  useEffect(() => {
-    if (open) getSessions().then(setSessions).catch(() => {});
-  }, [open, getSessions]);
-
   // 快捷键
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') handleClose();
       if ((e.metaKey || e.ctrlKey) && e.key === 'n') { e.preventDefault(); handleNewSession(); }
     }
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose, handleNewSession]);
+  }, [open, handleClose, handleNewSession]);
 
   const projects = (projectData as any)?.data || projectData || [];
 
@@ -176,7 +228,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
       {open && (
         <div
           className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm transition-opacity"
-          onClick={onClose}
+          onClick={handleClose}
         />
       )}
 
@@ -198,7 +250,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
             <button onClick={handleNewSession} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none" title="新对话 (⌘N)">
               <Plus className="h-4 w-4" />
             </button>
-            <button onClick={onClose} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none">
+            <button onClick={handleClose} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -218,6 +270,8 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
             onSwitchSession={handleSwitchSession}
             onDeleteSession={handleDeleteSession}
             onNewSession={handleNewSession}
+            onRenameSession={handleRenameSession}
+            onPinSession={handlePinSession}
             selectedModel={selectedModel}
             selectedModelName={selectedModelName}
             onModelSelect={handleModelSelect}

@@ -27,6 +27,7 @@ model User {
   savedResearch  SavedResearch[]
   notifications  Notification[]
   conversations  Conversation[]
+  conversationSessions ConversationSession[]
   memories       UserMemory[]
   greetings      Greeting[]
   profile        Profile?
@@ -224,22 +225,40 @@ model SavedResearch {
   searchResult   SearchResult? @relation(fields: [searchResultId], references: [id], onDelete: SetNull)
 }
 
+// ======================== AI 会话 ========================
+model ConversationSession {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String   @default("新对话")
+  isPinned   Boolean  @default(false)
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages   Conversation[]
+
+  @@index([userId, updatedAt])
+}
+
 // ======================== AI 对话记录 ========================
 model Conversation {
-  id          String   @id @default(cuid())
-  userId      String
-  sessionId   String          // 会话 ID，同一组对话共享
-  role        String          // user / assistant / system / tool
-  content     String
-  contextType String?
-  contextId   String?
-  tokenCount  Int?
-  toolName    String?         // Function Calling 时记录工具名
-  toolResult  String?         // Function Calling 时记录工具返回
-  createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String   @id @default(cuid())
+  userId                String
+  sessionId             String          // 旧字段，保留兼容
+  conversationSessionId String?         // 新字段，关联 ConversationSession
+  role                  String          // user / assistant / system / tool
+  content               String
+  contextType           String?
+  contextId             String?
+  tokenCount            Int?
+  toolName              String?         // Function Calling 时记录工具名
+  toolResult            String?         // Function Calling 时记录工具返回
+  createdAt             DateTime @default(now())
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationSession   ConversationSession? @relation(fields: [conversationSessionId], references: [id], onDelete: SetNull)
 
-  @@index([userId, sessionId])  // 按用户+会话查询
+  @@index([userId, sessionId])          // 按用户+会话查询
+  @@index([conversationSessionId])      // 按新会话查询
 }
 
 // ======================== 用户长期记忆 ========================

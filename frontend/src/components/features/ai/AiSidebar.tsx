@@ -2,6 +2,7 @@
 
 import { Brain, Users, Clock, Calendar, FolderKanban, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { ChatSession } from '@/hooks/useAiChat';
 import { SmartDigest } from './SmartDigest';
 import { QuickActions } from './QuickActions';
 import { ProjectMiniList } from './ProjectMiniList';
@@ -20,11 +21,13 @@ interface AiSidebarProps {
   onCustomerClick: (name: string) => void;
   onDigestClick: () => void;
   projects: Array<{ id: string; name: string; status: string; budget?: number; startDate?: string }>;
-  sessions: Array<{ sessionId: string; messageCount: number; lastMessage: Date; title?: string }>;
-  activeSessionId: string;
+  sessions: ChatSession[];
+  activeSessionId: string | null;
   onSwitchSession: (sessionId: string) => void;
   onDeleteSession: (sessionId: string) => void;
   onNewSession: () => void;
+  onRenameSession: (sessionId: string, title: string) => void;
+  onPinSession: (sessionId: string, isPinned: boolean) => void;
   selectedModel?: string;
   selectedModelName?: string;
   onModelSelect: (modelId: string | undefined, provider?: string, modelName?: string) => void;
@@ -52,6 +55,8 @@ export function AiSidebar({
   onSwitchSession,
   onDeleteSession,
   onNewSession,
+  onRenameSession,
+  onPinSession,
   selectedModel,
   selectedModelName,
   onModelSelect,
@@ -87,7 +92,6 @@ export function AiSidebar({
       {/* ── Tab 内容 ── */}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex-1 overflow-y-auto p-3">
-          {/* 概览：直接展示，不折叠 */}
           {activeTab === 'overview' && (
             <div className="space-y-4">
               <SmartDigest onDigestClick={onDigestClick} open={open} />
@@ -95,22 +99,18 @@ export function AiSidebar({
             </div>
           )}
 
-          {/* 项目：带展开任务 + 快捷提问 */}
           {activeTab === 'projects' && (
             <ProjectMiniList projects={projects} defaultOpen onQuickAction={onQuickAction} />
           )}
 
-          {/* 客户 */}
           {activeTab === 'customers' && (
             <CustomerTab onCustomerClick={onCustomerClick} open={open} />
           )}
 
-          {/* 排期 */}
           {activeTab === 'schedule' && (
             <ScheduleQuickActions onAction={onQuickAction} />
           )}
 
-          {/* 定时任务：独立 Tab */}
           {activeTab === 'jobs' && (
             <div>
               <p className="mb-3 px-1 text-[12px] font-bold text-foreground/80">⚡ 定时任务</p>
@@ -118,7 +118,6 @@ export function AiSidebar({
             </div>
           )}
 
-          {/* 历史 */}
           {activeTab === 'history' && (
             <HistoryTab
               sessions={sessions}
@@ -126,6 +125,8 @@ export function AiSidebar({
               onSwitchSession={onSwitchSession}
               onDeleteSession={onDeleteSession}
               onNewSession={onNewSession}
+              onRenameSession={onRenameSession}
+              onPinSession={onPinSession}
             />
           )}
         </div>
