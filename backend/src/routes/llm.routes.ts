@@ -119,18 +119,15 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
       if (event.type === 'tool_result') toolContext.push(`✅ ${event.name}: ${JSON.stringify(event.result).slice(0, 200)}`);
     }
 
-    // 保存 AI 回复
+    // 保存 AI 回复（只保存文本，工具调用由前端 SSE 实时渲染）
     if (fullText || toolContext.length > 0) {
-      const content = toolContext.length > 0
-        ? `${fullText}\n\n[工具调用]\n${toolContext.join('\n')}`
-        : fullText;
       await prisma.conversation.create({
         data: {
           userId: req.userId!,
           sessionId: sid,
           conversationSessionId: convSessionId,
           role: 'assistant',
-          content,
+          content: fullText || '(工具执行完成)',
         },
       });
     }

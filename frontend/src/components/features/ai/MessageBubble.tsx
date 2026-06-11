@@ -4,7 +4,7 @@ import { Bot, User as UserIcon, Copy, RotateCcw, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { ToolCallBar, type ToolCallItem } from './ToolCallBar';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 interface ChatMessage {
   id: string;
@@ -74,7 +74,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
   const isUser = message.role === 'user';
 
   function handleCopy() {
-    navigator.clipboard.writeText(message.content).then(() => {
+    navigator.clipboard.writeText(cleanContent).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     }).catch(() => {});
@@ -88,7 +88,15 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
 
   // 工具调用耗时模拟
   const toolDoneCount = toolItems.filter(t => t.status === 'done').length;
-  const hasRealToolCalls = toolItems.some(t => t.status === 'done');
+
+  // 过滤旧消息中拼接的 [工具调用] 原始文本（兼容历史数据）
+  const cleanContent = useMemo(() => {
+    if (isUser) return message.content;
+    // 去掉末尾的 [工具调用] ... 区块
+    return message.content
+      .replace(/\n*\[工具调用\][\s\S]*$/, '')
+      .trim();
+  }, [message.content, isUser]);
 
   return (
     <div className={cn('flex gap-3 group', isUser && 'flex-row-reverse')}>
@@ -111,7 +119,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
         )}
 
         {/* 消息气泡 */}
-        {message.content && (
+        {cleanContent && (
           <div className={cn(
             'rounded-2xl px-4 py-3 text-[13px] leading-[1.7]',
             isUser
@@ -119,18 +127,9 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
               : 'rounded-tl-md border border-slate-200 bg-background text-foreground shadow-sm',
           )}>
             {isUser ? (
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              <p className="whitespace-pre-wrap">{cleanContent}</p>
             ) : (
-              <>
-                {/* 假成功检测：AI 说成功但没调工具 */}
-                {!isUser && !hasRealToolCalls && /创建成功|已创建|✅/.test(message.content) && (
-                  <div className="mb-2 flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
-                    <span>⚠️</span>
-                    <span>AI 可能未实际执行操作，请刷新页面确认数据是否已创建</span>
-                  </div>
-                )}
-                <MarkdownRenderer content={message.content} />
-              </>
+              <MarkdownRenderer content={cleanContent} />
             )}
           </div>
         )}
