@@ -151,7 +151,7 @@ export function ChatInput({
         )}
       </div>
 
-      <p className="mt-1 text-center text-[9px] text-muted-foreground/30">
+      <p className="mt-2.5 text-center text-[10px] text-muted-foreground/50">
         小语可能会犯错，请核实重要信息 · Shift+Enter 换行
       </p>
     </div>

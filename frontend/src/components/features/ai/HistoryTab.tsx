@@ -45,6 +45,7 @@ function SessionItem({
 }) {
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(session.title);
+  const [confirming, setConfirming] = useState(false);
 
   const handleStartEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -115,7 +116,7 @@ function SessionItem({
       </div>
 
       {/* 操作按钮 */}
-      {!editing && (
+      {!editing && !confirming && (
         <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
           {!session.isDefault && (
             <>
@@ -134,7 +135,7 @@ function SessionItem({
                 <Pencil className="h-3 w-3" />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                onClick={(e) => { e.stopPropagation(); setConfirming(true); }}
                 title="删除"
                 className="rounded p-0.5 text-muted-foreground/50 hover:bg-red-50 hover:text-red-400"
               >
@@ -142,6 +143,21 @@ function SessionItem({
               </button>
             </>
           )}
+        </div>
+      )}
+
+      {/* 删除二次确认 */}
+      {confirming && (
+        <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <span className="text-[10px] font-medium text-red-500">删除？</span>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="rounded px-1.5 py-0.5 text-[10px] font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"
+          >确认</button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setConfirming(false); }}
+            className="rounded px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-muted transition-colors"
+          >取消</button>
         </div>
       )}
     </div>
