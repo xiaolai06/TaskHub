@@ -1,18 +1,14 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-
 /** 轻量级 Markdown 渲染器 */
 export function MarkdownRenderer({ content }: { content: string }) {
   if (!content) return null;
 
-  // 拆分成行
   const lines = content.split('\n');
   const elements: React.ReactNode[] = [];
   let i = 0;
   let inCodeBlock = false;
   let codeBuffer: string[] = [];
-  let codeLang = '';
 
   while (i < lines.length) {
     const line = lines[i];
@@ -29,7 +25,6 @@ export function MarkdownRenderer({ content }: { content: string }) {
         inCodeBlock = false;
       } else {
         inCodeBlock = true;
-        codeLang = line.slice(3).trim();
       }
       i++; continue;
     }
@@ -39,17 +34,34 @@ export function MarkdownRenderer({ content }: { content: string }) {
     // 空行
     if (!line.trim()) { i++; continue; }
 
-    // 标题
-    if (line.startsWith('### ')) {
-      elements.push(<h3 key={`h-${i}`} className="mt-3 mb-1 text-sm font-semibold text-foreground">{renderInline(line.slice(4))}</h3>);
-      i++; continue;
-    }
-    if (line.startsWith('## ')) {
-      elements.push(<h2 key={`h-${i}`} className="mt-3 mb-1 text-base font-bold text-foreground">{renderInline(line.slice(3))}</h2>);
+    // 分隔线 --- / *** / ___
+    if (/^[-*_]{3,}\s*$/.test(line.trim())) {
+      elements.push(<hr key={`hr-${i}`} className="my-3 border-t border-border/40" />);
       i++; continue;
     }
 
-    // 表格
+    // 标题 # ~ ###
+    const headingMatch = line.match(/^(#{1,3})\s+(.+)/);
+    if (headingMatch) {
+      const level = headingMatch[1].length;
+      const text = headingMatch[2];
+      const Tag = level === 1 ? 'h1' : level === 2 ? 'h2' : 'h3';
+      const cls = level === 1
+        ? 'mt-4 mb-2 text-lg font-bold text-foreground'
+        : level === 2
+          ? 'mt-3 mb-1.5 text-base font-bold text-foreground'
+          : 'mt-3 mb-1 text-sm font-semibold text-foreground';
+      elements.push(<Tag key={`h-${i}`} className={cls}>{renderInline(text)}</Tag>);
+      i++; continue;
+    }
+
+    // 中文编号标题：一、二、三、... / （一）/ 1. 标题
+    if (/^[一二三四五六七八九十]+[、.．]\s*.+/.test(line) || /^（[一二三四五六七八九十]+）\s*.+/.test(line)) {
+      elements.push(<h3 key={`cn-${i}`} className="mt-3 mb-1.5 text-sm font-semibold text-foreground">{renderInline(line)}</h3>);
+      i++; continue;
+    }
+
+    // 管道表格 | ... |
     if (line.startsWith('|') && line.endsWith('|')) {
       const tableRows: string[][] = [];
       while (i < lines.length && lines[i].startsWith('|') && lines[i].endsWith('|')) {
@@ -59,27 +71,23 @@ export function MarkdownRenderer({ content }: { content: string }) {
       }
       if (tableRows.length > 0 && !tableRows[0].every(c => /^[-:]+$/.test(c))) {
         const header = tableRows[0];
-        const body = tableRows.filter((_, idx) => idx !== 1 || !tableRows[1]?.every(c => /^[-:]+$/.test(c)));
         const realBody = tableRows[1] && tableRows[1].every(c => /^[-:]+$/.test(c)) ? tableRows.slice(2) : tableRows.slice(1);
-        elements.push(
-          <div key={`tbl-${i}`} className="my-2 overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted">
-                <tr>{header.map((h, j) => <th key={j} className="px-3 py-2 font-medium text-foreground/70 border-b">{renderInline(h)}</th>)}</tr>
-              </thead>
-              <tbody>
-                {realBody.map((row, ri) => (
-                  <tr key={ri} className="border-b last:border-0">{row.map((c, ci) => <td key={ci} className="px-3 py-1.5 text-foreground/80">{renderInline(c)}</td>)}</tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        );
+        elements.push(renderTable(`tbl-${i}`, header, realBody));
       }
       continue;
     }
 
-    // 列表项
+    // 空格/Tab 分隔表格检测：连续 2+ 行都有 2+ 个连续多空格/tab 分隔的列
+    if (isSpaceTable(lines, i)) {
+      const { header, body, nextI } = parseSpaceTable(lines, i);
+      if (header.length >= 2) {
+        elements.push(renderTable(`stbl-${i}`, header, body));
+      }
+      i = nextI;
+      continue;
+    }
+
+    // 列表项（- 或 *）
     if (/^[\s]*[-*]\s/.test(line)) {
       const items: string[] = [];
       while (i < lines.length && /^[\s]*[-*]\s/.test(lines[i])) {
@@ -99,11 +107,28 @@ export function MarkdownRenderer({ content }: { content: string }) {
       continue;
     }
 
+    // 有序列表 1. 2. 3.
+    if (/^\d+[.)]\s/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\d+[.)]\s/.test(lines[i])) {
+        items.push(lines[i].replace(/^\d+[.)]\s/, ''));
+        i++;
+      }
+      elements.push(
+        <ol key={`ol-${i}`} className="my-1 space-y-0.5 list-decimal list-inside">
+          {items.map((item, j) => (
+            <li key={j} className="text-xs text-foreground/80">{renderInline(item)}</li>
+          ))}
+        </ol>
+      );
+      continue;
+    }
+
     // 引用块
-    if (line.startsWith('> ')) {
+    if (line.startsWith('> ') || line === '>') {
       const quoteLines: string[] = [];
-      while (i < lines.length && lines[i].startsWith('> ')) {
-        quoteLines.push(lines[i].slice(2));
+      while (i < lines.length && (lines[i].startsWith('> ') || lines[i] === '>')) {
+        quoteLines.push(lines[i] === '>' ? '' : lines[i].slice(2));
         i++;
       }
       elements.push(
@@ -122,29 +147,87 @@ export function MarkdownRenderer({ content }: { content: string }) {
   return <>{elements}</>;
 }
 
-/** 安全 URL 检查：只允许 http/https/mailto 协议 */
-function isSafeUrl(url: string): boolean {
-  try {
-    const u = new URL(url);
-    return ['http:', 'https:', 'mailto:'].includes(u.protocol);
-  } catch {
-    return false;
-  }
+// ═══ 表格相关工具函数 ═══
+
+/** 渲染表格 */
+function renderTable(key: string, header: string[], body: string[][]) {
+  return (
+    <div key={key} className="my-2 overflow-x-auto rounded-lg border border-border">
+      <table className="w-full text-left text-xs">
+        <thead className="bg-muted">
+          <tr>{header.map((h, j) => <th key={j} className="px-3 py-2 font-medium text-foreground/70 border-b">{renderInline(h)}</th>)}</tr>
+        </thead>
+        <tbody>
+          {body.map((row, ri) => (
+            <tr key={ri} className="border-b last:border-0">{row.map((c, ci) => <td key={ci} className="px-3 py-1.5 text-foreground/80">{renderInline(c)}</td>)}</tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
+
+/** 检测从 pos 开始是否是空格/Tab 分隔的表格（至少 2 行、每行至少 2 列） */
+function isSpaceTable(lines: string[], pos: number): boolean {
+  let rowCount = 0;
+  let colCount = 0;
+  for (let j = pos; j < Math.min(lines.length, pos + 10); j++) {
+    const line = lines[j];
+    if (!line.trim()) break;
+    // 跳过分隔线行（如 ----    ----）
+    if (/^[-:=\s]+$/.test(line)) { rowCount++; continue; }
+    const cols = splitByColumns(line);
+    if (cols.length < 2) break;
+    if (colCount === 0) colCount = cols.length;
+    // 容许列数 ±1（有些行可能少一列）
+    if (Math.abs(cols.length - colCount) > 1) break;
+    rowCount++;
+  }
+  return rowCount >= 2 && colCount >= 2;
+}
+
+/** 按连续多空格或 Tab 分割列 */
+function splitByColumns(line: string): string[] {
+  // 先按 tab 分，再按 2+ 空格分
+  return line.split(/\t+|(?:\s{2,})/).map(c => c.trim()).filter(c => c.length > 0);
+}
+
+/** 解析空格/Tab 分隔表格 */
+function parseSpaceTable(lines: string[], pos: number): { header: string[]; body: string[][]; nextI: number } {
+  const rows: string[][] = [];
+  let j = pos;
+  for (; j < Math.min(lines.length, pos + 20); j++) {
+    const line = lines[j];
+    if (!line.trim()) break;
+    // 跳过纯分隔线行（----    ----）
+    if (/^[-:=\s]+$/.test(line)) continue;
+    const cols = splitByColumns(line);
+    if (cols.length < 2) break;
+    rows.push(cols);
+  }
+  return {
+    header: rows[0] || [],
+    body: rows.slice(1),
+    nextI: j,
+  };
+}
+
+// ═══ 行内渲染 ═══
 
 /** 归一化 AI 输出中的 Markdown 标记变体 */
 function normalizeMarkdown(text: string): string {
   return text
-    // 全角星号 → 半角
     .replace(/＊/g, '*')
-    // 全角下划线 → 半角
     .replace(/＿/g, '_')
-    // 去除零宽字符（零宽空格、零宽连接符、零宽不连字符、BOM）
     .replace(/[​‌‍﻿]/g, '')
-    // __bold__ → **bold**（有些模型用下划线做加粗）
     .replace(/__(.+?)__/g, '**$1**')
-    // _italic_ → *italic*（有些模型用下划线做斜体，但不处理代码中的下划线）
     .replace(/(?<!\w)_(.+?)_(?!\w)/g, '*$1*');
+}
+
+/** 安全 URL 检查 */
+function isSafeUrl(url: string): boolean {
+  try { return ['http:', 'https:', 'mailto:'].includes(new URL(url).protocol); }
+  catch { return false; }
 }
 
 /** 行内渲染：加粗、斜体、代码、链接 */
@@ -153,7 +236,6 @@ function renderInline(rawText: string): React.ReactNode {
   const parts: Array<{ type: 'text' | 'strong' | 'em' | 'code' | 'link'; text: string; url?: string }> = [];
   let remaining = text;
 
-  // 逐个提取 token
   while (remaining.length > 0) {
     const boldMatch = remaining.match(/^\*\*(.+?)\*\*/);
     const italicMatch = remaining.match(/^\*(.+?)\*/);
