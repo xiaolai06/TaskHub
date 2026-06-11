@@ -132,9 +132,24 @@ function isSafeUrl(url: string): boolean {
   }
 }
 
+/** 归一化 AI 输出中的 Markdown 标记变体 */
+function normalizeMarkdown(text: string): string {
+  return text
+    // 全角星号 → 半角
+    .replace(/＊/g, '*')
+    // 全角下划线 → 半角
+    .replace(/＿/g, '_')
+    // 去除零宽字符（零宽空格、零宽连接符、零宽不连字符、BOM）
+    .replace(/[​‌‍﻿]/g, '')
+    // __bold__ → **bold**（有些模型用下划线做加粗）
+    .replace(/__(.+?)__/g, '**$1**')
+    // _italic_ → *italic*（有些模型用下划线做斜体，但不处理代码中的下划线）
+    .replace(/(?<!\w)_(.+?)_(?!\w)/g, '*$1*');
+}
+
 /** 行内渲染：加粗、斜体、代码、链接 */
-function renderInline(text: string): React.ReactNode {
-  // 简化处理：使用安全的文本渲染，不注入 HTML
+function renderInline(rawText: string): React.ReactNode {
+  const text = normalizeMarkdown(rawText);
   const parts: Array<{ type: 'text' | 'strong' | 'em' | 'code' | 'link'; text: string; url?: string }> = [];
   let remaining = text;
 
