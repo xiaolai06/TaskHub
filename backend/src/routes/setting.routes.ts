@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as settingService from '../services/setting.service';
 import * as notificationService from '../services/notification.service';
+import { testProxy, getProxyStatus, clearProxyCache } from '../services/proxy-config';
 import { success, error } from '../utils/response';
 
 const router = Router();
@@ -178,6 +179,121 @@ router.post('/webhook/test', async (req: Request, res: Response, next: NextFunct
     const msg = err instanceof Error ? err.message : '发送失败';
     error(res, 'WEBHOOK_TEST_FAILED', msg, 502);
   }
+});
+
+// ═══ SearXNG 配置 ═══
+
+// POST /searxng/test — 测试 SearXNG 实例连通性
+router.post('/searxng/test', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { url } = req.body;
+    if (!url || typeof url !== 'string') {
+      error(res, 'VALIDATION_ERROR', '请提供 SearXNG 实例地址', 400);
+      return;
+    }
+    const baseUrl = url.trim().replace(/\/+$/, '');
+    try { new URL(baseUrl); } catch {
+      error(res, 'VALIDATION_ERROR', '地址格式不正确，应为 http://host:port', 400);
+      return;
+    }
+
+    const { fetchWithTimeout } = await import('../ai/tools/fetch-with-timeout');
+    const testUrl = `${baseUrl}/search?q=test&format=json&pageno=1`;
+    const start = Date.now();
+
+    try {
+      const resp = await fetchWithTimeout(testUrl, {
+        headers: { 'Accept': 'application/json', 'User-Agent': 'TaskFlow-Backend/1.0' },
+      }, 10_000);
+      const latency = Date.now() - start;
+
+      if (!resp.ok) {
+        success(res, { success: false, message: `HTTP ${resp.status}: ${resp.statusText}`, latency });
+        return;
+      }
+
+      const data = await resp.json() as { results?: unknown[]; query?: string };
+      const resultCount = data.results?.length || 0;
+      success(res, {
+        success: true,
+        message: `连接成功！返回 ${resultCount} 条结果`,
+        latency,
+        resultCount,
+        query: data.query,
+      });
+    } catch (err) {
+      const latency = Date.now() - start;
+      const msg = err instanceof Error ? err.message : '连接失败';
+      success(res, { success: false, message: `连接失败: ${msg}`, latency });
+    }
+  } catch (err) { next(err); }
+});
+
+// GET /searxng/status — 获取当前 SearXNG 配置状态
+router.get('/searxng/status', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const row = await (await import('../server')).prisma.setting.findFirst({
+      where: { userId: req.userId!, category: 'SEARCH', key: 'searxng_url' },
+    });
+    const url = row?.value?.trim() || '';
+    const configured = !!url;
+    let reachable = false;
+    let latency = 0;
+
+    if (configured) {
+      try {
+        const { fetchWithTimeout } = await import('../ai/tools/fetch-with-timeout');
+        const start = Date.now();
+        const resp = await fetchWithTimeout(`${url.replace(/\/+$/, '')}/search?q=test&format=json`, {
+          headers: { 'Accept': 'application/json' },
+        }, 5_000);
+        latency = Date.now() - start;
+        reachable = resp.ok;
+      } catch { /* unreachable */ }
+    }
+
+    success(res, { configured, url: url || null, reachable, latency });
+  } catch (err) { next(err); }
+});
+
+// ═══ 代理配置 ═══
+
+// GET /proxy/status — 获取当前代理状态
+router.get('/proxy/status', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const status = await getProxyStatus(req.userId!);
+    success(res, status);
+  } catch (err) { next(err); }
+});
+
+// POST /proxy/test — 测试代理连通性
+router.post('/proxy/test', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { url } = req.body;
+    if (!url || typeof url !== 'string') {
+      error(res, 'VALIDATION_ERROR', '请提供代理地址', 400);
+      return;
+    }
+    const result = await testProxy(url.trim());
+    success(res, result);
+  } catch (err) { next(err); }
+});
+
+// PUT /proxy — 保存代理配置（存入数据库）
+router.put('/proxy', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { url } = req.body;
+    if (url !== undefined && url !== '') {
+      // 验证 URL 格式
+      try { new URL(url); } catch {
+        error(res, 'VALIDATION_ERROR', '代理地址格式不正确，应为 http://host:port', 400);
+        return;
+      }
+    }
+    await settingService.set(req.userId!, 'NETWORK', 'proxy_url', String(url || ''));
+    clearProxyCache(req.userId!);
+    success(res, { saved: true, url: url || null }, '代理配置已保存');
+  } catch (err) { next(err); }
 });
 
 // ═══ 通用配置 CRUD ═══

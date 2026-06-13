@@ -10,7 +10,7 @@ import type { ToolDefinition } from '../ai/tools/types';
 export type StreamEvent =
   | { type: 'text'; content: string }
   | { type: 'tool_call'; id: string; name: string; args: Record<string, unknown> }
-  | { type: 'tool_result'; name: string; result: unknown }
+  | { type: 'tool_result'; name: string; result: unknown; durationMs?: number }
   | { type: 'done' };
 
 interface AIConfig {
@@ -43,7 +43,7 @@ function countMessagesTokens(messages: OpenAI.Chat.Completions.ChatCompletionMes
 
 // ═══ 工具结果截断 ═══
 
-function truncateResult(result: unknown, maxChars = 500): unknown {
+function truncateResult(result: unknown, maxChars = 1500): unknown {
   const str = JSON.stringify(result);
   if (str.length <= maxChars) return result;
   if (Array.isArray(result)) {
@@ -54,7 +54,7 @@ function truncateResult(result: unknown, maxChars = 500): unknown {
 
 // ═══ 裁剪 messages ═══
 
-function trimMessages(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[], maxTokens = 4000): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
+function trimMessages(messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[], maxTokens = 8000): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
   const current = countMessagesTokens(messages);
   if (current <= maxTokens) return messages;
 
@@ -124,8 +124,9 @@ function validateToolArgs(tool: ToolDefinition, args: Record<string, unknown>): 
 
 // ═══ 执行日志写入 ═══
 
-async function logToolExecution(userId: string, toolName: string, args: Record<string, unknown>, result: unknown): Promise<void> {
+async function logToolExecution(userId: string, toolName: string, args: Record<string, unknown>, result: unknown, durationMs?: number): Promise<void> {
   try {
+    const success = !(result && typeof result === 'object' && 'error' in result);
     await prisma.toolExecutionLog.create({
       data: {
         userId,
@@ -133,8 +134,18 @@ async function logToolExecution(userId: string, toolName: string, args: Record<s
         args: JSON.stringify(args),
         result: JSON.stringify(result),
         executedAt: new Date(),
+        durationMs: durationMs ?? null,
+        success,
       },
     });
+    // 耗时监控日志
+    if (durationMs !== undefined) {
+      if (durationMs > 10_000) {
+        console.warn(`[ToolPerf] ⚠️ ${toolName}: ${durationMs}ms (慢) ${success ? '✅' : '❌'}`);
+      } else {
+        console.log(`[ToolPerf] ${toolName}: ${durationMs}ms ${success ? '✅' : '❌'}`);
+      }
+    }
   } catch (err) {
     console.warn('[AI] 执行日志写入失败:', err instanceof Error ? err.message : err);
   }
@@ -305,8 +316,7 @@ export class AIService {
 
         if (toolCalls.length === 0) {
           // 兜底检测：AI 说成功但没调工具 → 插入警告
-          if (/已创建|创建成功|✅|已添加|已建立/.test(fullContent) && /create_|update_|delete_|log_/.test(fullContent) === false) {
-            const toolNames = this.tools.filter(t => t.access === 'write').map(t => t.name).join(', ');
+          if (/已创建|创建成功|✅|已添加|已建立/.test(fullContent) && !/create_|update_|delete_|log_/.test(fullContent)) {
             yield { type: 'text', content: '\n\n⚠️ **注意**：以上回复可能未实际调用工具。如需真正创建数据，请明确告知我执行操作。\n' };
           }
           yield { type: 'done' }; return;
@@ -343,22 +353,25 @@ export class AIService {
           yield { type: 'tool_call', id: tc.id, name: tc.function.name, args };
 
           let result: unknown;
+          let durationMs = 0;
+          const toolStart = Date.now();
           if (tool) {
             try {
               result = await tool.handler(args, this.userId);
-              await logToolExecution(this.userId, tc.function.name, args, result);
-            } catch (err) { result = { error: err instanceof Error ? err.message : '工具执行失败' }; }
+              durationMs = Date.now() - toolStart;
+              // fire-and-forget：不阻塞流式响应
+              logToolExecution(this.userId, tc.function.name, args, result, durationMs).catch(() => {});
+            } catch (err) {
+              durationMs = Date.now() - toolStart;
+              result = { error: err instanceof Error ? err.message : '工具执行失败' };
+            }
           } else {
             result = { error: `未知工具: ${tc.function.name}` };
           }
           const truncated = truncateResult(result);
-          yield { type: 'tool_result', name: tc.function.name, result: truncated };
+          yield { type: 'tool_result', name: tc.function.name, result: truncated, durationMs };
           messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(truncated) });
         }
-      }
-
-      if (maxLoops <= 0) {
-        yield { type: 'text', content: '\n\n⚠️ 已达到最大工具调用轮次（10轮），部分操作可能未完成。' };
       }
       yield { type: 'done' };
     } catch (apiErr: unknown) {

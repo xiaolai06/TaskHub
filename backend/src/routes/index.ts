@@ -23,6 +23,10 @@ import preferenceRoutes from './preference.routes';
 import cronJobRoutes from './cron-job.routes';
 import jobRoutes from './job.routes';
 import workRoutes from './work.routes';
+import transactionRoutes from './transaction.routes';
+import paymentRoutes from './payment.routes';
+import subscriptionRoutes from './subscription.routes';
+import financeRoutes from './finance.routes';
 
 // 导入认证中间件（需要登录才能访问的接口加这个）
 import { auth } from '../middleware/auth';
@@ -58,5 +62,9 @@ router.use('/preferences', auth, apiLimit, preferenceRoutes); // /api/preference
 router.use('/cron-jobs', auth, apiLimit, cronJobRoutes);      // /api/cron-jobs/*
 router.use('/jobs', auth, apiLimit, jobRoutes);              // /api/jobs/*（手动触发）
 router.use('/work', auth, apiLimit, workRoutes);            // /api/work/*
+router.use('/transactions', auth, apiLimit, transactionRoutes); // /api/transactions/*
+router.use('/payments', auth, apiLimit, paymentRoutes);         // /api/payments/*
+router.use('/subscriptions', auth, apiLimit, subscriptionRoutes); // /api/subscriptions/*
+router.use('/finance', auth, apiLimit, financeRoutes);         // /api/finance/*
 
 export default router;

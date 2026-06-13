@@ -10,7 +10,13 @@ import { createTaskTool, updateTaskStatusTool, logTimeTool, getScheduleTool, del
 import { createProjectTool, updateProjectTool } from './create-project';
 import { createCustomerTool, updateCustomerTool, getClientFollowUpTool, getClientInsightsTool, logCommunicationTool, getClientRankingTool } from './get-client-follow-up';
 import { getGoalProgressTool, getWeeklyReviewTool, suggestWeeklyPlanTool, getBusinessHealthTool } from './get-goal-progress';
-import { searchWebTool } from './search-web';
+import { searchTavilyTool, searchDuckDuckGoTool } from './search-web';
+import { searchSogouTool } from './sogou-search';
+import { searchSearXNGTool } from './searxng-search';
+import { fetchWebContentTool } from './fetch-content';
+import { searchGoogleNewsTool } from './google-news';
+import { searchDailyHotTool } from './daily-hot';
+import { searchWorldBankTool } from './world-bank';
 import { githubTrendingTool } from './github-trending';
 import { hackerNewsTool } from './hacker-news';
 import { npmSearchTool } from './npm-search';
@@ -39,8 +45,13 @@ const allTools: ToolDefinition[] = [
   createCustomerTool, updateCustomerTool, getClientFollowUpTool, getClientInsightsTool, logCommunicationTool, getClientRankingTool,
   // 🎯 goal
   getGoalProgressTool, getWeeklyReviewTool, suggestWeeklyPlanTool, getBusinessHealthTool,
-  // 🔍 search
-  searchWebTool, githubTrendingTool, hackerNewsTool, npmSearchTool,
+  // 🔍 搜索（命名明确，AI 自主选择）
+  searchSearXNGTool,
+  searchTavilyTool, searchDuckDuckGoTool,
+  searchSogouTool,
+  searchGoogleNewsTool, searchDailyHotTool, searchWorldBankTool,
+  fetchWebContentTool,
+  githubTrendingTool, hackerNewsTool, npmSearchTool,
   exchangeRateTool, devToTool, productHuntTool,
   // 🕐 system
   getCurrentTimeTool,

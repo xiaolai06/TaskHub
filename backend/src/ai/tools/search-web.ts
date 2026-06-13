@@ -1,6 +1,41 @@
 import { ToolDefinition } from './types';
+import { fetchWithTimeout, fetchWithProxy } from './fetch-with-timeout';
 import { prisma } from '../../server';
 import { decrypt } from '../../services/encryption.service';
+import { getProxyUrl } from '../../services/proxy-config';
+import { applySearchQualityGate, type RawSearchResult } from './search-quality';
+
+// ═══ 搜索结果缓存（10 分钟 TTL，LRU 淘汰）═══
+
+interface CacheEntry {
+  result: unknown;
+  ts: number;
+}
+
+const SEARCH_CACHE = new Map<string, CacheEntry>();
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 分钟
+const CACHE_MAX_SIZE = 200; // 最多缓存 200 条查询
+
+function getCachedResult(query: string, provider: string): unknown | null {
+  const key = `${provider}:${query.trim().toLowerCase()}`;
+  const entry = SEARCH_CACHE.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL_MS) {
+    SEARCH_CACHE.delete(key);
+    return null;
+  }
+  return entry.result;
+}
+
+function setCachedResult(query: string, provider: string, result: unknown): void {
+  // LRU 淘汰：超过上限删最旧的
+  if (SEARCH_CACHE.size >= CACHE_MAX_SIZE) {
+    const oldestKey = SEARCH_CACHE.keys().next().value;
+    if (oldestKey !== undefined) SEARCH_CACHE.delete(oldestKey);
+  }
+  const key = `${provider}:${query.trim().toLowerCase()}`;
+  SEARCH_CACHE.set(key, { result, ts: Date.now() });
+}
 
 // ═══ 搜索配置读取 ═══
 
@@ -126,20 +161,113 @@ async function callSerpAPI(query: string, cfg: SearchConfig) {
   }));
 }
 
-// ═══ Tool 定义 ═══
+// ═══ DuckDuckGo（免费兜底，无需 API Key）═══
+// 使用 Lite HTML 版本，不需要 VQD token，在国内更稳定
 
-export const searchWebTool: ToolDefinition = {
-  name: 'search_web',
-  description: `联网搜索外部信息。当用户问题无法仅凭本地数据库回答时调用。
+async function callDuckDuckGo(query: string, cfg: SearchConfig, proxyUrl?: string) {
+  // 有代理时直接走 Lite HTML（duck-duck-scrape 不支持代理，国内直连必失败）
+  if (!proxyUrl) {
+    // 无代理时尝试 duck-duck-scrape 库（直连，国内可能失败）
+    try {
+      const { search } = await import('duck-duck-scrape');
+      const results = await search(query, { safeSearch: -1 });
+      if (results.results.length > 0) {
+        return results.results.slice(0, cfg.maxResults).map(r => ({
+          title: r.title || '',
+          snippet: r.description?.slice(0, 300) || '',
+          url: r.url || '',
+        }));
+      }
+    } catch {
+      console.warn('[Search] duck-duck-scrape 直连失败，切换到 Lite 版本');
+    }
+  }
+
+  // 方案 2: DuckDuckGo Lite HTML（不需要 VQD，通过代理访问）
+  const params = new URLSearchParams({ q: query });
+  const res = await fetchWithProxy('https://lite.duckduckgo.com/lite/', proxyUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    },
+    body: params.toString(),
+    redirect: 'follow',
+  }, 15_000);
+
+  if (!res.ok) throw new Error(`DDG Lite HTTP ${res.status}`);
+
+  const html = await res.text();
+  const results: Array<{ title: string; snippet: string; url: string }> = [];
+
+  // 解析 Lite 版本的 HTML（表格结构：link + snippet）
+  const linkRegex = /<a[^>]+rel="nofollow"[^>]+href="([^"]+)"[^>]*>([^<]*)<\/a>/gi;
+  const snippetRegex = /<td[^>]*class="result-snippet"[^>]*>([\s\S]*?)<\/td>/gi;
+
+  const links: Array<{ url: string; title: string }> = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = linkRegex.exec(html)) !== null) {
+    const url = match[1];
+    const title = match[2].trim();
+    // 过滤掉 DuckDuckGo 自身链接和广告
+    if (url.startsWith('http') && !url.includes('duckduckgo.com') && !url.includes('duck.co')) {
+      links.push({ url, title });
+    }
+  }
+
+  const snippets: string[] = [];
+  while ((match = snippetRegex.exec(html)) !== null) {
+    snippets.push(match[1].replace(/<[^>]+>/g, '').trim());
+  }
+
+  for (let i = 0; i < Math.min(links.length, cfg.maxResults); i++) {
+    results.push({
+      title: links[i].title,
+      snippet: (snippets[i] || '').slice(0, 300),
+      url: links[i].url,
+    });
+  }
+
+  return results;
+}
+
+// ═══ URL 去重 ═══
+
+interface SearchResult {
+  title: string;
+  snippet: string;
+  url: string;
+}
+
+function dedupByUrl(results: SearchResult[]): SearchResult[] {
+  const seen = new Set<string>();
+  return results.filter(r => {
+    if (!r.url || seen.has(r.url)) return false;
+    seen.add(r.url);
+    return true;
+  });
+}
+
+// ═══ Tool: search_tavily ═══
+
+export const searchTavilyTool: ToolDefinition = {
+  name: 'search_tavily',
+  description: `通过 Tavily API 搜索网页信息（付费，需配置 API Key）。
 
 使用时机:
-- 用户问技术趋势、行业标准、市场行情、竞品等外部知识
-- 用户需要"对比我的情况 vs 行业水平"
-- 用户问最新信息（本地数据可能过时）
+- 需要高质量、精准的网页搜索结果
+- 用户已配置 Tavily API Key（在设置页面）
+- 需要搜索深度内容（Tavily 支持 search_depth: advanced）
 
 不使用时机:
-- 查项目/任务/客户/成本/目标 → 用对应的 get_xxx 工具
-- 纯粹的业务操作 → 用对应的 create_xxx/update_xxx`,
+- 未配置 API Key → 用 search_sogou（国内免费）或 search_duckduckgo（需代理）
+- 中文热点 → 用 search_daily_hot
+- 新闻 → 用 search_google_news
+- 宏观数据 → 用 search_world_bank
+
+AI 自适应提示: 质量最高的搜索引擎，但需要付费 Key。未配置 Key 时自动不可用，国内网络用 search_sogou 替代，有代理用 search_duckduckgo 替代。`,
+
   category: 'work',
   access: 'read',
   requiresConfirmation: false,
@@ -161,41 +289,113 @@ export const searchWebTool: ToolDefinition = {
     const query = args.query as string;
     const overrideMax = args.maxResults as number | undefined;
     const cfg = await getSearchConfig(userId);
-
-    if (cfg.provider === 'none' || !cfg.apiKey) {
-      return {
-        configured: false,
-        message: '未配置搜索 API Key。请在 设置 → 搜索配置 中配置（推荐 Tavily，有免费额度）。',
-      };
-    }
-
-    // AI 指定的 maxResults 可覆盖用户设置
     const resolvedCfg = { ...cfg, maxResults: overrideMax || cfg.maxResults };
 
-    try {
-      const results = cfg.provider === 'serpapi'
-        ? await callSerpAPI(query, resolvedCfg)
-        : await callTavily(query, resolvedCfg);
+    if (!cfg.apiKey) {
+      return { error: '未配置 Tavily/SerpAPI API Key，请在设置页面配置，或使用 search_duckduckgo 替代', configured: false };
+    }
 
-      return {
-        configured: true,
-        provider: cfg.provider,
-        query,
-        results,
-        total: results.length,
-        // 告诉 AI 用了什么参数，帮助它理解结果质量
-        params: {
-          topic: cfg.topic,
-          depth: cfg.depth,
-          timeRange: cfg.timeRange !== 'none' ? cfg.timeRange : undefined,
-          country: cfg.country !== 'none' ? cfg.country : undefined,
-          includeDomains: cfg.includeDomains.length > 0 ? cfg.includeDomains : undefined,
-          excludeDomains: cfg.excludeDomains.length > 0 ? cfg.excludeDomains : undefined,
-        },
-      };
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : '搜索失败';
-      return { configured: true, error: message, results: [] };
+    // ─── 缓存检查 ───
+    const cacheKey = `tavily:${cfg.provider}`;
+    const cached = getCachedResult(query, cacheKey);
+    if (cached) {
+      console.log(`[Search] 缓存命中: "${query.slice(0, 30)}..." (${cacheKey})`);
+      return cached;
+    }
+
+    let rawResults: SearchResult[] = [];
+    let provider = cfg.provider;
+
+    try {
+      if (cfg.provider === 'serpapi') {
+        rawResults = await callSerpAPI(query, resolvedCfg);
+      } else {
+        rawResults = await callTavily(query, resolvedCfg);
+        provider = 'tavily';
+      }
+    } catch (err) {
+      console.warn(`[Search] ${provider} failed:`, err);
+      return { error: `${provider} 请求失败: ${err instanceof Error ? err.message : '未知错误'}`, results: [] };
+    }
+
+    if (rawResults.length === 0) {
+      return { configured: true, provider, query, results: [], total: 0, meta: { tool: 'search_tavily', query, totalRaw: 0, returned: 0, filtered: 0, avgScore: 0, sourceDistribution: {} } };
+    }
+
+    const { results, meta } = applySearchQualityGate(rawResults as RawSearchResult[], query, 'search_tavily');
+    const result = { configured: true, provider, query, results, total: results.length, meta, canDeepRead: true, cached: false };
+    setCachedResult(query, cacheKey, result);
+    return result;
+  },
+};
+
+// ═══ Tool: search_duckduckgo ═══
+
+export const searchDuckDuckGoTool: ToolDefinition = {
+  name: 'search_duckduckgo',
+  description: `通过 DuckDuckGo 免费搜索网页信息。需代理才能访问（国内被墙）。
+
+使用时机:
+- 用户有代理网络，需要免费搜索
+- 需要英文内容搜索（DuckDuckGo 英文结果更好）
+
+不使用时机:
+- 用户有 Tavily Key → 用 search_tavily（质量更高）
+- 国内网络无代理 → 用 search_sogou（国内直连免费搜索）
+- 中文热点 → 用 search_daily_hot
+- 新闻 → 用 search_google_news
+
+AI 自适应提示: 免费搜索，但需要代理（国内被墙）。无代理时请用 search_sogou 替代。配置代理后会自动通过代理访问。`,
+
+  category: 'work',
+  access: 'read',
+  requiresConfirmation: false,
+  preferredModel: 'balanced',
+
+  parameters: {
+    type: 'object',
+    properties: {
+      query: {
+        type: 'string',
+        description: '搜索关键词。要精确具体：包含时间限定词(2025/最新)、范围限定词(一人公司/小团队)、类型词(报价/案例/对比)，例如"2025小程序外包开发报价行情"而非"报价"',
+      },
+      maxResults: { type: 'number', description: '返回条数，默认5', default: 5 },
+    },
+    required: ['query'],
+  },
+
+  handler: async (args, userId) => {
+    const query = args.query as string;
+    const overrideMax = args.maxResults as number | undefined;
+    const resolvedCfg: SearchConfig = {
+      provider: 'duckduckgo', apiKey: '', topic: 'general', depth: 'basic',
+      maxResults: overrideMax || 5, timeRange: 'none', country: 'none',
+      includeRaw: 'none', chunksPerSource: 3, includeDomains: [], excludeDomains: [],
+    };
+
+    // ─── 代理配置 ───
+    const proxyUrl = await getProxyUrl(userId);
+
+    // ─── 缓存检查 ───
+    const cached = getCachedResult(query, 'ddg');
+    if (cached) {
+      console.log(`[Search] 缓存命中: "${query.slice(0, 30)}..." (ddg)`);
+      return cached;
+    }
+
+    try {
+      const rawResults = await callDuckDuckGo(query, resolvedCfg, proxyUrl);
+      if (rawResults.length === 0) {
+        return { configured: true, provider: 'duckduckgo', query, results: [], total: 0, meta: { tool: 'search_duckduckgo', query, totalRaw: 0, returned: 0, filtered: 0, avgScore: 0, sourceDistribution: {} } };
+      }
+
+      const { results, meta } = applySearchQualityGate(rawResults as RawSearchResult[], query, 'search_duckduckgo');
+      const result = { configured: true, provider: 'duckduckgo', query, results, total: results.length, meta, canDeepRead: true, cached: false };
+      setCachedResult(query, 'ddg', result);
+      return result;
+    } catch (err) {
+      console.warn('[Search] duckduckgo failed:', err);
+      return { error: `DuckDuckGo 搜索失败: ${err instanceof Error ? err.message : '未知错误'}`, results: [] };
     }
   },
 };

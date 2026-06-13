@@ -5,11 +5,84 @@ import { chatSchema, updateSessionSchema } from '../validators/llm.schema';
 import { AIService } from '../services/ai.service';
 import { success } from '../utils/response';
 import { getAllTools } from '../ai/tools/registry';
+import { selectRelevantTools } from '../ai/tools/tool-router';
 import { selectSystemPrompt } from '../ai/prompt-selector';
+import { getProxyStatus } from '../services/proxy-config';
+import { fetchWithTimeout } from '../ai/tools/fetch-with-timeout';
 import * as convService from '../services/conversation.service';
 import OpenAI from 'openai';
 
 const router = Router();
+
+// ═══ 模块级缓存（避免每次请求查库/请求远程）═══
+
+interface CacheEntry<T> { data: T; ts: number; }
+const memCache = new Map<string, CacheEntry<unknown>>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 分钟
+
+function getCached<T>(key: string): T | null {
+  const e = memCache.get(key);
+  if (!e || Date.now() - e.ts > CACHE_TTL) return null;
+  return e.data as T;
+}
+function setCache<T>(key: string, data: T): void {
+  memCache.set(key, { data, ts: Date.now() });
+}
+
+interface MemoryItem { category: string; key: string; value: string; confidence: number; }
+
+// 缓存记忆查询
+async function getCachedMemories(userId: string): Promise<MemoryItem[]> {
+  const key = `mem:${userId}`;
+  const cached = getCached<MemoryItem[]>(key);
+  if (cached) return cached;
+  const data = await prisma.userMemory.findMany({
+    where: { userId },
+    orderBy: { confidence: 'desc' },
+    take: 30,
+    select: { category: true, key: true, value: true, confidence: true },
+  });
+  setCache(key, data);
+  return data;
+}
+
+// 缓存工具权限设置
+async function getCachedToolPermission(userId: string): Promise<string> {
+  const key = `perm:${userId}`;
+  const cached = getCached<string>(key);
+  if (cached) return cached;
+  const row = await prisma.setting.findFirst({
+    where: { userId, category: 'AI', key: 'tool_permission' },
+  });
+  const value = row?.value || 'auto';
+  setCache(key, value);
+  return value;
+}
+
+// 缓存 SearXNG 健康检查
+async function getCachedSearXNGStatus(userId: string): Promise<{ configured: boolean; available: boolean }> {
+  const key = `searxng:${userId}`;
+  const cached = getCached<{ configured: boolean; available: boolean }>(key);
+  if (cached) return cached;
+  const result = { configured: false, available: false };
+  try {
+    const row = await prisma.setting.findFirst({
+      where: { userId, category: 'SEARCH', key: 'searxng_url' },
+    });
+    const url = row?.value?.trim();
+    if (url) {
+      result.configured = true;
+      try {
+        const resp = await fetchWithTimeout(`${url.replace(/\/+$/, '')}/search?q=ping&format=json`, {
+          headers: { 'Accept': 'application/json' },
+        }, 8_000);
+        result.available = resp.ok;
+      } catch { /* unreachable */ }
+    }
+  } catch { /* ignore */ }
+  setCache(key, result);
+  return result;
+}
 
 // ═══ POST /chat/stream — SSE 流式对话 ═══
 router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Response) => {
@@ -34,7 +107,12 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
     // 初始化 AI
     const ai = new AIService(req.userId!);
     const initialized = await ai.init(provider);
-    const tools = getAllTools();
+    const allTools = getAllTools();
+
+    // 动态工具加载：根据用户消息只加载相关工具，减少 token 浪费
+    const { tools, matchedGroups, totalTools } = selectRelevantTools(message, allTools);
+    console.log(`[ToolRouter] 消息: "${message.slice(0, 30)}..." → 匹配组: [${matchedGroups.join(', ')}] → 加载 ${totalTools}/${allTools.length} 个工具`);
+
     ai.registerTools(tools);
 
     // 检测供应商是否匹配
@@ -45,29 +123,69 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
 
     // 系统提示
     const basePrompt = selectSystemPrompt(message, initialized);
-    const toolListHint = tools.map(t => `- \`${t.name}\`: ${t.description}`).join('\n');
+    const toolListHint = tools.map(t => `- \`${t.name}\`: ${t.description.split('\n')[0]}`).join('\n');
 
-    // 读取用户记忆注入上下文
-    const memories = await prisma.userMemory.findMany({
-      where: { userId: req.userId! },
-      orderBy: { confidence: 'desc' },
-      take: 20,
-      select: { category: true, key: true, value: true, confidence: true },
-    });
-    const memoryHint = memories.length > 0
-      ? `\n\n## 用户记忆（你已了解的用户偏好和业务知识）\n${memories.map(m => `- [${m.category}] ${m.key}: ${m.value}`).join('\n')}\n在回答时参考这些记忆，让回复更个性化。`
+    // 读取用户记忆注入上下文（缓存 5 分钟，避免每次查库）
+    const allMemories = await getCachedMemories(req.userId!);
+
+    // 记忆分层过滤：核心记忆始终注入，事实/事件记忆按关键词匹配
+    const msgLower = message.toLowerCase();
+    const isCore = (m: { category: string }) => m.category === 'PREFERENCE' || m.category === 'RULE';
+    const isRelated = (m: { key: string; value: string }) => {
+      const keywords = (m.key + ' ' + m.value)
+        .split(/[,，、\s]+/)
+        .filter(w => w.length >= 2)
+        .map(w => w.toLowerCase());
+      return keywords.some(kw => msgLower.includes(kw));
+    };
+
+    const relevantMemories = allMemories
+      .filter(m => isCore(m) || isRelated(m))
+      .slice(0, 8)
+      .map(m => `- [${m.category}] ${m.key}: ${m.value.slice(0, 50)}`);
+
+    const memoryHint = relevantMemories.length > 0
+      ? `\n\n## 用户记忆（你已了解的用户偏好和业务知识）\n${relevantMemories.join('\n')}\n在回答时参考这些记忆，让回复更个性化。`
       : '';
 
-    // 读取工具权限设置
-    const permSetting = await prisma.setting.findFirst({
-      where: { userId: req.userId!, category: 'AI', key: 'tool_permission' },
-    });
-    const toolPerm = permSetting?.value || 'auto';
+    console.log(`[Memory] 总记忆: ${allMemories.length}条, 相关: ${relevantMemories.length}条`);
+
+    // 读取工具权限设置（缓存 5 分钟）
+    const toolPerm = await getCachedToolPermission(req.userId!);
     const permHint = toolPerm === 'confirm'
       ? `\n\n## 写操作规则\n当用户要求创建、修改、删除数据时，先用文字说明你将要执行的操作（列出关键字段），然后询问用户"确认执行吗？"。只有当用户回复"确认""执行""是""好"等肯定词时，才调用工具执行。不要在用户确认前调用任何写操作工具。`
       : `\n\n## 写操作规则\n当用户要求创建、修改、删除数据时，直接调用对应的工具执行。不要询问确认，不要只用文字描述。工具是唯一能写入数据的方式。`;
 
-    const systemPrompt = `${basePrompt}${memoryHint}${permHint}\n\n## 可用工具（${tools.length}个）\n${toolListHint}\n\n## 时间说明\n当用户提到"今天"、"明天"、"下周"等相对时间时，必须先调用 get_current_time 工具获取准确日期，再进行计算。不要猜测日期。`;
+    // 检测代理状态（含健康检查，结果缓存 5 分钟）
+    const proxyStatus = await getProxyStatus(req.userId!);
+    console.log(`[Proxy] 聊天时代理状态: available=${proxyStatus.available}, message=${proxyStatus.message}`);
+
+    // 检测 SearXNG 状态（缓存 5 分钟，避免每次聊天都 HTTP 探测）
+    const searxngStatus = await getCachedSearXNGStatus(req.userId!);
+    console.log(`[SearXNG] 聊天时状态: configured=${searxngStatus.configured}, available=${searxngStatus.available}`);
+
+    // 构建网络环境说明
+    const networkLines: string[] = [];
+    if (searxngStatus.available) {
+      networkLines.push('- ✅ SearXNG 已就绪 → 通用搜索首选 search_searxng（聚合 Google+Bing+百度，质量最高）');
+    } else if (searxngStatus.configured) {
+      networkLines.push('- ⚠️ SearXNG 已配置但不可用 → 通用搜索降级到其他工具');
+    }
+    if (proxyStatus.available) {
+      networkLines.push(`- ✅ 代理可用: ${proxyStatus.message}`);
+      networkLines.push('  search_duckduckgo 和 search_google_news 可通过代理访问');
+      if (!searxngStatus.available) {
+        networkLines.push('  通用搜索优先用 search_duckduckgo（国际结果更全），中文搜索可用 search_sogou');
+      }
+    } else {
+      networkLines.push(`- ❌ 代理不可用: ${proxyStatus.message}`);
+      if (!searxngStatus.available) {
+        networkLines.push('  通用搜索用 search_sogou（国内直连免费）');
+      }
+    }
+    const networkEnv = networkLines.join('\n');
+
+    const systemPrompt = `${basePrompt}${memoryHint}${permHint}\n\n## 可用工具（${tools.length}个）\n${toolListHint}\n\n## 时间说明\n当用户提到"今天"、"明天"、"下周"等相对时间时，必须先调用 get_current_time 工具获取准确日期，再进行计算。不要猜测日期。\n\n## 网络环境\n${networkEnv}`;
 
     // 构建 messages 数组
     const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [];
@@ -111,16 +229,13 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
 
     // 流式对话
     let fullText = '';
-    const toolContext: string[] = [];
     for await (const event of ai.chat({ messages, model })) {
       if (!res.destroyed) send(event);
       if (event.type === 'text') fullText += event.content;
-      if (event.type === 'tool_call') toolContext.push(`🔧 ${event.name}(${JSON.stringify(event.args).slice(0, 200)})`);
-      if (event.type === 'tool_result') toolContext.push(`✅ ${event.name}: ${JSON.stringify(event.result).slice(0, 200)}`);
     }
 
-    // 保存 AI 回复（只保存文本，工具调用由前端 SSE 实时渲染）
-    if (fullText || toolContext.length > 0) {
+    // 保存 AI 回复
+    if (fullText) {
       await prisma.conversation.create({
         data: {
           userId: req.userId!,
@@ -157,7 +272,9 @@ router.post('/chat', validate(chatSchema), async (req: Request, res: Response, n
   try {
     const ai = new AIService(req.userId!);
     const initialized = await ai.init(req.body.provider);
-    ai.registerTools(getAllTools());
+    // 非流式也使用动态工具路由，节省 token
+    const { tools } = selectRelevantTools(req.body.message, getAllTools());
+    ai.registerTools(tools);
 
     const resolvedProvider = ai.getProvider();
     let prefix = '';
@@ -198,7 +315,7 @@ router.post('/conversations', async (req: Request, res: Response, next) => {
 // ═══ PATCH /conversations/:id — 更新会话（重命名/置顶） ═══
 router.patch('/conversations/:id', validate(updateSessionSchema), async (req: Request, res: Response, next) => {
   try {
-    const session = await convService.updateSession(req.userId!, req.params.id, req.body);
+    const session = await convService.updateSession(req.userId!, req.params.id as string, req.body);
     success(res, session);
   } catch (err) { next(err); }
 });
@@ -233,7 +350,7 @@ router.get('/conversations/weekly', async (req: Request, res: Response, next) =>
 // ═══ GET /conversations/:id/messages — 获取会话消息 ═══
 router.get('/conversations/:id/messages', async (req: Request, res: Response, next) => {
   try {
-    const msgs = await convService.getMessages(req.userId!, req.params.id);
+    const msgs = await convService.getMessages(req.userId!, req.params.id as string);
     success(res, msgs);
   } catch (err) { next(err); }
 });
@@ -241,7 +358,7 @@ router.get('/conversations/:id/messages', async (req: Request, res: Response, ne
 // ═══ DELETE /conversations/:id — 删除会话 ═══
 router.delete('/conversations/:id', async (req: Request, res: Response, next) => {
   try {
-    await convService.deleteSession(req.userId!, req.params.id);
+    await convService.deleteSession(req.userId!, req.params.id as string);
     success(res, null, '会话已删除');
   } catch (err) { next(err); }
 });

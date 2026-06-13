@@ -23,6 +23,7 @@ export interface ToolCallEvent {
   result?: unknown;
   status: 'calling' | 'done' | 'error';
   toolCallId?: string;
+  durationMs?: number;
 }
 
 export interface ChatMessage {
@@ -89,7 +90,7 @@ async function consumeSSEStream(
             break;
           case 'tool_result':
             for (const t of tools) {
-              if (t.name === event.name) { t.result = event.result; t.status = 'done'; }
+              if (t.name === event.name) { t.result = event.result; t.status = 'done'; t.durationMs = event.durationMs; }
             }
             opts.onToolResult(event.name, event.result, [...tools]);
             break;
@@ -97,7 +98,10 @@ async function consumeSSEStream(
             opts.onDone([...tools]);
             return;
         }
-      } catch { /* parse failure — skip */ }
+      } catch (e) {
+        // SSE JSON 解析失败 — 记录但不中断流
+        console.warn('[SSE] JSON 解析失败:', data.slice(0, 100), e);
+      }
     }
   }
   opts.onDone([...tools]);

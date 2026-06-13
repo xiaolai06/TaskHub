@@ -35,9 +35,11 @@ interface ScheduledTask {
   isDelayed: boolean;
   delayDays: number;
   isConflict: boolean;
+  isOverdue: boolean;
   status: string;
   projectId: string;
   projectName: string;
+  workdayAllocs: Record<string, number>; // date → 分配小时数（来自排期引擎）
 }
 
 interface DailyWorkload {
@@ -92,8 +94,14 @@ const PRIORITY_ORDER: Record<string, number> = {
   LOW: 3,
 };
 
-function sortByPriorityAndDueDate(tasks: TaskInput[]): TaskInput[] {
+function sortByPriorityAndDueDate(tasks: TaskInput[], today: Date): TaskInput[] {
   return [...tasks].sort((a, b) => {
+    // 逾期任务排最前面（不管优先级）
+    const aOverdue = a.dueDate && new Date(a.dueDate) < today && a.status !== 'DONE';
+    const bOverdue = b.dueDate && new Date(b.dueDate) < today && b.status !== 'DONE';
+    if (aOverdue && !bOverdue) return -1;
+    if (!aOverdue && bOverdue) return 1;
+
     const pa = PRIORITY_ORDER[a.priority] ?? 2;
     const pb = PRIORITY_ORDER[b.priority] ?? 2;
     if (pa !== pb) return pa - pb;
@@ -115,7 +123,10 @@ function sortByPriorityAndDueDate(tasks: TaskInput[]): TaskInput[] {
 // ======================== 日期工具函数 ========================
 
 function toDateStr(d: Date): string {
-  return d.toISOString().split('T')[0];
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 function addDays(d: Date, n: number): Date {
@@ -211,109 +222,157 @@ function buildSchedule(
   dailyHourLimit: number,
   skipWeekends: boolean = true,
 ): ScheduleResult {
-  const sorted = sortByPriorityAndDueDate(tasks);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const sorted = sortByPriorityAndDueDate(tasks, today);
 
-  const scheduled: ScheduledTask[] = [];
-  const workloadMap = new Map<string, { hours: number; tasks: string[] }>();
-  let cursorDate = skipWeekends ? skipToNextWorkday(new Date(today)) : new Date(today);
+  // 预处理：计算每个任务的剩余工时 + 初始化状态
+  interface TaskState {
+    task: TaskInput;
+    remaining: number;
+    firstDay: string | null;
+    lastDay: string | null;
+    dayAllocs: Map<string, number>; // date → 分配小时数
+    isOverdue: boolean;
+  }
 
+  const taskStates: TaskState[] = [];
   for (const task of sorted) {
-    const remaining = task.actualHours ?? task.estimatedHours;
-    const effectiveHours = remaining;
-    let firstDay: Date | null = null;
-    let lastDay: Date | null = null;
-    let left = remaining;
+    const actual = task.actualHours ?? 0;
+    const remaining = Math.max(0, task.estimatedHours - actual);
+    const isOverdue = !!(task.dueDate && new Date(task.dueDate) < today && task.status !== 'DONE');
+    taskStates.push({
+      task,
+      remaining,
+      firstDay: null,
+      lastDay: null,
+      dayAllocs: new Map(),
+      isOverdue,
+    });
+  }
 
-    // 确定起始日期：如果任务有 startDate 且在 cursor 之后，跳到 startDate
-    if (task.startDate) {
-      const taskStartHint = new Date(task.startDate);
-      if (taskStartHint > cursorDate) {
-        cursorDate = skipWeekends ? skipToNextWorkday(taskStartHint) : new Date(taskStartHint);
-      }
+  // 每日打包算法：逐天遍历，每天按优先级依次安排多个任务
+  // 注意：先处理当天，再推进到下一天（避免跳过今天）
+  const workloadMap = new Map<string, { hours: number; tasks: string[] }>();
+  const maxDays = 365;
+  const cursor = new Date(today);
+
+  for (let dayIdx = 0; dayIdx < maxDays; dayIdx++) {
+    // 跳过周末
+    if (skipWeekends && isWeekend(cursor)) {
+      cursor.setDate(cursor.getDate() + 1);
+      continue;
     }
 
-    // 按天分配工时
-    while (left > 0) {
-      // 跳过周末
-      if (skipWeekends && isWeekend(cursorDate)) {
-        cursorDate.setDate(cursorDate.getDate() + 1);
-        continue;
+    // 检查是否所有任务都分配完毕
+    const allDone = taskStates.every((ts) => ts.remaining <= 0);
+    if (allDone) break;
+
+    const dateStr = toDateStr(cursor);
+    const dayInfo = workloadMap.get(dateStr) ?? { hours: 0, tasks: [] as string[] };
+    let available = dailyHourLimit - dayInfo.hours;
+
+    // 两阶段分配：逾期任务优先独占整天，排完后再排其他任务
+    // Phase 1: 只分配逾期任务；Phase 2: 逾期全部完成后，分配所有任务
+    const hasPendingOverdue = taskStates.some((ts) => ts.remaining > 0 && ts.isOverdue);
+
+    for (const ts of taskStates) {
+      if (ts.remaining <= 0) continue;
+      if (available <= 0) break;
+
+      // 逾期未排完时，只分配逾期任务（非逾期任务等 Phase 2）
+      if (hasPendingOverdue && !ts.isOverdue) continue;
+
+      // startDate 约束：当天还没到任务的 startDate，跳过
+      if (ts.task.startDate) {
+        const hint = new Date(ts.task.startDate);
+        hint.setHours(0, 0, 0, 0);
+        if (cursor < hint) continue;
       }
 
-      const dateStr = toDateStr(cursorDate);
-      const day = workloadMap.get(dateStr) ?? { hours: 0, tasks: [] };
-      const available = dailyHourLimit - day.hours;
+      const allocate = Math.min(ts.remaining, available);
+      ts.remaining -= allocate;
+      ts.dayAllocs.set(dateStr, (ts.dayAllocs.get(dateStr) ?? 0) + allocate);
+      if (!ts.firstDay) ts.firstDay = dateStr;
+      ts.lastDay = dateStr;
 
-      if (available <= 0) {
-        // 当天已满，移到下一天
-        cursorDate.setDate(cursorDate.getDate() + 1);
-        continue;
-      }
-
-      const allocate = Math.min(left, available);
-      day.hours += allocate;
-      day.tasks.push(task.title);
-      workloadMap.set(dateStr, day);
-
-      if (!firstDay) firstDay = new Date(cursorDate);
-      lastDay = new Date(cursorDate);
-      left -= allocate;
-
-      if (left > 0) {
-        cursorDate.setDate(cursorDate.getDate() + 1);
-      }
+      dayInfo.hours += allocate;
+      dayInfo.tasks.push(ts.task.title);
+      available -= allocate;
     }
 
-    const scheduledStart = firstDay ? toDateStr(firstDay) : toDateStr(today);
-    const scheduledEnd = lastDay ? toDateStr(lastDay) : scheduledStart;
+    workloadMap.set(dateStr, dayInfo);
+    // 先处理再推进：确保今天（cursor 初始值）被处理
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  // 构建排期结果
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  const scheduled: ScheduledTask[] = taskStates.map((ts) => {
+    const actual = ts.task.actualHours ?? 0;
+    const effectiveHours = Math.max(0, ts.task.estimatedHours - actual);
+    const scheduledStart = ts.firstDay ?? toDateStr(today);
+    const scheduledEnd = ts.lastDay ?? scheduledStart;
     const endDate = new Date(scheduledEnd);
 
-    // 延期检测：有截止日期且排期结束超过截止日期
     let isDelayed = false;
     let delayDays = 0;
-    if (task.dueDate) {
-      const due = new Date(task.dueDate);
+    if (ts.task.dueDate) {
+      const due = new Date(ts.task.dueDate);
       if (endDate > due) {
         isDelayed = true;
         delayDays = diffDays(due, endDate);
       }
     }
 
-    // 冲突检测：排期内有工时超限的天
+    // 逾期标记：截止日期已过且未完成
+    let isOverdue = false;
+    if (ts.task.dueDate && ts.task.status !== 'DONE') {
+      const due = new Date(ts.task.dueDate);
+      due.setHours(0, 0, 0, 0);
+      if (due < now) isOverdue = true;
+    }
+
     let isConflict = false;
-    if (firstDay && lastDay) {
-      let check = new Date(firstDay);
-      while (check <= lastDay) {
+    if (ts.firstDay && ts.lastDay) {
+      let check = new Date(ts.firstDay);
+      const end = new Date(ts.lastDay);
+      while (check <= end) {
         const day = workloadMap.get(toDateStr(check));
-        if (day && day.hours > dailyHourLimit) {
-          isConflict = true;
-          break;
-        }
+        if (day && day.hours > dailyHourLimit) { isConflict = true; break; }
         check.setDate(check.getDate() + 1);
       }
     }
 
-    scheduled.push({
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      priority: task.priority,
-      estimatedHours: task.estimatedHours,
-      actualHours: task.actualHours,
+    // 将 dayAllocs Map 序列化为对象，供前端直接使用
+    const workdayAllocs: Record<string, number> = {};
+    for (const [date, hours] of ts.dayAllocs) {
+      workdayAllocs[date] = Math.round(hours * 100) / 100;
+    }
+
+    return {
+      id: ts.task.id,
+      title: ts.task.title,
+      description: ts.task.description,
+      priority: ts.task.priority,
+      estimatedHours: ts.task.estimatedHours,
+      actualHours: ts.task.actualHours,
       effectiveHours,
       scheduledStart,
       scheduledEnd,
-      originalDueDate: task.dueDate,
+      originalDueDate: ts.task.dueDate,
       isDelayed,
       delayDays,
       isConflict,
-      status: task.status,
-      projectId: task.projectId,
-      projectName: task.projectName,
-    });
-  }
+      isOverdue,
+      status: ts.task.status,
+      projectId: ts.task.projectId,
+      projectName: ts.task.projectName,
+      workdayAllocs,
+    };
+  });
 
   // 构建每日工时数组
   const dailyWorkload: DailyWorkload[] = [];

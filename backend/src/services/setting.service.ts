@@ -76,8 +76,11 @@ export async function getAvailableProviders(userId: string) {
   const configured = await getProviders(userId);
   const configuredNames = new Set(configured.map(p => p.name));
 
-  // 已配置的排在前面，预置的排在后面
-  const all = [...configured];
+  // 已配置的排在前面，预置的排在后面（API Key 脱敏，只返回是否已配置）
+  const all = configured.map(p => ({
+    ...p,
+    apiKey: p.apiKey ? '***' : '',
+  }));
   for (const p of PRESET_PROVIDERS) {
     if (!configuredNames.has(p.name)) {
       all.push({ name: p.name, label: p.label, baseUrl: p.baseUrl, apiKey: '', defaultModel: '', powerfulModel: '' });
@@ -227,7 +230,7 @@ export async function fetchModelsFromProvider(
         continue;
       }
 
-      const data = await res.json() as any;
+      const data = await res.json() as Record<string, unknown>;
 
       // 兼容多种返回格式
       let items: Record<string, unknown>[] = [];
@@ -365,15 +368,20 @@ export function getFallbackModelsForProvider(provider: string): { id: string; na
   });
 }
 
-/** 获取某分类所有配置 */
+/** 获取某分类所有配置（前端用，敏感值脱敏） */
 export async function getByCategory(userId: string, category: string) {
   const settings = await prisma.setting.findMany({
     where: { OR: [{ userId }, { userId: 'system' }], category },
   });
   const result: Record<string, string> = {};
+  const SENSITIVE_KEYS = new Set(['api_key', 'smtp_pass', 'producthunt_token', 'webhook_secret']);
   for (const s of settings) {
-    if (s.encrypted) {
-      try { result[s.key] = decrypt(s.value); } catch { result[s.key] = '***'; }
+    if (s.encrypted || SENSITIVE_KEYS.has(s.key)) {
+      // 敏感字段只返回是否已配置，不返回明文
+      try {
+        const val = s.encrypted ? decrypt(s.value) : s.value;
+        result[s.key] = val ? '***' : '';
+      } catch { result[s.key] = '***'; }
     } else {
       result[s.key] = s.value;
     }

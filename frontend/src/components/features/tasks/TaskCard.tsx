@@ -5,39 +5,7 @@ import { Clock, Calendar, DollarSign, Ban, MoreVertical, Edit3, Trash2 } from 'l
 import { useState, useRef, useEffect } from 'react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import type { Task } from '@/hooks/useTasks';
-import { getPriorityBorderColor } from '@/components/ui/PriorityBadge';
-
-const priorityDot: Record<string, string> = {
-  URGENT: 'bg-red-500',
-  HIGH: 'bg-orange-500',
-  MEDIUM: 'bg-amber-400',
-  LOW: 'bg-accent',
-};
-
-const priorityLabel: Record<string, string> = {
-  URGENT: '紧急',
-  HIGH: '高',
-  MEDIUM: '中',
-  LOW: '低',
-};
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function formatCost(fen: number | null | undefined): string {
-  if (!fen) return '';
-  const yuan = fen / 100;
-  return yuan >= 10000 ? `¥${(yuan / 10000).toFixed(1)}万` : `¥${yuan.toLocaleString()}`;
-}
-
-function isOverdue(dateStr: string | null): boolean {
-  if (!dateStr) return false;
-  return new Date(dateStr) < new Date();
-}
+import { formatDate, formatCost, isOverdue, PRIORITY_DOT, PRIORITY_LABEL } from '@/lib/task-utils';
 
 interface TaskCardProps {
   task: Task;
@@ -56,7 +24,7 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
   const isDone = task.status === 'DONE';
   const isBlocked = task.status === 'BLOCKED';
   const overdue = !isDone && isOverdue(task.dueDate);
-  const cost = formatCost(task.cost);
+  const cost = formatCost(task.cost, '');
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -70,10 +38,9 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
     <div
       onClick={() => onClick?.(task)}
       className={cn(
-        'group relative flex h-[168px] flex-col rounded-xl border border-border/60 bg-card shadow-sm transition-all duration-200',
-        'border-l-[3px] pl-4 pr-3.5 py-3.5',
-        getPriorityBorderColor(task.priority),
-        isDragging && 'drag-active border-indigo-200',
+        'group relative flex min-h-[120px] flex-col rounded-xl border border-border/60 bg-card shadow-sm transition-all duration-200',
+        'px-3.5 py-2.5',
+        isDragging && 'shadow-2xl ring-2 ring-indigo-300',
         isDone && 'opacity-55',
         onClick && 'cursor-pointer hover:border-border hover:shadow-md hover:-translate-y-0.5',
       )}
@@ -146,8 +113,8 @@ export function TaskCard({ task, onEdit, onDelete, onClick, isDragging }: TaskCa
       <div className="mt-auto flex h-8 items-center gap-x-3 border-t border-border pt-0 text-[11px]">
         {/* 优先级 */}
         <span className="flex items-center gap-1 text-muted-foreground">
-          <span className={cn('h-1.5 w-1.5 rounded-full', priorityDot[task.priority] || 'bg-accent')} />
-          {priorityLabel[task.priority] || '中'}
+          <span className={cn('h-1.5 w-1.5 rounded-full', PRIORITY_DOT[task.priority] || 'bg-accent')} />
+          {PRIORITY_LABEL[task.priority] || '中'}
         </span>
         <span className="h-0.5 w-0.5 rounded-full bg-accent" />
 

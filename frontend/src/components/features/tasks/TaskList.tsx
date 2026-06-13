@@ -9,34 +9,23 @@ import {
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PriorityBadge } from '@/components/ui/PriorityBadge';
 import type { Task } from '@/hooks/useTasks';
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function formatCost(fen: number | null | undefined): string {
-  if (!fen) return '—';
-  const yuan = fen / 100;
-  return yuan >= 10000 ? `¥${(yuan / 10000).toFixed(1)}万` : `¥${yuan.toLocaleString()}`;
-}
-
-function isOverdue(dateStr: string | null, status: string): boolean {
-  if (!dateStr || status === 'DONE') return false;
-  return new Date(dateStr) < new Date();
-}
+import { formatDate, formatCost, isOverdue } from '@/lib/task-utils';
 
 // 排序配置
-type SortField = 'priority' | 'dueDate' | 'estimatedHours' | 'title' | 'cost';
+type SortField = 'priority' | 'dueDate' | 'estimatedHours' | 'title' | 'cost' | 'status';
 type SortOrder = 'asc' | 'desc';
 
 const priorityOrder: Record<string, number> = { URGENT: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+const statusOrder: Record<string, number> = { IN_PROGRESS: 0, TODO: 1, BLOCKED: 2, DONE: 3 };
 
 function sortTasks(tasks: Task[], field: SortField, order: SortOrder): Task[] {
   const sorted = [...tasks].sort((a, b) => {
     switch (field) {
+      case 'status': {
+        const av = statusOrder[a.status] ?? 99;
+        const bv = statusOrder[b.status] ?? 99;
+        return av - bv;
+      }
       case 'priority': {
         const av = priorityOrder[a.priority] ?? 99;
         const bv = priorityOrder[b.priority] ?? 99;
@@ -162,7 +151,7 @@ function TaskRow({
         <td className="py-3">
           <button
             onClick={() => onStatusChange?.(task.id, task.status === 'DONE' ? 'TODO' : 'DONE')}
-            className="transition-opacity group-hover:opacity-100 md:opacity-0"
+            className="transition-opacity"
           >
             <StatusBadge status={task.status} />
           </button>
@@ -273,25 +262,27 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
     <div className="overflow-hidden rounded-xl border border-border/60 bg-card">
       <table className="w-full">
         <thead>
-          <tr className="border-b border-border bg-muted/80">
+          <tr className="border-b-2 border-border bg-muted/80">
             <th className="w-8 pl-4" />
-            <th className="px-3 py-2.5 text-left">
+            <th className="px-4 py-3 text-left">
               <SortHeader label="任务名称" field="title" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>
-            <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">状态</th>
-            <th className="px-3 py-2.5 text-left">
+            <th className="px-4 py-3 text-left">
+              <SortHeader label="状态" field="status" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
+            </th>
+            <th className="px-4 py-3 text-left">
               <SortHeader label="优先级" field="priority" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>
-            <th className="px-3 py-2.5 text-left">
+            <th className="px-4 py-3 text-left">
               <SortHeader label="项目/花销" field="cost" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>
-            <th className="px-3 py-2.5 text-left">
+            <th className="px-4 py-3 text-left">
               <SortHeader label="工时" field="estimatedHours" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>
-            <th className="px-3 py-2.5 text-left">
+            <th className="px-4 py-3 text-left">
               <SortHeader label="截止日期" field="dueDate" currentField={sortField} currentOrder={sortOrder} onSort={handleSort} />
             </th>
-            <th className="w-20 px-3 py-2.5" />
+            <th className="w-20 px-4 py-3" />
           </tr>
         </thead>
         <tbody className="divide-y divide-border">

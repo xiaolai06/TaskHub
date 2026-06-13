@@ -13,7 +13,6 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
-import { GripVertical } from 'lucide-react';
 import { TaskCard } from './TaskCard';
 import type { Task } from '@/hooks/useTasks';
 
@@ -28,10 +27,10 @@ interface ColumnDef {
 }
 
 const columns: ColumnDef[] = [
-  { key: 'TODO', label: '待办', color: 'text-foreground/70', accentBg: 'bg-muted', countBg: 'bg-muted text-muted-foreground' },
-  { key: 'IN_PROGRESS', label: '进行中', color: 'text-blue-600 dark:text-blue-400', accentBg: 'bg-blue-50 dark:bg-blue-950/40', countBg: 'bg-blue-50 text-blue-500 dark:bg-blue-950/40 dark:text-blue-400' },
-  { key: 'DONE', label: '已完成', color: 'text-emerald-600 dark:text-emerald-400', accentBg: 'bg-emerald-50 dark:bg-emerald-950/40', countBg: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-400' },
-  { key: 'BLOCKED', label: '阻塞', color: 'text-red-600 dark:text-red-400', accentBg: 'bg-red-50 dark:bg-red-950/40', countBg: 'bg-red-50 text-red-500 dark:bg-red-950/40 dark:text-red-400' },
+  { key: 'TODO', label: '待办', color: 'text-slate-700 dark:text-slate-300', accentBg: 'bg-slate-200/70 dark:bg-slate-700/50', countBg: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300' },
+  { key: 'IN_PROGRESS', label: '进行中', color: 'text-blue-700 dark:text-blue-300', accentBg: 'bg-blue-100 dark:bg-blue-900/40', countBg: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+  { key: 'DONE', label: '已完成', color: 'text-emerald-700 dark:text-emerald-300', accentBg: 'bg-emerald-100 dark:bg-emerald-900/40', countBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
+  { key: 'BLOCKED', label: '阻塞', color: 'text-red-700 dark:text-red-300', accentBg: 'bg-red-100 dark:bg-red-900/40', countBg: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
 ];
 
 // ========== 可拖拽卡片 ==========
@@ -52,17 +51,10 @@ function DraggableCard({
   return (
     <div
       ref={setNodeRef}
-      style={{ opacity: isDragging ? 0.3 : 1 }}
-      className="group/card relative"
+      className={cn('group/card relative transition-opacity', isDragging && 'opacity-40')}
+      {...attributes}
+      {...listeners}
     >
-      {/* 拖拽手柄 */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute left-0 top-0 z-10 flex h-full w-7 cursor-grab items-center justify-center rounded-l-xl opacity-0 transition-opacity hover:bg-muted/60 group-hover/card:opacity-100 active:cursor-grabbing"
-      >
-        <GripVertical className="h-4 w-4 text-muted-foreground/50" />
-      </div>
       <TaskCard task={task} onEdit={onEdit} onDelete={onDelete} onClick={onClick} />
     </div>
   );
@@ -88,28 +80,25 @@ function DroppableColumn({
   return (
     <div className="flex flex-col">
       {/* 列头 */}
-      <div className="mb-2 flex items-center justify-between px-1 pb-2">
+      <div className={cn('mb-2 flex items-center justify-between rounded-lg px-3 py-2', column.accentBg)}>
         <div className="flex items-center gap-2">
-          <div className={cn('h-2.5 w-2.5 rounded-full', column.accentBg)} />
-          <h3 className={cn('text-sm font-semibold', column.color)}>{column.label}</h3>
+          <div className={cn('h-2 w-2 rounded-full', column.color === 'text-foreground/70' ? 'bg-foreground/40' : column.color.replace('text-', 'bg-'))} />
+          <h3 className={cn('text-[13px] font-semibold', column.color)}>{column.label}</h3>
         </div>
-        <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-semibold', column.countBg)}>
+        <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', column.countBg)}>
           {tasks.length}
         </span>
       </div>
 
-      {/* 分割线 */}
-      <div className="mb-3 h-px bg-accent/60" />
-
       {/* 卡片区域 — 独立滚动 */}
       <div
         className={cn(
-          'flex-1 space-y-3 overflow-y-auto rounded-xl border-2 border-dashed p-3 transition-colors',
+          'flex-1 space-y-2 overflow-y-auto rounded-xl border-2 border-dashed p-2 transition-colors',
           isOver
             ? 'border-indigo-300 bg-indigo-50/40 dark:border-indigo-700 dark:bg-indigo-950/30'
-            : 'border-transparent bg-muted/60',
+            : 'border-transparent',
         )}
-        style={{ maxHeight: 'calc(100vh - 220px)' }}
+        style={{ maxHeight: 'calc(100vh - 260px)' }}
       >
         {tasks.map((task) => (
           <DraggableCard
@@ -144,7 +133,7 @@ export function TaskBoard({ tasks, onStatusChange, onEdit, onDelete, onClick }: 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
   );
 
   const topLevelTasks = tasks.filter((t) => !t.parentId);
@@ -175,8 +164,8 @@ export function TaskBoard({ tasks, onStatusChange, onEdit, onDelete, onClick }: 
       findTaskById(overId)?.status;
 
     if (targetColumn) {
-      const activeTask = findTaskById(activeId);
-      if (activeTask && activeTask.status !== targetColumn) {
+      const draggedTask = findTaskById(activeId);
+      if (draggedTask && draggedTask.status !== targetColumn) {
         onStatusChange(activeId, targetColumn);
       }
     }
@@ -197,11 +186,9 @@ export function TaskBoard({ tasks, onStatusChange, onEdit, onDelete, onClick }: 
         ))}
       </div>
 
-      <DragOverlay dropAnimation={null}>
+      <DragOverlay dropAnimation={{ duration: 150, easing: 'ease-out' }}>
         {activeTask && (
-          <div className="w-[280px]">
-            <TaskCard task={activeTask} isDragging />
-          </div>
+          <TaskCard task={activeTask} isDragging />
         )}
       </DragOverlay>
     </DndContext>

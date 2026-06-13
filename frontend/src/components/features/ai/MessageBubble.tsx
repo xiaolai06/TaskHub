@@ -15,6 +15,7 @@ interface ChatMessage {
     args: Record<string, unknown>;
     result?: unknown;
     status: 'calling' | 'done' | 'error';
+    durationMs?: number;
   }>;
   timestamp: Date;
 }
@@ -83,7 +84,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
   // 将 tool calls 转为 ToolCallItem
   const toolItems: ToolCallItem[] = (message.toolCalls || []).map(tc => {
     const info = TOOL_INFO[tc.name] || { icon: '🔧', label: tc.name };
-    return { ...info, name: tc.name, status: tc.status };
+    return { ...info, name: tc.name, status: tc.status, durationMs: tc.durationMs };
   });
 
   // 工具调用耗时模拟

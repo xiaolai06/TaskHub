@@ -19,9 +19,11 @@ export interface ScheduledTask {
   isDelayed: boolean;
   delayDays: number;
   isConflict: boolean;
+  isOverdue: boolean;
   status: string;
   projectId: string;
   projectName: string;
+  workdayAllocs: Record<string, number>; // date → 分配小时数（来自排期引擎）
 }
 
 export interface DailyWorkload {

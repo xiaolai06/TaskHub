@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   Loader2, CheckCircle, AlertCircle, Bot, Link, Shield, Database,
-  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search, Plus, Mail, Send, Bell, Clock,
+  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search, Plus, Mail, Send, Bell, Clock, Globe,
 } from 'lucide-react';
 
 // ========== 类型 ==========
@@ -415,6 +415,20 @@ function SearchConfig() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // 代理配置
+  const [proxyUrl, setProxyUrl] = useState('');
+  const [proxyTesting, setProxyTesting] = useState(false);
+  const [proxyResult, setProxyResult] = useState<{ success: boolean; message: string; ip?: string } | null>(null);
+
+  // 外部访问测试
+  const [extTesting, setExtTesting] = useState(false);
+  const [extResult, setExtResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // SearXNG 配置
+  const [searxngUrl, setSearxngUrl] = useState('');
+  const [searxngTesting, setSearxngTesting] = useState(false);
+  const [searxngResult, setSearxngResult] = useState<{ success: boolean; message: string; latency?: number; resultCount?: number } | null>(null);
+
   // 搜索高级参数
   const [cfg, setCfg] = useState<SearchConfig>({
     topic: 'general', depth: 'basic', maxResults: 5,
@@ -431,7 +445,12 @@ function SearchConfig() {
         if (res.config) {
           try { setCfg(prev => ({ ...prev, ...JSON.parse(res.config) })); } catch {}
         }
+        if (res.searxng_url) setSearxngUrl(res.searxng_url);
       })
+      .catch(() => {});
+    // 加载代理配置
+    api.get<Record<string, string>>('/settings/network')
+      .then((res) => { if (res.proxy_url) setProxyUrl(res.proxy_url); })
       .catch(() => {});
   }, []);
 
@@ -444,11 +463,60 @@ function SearchConfig() {
           { category: 'SEARCH', key: 'api_key', value: apiKey || '', encrypted: true },
           { category: 'SEARCH', key: 'config', value: JSON.stringify(cfg) },
           { category: 'SEARCH', key: 'producthunt_token', value: phToken || '', encrypted: true },
+          { category: 'SEARCH', key: 'searxng_url', value: searxngUrl || '' },
+          { category: 'NETWORK', key: 'proxy_url', value: proxyUrl || '' },
         ],
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {} finally { setSaving(false); }
+  }
+
+  // 测试代理
+  async function handleProxyTest() {
+    if (!proxyUrl.trim()) return;
+    setProxyTesting(true);
+    setProxyResult(null);
+    try {
+      const res = await api.post<{ success: boolean; message: string; ip?: string }>(
+        '/settings/proxy/test', { url: proxyUrl.trim() },
+      );
+      setProxyResult(res);
+    } catch {
+      setProxyResult({ success: false, message: '测试请求失败' });
+    } finally { setProxyTesting(false); }
+  }
+
+  // 测试外部访问（直连）
+  async function handleExtTest() {
+    setExtTesting(true);
+    setExtResult(null);
+    try {
+      const res = await fetch('https://httpbin.org/ip', { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const data = await res.json() as { origin?: string };
+        setExtResult({ success: true, message: `直连成功，IP: ${data.origin || '未知'}` });
+      } else {
+        setExtResult({ success: false, message: `HTTP ${res.status}` });
+      }
+    } catch {
+      setExtResult({ success: false, message: '直连失败，可能需要代理才能访问外部网络' });
+    } finally { setExtTesting(false); }
+  }
+
+  // 测试 SearXNG 连接
+  async function handleSearXNGTest() {
+    if (!searxngUrl.trim()) return;
+    setSearxngTesting(true);
+    setSearxngResult(null);
+    try {
+      const res = await api.post<{ success: boolean; message: string; latency?: number; resultCount?: number }>(
+        '/settings/searxng/test', { url: searxngUrl.trim() },
+      );
+      setSearxngResult(res);
+    } catch {
+      setSearxngResult({ success: false, message: '测试请求失败' });
+    } finally { setSearxngTesting(false); }
   }
 
   const inputCls = 'w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
@@ -578,6 +646,80 @@ function SearchConfig() {
         <p className="mt-0.5 text-[10px] text-muted-foreground">
           在 producthunt.com → Settings → API 免费申请，每天 100 次请求
         </p>
+      </div>
+
+      {/* SearXNG 自托管搜索 */}
+      <div className="border-t border-border pt-4">
+        <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">SearXNG 自托管搜索</h3>
+        <p className="mb-3 text-[11px] text-muted-foreground">
+          聚合 Google / Bing / DuckDuckGo / 百度等多个引擎，质量最高。
+          <a href="https://docs.searxng.org/" target="_blank" rel="noopener" className="ml-1 text-indigo-500 hover:underline">部署文档</a>
+        </p>
+
+        <div className="flex gap-2">
+          <input type="text" value={searxngUrl} onChange={e => { setSearxngUrl(e.target.value); setSearxngResult(null); }}
+            placeholder="http://localhost:8080" className={cn(inputCls, 'flex-1')} />
+          <button onClick={handleSearXNGTest} disabled={searxngTesting || !searxngUrl.trim()}
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground/70 transition-all hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50">
+            {searxngTesting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+            测试连接
+          </button>
+        </div>
+
+        {searxngResult && (
+          <div className={cn('mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs',
+            searxngResult.success ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400')}>
+            {searxngResult.success ? <CheckCircle className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
+            {searxngResult.message}
+            {searxngResult.latency ? ` (${searxngResult.latency}ms)` : ''}
+            {searxngResult.resultCount ? ` — ${searxngResult.resultCount} 条结果` : ''}
+          </div>
+        )}
+
+        {!searxngUrl && (
+          <p className="mt-2 text-[10px] text-muted-foreground">
+            快速部署: <code className="rounded bg-muted px-1 py-0.5">docker run -d --name searxng -p 8080:8080 searxng/searxng</code>
+          </p>
+        )}
+      </div>
+
+      {/* 网络代理配置 */}
+      <div className="border-t border-border pt-4">
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">网络代理（可选）</h3>
+        <p className="mb-3 text-[11px] text-muted-foreground">
+          配置代理后，DuckDuckGo 和 Google News 等被墙的搜索源会自动通过代理访问。
+        </p>
+
+        <div className="flex gap-2">
+          <input type="text" value={proxyUrl} onChange={e => { setProxyUrl(e.target.value); setProxyResult(null); }}
+            placeholder="http://127.0.0.1:7890" className={cn(inputCls, 'flex-1')} />
+          <button onClick={handleProxyTest} disabled={proxyTesting || !proxyUrl.trim()}
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground/70 transition-all hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50">
+            {proxyTesting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wifi className="h-3.5 w-3.5" />}
+            测试代理
+          </button>
+          <button onClick={handleExtTest} disabled={extTesting}
+            className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground/70 transition-all hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+            title="测试本机是否能直连外部网络">
+            {extTesting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Globe className="h-3.5 w-3.5" />}
+            测试外网
+          </button>
+        </div>
+
+        {proxyResult && (
+          <div className={cn('mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs',
+            proxyResult.success ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400')}>
+            {proxyResult.success ? <CheckCircle className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
+            {proxyResult.message}{proxyResult.ip ? ` (出口 IP: ${proxyResult.ip})` : ''}
+          </div>
+        )}
+        {extResult && (
+          <div className={cn('mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs',
+            extResult.success ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400')}>
+            {extResult.success ? <CheckCircle className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
+            {extResult.message}
+          </div>
+        )}
       </div>
 
       {saved && (

@@ -11,9 +11,9 @@ import {
   Search,
   Settings,
   Target,
-  Calendar,
   Sparkles,
   PanelLeftClose,
+  Wallet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,10 +32,10 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: '/main/dashboard', label: '仪表盘', icon: LayoutDashboard, color: 'text-blue-600', darkColor: 'dark:text-blue-400', activeBg: 'bg-blue-50', darkActiveBg: 'dark:bg-blue-950/50', activeText: 'text-blue-700', darkActiveText: 'dark:text-blue-300' },
   { href: '/main/projects', label: '项目管理', icon: FolderKanban, color: 'text-violet-600', darkColor: 'dark:text-violet-400', activeBg: 'bg-violet-50', darkActiveBg: 'dark:bg-violet-950/50', activeText: 'text-violet-700', darkActiveText: 'dark:text-violet-300' },
-  { href: '/main/tasks', label: '任务看板', icon: CheckSquare, color: 'text-cyan-600', darkColor: 'dark:text-cyan-400', activeBg: 'bg-cyan-50', darkActiveBg: 'dark:bg-cyan-950/50', activeText: 'text-cyan-700', darkActiveText: 'dark:text-cyan-300' },
+  { href: '/main/tasks', label: '任务中心', icon: CheckSquare, color: 'text-cyan-600', darkColor: 'dark:text-cyan-400', activeBg: 'bg-cyan-50', darkActiveBg: 'dark:bg-cyan-950/50', activeText: 'text-cyan-700', darkActiveText: 'dark:text-cyan-300' },
   { href: '/main/customers', label: '客户管理', icon: Users, color: 'text-emerald-600', darkColor: 'dark:text-emerald-400', activeBg: 'bg-emerald-50', darkActiveBg: 'dark:bg-emerald-950/50', activeText: 'text-emerald-700', darkActiveText: 'dark:text-emerald-300' },
+  { href: '/main/finance', label: '记账', icon: Wallet, color: 'text-teal-600', darkColor: 'dark:text-teal-400', activeBg: 'bg-teal-50', darkActiveBg: 'dark:bg-teal-950/50', activeText: 'text-teal-700', darkActiveText: 'dark:text-teal-300' },
   { href: '/main/goals', label: '目标管理', icon: Target, color: 'text-amber-600', darkColor: 'dark:text-amber-400', activeBg: 'bg-amber-50', darkActiveBg: 'dark:bg-amber-950/50', activeText: 'text-amber-700', darkActiveText: 'dark:text-amber-300' },
-  { href: '/main/schedule', label: '排期视图', icon: Calendar, color: 'text-rose-600', darkColor: 'dark:text-rose-400', activeBg: 'bg-rose-50', darkActiveBg: 'dark:bg-rose-950/50', activeText: 'text-rose-700', darkActiveText: 'dark:text-rose-300' },
   { href: '/main/ai', label: 'AI 工作台', icon: Sparkles, color: 'text-indigo-600', darkColor: 'dark:text-indigo-400', activeBg: 'bg-indigo-50', darkActiveBg: 'dark:bg-indigo-950/50', activeText: 'text-indigo-700', darkActiveText: 'dark:text-indigo-300' },
   { href: '/main/reports', label: '经营看板', icon: BarChart3, color: 'text-teal-600', darkColor: 'dark:text-teal-400', activeBg: 'bg-teal-50', darkActiveBg: 'dark:bg-teal-950/50', activeText: 'text-teal-700', darkActiveText: 'dark:text-teal-300' },
   { href: '/main/research', label: '行业洞察', icon: Search, color: 'text-orange-600', darkColor: 'dark:text-orange-400', activeBg: 'bg-orange-50', darkActiveBg: 'dark:bg-orange-950/50', activeText: 'text-orange-700', darkActiveText: 'dark:text-orange-300' },

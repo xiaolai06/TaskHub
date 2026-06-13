@@ -10,6 +10,7 @@ export interface ToolCallItem {
   label: string;
   status: 'calling' | 'done' | 'error';
   summary?: string;
+  durationMs?: number;
 }
 
 interface ToolCallBarProps {
@@ -58,6 +59,14 @@ export function ToolCallBar({ tools }: ToolCallBarProps) {
               )}
               <span>{t.icon}</span>
               <span>{t.label}</span>
+              {t.durationMs !== undefined && t.durationMs > 0 && (
+                <span className={cn(
+                  'ml-auto text-[10px] tabular-nums',
+                  t.durationMs > 10000 ? 'text-amber-500' : 'text-emerald-500',
+                )}>
+                  {t.durationMs >= 1000 ? `${(t.durationMs / 1000).toFixed(1)}s` : `${t.durationMs}ms`}
+                </span>
+              )}
               {t.summary && <span className="text-muted-foreground">· {t.summary}</span>}
             </div>
           ))}

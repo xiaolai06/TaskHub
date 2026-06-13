@@ -1,49 +1,31 @@
 ﻿import { prisma } from '../server';
+import { getFinancialSummary } from './finance.service';
 
 export async function getStats(userId: string) {
-  const [projectCount, taskStats, recordCostSum, taskCostSum, monthlyIncomeAgg, overdueCount] = await Promise.all([
+  const [projectCount, taskStats, overdueCount, finance] = await Promise.all([
     prisma.project.count({ where: { ownerId: userId } }),
     prisma.task.groupBy({
       by: ['status'],
       where: { project: { ownerId: userId } },
       _count: { id: true },
     }),
-    prisma.costRecord.aggregate({
-      where: { project: { ownerId: userId } },
-      _sum: { amount: true },
-    }),
-    prisma.task.aggregate({
-      where: { project: { ownerId: userId }, cost: { gt: 0 } },
-      _sum: { cost: true },
-    }),
-    prisma.project.aggregate({
-      where: {
-        ownerId: userId,
-        status: 'COMPLETED',
-        updatedAt: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        },
-      },
-      _sum: { budget: true },
-    }),
     prisma.task.count({
       where: { project: { ownerId: userId }, dueDate: { lt: new Date() }, status: { not: 'DONE' } },
     }),
+    getFinancialSummary(userId),
   ]);
 
   const totalTasks = taskStats.reduce((sum, group) => sum + group._count.id, 0);
   const doneTasks = taskStats.find((group) => group.status === 'DONE')?._count.id || 0;
-  const totalCost = (recordCostSum._sum.amount || 0) + (taskCostSum._sum.cost || 0);
-  const monthlyIncome = monthlyIncomeAgg._sum.budget || 0;
 
   return {
     projectCount,
     totalTasks,
     doneTasks,
     completionRate: totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0,
-    totalCost,
-    monthlyIncome,
-    estimatedProfit: monthlyIncome - totalCost,
+    totalCost: finance.expense,
+    monthlyIncome: finance.income,
+    estimatedProfit: finance.profit,
     overdueCount,
   };
 }
@@ -52,6 +34,7 @@ export async function getRecentTasks(userId: string) {
   return prisma.task.findMany({
     where: { project: { ownerId: userId }, status: { not: 'DONE' } },
     orderBy: [{ dueDate: 'asc' }, { priority: 'asc' }],
+    take: 20,
     select: {
       id: true,
       title: true,

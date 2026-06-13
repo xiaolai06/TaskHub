@@ -41,6 +41,8 @@ model User {
   workTimers     WorkTimer[]
   todayTodos     TodayTodo[]
   toolExecutions ToolExecutionLog[]
+  transactions     Transaction[]
+  subscriptions    Subscription[]
 }
 
 // ======================== 个人资料 ========================
@@ -88,6 +90,7 @@ model Project {
   expenseNote  String?                       // 支出说明
   rewardNote   String?                       // 报酬说明
   type         String?                       // 项目类型标签（如：开发/设计/运营/咨询）
+  completedAt    DateTime?                     // 标记为"已完成"的时间点
   ownerId      String
   customerId   String?                       // 归属客户
   createdAt   DateTime @default(now())
@@ -99,6 +102,8 @@ model Project {
   timeEntries TimeEntry[]
   communications Communication[]
   goals       Goal[]
+  payments    Payment[]
+  transactions Transaction[]
 
   @@index([ownerId, status])
   @@index([customerId])
@@ -131,6 +136,7 @@ model Task {
   children       Task[]   @relation("Subtasks")
   costRecords    CostRecord[]
   timeEntries    TimeEntry[]
+  transactions   Transaction[]
 
   @@index([projectId, status])
   @@index([assigneeId, status])
@@ -320,13 +326,15 @@ model Setting {
 
 // ======================== 工具执行日志 ========================
 model ToolExecutionLog {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   userId     String
   toolName   String
   args       String              // JSON
   result     String              // JSON
-  executedAt DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  durationMs Int?                // 执行耗时(毫秒)
+  success    Boolean   @default(true)  // 是否成功
+  executedAt DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ======================== 目标管理 ========================
@@ -510,4 +518,79 @@ model CronJob {
 
   @@index([userId, enabled])
   @@index([userId, action])
+}
+
+// ======================== 收支流水 ========================
+model Transaction {
+  id              String   @id @default(cuid())
+  amount          Int                              // 金额（分），用 Int 存储避免浮点精度问题，前端 ÷100 显示元
+  direction       String                           // INCOME / EXPENSE
+  category        String                           // 收入类：PROJECT_PAYMENT/INTEREST/REFUND/SUBSIDY/ASSET_SALE/FREELANCE/OTHER_INCOME
+                                                 // 支出类：RENT/SUBSCRIPTION/EQUIPMENT/TRAVEL/MEAL/TAX/MARKETING/INSURANCE/OTHER_EXPENSE
+  description     String
+  date            DateTime                         // 发生日期
+  source          String   @default("MANUAL")      // MANUAL / PAYMENT / SUBSCRIPTION
+  paymentId       String?                          // 来源是回款时关联 Payment
+  subscriptionId  String?                          // 来源是订阅时关联 Subscription
+  projectId       String?                          // 关联项目（可选）
+  taskId          String?                          // 关联任务（可选）
+  note            String?
+  userId          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment         Payment?       @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  subscription    Subscription?  @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  project         Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  task            Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([userId, direction])
+  @@index([userId, source])
+  @@index([paymentId])
+  @@index([subscriptionId])
+  @@index([projectId])
+}
+
+// ======================== 回款记录 ========================
+model Payment {
+  id            String   @id @default(cuid())
+  amount        Int                              // 金额（分）
+  type          String                           // DOWN_PAYMENT / PROGRESS / FINAL / ADJUSTMENT / OTHER
+  method        String   @default("BANK_TRANSFER") // BANK_TRANSFER / ALIPAY / WECHAT / CASH / OTHER
+  receivedAt    DateTime                         // 实际到账日期
+  note          String?
+  projectId     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+
+  @@index([projectId])
+  @@index([projectId, receivedAt])
+}
+
+// ======================== 订阅管理 ========================
+model Subscription {
+  id              String   @id @default(cuid())
+  name            String                           // 服务名称（如"ChatGPT Plus"）
+  category        String                           // SOFTWARE / CLOUD / DOMAIN / TOOL / MEDIA / OTHER
+  amount          Int                              // 每期金额（分）
+  currency        String   @default("CNY")         // CNY / USD / EUR
+  exchangeRate    Float    @default(1.0)           // 汇率（非 CNY 时需要）
+  cycle           String                           // MONTHLY / QUARTERLY / YEARLY
+  startDate       DateTime                         // 首次订阅日期
+  nextBillingAt   DateTime                         // 下次扣费日期
+  status          String   @default("ACTIVE")      // ACTIVE / PAUSED / CANCELLED
+  autoRenew       Boolean  @default(true)
+  url             String?
+  note            String?
+  userId          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+
+  @@index([userId, status])
+  @@index([userId, nextBillingAt])
 }

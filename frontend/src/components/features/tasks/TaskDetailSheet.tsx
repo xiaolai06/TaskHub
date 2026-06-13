@@ -8,29 +8,7 @@ import {
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { PriorityBadge } from '@/components/ui/PriorityBadge';
 import type { Task } from '@/hooks/useTasks';
-
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return '—';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-
-function formatDateTime(dateStr: string | null): string {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
-function formatCost(fen: number | null | undefined): string {
-  if (!fen) return '—';
-  const yuan = fen / 100;
-  return `¥${yuan.toLocaleString()}`;
-}
-
-function isOverdue(dateStr: string | null, status: string): boolean {
-  if (!dateStr || status === 'DONE') return false;
-  return new Date(dateStr) < new Date();
-}
+import { formatDate, formatDateTime, formatCost, isOverdue } from '@/lib/task-utils';
 
 interface TaskDetailSheetProps {
   task: Task | null;
@@ -132,7 +110,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
               />
               <InfoCard
                 label="截止日期"
-                value={formatDate(task.dueDate)}
+                value={formatDate(task.dueDate, 'long')}
                 icon={<Calendar className="h-3.5 w-3.5" />}
                 highlight={overdue}
               />
