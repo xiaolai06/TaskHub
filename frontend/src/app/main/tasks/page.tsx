@@ -10,6 +10,7 @@ import {
   Clock, ListChecks, CalendarX, Timer, BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DatePicker } from '@/components/ui/date-picker';
 import { api } from '@/lib/api';
 import { useTaskList, useCreateTask, useUpdateTask, useUpdateTaskStatus, useDeleteTask } from '@/hooks/useTasks';
 import { useProjectList } from '@/hooks/useProjects';
@@ -22,6 +23,7 @@ import { GanttChart } from '@/components/features/schedule/GanttChart';
 import { InsertionDialog } from '@/components/features/schedule/InsertionDialog';
 import { formatDate } from '@/lib/task-utils';
 import { toast } from 'sonner';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import type { Task, CreateTaskInput, TaskQueryParams } from '@/hooks/useTasks';
 
 // ======================== 常量 ========================
@@ -44,9 +46,9 @@ const priorityFilters = [
   { key: 'LOW', label: '低' },
 ];
 
-const filterBoxCls = 'flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-xs';
-const filterBoxInner = 'border-none bg-transparent text-[11px] text-foreground/70 outline-none placeholder:text-muted-foreground';
-const toolBtnCls = 'h-9 rounded-lg border border-border bg-card px-3 text-[13px] text-foreground/80 hover:bg-accent transition-colors inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed';
+const filterBoxCls = 'flex h-9 items-center gap-1.5 rounded-lg border border-border/80 bg-card px-2.5 text-xs transition-all hover:border-indigo-300';
+const filterBoxInner = 'border-none bg-transparent text-2xs-plus text-foreground/70 outline-none placeholder:text-muted-foreground/60';
+const toolBtnCls = 'h-9 rounded-lg border border-border/80 bg-card px-3 text-sm text-foreground/80 hover:bg-accent hover:border-indigo-300 transition-all inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed';
 
 // ======================== 主页面 ========================
 
@@ -93,7 +95,7 @@ function TasksPageContent() {
     projectId: projectFilter || undefined,
     search: search || undefined,
     dueDateFrom: dateFrom || undefined,
-    dueDateTo: dateTo || undefined,
+    dueDateTo: (dateTo || dateFrom) || undefined,
     limit: 200,
   };
   const { data, isLoading, error } = useTaskList(queryParams);
@@ -221,21 +223,21 @@ function TasksPageContent() {
       {/* 第一行：视图切换 + 工具栏 + 操作按钮 */}
       <div className="flex items-center gap-3">
         {/* 视图切换 — 加大 */}
-        <div className="flex h-10 shrink-0 items-center gap-1 rounded-xl border border-border bg-card p-1">
+        <div className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card p-1">
           <button onClick={() => setViewMode('board')}
-            className={cn('flex h-full items-center gap-1.5 rounded-lg px-3.5 text-[13px] font-medium transition-all',
+            className={cn('flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-all',
               viewMode === 'board' ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
-            <Columns3 className="h-4 w-4" />看板
+            <Columns3 className="h-3.5 w-3.5" />看板
           </button>
           <button onClick={() => setViewMode('list')}
-            className={cn('flex h-full items-center gap-1.5 rounded-lg px-3.5 text-[13px] font-medium transition-all',
+            className={cn('flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-all',
               viewMode === 'list' ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
-            <LayoutList className="h-4 w-4" />列表
+            <LayoutList className="h-3.5 w-3.5" />列表
           </button>
           <button onClick={() => setViewMode('gantt')}
-            className={cn('flex h-full items-center gap-1.5 rounded-lg px-3.5 text-[13px] font-medium transition-all',
+            className={cn('flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-all',
               viewMode === 'gantt' ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
-            <CalendarDays className="h-4 w-4" />甘特
+            <CalendarDays className="h-3.5 w-3.5" />甘特
           </button>
         </div>
 
@@ -263,11 +265,15 @@ function TasksPageContent() {
           <div className="flex items-center gap-2">
             <div className={cn(filterBoxCls, 'w-40 overflow-hidden')}>
               <FolderKanban className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}
-                className={cn(filterBoxInner, 'w-full truncate appearance-none pr-4')}>
-                <option value="">全部项目</option>
-                {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </select>
+              <Select value={projectFilter || 'all_projects_placeholder'} onValueChange={(v) => setProjectFilter(v === 'all_projects_placeholder' ? '' : (v ?? ''))}>
+                <SelectTrigger className={cn(filterBoxInner, 'w-full truncate pr-4')}>
+                  <SelectValue placeholder="全部项目" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_projects_placeholder">全部项目</SelectItem>
+                  {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
             <label className={cn(toolBtnCls, 'cursor-default')}>
@@ -313,17 +319,21 @@ function TasksPageContent() {
         <div className="flex flex-wrap items-center gap-2">
           <div className={cn(filterBoxCls, 'w-36 overflow-hidden')}>
             <FolderKanban className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <select value={projectFilter} onChange={(e) => setProjectFilter(e.target.value)}
-              className={cn(filterBoxInner, 'w-full truncate appearance-none pr-4')}>
-              <option value="">全部项目</option>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+            <Select value={projectFilter || 'all_projects_placeholder'} onValueChange={(v) => setProjectFilter(v === 'all_projects_placeholder' ? '' : (v ?? ''))}>
+              <SelectTrigger className={cn(filterBoxInner, 'w-full truncate pr-4')}>
+                <SelectValue placeholder="全部项目" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all_projects_placeholder">全部项目</SelectItem>
+                {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex h-9 items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
             {statusFilters.map((f) => (
               <button key={f.key} onClick={() => setStatusFilter(f.key)}
-                className={cn('flex h-full items-center rounded-md px-2.5 text-[11px] font-medium transition-all',
+                className={cn('rounded-md px-2.5 py-1 text-xs font-medium transition-all',
                   statusFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
                 {f.label}
               </button>
@@ -333,25 +343,21 @@ function TasksPageContent() {
           <div className="flex h-9 items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
             {priorityFilters.map((f) => (
               <button key={f.key} onClick={() => setPriorityFilter(f.key)}
-                className={cn('flex h-full items-center rounded-md px-2.5 text-[11px] font-medium transition-all',
+                className={cn('rounded-md px-2.5 py-1 text-xs font-medium transition-all',
                   priorityFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
                 {f.label}
               </button>
             ))}
           </div>
 
-          <div className={filterBoxCls}>
-            <CalendarDays className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className={cn(filterBoxInner, 'w-[120px] rounded-md border border-transparent px-1.5 py-0.5 hover:border-border hover:bg-accent/50 focus:border-indigo-300 focus:bg-card transition-colors cursor-pointer')} />
-            <span className="text-[11px] text-muted-foreground/40">-</span>
-            <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className={cn(filterBoxInner, 'w-[120px] rounded-md border border-transparent px-1.5 py-0.5 hover:border-border hover:bg-accent/50 focus:border-indigo-300 focus:bg-card transition-colors cursor-pointer')} />
+          <div className="flex items-center gap-1.5">
+            <DatePicker value={dateFrom} onChange={setDateFrom} />
+            <DatePicker value={dateTo} onChange={setDateTo} />
           </div>
 
           {hasActiveFilters && (
             <button onClick={clearFilters}
-              className="flex h-9 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground hover:bg-accent hover:text-foreground">
+              className="flex h-9 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground">
               <X className="h-3 w-3" />清除筛选
             </button>
           )}
@@ -447,8 +453,8 @@ function GanttMetricCards({ schedule }: { schedule: NonNullable<ReturnType<typeo
       {items.map((c, i) => (
         <div key={i} className="flex h-9 items-center gap-2.5 rounded-lg border border-border bg-card px-3.5">
           <span className={cn('flex shrink-0', c.color)}>{c.icon}</span>
-          <span className="whitespace-nowrap text-[11px] text-muted-foreground">{c.label}</span>
-          <span className="whitespace-nowrap text-[13px] font-bold text-foreground">{c.value}</span>
+          <span className="whitespace-nowrap text-2xs-plus text-muted-foreground">{c.label}</span>
+          <span className="whitespace-nowrap text-sm font-bold text-foreground">{c.value}</span>
         </div>
       ))}
     </div>
@@ -522,13 +528,13 @@ function GanttContent({
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] text-muted-foreground">
+          <span className="rounded-full bg-muted px-2.5 py-0.5 text-2xs-plus text-muted-foreground">
             {schedule.tasks.length} 个任务
           </span>
           <button
             onClick={() => applyMutation.mutate()}
             disabled={!schedule.tasks.length || applyMutation.isPending}
-            className="flex h-8 items-center gap-1.5 rounded-lg bg-indigo-600 px-3 text-[13px] font-medium text-white transition-all hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex h-8 items-center gap-1.5 rounded-lg bg-indigo-600 px-3 text-sm font-medium text-white transition-all hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {applyMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
             应用排期

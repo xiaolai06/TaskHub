@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, AlertTriangle, FolderKanban, Plus, X, Calendar } from 'lucide-react';
+import { Loader2, AlertTriangle, FolderKanban, Plus, X } from 'lucide-react';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useProjectList, useCreateProject, useUpdateProject, useDeleteProject, useArchiveProject } from '@/hooks/useProjects';
 import { useProjectTasks, useCreateTask, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
 import { ProjectCard } from '@/components/features/projects/ProjectCard';
@@ -21,7 +22,7 @@ export default function ProjectsPage() {
   const { data, isLoading, error } = useProjectList({
     status: statusFilter || undefined,
     startDate: startDate || undefined,
-    endDate: endDate || undefined,
+    endDate: (endDate || startDate) || undefined,
   });
   const createMutation = useCreateProject();
   const updateMutation = useUpdateProject();
@@ -45,7 +46,7 @@ export default function ProjectsPage() {
   function handleUpdate(input: CreateProjectInput) {
     if (!editProject) return;
     updateMutation.mutate(
-      { id: editProject.id, data: input as UpdateProjectInput },
+      { id: editProject.id, data: input as Partial<CreateProjectInput> },
       { onSuccess: () => { setShowForm(false); setEditProject(null); } },
     );
   }
@@ -91,12 +92,12 @@ export default function ProjectsPage() {
       {/* 筛选栏 */}
       <div className="flex flex-wrap items-center gap-3">
         {/* 状态筛选 */}
-        <div className="flex h-10 items-center gap-1 rounded-lg border border-border bg-card p-1">
+        <div className="flex h-9 items-center gap-1 rounded-lg border border-border/80 bg-card p-1 transition-all hover:border-indigo-300">
           {filters.map((f) => (
             <button
               key={f.key}
               onClick={() => setStatusFilter(f.key)}
-              className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none ${
+              className={`rounded-md px-3.5 py-1.5 text-sm font-medium transition-all focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none ${
                 statusFilter === f.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent'
               }`}
             >
@@ -106,16 +107,12 @@ export default function ProjectsPage() {
         </div>
 
         {/* 日期筛选 */}
-        <div className="flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-3.5">
-          <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)}
-            className="w-36 bg-transparent text-sm text-foreground/70 outline-none" />
-          <span className="text-sm text-muted-foreground/50">—</span>
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-            className="w-36 bg-transparent text-sm text-foreground/70 outline-none" />
+        <div className="flex items-center gap-1.5">
+          <DatePicker value={startDate} onChange={setStartDate} />
+          <DatePicker value={endDate} onChange={setEndDate} />
           {(startDate || endDate) && (
-            <button onClick={() => { setStartDate(''); setEndDate(''); }} className="text-muted-foreground hover:text-foreground">
-              <X className="h-4 w-4" />
+            <button onClick={() => { setStartDate(''); setEndDate(''); }} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+              <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
@@ -171,7 +168,7 @@ export default function ProjectsPage() {
               {expandedProjectId === project.id && (
                 <div className="mt-2 rounded-xl border border-border/60 bg-card shadow-sm">
                   <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-                    <h3 className="text-[13px] font-semibold text-foreground/80">任务列表</h3>
+                    <h3 className="text-sm font-semibold text-foreground/80">任务列表</h3>
                     <button onClick={() => setExpandedProjectId(null)} className="rounded p-1 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none">
                       <X className="h-3.5 w-3.5" />
                     </button>
