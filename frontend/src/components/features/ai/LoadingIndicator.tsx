@@ -14,7 +14,7 @@ export function LoadingIndicator() {
           <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
           <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
         </span>
-        <span className="text-[12px] text-muted-foreground">正在思考</span>
+        <span className="text-xs text-muted-foreground">正在思考</span>
       </div>
     </div>
   );

@@ -70,6 +70,30 @@ export async function getProviders(userId: string): Promise<ProviderInfo[]> {
   return providers;
 }
 
+// ═══ 获取单个供应商（解密后的 key，供内部使用）═══
+
+export async function getProviderRaw(userId: string, provider: string): Promise<ProviderInfo | null> {
+  const row = await prisma.setting.findFirst({
+    where: { userId, category: 'AI_PROVIDER', key: provider },
+  });
+  if (!row) return null;
+  try {
+    const parsed = JSON.parse(row.value);
+    let apiKey = '';
+    if (parsed.apiKey) {
+      try { apiKey = decrypt(parsed.apiKey); } catch { apiKey = parsed.apiKey; }
+    }
+    return {
+      name: row.key,
+      label: parsed.label || row.key,
+      baseUrl: parsed.baseUrl || '',
+      apiKey,
+      defaultModel: parsed.defaultModel || '',
+      powerfulModel: parsed.powerfulModel || '',
+    };
+  } catch { return null; }
+}
+
 // ═══ 获取已配置 + 预置的可选供应商列表 ═══
 
 export async function getAvailableProviders(userId: string) {
@@ -96,10 +120,27 @@ export async function saveProvider(
   userId: string,
   data: { name: string; label?: string; baseUrl: string; apiKey?: string; defaultModel?: string; powerfulModel?: string },
 ) {
+  // apiKey 为空或 '***' 表示用户未修改，保留已有的加密值
+  let encryptedKey: string | undefined;
+  if (data.apiKey && data.apiKey !== '***') {
+    encryptedKey = encrypt(data.apiKey);
+  } else {
+    // 从数据库读取已保存的加密 key
+    const existing = await prisma.setting.findFirst({
+      where: { userId, category: 'AI_PROVIDER', key: data.name },
+    });
+    if (existing) {
+      try {
+        const parsed = JSON.parse(existing.value);
+        encryptedKey = parsed.apiKey; // 保留旧值
+      } catch { /* 无旧值 */ }
+    }
+  }
+
   const value = JSON.stringify({
     label: data.label || data.name,
     baseUrl: data.baseUrl,
-    apiKey: data.apiKey ? encrypt(data.apiKey) : undefined,
+    apiKey: encryptedKey,
     defaultModel: data.defaultModel || '',
     powerfulModel: data.powerfulModel || '',
   });

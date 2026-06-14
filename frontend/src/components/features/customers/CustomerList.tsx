@@ -65,9 +65,9 @@ function ProjectCard({ project }: { project: CustomerProject }) {
       <div className="flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${pst.dot}`} />
         <span className="text-sm font-medium text-foreground">{project.name}</span>
-        <span className="text-[11px] text-muted-foreground">{pst.label}</span>
+        <span className="text-2xs-plus text-muted-foreground">{pst.label}</span>
         {project.type && (
-          <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-medium text-indigo-600">
+          <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-2xs font-medium text-indigo-600">
             {project.type}
           </span>
         )}
@@ -211,8 +211,8 @@ export function CustomerList({
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-[15px] font-semibold text-foreground">{c.name}</h3>
-                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${st.color} ${st.bg}`}>{st.label}</span>
+                        <h3 className="text-base font-semibold text-foreground">{c.name}</h3>
+                        <span className={`rounded-full px-2 py-0.5 text-2xs-plus font-medium ${st.color} ${st.bg}`}>{st.label}</span>
                       </div>
                       {c.company && (
                         <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">

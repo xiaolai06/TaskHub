@@ -71,7 +71,7 @@ function SortHeader({
     <button
       onClick={() => onSort(field)}
       className={cn(
-        'flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider transition-colors',
+        'flex items-center gap-1 text-2xs-plus font-semibold uppercase tracking-wider transition-colors',
         isActive ? 'text-indigo-600' : 'text-muted-foreground hover:text-foreground/70',
         className,
       )}
@@ -129,19 +129,19 @@ function TaskRow({
               {task.title}
             </span>
             {children.length > 0 && (
-              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-2xs font-medium text-muted-foreground">
                 {doneCount}/{children.length}
               </span>
             )}
           </div>
           {task.description && depth === 0 && (
-            <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground" style={{ paddingLeft: depth * 20 }}>
+            <p className="mt-0.5 line-clamp-1 text-2xs-plus text-muted-foreground" style={{ paddingLeft: depth * 20 }}>
               {task.description}
             </p>
           )}
           {/* 阻塞原因 */}
           {isBlocked && task.blockedReason && (
-            <p className="mt-0.5 flex items-center gap-1 text-[11px] text-red-400" style={{ paddingLeft: depth * 20 }}>
+            <p className="mt-0.5 flex items-center gap-1 text-2xs-plus text-red-400" style={{ paddingLeft: depth * 20 }}>
               <Ban className="h-3 w-3" />{task.blockedReason}
             </p>
           )}
@@ -163,9 +163,9 @@ function TaskRow({
         {/* 项目 + 花销 */}
         <td className="py-3">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[12px] text-foreground/70">{task.project?.name || '—'}</span>
+            <span className="text-xs text-foreground/70">{task.project?.name || '—'}</span>
             {task.cost > 0 && (
-              <span className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
+              <span className="flex items-center gap-0.5 text-2xs-plus text-muted-foreground">
                 <DollarSign className="h-3 w-3" />{formatCost(task.cost)}
               </span>
             )}
@@ -173,14 +173,14 @@ function TaskRow({
         </td>
 
         {/* 工时 */}
-        <td className="py-3 text-[13px] tabular-nums text-muted-foreground">
+        <td className="py-3 text-sm tabular-nums text-muted-foreground">
           {task.estimatedHours > 0 ? (
             <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-muted-foreground" />{task.estimatedHours}h</span>
           ) : '—'}
         </td>
 
         {/* 截止日期 */}
-        <td className={cn('py-3 text-[13px]', overdue ? 'font-semibold text-red-500' : 'text-muted-foreground')}>
+        <td className={cn('py-3 text-sm', overdue ? 'font-semibold text-red-500' : 'text-muted-foreground')}>
           {task.dueDate ? (
             <span className="flex items-center gap-1"><Calendar className="h-3 w-3 text-muted-foreground" />{formatDate(task.dueDate)}</span>
           ) : '—'}

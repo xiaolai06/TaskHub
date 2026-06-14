@@ -9,6 +9,8 @@ import {
   Camera, Sparkles, MapPin, Building2, Globe, Phone,
   Cake, Star, Brain, Save,
 } from 'lucide-react';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 // ========== 常量 ==========
 
@@ -217,8 +219,8 @@ export default function ProfilePage() {
     return <div className="flex items-center justify-center py-32"><Loader2 className="h-8 w-8 animate-spin text-indigo-500" /></div>;
   }
 
-  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
-  const selectCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
+  const selectCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 page-enter">
@@ -265,7 +267,7 @@ export default function ProfilePage() {
                 ))}
                 {savedImage && avatarType === 'color' && (
                   <button type="button" onClick={() => { setAvatarType('image'); setAvatarValue(savedImage); }}
-                    className="ml-2 flex h-8 items-center gap-1 rounded-full border border-dashed border-border px-2 text-[11px] text-muted-foreground transition-colors hover:border-indigo-300 hover:text-indigo-500">
+                    className="ml-2 flex h-8 items-center gap-1 rounded-full border border-dashed border-border px-2 text-2xs-plus text-muted-foreground transition-colors hover:border-indigo-300 hover:text-indigo-500">
                     <Camera className="h-3 w-3" />恢复图片
                   </button>
                 )}
@@ -289,7 +291,7 @@ export default function ProfilePage() {
           <div className="mt-4">
             <label className="mb-1.5 block text-sm font-medium text-foreground/80">个人简介</label>
             <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="用一句话介绍自己吧" rows={2}
-              className="w-full resize-none rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+              className="w-full resize-none rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
           </div>
         </div>
       </div>
@@ -305,25 +307,33 @@ export default function ProfilePage() {
               <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Cake className="h-4 w-4 text-pink-500" />生日
               </label>
-              <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className={inputCls} />
+              <DatePicker value={birthday} onChange={setBirthday} />
             </div>
             <div>
               <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Star className="h-4 w-4 text-amber-500" />星座
               </label>
-              <select value={zodiac} onChange={(e) => setZodiac(e.target.value)} className={selectCls}>
-                <option value="">选择星座</option>
-                {zodiacOptions.map((z) => <option key={z} value={z}>{z}</option>)}
-              </select>
+              <Select value={zodiac} onValueChange={(v) => setZodiac(v || "")}>
+                <SelectTrigger className={cn(selectCls, "w-full")}>
+                  <SelectValue placeholder="选择星座" />
+                </SelectTrigger>
+                <SelectContent>
+                  {zodiacOptions.map((z) => <SelectItem key={z} value={z}>{z}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground/80">
                 <Brain className="h-4 w-4 text-purple-500" />MBTI
               </label>
-              <select value={mbti} onChange={(e) => setMbti(e.target.value)} className={selectCls}>
-                <option value="">选择类型</option>
-                {mbtiOptions.map((m) => <option key={m} value={m}>{m}</option>)}
-              </select>
+              <Select value={mbti} onValueChange={(v) => setMbti(v || "")}>
+                <SelectTrigger className={cn(selectCls, "w-full")}>
+                  <SelectValue placeholder="选择类型" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mbtiOptions.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -369,7 +379,7 @@ export default function ProfilePage() {
       <div className="rounded-xl border border-border/60 bg-card shadow-sm">
         <div className="border-b border-border px-6 py-4">
           <h2 className="text-sm font-semibold text-foreground/80">我的标签</h2>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">选择能代表你的标签，最多 8 个</p>
+          <p className="mt-0.5 text-2xs-plus text-muted-foreground">选择能代表你的标签，最多 8 个</p>
         </div>
         <div className="px-6 py-5">
           <div className="flex flex-wrap gap-2">
@@ -390,7 +400,7 @@ export default function ProfilePage() {
               );
             })}
           </div>
-          {tags.length > 0 && <p className="mt-3 text-[11px] text-muted-foreground">已选 {tags.length}/8</p>}
+          {tags.length > 0 && <p className="mt-3 text-2xs-plus text-muted-foreground">已选 {tags.length}/8</p>}
         </div>
       </div>
 

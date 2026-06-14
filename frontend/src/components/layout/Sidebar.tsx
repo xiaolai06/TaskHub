@@ -78,8 +78,8 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
           'flex flex-col items-start justify-center overflow-hidden transition-all duration-300',
           collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
         )}>
-          <span className="text-[15px] font-extrabold text-foreground whitespace-nowrap leading-none tracking-tight">智汇轻营</span>
-          <span className="mt-1.5 text-[11px] font-medium text-muted-foreground/70 whitespace-nowrap leading-none tracking-wide">TaskHub</span>
+          <span className="text-base font-extrabold text-foreground whitespace-nowrap leading-none tracking-tight">智汇轻营</span>
+          <span className="mt-1.5 text-2xs-plus font-medium text-muted-foreground/70 whitespace-nowrap leading-none tracking-wide">TaskHub</span>
         </div>
         {!collapsed && (
           <div className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
@@ -101,7 +101,7 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
               href={item.href}
               title={collapsed ? item.label : undefined}
               className={cn(
-                'group relative flex items-center rounded-lg text-[13px] font-medium transition-all duration-200',
+                'group relative flex items-center rounded-lg text-sm font-medium transition-all duration-200',
                 collapsed ? 'justify-center h-9 w-9 mx-auto' : 'gap-2.5 px-3 py-2',
                 isActive
                   ? cn(item.activeBg, item.activeText, item.darkActiveBg, item.darkActiveText)
@@ -138,7 +138,7 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
         >
           <Sparkles className="h-[18px] w-[18px] shrink-0" />
           <span className={cn(
-            'overflow-hidden whitespace-nowrap text-[13px] font-semibold transition-all duration-300',
+            'overflow-hidden whitespace-nowrap text-sm font-semibold transition-all duration-300',
             collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
           )}>
             AI 助手

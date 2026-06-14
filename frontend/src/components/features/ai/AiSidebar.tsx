@@ -81,7 +81,7 @@ export function AiSidebar({
               )}
             >
               <tab.icon className={cn('h-[16px] w-[16px]', active ? 'stroke-[2.2]' : 'stroke-[1.8]')} />
-              <span className="pointer-events-none absolute left-full z-10 ml-2.5 whitespace-nowrap rounded-lg bg-foreground/90 px-2.5 py-1 text-[11px] font-medium text-card opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
+              <span className="pointer-events-none absolute left-full z-10 ml-2.5 whitespace-nowrap rounded-lg bg-foreground/90 px-2.5 py-1 text-2xs-plus font-medium text-card opacity-0 shadow-lg backdrop-blur-sm transition-opacity group-hover:opacity-100">
                 {tab.label}
               </span>
             </button>
@@ -113,7 +113,7 @@ export function AiSidebar({
 
           {activeTab === 'jobs' && (
             <div>
-              <p className="mb-3 px-1 text-[12px] font-bold text-foreground/80">⚡ 定时任务</p>
+              <p className="mb-3 px-1 text-xs font-bold text-foreground/80">⚡ 定时任务</p>
               <JobConfigPanel />
             </div>
           )}
@@ -132,7 +132,7 @@ export function AiSidebar({
         </div>
 
         {/* 模型切换器 */}
-        <ModelSwitcher selectedModel={selectedModel} selectedModelName={selectedModelName} onSelect={onModelSelect} />
+        <ModelSwitcher selectedModel={selectedModel} selectedModelName={selectedModelName} onSelect={onModelSelect} open={open} />
       </div>
     </div>
   );

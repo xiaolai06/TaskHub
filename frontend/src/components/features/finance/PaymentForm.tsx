@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useCreatePayment, type CreatePaymentInput } from '@/hooks/usePayments';
 import { useProjectList } from '@/hooks/useProjects';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const PAYMENT_TYPES = [
   { value: 'DOWN_PAYMENT', label: '预付款' },
@@ -74,14 +75,14 @@ export function PaymentForm({ open, onOpenChange, projectId, projectName }: Paym
   const isValid = selectedProjectId && amount && Number(amount) > 0 && receivedAt;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>录入回款</SheetTitle>
-          <SheetDescription>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col max-h-[90vh] p-0">
+        <DialogHeader>
+          <DialogTitle>录入回款</DialogTitle>
+          <DialogDescription>
             记录客户项目回款，会自动同步到流水记录
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         <div className="flex flex-col gap-4 px-4 py-4">
           {/* Project */}
@@ -144,12 +145,7 @@ export function PaymentForm({ open, onOpenChange, projectId, projectName }: Paym
           {/* Received Date */}
           <div className="space-y-1.5">
             <Label className="text-xs">到账日期 *</Label>
-            <Input
-              type="date"
-              value={receivedAt}
-              onChange={(e) => setReceivedAt(e.target.value)}
-              className="text-sm"
-            />
+            <DatePicker value={receivedAt} onChange={setReceivedAt} />
           </div>
 
           {/* Method */}
@@ -185,7 +181,7 @@ export function PaymentForm({ open, onOpenChange, projectId, projectName }: Paym
           </div>
         </div>
 
-        <SheetFooter>
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
           <Button
             onClick={handleSubmit}
@@ -195,8 +191,8 @@ export function PaymentForm({ open, onOpenChange, projectId, projectName }: Paym
             {createPayment.isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
             确认录入
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

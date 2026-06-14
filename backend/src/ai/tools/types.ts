@@ -4,7 +4,7 @@ import { z } from 'zod';
 export interface ToolDefinition {
   name: string;
   description: string;
-  category: 'finance' | 'work' | 'client' | 'goal' | 'schedule' | 'search' | 'info' | 'system' | 'notification';
+  category: 'finance' | 'work' | 'client' | 'goal' | 'schedule' | 'search' | 'info' | 'system' | 'notification' | 'transaction' | 'payment' | 'report' | 'dashboard' | 'subscription' | 'work_timer';
   parameters: {
     type: 'object';
     properties: Record<string, { type: string; description?: string; enum?: string[]; default?: unknown }>;

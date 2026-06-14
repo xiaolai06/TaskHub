@@ -1,8 +1,12 @@
 'use client';
 
+import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
-import { X, Loader2, Info, Sparkles } from 'lucide-react';
+import { Loader2, Info, Sparkles } from 'lucide-react';
 import type { Goal, MetricType, ProjectOption, CustomerOption } from '@/hooks/useGoals';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const typeOptions = [
   { value: 'MONTHLY', label: '月度', autoRange: 'month' },
@@ -39,6 +43,9 @@ function getDefaultDates(type: string) {
   return { start: fmt(start), end: fmt(end) };
 }
 
+const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
+const labelCls = 'mb-1.5 block text-sm font-medium text-foreground/80';
+
 interface GoalFormProps {
   open: boolean;
   onClose: () => void;
@@ -66,8 +73,8 @@ export function GoalForm({
   const isEdit = !!editGoal;
   const currentMetric = metricOptions.find(m => m.value === metricType);
 
-  // 编辑模式填充
   useEffect(() => {
+    if (!open) return;
     if (editGoal) {
       setTitle(editGoal.title);
       setDescription(editGoal.description || '');
@@ -82,21 +89,18 @@ export function GoalForm({
     } else {
       reset();
     }
-  }, [editGoal]);
+  }, [open]);
 
-  // 指标变化 → 自动填充单位和标题建议
   useEffect(() => {
     if (isEdit || !currentMetric) return;
     setUnit(currentMetric.unit);
     if (currentMetric.value === 'MILESTONE') setTargetValue('');
-    // 自动生成标题
     if (!title) {
       const periodLabel = typeOptions.find(t => t.value === type)?.label || '月度';
       setTitle(`${periodLabel}${currentMetric.label.replace('目标', '')}`);
     }
   }, [metricType]);
 
-  // 周期变化 → 自动填充日期
   useEffect(() => {
     if (isEdit) return;
     const dates = getDefaultDates(type);
@@ -114,106 +118,76 @@ export function GoalForm({
     onSubmit({
       title: title.trim(),
       description: description.trim() || undefined,
-      type,
-      metricType,
+      type, metricType,
       targetValue: targetValue ? Number(targetValue) : null,
       unit: unit.trim() || null,
-      startDate,
-      endDate,
+      startDate, endDate,
       projectId: projectId || null,
       customerId: customerId || null,
     });
   }
 
   function reset() {
-    setTitle('');
-    setDescription('');
-    setType('MONTHLY');
-    setMetricType('REVENUE');
-    setTargetValue('');
-    setUnit('元');
+    setTitle(''); setDescription(''); setType('MONTHLY'); setMetricType('REVENUE');
+    setTargetValue(''); setUnit('元');
     const dates = getDefaultDates('MONTHLY');
-    setStartDate(dates.start);
-    setEndDate(dates.end);
-    setProjectId('');
-    setCustomerId('');
+    setStartDate(dates.start); setEndDate(dates.end);
+    setProjectId(''); setCustomerId('');
   }
 
-  if (!open) return null;
-
   return (
-    <>
-      <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl">
-          {/* 头部 */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4">
-            <h2 className="text-base font-semibold text-slate-800">
-              {isEdit ? '编辑目标' : '新建经营目标'}
-            </h2>
-            <button onClick={() => { reset(); onClose(); }}
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onClose(); } }}>
+      <DialogContent className="flex flex-col max-h-[90vh] p-0">
+        <DialogHeader className="border-b px-6 py-4">
+          <DialogTitle>{isEdit ? '编辑目标' : '新建经营目标'}</DialogTitle>
+          <DialogDescription>{isEdit ? '修改目标信息后将实时更新' : '设定目标类型和周期后创建'}</DialogDescription>
+        </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="px-6 py-5">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-5">
             <div className="space-y-4">
-              {/* 指标类型选择 - 卡片式 */}
+              {/* 指标类型 */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">选择目标类型</label>
+                <label className="mb-2 block text-sm font-medium text-foreground/80">选择目标类型</label>
                 <div className="grid grid-cols-3 gap-2">
                   {metricOptions.map(m => (
-                    <button key={m.value} type="button"
-                      onClick={() => setMetricType(m.value)}
+                    <button key={m.value} type="button" onClick={() => setMetricType(m.value)}
                       className={`flex flex-col items-center gap-1 rounded-xl border-2 px-2 py-3 text-center transition-all ${
-                        metricType === m.value
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-slate-200 hover:border-slate-300'
+                        metricType === m.value ? 'border-indigo-500 bg-indigo-50' : 'border-border hover:border-indigo-200'
                       }`}>
                       <span className="text-lg">{m.icon}</span>
-                      <span className={`text-xs font-medium ${
-                        metricType === m.value ? 'text-indigo-700' : 'text-slate-600'
-                      }`}>{m.label}</span>
+                      <span className={`text-xs font-medium ${metricType === m.value ? 'text-indigo-700' : 'text-muted-foreground'}`}>{m.label}</span>
                     </button>
                   ))}
                 </div>
                 {currentMetric && (
-                  <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Sparkles className="h-3 w-3" />{currentMetric.hint}
                   </p>
                 )}
               </div>
 
-              {/* 目标标题 */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                  目标名称 <span className="text-red-500">*</span>
-                </label>
-                <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-                  placeholder="如：6月收入达到3万 / Q2利润目标5万"
-                  className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
-                  required />
+                <label className={labelCls}>目标名称 <span className="text-red-500">*</span></label>
+                <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="如：6月收入达到3万" className={inputCls} required />
               </div>
 
-              {/* 周期 + 目标值 */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">目标周期</label>
-                  <select value={type} onChange={e => setType(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
-                    {typeOptions.map(o => <option key={o.value} value={o.value}>{o.label}目标</option>)}
-                  </select>
+                  <label className={labelCls}>目标周期</label>
+                  <Select value={type} onValueChange={(v) => setType(v || "MONTHLY")}>
+                    <SelectTrigger className={cn(inputCls, "w-full")}>
+                      <SelectValue placeholder="选择周期" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typeOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}目标</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 {metricType !== 'MILESTONE' && (
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      目标值 <span className="text-xs font-normal text-slate-400">({unit})</span>
-                    </label>
-                    <input type="number" value={targetValue} onChange={e => setTargetValue(e.target.value)}
-                      placeholder="0" min="0"
-                      className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
-                      required />
+                    <label className={labelCls}>目标值 <span className="text-xs font-normal text-muted-foreground">({unit})</span></label>
+                    <input type="number" value={targetValue} onChange={e => setTargetValue(e.target.value)} placeholder="0" min="0" className={inputCls} required />
                   </div>
                 )}
               </div>
@@ -225,78 +199,59 @@ export function GoalForm({
                 </div>
               )}
 
-              {/* 范围限定 */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                  范围限定 <span className="text-xs font-normal text-slate-400">（可选）</span>
-                </label>
+                <label className={labelCls}>范围限定 <span className="text-xs font-normal text-muted-foreground">（可选）</span></label>
                 <div className="grid grid-cols-2 gap-3">
-                  <select value={customerId} onChange={e => setCustomerId(e.target.value)}
-                    className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
-                    <option value="">全部客户</option>
-                    {customers.map(c => (
-                      <option key={c.id} value={c.id}>{c.name}{c.company ? ` (${c.company})` : ''}</option>
-                    ))}
-                  </select>
-                  <select value={projectId} onChange={e => setProjectId(e.target.value)}
-                    className="rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
-                    <option value="">全部项目</option>
-                    {projects.map(p => (
-                      <option key={p.id} value={p.id}>{p.name}</option>
-                    ))}
-                  </select>
+                  <Select value={customerId} onValueChange={(v) => setCustomerId(v || "")}>
+                    <SelectTrigger className={cn(inputCls, "w-full")}>
+                      <SelectValue placeholder="全部客户" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {customers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}{c.company ? ` (${c.company})` : ''}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Select value={projectId} onValueChange={(v) => setProjectId(v || "")}>
+                    <SelectTrigger className={cn(inputCls, "w-full")}>
+                      <SelectValue placeholder="全部项目" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <p className="mt-1 text-[11px] text-slate-400">
-                  不限定则统计所有数据；选择客户则统计该客户下所有项目
-                </p>
+                <p className="mt-1 text-2xs-plus text-muted-foreground">不限定则统计所有数据；选择客户则统计该客户下所有项目</p>
               </div>
 
-              {/* 时间范围 */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    开始日期 <span className="text-red-500">*</span>
-                  </label>
-                  <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
-                    required />
+                  <label className={labelCls}>开始日期 <span className="text-red-500">*</span></label>
+                  <DatePicker value={startDate} onChange={setStartDate} />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    结束日期 <span className="text-red-500">*</span>
-                  </label>
-                  <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
-                    required />
+                  <label className={labelCls}>结束日期 <span className="text-red-500">*</span></label>
+                  <DatePicker value={endDate} onChange={setEndDate} />
                 </div>
               </div>
 
-              {/* 描述 */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-slate-700">备注</label>
-                <textarea value={description} onChange={e => setDescription(e.target.value)}
-                  placeholder="可选：记录目标背景或拆解思路"
-                  rows={2}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+                <label className={labelCls}>备注</label>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="可选：记录目标背景或拆解思路" rows={2}
+                  className="w-full resize-none rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
               </div>
             </div>
+          </div>
 
-            {/* 按钮 */}
-            <div className="mt-6 flex justify-end gap-2.5">
-              <button type="button" onClick={() => { reset(); onClose(); }}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
-                取消
-              </button>
-              <button type="submit"
-                disabled={isLoading || !title.trim() || !startDate || !endDate}
-                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 active:scale-95 disabled:opacity-50">
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isEdit ? '保存修改' : '创建目标'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </>
+          <div className="flex items-center justify-end gap-3 border-t px-6 py-4">
+            <button type="button" onClick={() => { reset(); onClose(); }}
+              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted">取消</button>
+            <button type="submit" disabled={isLoading || !title.trim() || !startDate || !endDate}
+              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isEdit ? '保存修改' : '创建目标'}
+            </button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

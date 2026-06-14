@@ -75,7 +75,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
           <div className="space-y-5">
             {/* 描述 */}
             <div>
-              <h3 className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">描述</h3>
+              <h3 className="mb-1.5 text-2xs-plus font-semibold uppercase tracking-wider text-muted-foreground">描述</h3>
               {task.description ? (
                 <p className="text-sm leading-relaxed text-foreground/70">{task.description}</p>
               ) : (
@@ -128,8 +128,8 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
 
             {/* 时间信息 */}
             <div>
-              <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">时间线</h3>
-              <div className="space-y-2 text-[13px]">
+              <h3 className="mb-2 text-2xs-plus font-semibold uppercase tracking-wider text-muted-foreground">时间线</h3>
+              <div className="space-y-2 text-sm">
                 <TimeLineRow label="创建时间" value={formatDateTime(task.createdAt)} />
                 <TimeLineRow label="最后更新" value={formatDateTime(task.updatedAt)} />
                 {task.completedAt && (
@@ -141,7 +141,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
             {/* 子任务 */}
             {children.length > 0 && (
               <div>
-                <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <h3 className="mb-2 text-2xs-plus font-semibold uppercase tracking-wider text-muted-foreground">
                   子任务 {doneCount}/{children.length}
                 </h3>
                 {/* 进度条 */}
@@ -166,12 +166,12 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
                         {child.status === 'DONE' && <CheckSquare className="h-2.5 w-2.5" />}
                       </button>
                       <span className={cn(
-                        'flex-1 text-[13px]',
+                        'flex-1 text-sm',
                         child.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground/70',
                       )}>
                         {child.title}
                       </span>
-                      <StatusBadge status={child.status} className="text-[10px]" />
+                      <StatusBadge status={child.status} className="text-2xs" />
                     </div>
                   ))}
                 </div>
@@ -187,7 +187,7 @@ export function TaskDetailSheet({ task, open, onClose, onEdit, onDelete, onStatu
 function InfoCard({ label, value, icon, highlight }: { label: string; value: string; icon?: React.ReactNode; highlight?: boolean }) {
   return (
     <div className="rounded-lg border border-border bg-muted/50 px-3 py-2.5">
-      <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mb-0.5 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className={cn('flex items-center gap-1 text-sm font-medium', highlight ? 'text-red-500' : 'text-foreground/80')}>
         {icon}
         {value}

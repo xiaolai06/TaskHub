@@ -6,11 +6,12 @@ import {
   useCreateSubscription, useUpdateSubscription,
   type CreateSubscriptionInput, type Subscription,
 } from '@/hooks/useSubscriptions';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const CATEGORIES = [
   { value: 'SOFTWARE', label: 'AI/软件' },
@@ -119,14 +120,14 @@ export function SubscriptionForm({ open, onOpenChange, subscription }: Subscript
   const isPending = createSub.isPending || updateSub.isPending;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>{isEdit ? '编辑订阅' : '添加订阅'}</SheetTitle>
-          <SheetDescription>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col max-h-[90vh] p-0">
+        <DialogHeader>
+          <DialogTitle>{isEdit ? '编辑订阅' : '添加订阅'}</DialogTitle>
+          <DialogDescription>
             {isEdit ? '修改订阅信息' : '登记一个会定期扣费的服务'}
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         <div className="flex flex-col gap-4 px-4 py-4">
           {/* Name */}
@@ -234,21 +235,11 @@ export function SubscriptionForm({ open, onOpenChange, subscription }: Subscript
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">首次订阅</Label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="text-sm"
-              />
+              <DatePicker value={startDate} onChange={setStartDate} />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">下次扣费 *</Label>
-              <Input
-                type="date"
-                value={nextBillingAt}
-                onChange={(e) => setNextBillingAt(e.target.value)}
-                className="text-sm"
-              />
+              <DatePicker value={nextBillingAt} onChange={setNextBillingAt} />
             </div>
           </div>
 
@@ -256,7 +247,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription }: Subscript
           <div className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5">
             <div>
               <p className="text-sm font-medium text-foreground">自动续费</p>
-              <p className="text-[11px] text-muted-foreground">到期时自动创建支出记录</p>
+              <p className="text-2xs-plus text-muted-foreground">到期时自动创建支出记录</p>
             </div>
             <button
               onClick={() => setAutoRenew(!autoRenew)}
@@ -296,7 +287,7 @@ export function SubscriptionForm({ open, onOpenChange, subscription }: Subscript
           </div>
         </div>
 
-        <SheetFooter>
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
           <Button
             onClick={handleSubmit}
@@ -305,8 +296,8 @@ export function SubscriptionForm({ open, onOpenChange, subscription }: Subscript
             {isPending && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
             {isEdit ? '保存修改' : '添加订阅'}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

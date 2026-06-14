@@ -88,7 +88,7 @@ function WorkloadBar({ dailyWorkload }: { dailyWorkload: ScheduleData['dailyWork
 
             return (
               <div key={day.date} className="flex-1 flex flex-col items-center gap-1 group">
-                <span className={`text-[9px] font-mono opacity-0 group-hover:opacity-100 transition-opacity ${isOverloaded ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
+                <span className={`text-2xs font-mono opacity-0 group-hover:opacity-100 transition-opacity ${isOverloaded ? 'text-red-500 font-bold' : 'text-muted-foreground'}`}>
                   {day.hours}h
                 </span>
                 <div className="w-full relative" style={{ height: '100px' }}>
@@ -97,12 +97,12 @@ function WorkloadBar({ dailyWorkload }: { dailyWorkload: ScheduleData['dailyWork
                     style={{ height: `${Math.max(heightPct, 4)}%` }}
                   />
                 </div>
-                <span className="text-[9px] text-muted-foreground">{dayNum}</span>
+                <span className="text-2xs text-muted-foreground">{dayNum}</span>
               </div>
             );
           })}
         </div>
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-4 mt-3 text-2xs text-muted-foreground">
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-indigo-400" />正常</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400" />较满</span>
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400" />超载</span>

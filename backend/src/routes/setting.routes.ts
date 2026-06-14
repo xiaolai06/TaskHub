@@ -53,6 +53,16 @@ router.get('/ai/models', async (req: Request, res: Response, next: NextFunction)
   } catch (err) { next(err); }
 });
 
+// ═══ 解析 apiKey（'***' 表示使用已保存的 key）═══
+
+async function resolveApiKey(userId: string, provider: string, apiKey: string): Promise<string> {
+  if (apiKey !== '***') return apiKey;
+  // 从数据库读取已保存的加密 key 并解密
+  const row = await settingService.getProviderRaw(userId, provider);
+  if (!row?.apiKey) throw new Error('该供应商未保存 API Key，请先输入');
+  return row.apiKey;
+}
+
 // POST /ai/fetch-models — 从官方 API 动态获取
 router.post('/ai/fetch-models', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -61,7 +71,8 @@ router.post('/ai/fetch-models', async (req: Request, res: Response, next: NextFu
       error(res, 'VALIDATION_ERROR', '请选择供应商并填写 API Key', 400);
       return;
     }
-    const result = await settingService.fetchModelsFromProvider(req.userId!, provider, apiKey, baseUrl);
+    const resolvedKey = await resolveApiKey(req.userId!, provider, apiKey);
+    const result = await settingService.fetchModelsFromProvider(req.userId!, provider, resolvedKey, baseUrl);
     if (result.models.length === 0 && result.error) {
       success(res, { models: [], error: result.error, note: '该供应商不支持 /models 端点，请在下方手动填写模型名称' });
       return;
@@ -78,7 +89,8 @@ router.post('/ai/test', async (req: Request, res: Response, next: NextFunction) 
       error(res, 'VALIDATION_ERROR', '请填写供应商和 API Key', 400);
       return;
     }
-    const result = await settingService.testAiConnection(provider, apiKey, baseUrl);
+    const resolvedKey = await resolveApiKey(req.userId!, provider, apiKey);
+    const result = await settingService.testAiConnection(provider, resolvedKey, baseUrl);
     success(res, result);
   } catch (err) { next(err); }
 });
@@ -90,26 +102,32 @@ router.get('/ai/all-models', async (req: Request, res: Response, next: NextFunct
     const results: Array<{ provider: string; label: string; models: { id: string; name: string; tier: string }[]; error?: string }> = [];
 
     await Promise.allSettled(
-      providers
-        .filter(p => p.apiKey && p.apiKey !== '***')
-        .map(async (p) => {
-          try {
-            const result = await settingService.fetchModelsFromProvider(req.userId!, p.name, p.apiKey, p.baseUrl);
-            results.push({
-              provider: p.name,
-              label: p.label,
-              models: result.models,
-              error: result.error || undefined,
-            });
-          } catch (err) {
-            results.push({
-              provider: p.name,
-              label: p.label,
-              models: [],
-              error: err instanceof Error ? err.message : '获取失败',
-            });
+      providers.map(async (p) => {
+        // 没有 API Key 的供应商，返回 fallback 模型列表（而不是直接跳过）
+        if (!p.apiKey || p.apiKey === '***') {
+          const fallback = settingService.getFallbackModelsForProvider(p.name);
+          if (fallback.length > 0) {
+            results.push({ provider: p.name, label: p.label, models: fallback, error: '未配置 API Key，显示预置模型' });
           }
-        }),
+          return;
+        }
+        try {
+          const result = await settingService.fetchModelsFromProvider(req.userId!, p.name, p.apiKey, p.baseUrl);
+          results.push({
+            provider: p.name,
+            label: p.label,
+            models: result.models,
+            error: result.error || undefined,
+          });
+        } catch (err) {
+          results.push({
+            provider: p.name,
+            label: p.label,
+            models: [],
+            error: err instanceof Error ? err.message : '获取失败',
+          });
+        }
+      }),
     );
 
     // 按供应商名字排序，保持顺序稳定

@@ -1,11 +1,14 @@
 'use client';
+import { cn } from '@/lib/utils';
 
 import { useState, useEffect } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import type { Task, CreateTaskInput } from '@/hooks/useTasks';
 import type { Project } from '@/hooks/useProjects';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 
-/** 安全地将日期字符串转为 YYYY-MM-DD 格式，无效日期返回空字符串 */
 function safeDateValue(dateStr: string): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return '';
@@ -26,6 +29,9 @@ const priorityOptions = [
   { value: 'LOW', label: '低' },
 ];
 
+const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
+const labelCls = 'mb-1.5 block text-sm font-medium text-foreground/80';
+
 interface TaskFormProps {
   open: boolean;
   onClose: () => void;
@@ -38,15 +44,10 @@ interface TaskFormProps {
 }
 
 export function TaskForm({
-  open,
-  onClose,
-  onSubmit,
-  isLoading,
-  editTask,
-  projects = [],
-  defaultProjectId,
-  projectId: projectIdProp,
+  open, onClose, onSubmit, isLoading, editTask,
+  projects = [], defaultProjectId, projectId: projectIdProp,
 }: TaskFormProps) {
+  const isEdit = !!editTask;
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('TODO');
@@ -58,8 +59,6 @@ export function TaskForm({
   const [blockedReason, setBlockedReason] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [projectId, setProjectId] = useState('');
-
-  const isEdit = !!editTask;
 
   useEffect(() => {
     if (!open) return;
@@ -88,8 +87,7 @@ export function TaskForm({
     onSubmit({
       title: title.trim(),
       description: description.trim() || undefined,
-      status,
-      priority,
+      status, priority,
       estimatedHours: estimatedHours ? Number(estimatedHours) : undefined,
       actualHours: actualHours ? Number(actualHours) : undefined,
       cost: cost ? Math.round(Number(cost) * 100) : undefined,
@@ -106,126 +104,109 @@ export function TaskForm({
     setBlockedReason(''); setDueDate(''); setProjectId('');
   }
 
-  if (!open) return null;
-
   return (
-    <>
-      <div className="fixed inset-0 z-50 bg-black/30" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-card shadow-xl">
-          {/* 头部 */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card px-6 py-4">
-            <h2 className="text-base font-semibold text-foreground">{isEdit ? '编辑任务' : '新建任务'}</h2>
-            <button onClick={() => { reset(); onClose(); }} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground/70">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onClose(); } }}>
+      <DialogContent className="flex flex-col max-h-[90vh] p-0">
+        <DialogHeader className="border-b px-6 py-4">
+          <DialogTitle>{isEdit ? '编辑任务' : '新建任务'}</DialogTitle>
+          <DialogDescription>{isEdit ? '修改任务信息后将实时更新' : '填写任务信息后创建'}</DialogDescription>
+        </DialogHeader>
 
-          {/* 表单 */}
-          <form onSubmit={handleSubmit} className="px-6 py-5">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-5">
             <div className="space-y-4">
-              {/* 任务标题 */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground/80">任务标题 <span className="text-red-500">*</span></label>
-                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="输入任务标题"
-                  className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" required />
+                <label className={labelCls}>任务标题 <span className="text-red-500">*</span></label>
+                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="输入任务标题" className={inputCls} required />
               </div>
 
-              {/* 描述 */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground/80">任务描述</label>
+                <label className={labelCls}>任务描述</label>
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="简要描述任务内容" rows={3}
-                  className="w-full resize-none rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
+                  className="w-full resize-none rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
               </div>
 
-              {/* 所属项目 */}
               {projects.length > 0 && !defaultProjectId && (
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground/80">所属项目 <span className="text-red-500">*</span></label>
-                  <select value={projectId} onChange={(e) => setProjectId(e.target.value)}
-                    className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" required>
-                    <option value="">选择项目</option>
-                    {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                  <label className={labelCls}>所属项目 <span className="text-red-500">*</span></label>
+                  <Select value={projectId} onValueChange={(v) => setProjectId(v || "")} required>
+                    <SelectTrigger className={cn(inputCls, "w-full")}><SelectValue placeholder="选择项目" /></SelectTrigger>
+                    <SelectContent>
+                      {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 
-              {/* 状态 + 优先级 */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground/80">状态</label>
-                  <select value={status} onChange={(e) => setStatus(e.target.value)}
-                    className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
-                    {statusOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
+                  <label className={labelCls}>状态</label>
+                  <Select value={status} onValueChange={(v) => setStatus(v || "TODO")}>
+                    <SelectTrigger className={cn(inputCls, "w-full")}><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {statusOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground/80">优先级</label>
-                  <select value={priority} onChange={(e) => setPriority(e.target.value)}
-                    className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
-                    {priorityOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
+                  <label className={labelCls}>优先级</label>
+                  <Select value={priority} onValueChange={(v) => setPriority(v || "MEDIUM")}>
+                    <SelectTrigger className={cn(inputCls, "w-full")}><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {priorityOptions.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              {/* 工时：预估 + 实际 */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground/80">预估工时（小时）</label>
-                  <input type="number" value={estimatedHours} onChange={(e) => setEstimatedHours(e.target.value)} placeholder="0" min="0" step="0.5"
-                    className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
+                  <label className={labelCls}>预估工时（小时）</label>
+                  <input type="number" value={estimatedHours} onChange={(e) => setEstimatedHours(e.target.value)} placeholder="0" min="0" step="0.5" className={inputCls} />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground/80">实际工时（小时）</label>
-                  <input type="number" value={actualHours} onChange={(e) => setActualHours(e.target.value)} placeholder="完成后填写" min="0" step="0.5"
-                    className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
+                  <label className={labelCls}>实际工时（小时）</label>
+                  <input type="number" value={actualHours} onChange={(e) => setActualHours(e.target.value)} placeholder="完成后填写" min="0" step="0.5" className={inputCls} />
                 </div>
               </div>
 
-              {/* 花销 + 说明 */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground/80">花销（元）</label>
-                  <input type="number" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0.00" min="0" step="0.01"
-                    className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
+                  <label className={labelCls}>花销（元）</label>
+                  <input type="number" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0.00" min="0" step="0.01" className={inputCls} />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground/80">花销说明</label>
-                  <input type="text" value={costNote} onChange={(e) => setCostNote(e.target.value)} placeholder="如：购买域名"
-                    className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
+                  <label className={labelCls}>花销说明</label>
+                  <input type="text" value={costNote} onChange={(e) => setCostNote(e.target.value)} placeholder="如：购买域名" className={inputCls} />
                 </div>
               </div>
 
-              {/* 截止日期 */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground/80">截止日期</label>
-                <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none" />
+                <label className={labelCls}>截止日期</label>
+                <DatePicker value={dueDate} onChange={setDueDate} />
               </div>
 
-              {/* 阻塞原因（仅 BLOCKED 状态显示） */}
               {status === 'BLOCKED' && (
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-foreground/80">阻塞原因 <span className="text-red-500">*</span></label>
+                  <label className={labelCls}>阻塞原因 <span className="text-red-500">*</span></label>
                   <input type="text" value={blockedReason} onChange={(e) => setBlockedReason(e.target.value)} placeholder="说明为什么被阻塞"
                     className="w-full rounded-lg border border-red-200 px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-red-300 focus:ring-1 focus:ring-red-200" />
                 </div>
               )}
             </div>
+          </div>
 
-            {/* 按钮 */}
-            <div className="mt-6 flex justify-end gap-2.5">
-              <button type="button" onClick={() => { reset(); onClose(); }}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground/70 hover:bg-muted focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">取消</button>
-              <button type="submit" disabled={isLoading || !title.trim() || !projectId}
-                className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:outline-none">
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isEdit ? '保存修改' : '创建任务'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </>
+          <div className="flex items-center justify-end gap-3 border-t px-6 py-4">
+            <button type="button" onClick={() => { reset(); onClose(); }}
+              className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground/70 transition-colors hover:bg-muted">取消</button>
+            <button type="submit" disabled={isLoading || !title.trim() || !projectId}
+              className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isEdit ? '保存修改' : '创建任务'}
+            </button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

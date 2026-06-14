@@ -28,16 +28,16 @@ export function GoalFilter({ status, type, onStatusChange, onTypeChange }: GoalF
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* 状态筛选 */}
-      <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
+      <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
         {statusOptions.map((opt) => (
           <button
             key={opt.value}
             onClick={() => onStatusChange(opt.value)}
             className={cn(
-              'rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+              'rounded-md px-2.5 py-1 text-xs font-medium transition-all',
               status === opt.value
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground/80',
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-muted-foreground hover:bg-accent',
             )}
           >
             {opt.label}
@@ -46,16 +46,16 @@ export function GoalFilter({ status, type, onStatusChange, onTypeChange }: GoalF
       </div>
 
       {/* 周期筛选 */}
-      <div className="flex items-center gap-1 rounded-lg bg-muted p-1">
+      <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
         {typeOptions.map((opt) => (
           <button
             key={opt.value}
             onClick={() => onTypeChange(opt.value)}
             className={cn(
-              'rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+              'rounded-md px-2.5 py-1 text-xs font-medium transition-all',
               type === opt.value
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground/80',
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-muted-foreground hover:bg-accent',
             )}
           >
             {opt.label}

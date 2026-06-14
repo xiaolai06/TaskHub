@@ -7,6 +7,7 @@ import {
   Timer, Play, Pause, Square, Plus, Trash2,
   Check, Loader2, ListTodo, X,
 } from 'lucide-react';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 
 // ========== 类型 ==========
 
@@ -127,18 +128,22 @@ function TimerPanel({ onClose }: { onClose: () => void }) {
       <div className="space-y-2">
         <input type="text" value={desc} onChange={(e) => setDesc(e.target.value)}
           placeholder="工作说明（必填）" onKeyDown={(e) => e.key === 'Enter' && handleStart()}
-          className="w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/70 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+          className="w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/70 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
 
-        <select value={taskId} onChange={(e) => setTaskId(e.target.value)}
-          className="w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/70 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
-          <option value="">不绑定任务</option>
-          {tasks.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.project?.name || ''} · {t.title}
-              {t.actualHours != null ? ` [已记录 ${t.actualHours}h]` : t.estimatedHours ? ` [预估 ${t.estimatedHours}h]` : ''}
-            </option>
-          ))}
-        </select>
+        <Select value={taskId || 'no_task_placeholder'} onValueChange={(v) => setTaskId(v === 'no_task_placeholder' ? '' : (v ?? ''))}>
+          <SelectTrigger className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60">
+            <SelectValue placeholder="不绑定任务" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="no_task_placeholder">不绑定任务</SelectItem>
+            {tasks.map((t) => (
+              <SelectItem key={t.id} value={t.id}>
+                {t.project?.name || ''} · {t.title}
+                {t.actualHours != null ? ` [已记录 ${t.actualHours}h]` : t.estimatedHours ? ` [预估 ${t.estimatedHours}h]` : ''}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <button onClick={handleStart} disabled={!desc.trim()}
           className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">
@@ -194,7 +199,7 @@ function TodoPanel({ onClose }: { onClose: () => void }) {
         <div className="flex items-center gap-1.5">
           <ListTodo className="h-4 w-4 text-indigo-500" />
           <span className="text-sm font-semibold text-foreground/80">今日任务</span>
-          {todos.length > 0 && <span className="text-[11px] text-muted-foreground">{doneCount}/{todos.length}</span>}
+          {todos.length > 0 && <span className="text-2xs-plus text-muted-foreground">{doneCount}/{todos.length}</span>}
         </div>
         <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground/70">收起</button>
       </div>
@@ -202,7 +207,7 @@ function TodoPanel({ onClose }: { onClose: () => void }) {
       <div className="flex gap-1.5 mb-3">
         <input type="text" value={input} onChange={(e) => setInput(e.target.value)}
           placeholder="今天要做什么？" onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          className="flex-1 rounded-lg border border-border px-2.5 py-1.5 text-xs text-foreground/70 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+          className="flex-1 rounded-lg border border-border px-2.5 py-1.5 text-xs text-foreground/70 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
         <button onClick={handleAdd} disabled={!input.trim()}
           className="rounded-lg bg-indigo-600 px-2.5 py-1.5 text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50">
           <Plus className="h-3.5 w-3.5" />
@@ -222,7 +227,7 @@ function TodoPanel({ onClose }: { onClose: () => void }) {
                   todo.completed ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-border hover:border-indigo-400')}>
                 {todo.completed && <Check className="h-3 w-3" />}
               </button>
-              <span className={cn('flex-1 text-[13px]', todo.completed ? 'text-muted-foreground line-through' : 'text-foreground/80')}>
+              <span className={cn('flex-1 text-sm', todo.completed ? 'text-muted-foreground line-through' : 'text-foreground/80')}>
                 {todo.content}
               </span>
               <button onClick={() => handleDelete(todo.id)}

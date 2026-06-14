@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import {
   useCronJobs, useUpdateCronJob, useRunJob, useTestNotify,
   type CronJob,
@@ -86,9 +87,9 @@ function NRow({ icon, label, sub, children }: { icon: React.ReactNode; label: st
   return (
     <div className="flex items-center justify-between py-1.5 px-1">
       <div className="flex items-center gap-2 min-w-0">
-        <span className="text-[13px] shrink-0">{icon}</span>
-        <span className="text-[12px] text-foreground/80">{label}</span>
-        {sub && <span className="text-[10px] text-muted-foreground/50">{sub}</span>}
+        <span className="text-sm shrink-0">{icon}</span>
+        <span className="text-xs text-foreground/80">{label}</span>
+        {sub && <span className="text-2xs text-muted-foreground/50">{sub}</span>}
       </div>
       {children}
     </div>
@@ -179,11 +180,11 @@ function JobCard({ job, models, webhooks, onToggle }: {
           onClick={e => { e.stopPropagation(); onToggle(); }}>
           {job.enabled ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
         </span>
-        <span className="text-[13px]">{icon}</span>
-        <span className="min-w-0 flex-1 text-[12px] font-semibold text-foreground truncate">{job.name}</span>
+        <span className="text-sm">{icon}</span>
+        <span className="min-w-0 flex-1 text-xs font-semibold text-foreground truncate">{job.name}</span>
         <span className="flex items-center gap-1 shrink-0">
           {emailOn && <Mail className="h-3 w-3 text-emerald-500" />}
-          {targets.length > 0 && <span className="text-[10px] text-blue-500">+{targets.length}</span>}
+          {targets.length > 0 && <span className="text-2xs text-blue-500">+{targets.length}</span>}
           <ChevronDown className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform', open && 'rotate-180')} />
         </span>
       </button>
@@ -193,13 +194,13 @@ function JobCard({ job, models, webhooks, onToggle }: {
         <div className="border-t border-border/60 px-3 pb-3 pt-2 space-y-3">
           {/* 频率 */}
           <div>
-            <p className="mb-1 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">执行频率</p>
+            <p className="mb-1 text-2xs font-medium text-muted-foreground uppercase tracking-wider">执行频率</p>
             <input value={cron} onChange={e => setCron(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 font-mono text-[11px] outline-none focus:border-indigo-300" />
+              className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
             <div className="mt-1.5 flex flex-wrap gap-1">
               {CRON_PRESETS.map(p => (
                 <button key={p.expr} type="button" onClick={() => setCron(p.expr)}
-                  className={cn('rounded border px-1.5 py-0.5 text-[10px] transition-colors',
+                  className={cn('rounded border px-1.5 py-0.5 text-2xs transition-colors',
                     cron === p.expr ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-border text-muted-foreground hover:border-indigo-200')}>
                   {p.label}
                 </button>
@@ -209,7 +210,7 @@ function JobCard({ job, models, webhooks, onToggle }: {
 
           {/* 通知 */}
           <div>
-            <p className="mb-1 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">通知渠道</p>
+            <p className="mb-1 text-2xs font-medium text-muted-foreground uppercase tracking-wider">通知渠道</p>
             <div className="rounded-md border border-border/60 bg-background">
               <NRow icon="📧" label="邮件"><Toggle on={emailOn} onChange={setEmailOn} /></NRow>
               {webhooks.length > 0 && <div className="border-t border-border/40 mx-2" />}
@@ -222,7 +223,7 @@ function JobCard({ job, models, webhooks, onToggle }: {
               {webhooks.length === 0 && (
                 <>
                   <div className="border-t border-border/40 mx-2" />
-                  <p className="px-3 py-1.5 text-[10px] text-muted-foreground/50">暂无推送目标，去系统设置添加</p>
+                  <p className="px-3 py-1.5 text-2xs text-muted-foreground/50">暂无推送目标，去系统设置添加</p>
                 </>
               )}
             </div>
@@ -231,28 +232,31 @@ function JobCard({ job, models, webhooks, onToggle }: {
           {/* AI 模型 */}
           {job.action === 'AI_ANALYSIS' && (
             <div>
-              <p className="mb-1 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">AI 模型</p>
-              <select value={model} onChange={e => setModel(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-[11px] outline-none focus:border-indigo-300">
-                <option value="">使用默认</option>
-                {models.map(m => <option key={m.id} value={m.id}>{m.name} ({m.providerLabel})</option>)}
-              </select>
+              <p className="mb-1 text-2xs font-medium text-muted-foreground uppercase tracking-wider">AI 模型</p>
+              <Select value={model} onValueChange={(v) => setModel(v || "")}>
+                <SelectTrigger className="w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60">
+                  <SelectValue placeholder="使用默认" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map(m => <SelectItem key={m.id} value={m.id}>{m.name} ({m.providerLabel})</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
           {/* 操作 */}
           <div className="flex items-center gap-1.5 pt-1">
             <button onClick={handleRun} disabled={rMut.isPending}
-              className="flex items-center gap-1 rounded-md border border-border px-2 py-1.5 text-[11px] font-medium text-foreground/60 hover:bg-accent disabled:opacity-50">
+              className="flex items-center gap-1 rounded-md border border-border px-2 py-1.5 text-2xs-plus font-medium text-foreground/60 hover:bg-accent disabled:opacity-50">
               {rMut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}执行
             </button>
             <button onClick={handleTest} disabled={tMut.isPending}
-              className="flex items-center gap-1 rounded-md border border-border px-2 py-1.5 text-[11px] font-medium text-foreground/60 hover:bg-accent disabled:opacity-40">
+              className="flex items-center gap-1 rounded-md border border-border px-2 py-1.5 text-2xs-plus font-medium text-foreground/60 hover:bg-accent disabled:opacity-40">
               {tMut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}测试
             </button>
             <div className="flex-1" />
             <button onClick={handleSave} disabled={saving || !dirty}
-              className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-[11px] font-medium transition-all disabled:opacity-40',
+              className={cn('flex items-center gap-1 rounded-md px-3 py-1.5 text-2xs-plus font-medium transition-all disabled:opacity-40',
                 dirty ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-muted text-muted-foreground')}>
               {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
               {saved ? '已保存' : '保存'}
@@ -260,11 +264,11 @@ function JobCard({ job, models, webhooks, onToggle }: {
           </div>
 
           {/* 结果 */}
-          {runRes && <p className={cn('text-[11px]', runRes.ok ? 'text-emerald-500' : 'text-red-500')}>{runRes.msg}</p>}
+          {runRes && <p className={cn('text-2xs-plus', runRes.ok ? 'text-emerald-500' : 'text-red-500')}>{runRes.msg}</p>}
           {testRes && testRes.length > 0 && (
             <div className="rounded-md border border-border/60 bg-muted/30 px-2 py-1.5 space-y-0.5">
               {testRes.map((r, i) => (
-                <div key={i} className="flex items-center gap-1.5 text-[10px]">
+                <div key={i} className="flex items-center gap-1.5 text-2xs">
                   {r.ok ? <CheckCircle className="h-3 w-3 text-emerald-500" /> : <XCircle className="h-3 w-3 text-red-500" />}
                   <span className="font-medium text-foreground/50">{r.channel}</span>
                   <span className={r.ok ? 'text-emerald-600' : 'text-red-500'}>{r.msg}</span>
@@ -274,7 +278,7 @@ function JobCard({ job, models, webhooks, onToggle }: {
           )}
 
           {job.lastRunAt && (
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-2xs text-muted-foreground">
               上次 {new Date(job.lastRunAt).toLocaleString('zh-CN')}
               {job.lastStatus && (job.lastStatus === 'success' ? ' ✅' : ' ❌')}
             </p>
@@ -301,7 +305,7 @@ export function JobConfigPanel() {
   }, []);
 
   const sj = jobs?.filter(j => j.isSystem) || [];
-  if (isLoading) return <div className="flex items-center gap-2 py-2"><Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" /><span className="text-[11px] text-muted-foreground">加载中...</span></div>;
+  if (isLoading) return <div className="flex items-center gap-2 py-2"><Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" /><span className="text-2xs-plus text-muted-foreground">加载中...</span></div>;
   if (sj.length === 0) return null;
 
   return (

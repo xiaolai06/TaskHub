@@ -185,7 +185,7 @@ function GanttToolbar({
   return (
     <div className="flex items-center justify-between">
       {/* 图例 */}
-      <div className="flex items-center gap-4 text-[11px] text-foreground/60">
+      <div className="flex items-center gap-4 text-2xs-plus text-foreground/60">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-5 rounded-sm border border-indigo-300 bg-indigo-50" />
           正常排期
@@ -205,7 +205,7 @@ function GanttToolbar({
       </div>
 
       {/* 缩放切换 */}
-      <div className="flex h-9 items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
+      <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
         {modes.map((m) => {
           const Icon = m.icon;
           const active = zoom === m.key;
@@ -214,7 +214,7 @@ function GanttToolbar({
               key={m.key}
               onClick={() => onZoom(m.key)}
               className={cn(
-                'flex h-full items-center gap-1 rounded-md px-3 text-xs font-medium transition-all',
+                'flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-all',
                 active ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent',
               )}
             >
@@ -324,11 +324,11 @@ function DayView({
 
                   {/* 状态标签 */}
                   <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <span className={cn('rounded px-2 py-0.5 text-[11px] font-medium border', colors.text, colors.border, colors.bg)}>
+                    <span className={cn('rounded px-2 py-0.5 text-2xs-plus font-medium border', colors.text, colors.border, colors.bg)}>
                       {PRIORITY_LABEL[task.priority]}
                     </span>
                     <span className={cn(
-                      'rounded px-2 py-0.5 text-[11px] font-medium border',
+                      'rounded px-2 py-0.5 text-2xs-plus font-medium border',
                       inProgress ? 'bg-blue-100 text-blue-700 border-blue-200'
                         : done ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                           : blocked ? 'bg-red-100 text-red-700 border-red-200'
@@ -337,17 +337,17 @@ function DayView({
                       {inProgress ? '进行中' : done ? '已完成' : blocked ? '阻塞' : '待办'}
                     </span>
                     {task.isOverdue && (
-                      <span className="rounded bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-200">
+                      <span className="rounded bg-rose-100 px-2 py-0.5 text-2xs-plus font-semibold text-rose-700 border border-rose-200">
                         已逾期
                       </span>
                     )}
                     {!task.isOverdue && delayed && (
-                      <span className="rounded bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700 border border-red-200">
+                      <span className="rounded bg-red-100 px-2 py-0.5 text-2xs-plus font-semibold text-red-700 border border-red-200">
                         延期 {task.delayDays} 天
                       </span>
                     )}
                     {task.isConflict && (
-                      <span className="rounded bg-orange-100 px-2 py-0.5 text-[11px] font-semibold text-orange-700 border border-orange-200">
+                      <span className="rounded bg-orange-100 px-2 py-0.5 text-2xs-plus font-semibold text-orange-700 border border-orange-200">
                         冲突
                       </span>
                     )}
@@ -392,16 +392,16 @@ const GanttHeader = function GanttHeader({
               style={colStyle}
             >
               {isFirst && (
-                <span className="text-[10px] font-bold text-indigo-500 leading-tight">{MONTH_NAMES[d.getMonth()]}</span>
+                <span className="text-2xs font-bold text-indigo-500 leading-tight">{MONTH_NAMES[d.getMonth()]}</span>
               )}
               <span className={cn(
-                'text-[13px] font-bold leading-tight',
+                'text-sm font-bold leading-tight',
                 isToday ? 'text-indigo-600' : isWeekend ? 'text-muted-foreground/40' : 'text-foreground/70',
               )}>
                 {d.getDate()}
               </span>
               <span className={cn(
-                'text-[11px] leading-tight',
+                'text-2xs-plus leading-tight',
                 isToday ? 'text-indigo-500 font-medium' : isWeekend ? 'text-muted-foreground/30' : 'text-muted-foreground/50',
               )}>
                 {WEEKDAY_NAMES[d.getDay()]}
@@ -444,10 +444,10 @@ const GanttRow = function GanttRow({
           <div className="flex-shrink-0 border-r border-border flex items-center gap-2.5 px-4 overflow-hidden cursor-default" style={{ width: labelW }}>
             <div className={cn('w-1.5 h-6 rounded-full flex-shrink-0', getBarColor(task))} />
             <div className="min-w-0 flex-1">
-              <span className={cn('text-[13px] truncate block leading-tight', task.isDelayed ? 'text-red-600 font-semibold' : 'text-foreground font-medium')}>
+              <span className={cn('text-sm truncate block leading-tight', task.isDelayed ? 'text-red-600 font-semibold' : 'text-foreground font-medium')}>
                 {task.title}
               </span>
-              <span className="text-[10px] text-muted-foreground/60 truncate block leading-tight mt-0.5">
+              <span className="text-2xs text-muted-foreground/60 truncate block leading-tight mt-0.5">
                 {task.effectiveHours}h · {PRIORITY_LABEL[task.priority]}优先
                 {task.isOverdue && <span className="text-rose-600 ml-1 font-semibold">已逾期</span>}
                 {!task.isOverdue && task.isDelayed && <span className="text-red-500 ml-1">延期{task.delayDays}天</span>}
@@ -491,17 +491,17 @@ const GanttRow = function GanttRow({
                   )}
                   style={{ minWidth: useFlex ? 36 : Math.max(cellW - 6, 20) }}
                 >
-                  <span className="font-bold text-[12px] leading-none">
+                  <span className="font-bold text-xs leading-none">
                     {hours % 1 === 0 ? `${hours}h` : `${hours.toFixed(1)}h`}
                   </span>
                   {task.isDelayed && (
-                    <div className="text-[9px] font-bold text-red-500 leading-none mt-0.5">
+                    <div className="text-2xs font-bold text-red-500 leading-none mt-0.5">
                       +{task.delayDays}天
                     </div>
                   )}
                 </div>
               ) : isToday ? (
-                <span className="text-[11px] text-indigo-300">—</span>
+                <span className="text-2xs-plus text-indigo-300">—</span>
               ) : null}
             </div>
           );
@@ -521,29 +521,29 @@ function TaskTooltipContent({ task, totalInView }: { task: ScheduledTask; totalI
       <div className="px-4 pt-3 pb-2 bg-muted/40">
         <p className="text-sm font-semibold leading-snug">{task.title}</p>
         {task.projectName && (
-          <p className="mt-1 flex items-center gap-1.5 text-[12px] text-indigo-600">
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-indigo-600">
             <FolderOpen className="h-3.5 w-3.5" />{task.projectName}
           </p>
         )}
         {task.description && (
-          <p className="mt-1 text-[11px] text-muted-foreground line-clamp-2">{task.description}</p>
+          <p className="mt-1 text-2xs-plus text-muted-foreground line-clamp-2">{task.description}</p>
         )}
       </div>
 
       <div className="px-4 py-2.5 space-y-2">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className={cn('rounded px-1.5 py-0.5 text-[10px] font-medium border', colors.text, colors.border, colors.bg)}>
+          <span className={cn('rounded px-1.5 py-0.5 text-2xs font-medium border', colors.text, colors.border, colors.bg)}>
             {PRIORITY_LABEL[task.priority]}
           </span>
-          <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+          <span className="rounded bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground">
             {task.status === 'TODO' ? '待办' : task.status === 'IN_PROGRESS' ? '进行中' : task.status === 'BLOCKED' ? '阻塞' : task.status}
           </span>
-          {task.isOverdue && <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-600">已逾期</span>}
-          {!task.isOverdue && task.isDelayed && <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-600">延期 {task.delayDays} 天</span>}
-          {task.isConflict && <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-semibold text-orange-600">工时冲突</span>}
+          {task.isOverdue && <span className="rounded bg-rose-100 px-1.5 py-0.5 text-2xs font-semibold text-rose-600">已逾期</span>}
+          {!task.isOverdue && task.isDelayed && <span className="rounded bg-red-100 px-1.5 py-0.5 text-2xs font-semibold text-red-600">延期 {task.delayDays} 天</span>}
+          {task.isConflict && <span className="rounded bg-orange-100 px-1.5 py-0.5 text-2xs font-semibold text-orange-600">工时冲突</span>}
         </div>
 
-        <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-[12px]">
+        <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
           <span className="text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />总工时</span>
           <span className="font-medium">{task.effectiveHours}h{task.actualHours ? <span className="text-muted-foreground ml-1">(实际 {task.actualHours}h)</span> : <span className="text-muted-foreground ml-1">(预估)</span>}</span>
           <span className="text-muted-foreground flex items-center gap-1"><CalendarDays className="h-3 w-3" />排期</span>
@@ -575,7 +575,7 @@ const WorkloadFooter = function WorkloadFooter({
 
   return (
     <div className="flex border-t-2 border-border bg-muted/20" style={{ height: FOOTER_H }}>
-      <div className="flex-shrink-0 border-r border-border flex items-center px-4 text-[11px] font-semibold text-muted-foreground" style={{ width: labelW }}>
+      <div className="flex-shrink-0 border-r border-border flex items-center px-4 text-2xs-plus font-semibold text-muted-foreground" style={{ width: labelW }}>
         每日工时
       </div>
       <div className={useFlex ? 'flex flex-1 min-w-0' : 'flex'} style={useFlex ? undefined : { width: dates.length * cellW }}>
@@ -595,7 +595,7 @@ const WorkloadFooter = function WorkloadFooter({
                 <span className={cn(
                   'font-mono font-bold',
                   overloaded ? 'text-red-600' : 'text-muted-foreground/70',
-                  'text-[11px]',
+                  'text-2xs-plus',
                 )}>
                   {hours % 1 === 0 ? `${hours}` : hours.toFixed(1)}
                 </span>

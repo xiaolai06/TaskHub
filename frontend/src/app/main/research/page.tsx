@@ -148,11 +148,11 @@ export default function ResearchPage() {
     <div className="mx-auto max-w-4xl space-y-5 page-enter">
       {/* Tab 切换 + 搜索栏一体 */}
       <div className="flex items-center gap-3">
-        <div className="flex gap-1 rounded-lg border border-border bg-card p-0.5">
+        <div className="flex gap-1 rounded-lg border border-border bg-card p-1">
           {tabs.map((tab) => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={cn('flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
-                activeTab === tab.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:text-foreground/80')}>
+              className={cn('flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-all',
+                activeTab === tab.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
               <tab.icon className="h-3.5 w-3.5" />{tab.label}
             </button>
           ))}
@@ -255,7 +255,7 @@ export default function ResearchPage() {
             <>
               <div className="mb-3 flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">找到 {searchData?.total || results.length} 条结果</span>
-                <span className="text-[10px] text-muted-foreground/50">· 按热度排序</span>
+                <span className="text-2xs text-muted-foreground/50">· 按热度排序</span>
               </div>
               <div className="space-y-2">
                 {results.map((item, i) => {
@@ -286,27 +286,27 @@ export default function ResearchPage() {
                             ) : (
                               <h3 className="truncate text-sm font-semibold text-foreground">{item.title}</h3>
                             )}
-                            <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px]', cfg.color)}>
+                            <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-2xs', cfg.color)}>
                               {cfg.label}
                             </span>
                             {item.extra && (
-                              <span className="text-[10px] text-muted-foreground">{item.extra}</span>
+                              <span className="text-2xs text-muted-foreground">{item.extra}</span>
                             )}
                           </div>
                           <p className={cn(
-                            'mt-1 text-[12px] leading-relaxed text-muted-foreground',
+                            'mt-1 text-xs leading-relaxed text-muted-foreground',
                             !isExpanded && isLong && 'line-clamp-2',
                           )}>{item.snippet}</p>
                           {isLong && (
                             <button onClick={toggleExpand}
-                              className="mt-1 flex items-center gap-0.5 text-[11px] text-indigo-500 hover:text-indigo-600">
+                              className="mt-1 flex items-center gap-0.5 text-2xs-plus text-indigo-500 hover:text-indigo-600">
                               {isExpanded ? '收起' : '展开全部'}
                               <ChevronDown className={cn('h-3 w-3 transition-transform', isExpanded && 'rotate-180')} />
                             </button>
                           )}
                           {item.url && (
                             <a href={item.url} target="_blank" rel="noreferrer"
-                              className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-muted-foreground transition-colors hover:text-indigo-500">
+                              className="mt-1.5 inline-flex items-center gap-1 text-2xs text-muted-foreground transition-colors hover:text-indigo-500">
                               <ExternalLink className="h-3 w-3" />
                               打开链接
                             </a>
@@ -373,17 +373,17 @@ export default function ResearchPage() {
                     className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-border">
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
-                      <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">{item.summary}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.summary}</p>
                       <div className="mt-2 flex items-center gap-2">
                         {tags.length > 0 && (
                           <div className="flex items-center gap-1">
                             <Tag className="h-3 w-3 text-muted-foreground" />
                             {tags.map(t => (
-                              <span key={t} className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{t}</span>
+                              <span key={t} className="rounded-full bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground">{t}</span>
                             ))}
                           </div>
                         )}
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-2xs text-muted-foreground">
                           {new Date(item.createdAt).toLocaleDateString('zh-CN')}
                         </span>
                       </div>

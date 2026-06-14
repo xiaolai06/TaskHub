@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Loader2, Plus } from 'lucide-react';
 import type { CreateCostInput } from '@/hooks/useCosts';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const categories = [
   { value: 'LABOR', label: '人工' },
@@ -61,12 +62,7 @@ export function CostForm({ onSubmit, isLoading }: CostFormProps) {
         placeholder="成本说明，如外包、服务器、素材"
         className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300"
       />
-      <input
-        type="date"
-        value={date}
-        onChange={(event) => setDate(event.target.value)}
-        className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300"
-      />
+      <DatePicker value={date} onChange={setDate} />
       <button
         type="submit"
         disabled={isLoading || !amount || !description.trim()}

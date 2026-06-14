@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
   Select,
   SelectContent,
@@ -166,12 +167,7 @@ export function InsertionDialog({ projectId, open, onOpenChange }: InsertionDial
 
             <div className="space-y-2">
               <Label htmlFor="dueDate">截止日期（可选）</Label>
-              <Input
-                id="dueDate"
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+              <DatePicker value={dueDate} onChange={setDueDate} />
             </div>
           </div>
         ) : (
@@ -265,7 +261,7 @@ export function InsertionDialog({ projectId, open, onOpenChange }: InsertionDial
                         <span className="text-red-600 font-mono text-xs font-medium">
                           {t.newEnd}
                         </span>
-                        <Badge variant="outline" className="text-[10px] text-red-500 border-red-300">
+                        <Badge variant="outline" className="text-2xs text-red-500 border-red-300">
                           +{t.delayDays}d
                         </Badge>
                       </div>

@@ -254,6 +254,7 @@ model Conversation {
   conversationSessionId String?         // 新字段，关联 ConversationSession
   role                  String          // user / assistant / system / tool
   content               String
+  attachments           String?         // JSON: [{type, fileName, fileSize, url}]
   contextType           String?
   contextId             String?
   tokenCount            Int?

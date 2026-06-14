@@ -30,28 +30,31 @@ const TOOL_GROUPS: ToolGroup[] = [
     alwaysLoad: true,
   },
 
-  // 💰 财务
+  // 💰 财务（增加 create_cost, delete_cost）
   {
     name: 'finance',
     tools: [
       'get_profit_analysis', 'get_cash_flow', 'get_cost_breakdown',
       'get_revenue_by_client', 'get_project_margin_ranking',
+      'create_cost', 'delete_cost',
     ],
     keywords: [
       '利润', '盈利', '盈亏', '赚', '亏', '收入', '支出', '成本', '费用',
       '报价', '预算', '现金流', '收支', '财务', '账', '金额', '价格',
       '赚钱', '不划算', '利润率', '毛利', '净利润', 'margin', 'profit',
-      '客户价值', '哪个客户最赚钱', '排名',
+      '客户价值', '哪个客户最赚钱', '排名', '记一笔成本', '成本录入',
     ],
   },
 
-  // 📋 工作/项目/任务
+  // 📋 工作/项目/任务（增加 list_projects, get_project_detail, archive_project, list_tasks, get_task_stats）
   {
     name: 'work',
     tools: [
       'get_today_focus', 'get_overdue_tasks', 'get_project_progress', 'get_schedule',
       'create_project', 'update_project', 'create_task', 'update_task_status',
       'log_time', 'delete_task',
+      'list_projects', 'get_project_detail', 'archive_project',
+      'list_tasks', 'get_task_stats',
     ],
     keywords: [
       '任务', '项目', '排期', '进度', '完成', '待办', '延期', '工时',
@@ -59,34 +62,112 @@ const TOOL_GROUPS: ToolGroup[] = [
       '创建', '新建', '添加', '删除', '修改', '更新', '标记',
       '做完了', '完成了', '开始了', '阻塞', '延期', '过期',
       '订单', '项目管理', '工作', 'focus', 'todo', 'task', 'project',
+      '归档', '项目列表', '项目详情', '任务统计', '完成率',
     ],
   },
 
-  // 👥 客户
+  // 👥 客户（增加 list_customers, delete_customer）
   {
     name: 'client',
     tools: [
       'create_customer', 'update_customer', 'get_client_follow_up',
       'get_client_insights', 'log_communication', 'get_client_ranking',
+      'list_customers', 'delete_customer',
     ],
     keywords: [
       '客户', '跟进', '沟通', '联系', '签约', '拜访', '洽谈',
       '客户信息', '客户详情', '客户排名', '客户价值',
       '添加客户', '新客户', '大客户', 'VIP', '潜在客户',
+      '客户列表', '删除客户',
     ],
   },
 
-  // 🎯 目标/周报
+  // 🎯 目标/周报（增加 list_goals, get_goal_overview, create_goal, update_goal, update_goal_progress）
   {
     name: 'goal',
     tools: [
       'get_goal_progress', 'get_weekly_review', 'suggest_weekly_plan',
       'get_business_health',
+      'list_goals', 'get_goal_overview', 'create_goal', 'update_goal', 'update_goal_progress',
     ],
     keywords: [
       '目标', '周报', '业绩', '健康', '总结', '回顾',
       '这周做了什么', '本周', '完成率', 'KPI', 'OKR',
-      '建议', '规划', '周计划',
+      '建议', '规划', '周计划', '目标总览', '创建目标', '更新目标',
+    ],
+  },
+
+  // 💳 收支流水（新增）
+  {
+    name: 'transaction',
+    tools: ['list_transactions', 'create_transaction', 'update_transaction', 'delete_transaction'],
+    keywords: [
+      '流水', '收入', '支出', '记账', '入账', '交易',
+      '收支记录', '账单', '记一笔', '收入记录', '支出明细',
+    ],
+  },
+
+  // 💵 回款（新增）
+  {
+    name: 'payment',
+    tools: ['create_payment', 'list_payments', 'get_receivables', 'get_aging_analysis'],
+    keywords: [
+      '收款', '回款', '应收账款', '账龄',
+      '付款', '首付', '尾款', '进度款',
+      '收钱', '收到款', '回款率',
+    ],
+  },
+
+  // ⏱ 工时/待办（新增）
+  {
+    name: 'work_timer',
+    tools: ['get_today_entries', 'get_active_timer', 'list_todos', 'add_todo', 'toggle_todo'],
+    keywords: [
+      '工时', '计时', '待办', '今日任务', '打卡',
+      '计时器', '工作时间', '记录工时',
+      '今日待办', '加个待办', '完成待办',
+    ],
+  },
+
+  // 📊 报表（新增）
+  {
+    name: 'report',
+    tools: ['get_report_overview', 'get_project_ranking', 'get_cost_structure', 'get_time_analysis'],
+    keywords: [
+      '报表', '报告', '排名', '分析报告',
+      '成本结构', '工时分析', '时间分析',
+      '项目排名', '财务报表',
+    ],
+  },
+
+  // 📈 仪表盘（新增）
+  {
+    name: 'dashboard',
+    tools: ['get_dashboard_summary', 'get_recent_activity'],
+    keywords: [
+      '仪表盘', '总览', '概况', '汇总',
+      '最近活动', '最近做了什么', '整体情况',
+    ],
+  },
+
+  // 🔔 通知查询（新增）
+  {
+    name: 'notification_query',
+    tools: ['list_notifications', 'get_unread_count', 'mark_as_read'],
+    keywords: [
+      '通知', '未读', '消息提醒',
+      '查看通知', '通知数量', '标记已读',
+    ],
+  },
+
+  // 📦 订阅（新增）
+  {
+    name: 'subscription',
+    tools: ['list_subscriptions', 'get_subscription_cost', 'create_subscription', 'pause_subscription', 'resume_subscription'],
+    keywords: [
+      '订阅', '续费', '会员', 'SaaS',
+      '订阅费', '暂停订阅', '恢复订阅',
+      '月费', '年费', '订阅服务',
     ],
   },
 
@@ -133,7 +214,7 @@ const TOOL_GROUPS: ToolGroup[] = [
       'npm', 'github', '开源', 'trending', '技术文章',
       '新产品', 'SaaS', '产品', 'GDP', '人口', '宏观',
       '科技', '创投', 'Hacker News', 'Dev.to', 'Product Hunt',
-      '新闻', '今日头条', '36kr', '虎嗅',
+      '今日头条', '36kr', '虎嗅',
     ],
   },
 ];

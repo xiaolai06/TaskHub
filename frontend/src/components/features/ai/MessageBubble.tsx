@@ -62,6 +62,47 @@ const TOOL_INFO: Record<string, { icon: string; label: string }> = {
   get_historical_accuracy: { icon: '📈', label: '工时准确度' },
   create_customer: { icon: '👤', label: '创建客户' },
   update_customer: { icon: '✏️', label: '更新客户' },
+  list_transactions: { icon: '💳', label: '收支流水' },
+  create_transaction: { icon: '💳', label: '录入流水' },
+  update_transaction: { icon: '✏️', label: '编辑流水' },
+  delete_transaction: { icon: '🗑️', label: '删除流水' },
+  create_payment: { icon: '💵', label: '录入收款' },
+  list_payments: { icon: '💵', label: '收款记录' },
+  get_receivables: { icon: '💰', label: '应收账款' },
+  get_aging_analysis: { icon: '📊', label: '账龄分析' },
+  create_cost: { icon: '💰', label: '录入成本' },
+  delete_cost: { icon: '🗑️', label: '删除成本' },
+  list_projects: { icon: '📁', label: '项目列表' },
+  get_project_detail: { icon: '📁', label: '项目详情' },
+  archive_project: { icon: '📦', label: '归档项目' },
+  list_tasks: { icon: '📋', label: '任务列表' },
+  get_task_stats: { icon: '📊', label: '任务统计' },
+  list_customers: { icon: '👥', label: '客户列表' },
+  delete_customer: { icon: '🗑️', label: '删除客户' },
+  list_goals: { icon: '🎯', label: '目标列表' },
+  get_goal_overview: { icon: '🎯', label: '目标总览' },
+  create_goal: { icon: '🎯', label: '创建目标' },
+  update_goal: { icon: '✏️', label: '更新目标' },
+  update_goal_progress: { icon: '📈', label: '目标进度' },
+  get_today_entries: { icon: '⏱', label: '今日工时' },
+  get_active_timer: { icon: '⏱', label: '计时器' },
+  list_todos: { icon: '📝', label: '待办列表' },
+  add_todo: { icon: '📝', label: '添加待办' },
+  toggle_todo: { icon: '✅', label: '完成待办' },
+  get_report_overview: { icon: '📊', label: '报表总览' },
+  get_project_ranking: { icon: '📈', label: '项目排名' },
+  get_cost_structure: { icon: '📊', label: '成本结构' },
+  get_time_analysis: { icon: '⏱', label: '工时分析' },
+  get_dashboard_summary: { icon: '📈', label: '仪表盘' },
+  get_recent_activity: { icon: '📋', label: '最近活动' },
+  list_notifications: { icon: '🔔', label: '通知列表' },
+  get_unread_count: { icon: '🔔', label: '未读通知' },
+  mark_as_read: { icon: '✅', label: '标记已读' },
+  list_subscriptions: { icon: '📦', label: '订阅列表' },
+  get_subscription_cost: { icon: '💰', label: '订阅费用' },
+  create_subscription: { icon: '📦', label: '创建订阅' },
+  pause_subscription: { icon: '⏸', label: '暂停订阅' },
+  resume_subscription: { icon: '▶️', label: '恢复订阅' },
 };
 
 interface MessageBubbleProps {
@@ -122,7 +163,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
         {/* 消息气泡 */}
         {cleanContent && (
           <div className={cn(
-            'rounded-2xl px-4 py-3 text-[13px] leading-[1.7]',
+            'rounded-2xl px-4 py-3 text-sm leading-relaxed',
             isUser
               ? 'rounded-tr-md bg-indigo-600 text-white'
               : 'rounded-tl-md border border-slate-200 bg-background text-foreground shadow-sm',
@@ -137,7 +178,7 @@ export function MessageBubble({ message, user, onRegenerate }: MessageBubbleProp
 
         {/* 时间 + 操作 */}
         <div className={cn(
-          'mt-1 flex items-center gap-2 text-[10px] text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100',
+          'mt-1 flex items-center gap-2 text-2xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100',
           isUser && 'flex-row-reverse',
         )}>
           <span>{formatTime(message.timestamp)}</span>
@@ -184,7 +225,7 @@ function UserAvatar({ user }: { user: UserInfo | null }) {
 
   const initial = user.name?.charAt(0)?.toUpperCase() || 'U';
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[12px] font-semibold text-indigo-600 ring-2 ring-slate-100">
+    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600 ring-2 ring-slate-100">
       {initial}
     </div>
   );

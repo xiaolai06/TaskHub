@@ -349,22 +349,22 @@ export function Header({ onOpenAi }: HeaderProps) {
       >
         <div className="mt-0.5 shrink-0">{infoIcon(item.type)}</div>
         <div className="min-w-0 flex-1">
-          <p className={cn('text-[13px]', !item.read ? 'font-semibold text-foreground' : 'font-medium text-foreground/70')}>
+          <p className={cn('text-sm', !item.read ? 'font-semibold text-foreground' : 'font-medium text-foreground/70')}>
             {item.title}
           </p>
-          <div className="mt-0.5 text-[12px] text-muted-foreground leading-relaxed">
+          <div className="mt-0.5 text-xs text-muted-foreground leading-relaxed">
             {isExpanded ? (
               <MarkdownRenderer content={item.desc} />
             ) : (
               <span>{displayDesc}</span>
             )}
             {needsTruncate && (
-              <span className="ml-1 inline-flex items-center gap-0.5 text-[11px] text-indigo-500">
+              <span className="ml-1 inline-flex items-center gap-0.5 text-2xs-plus text-indigo-500">
                 {isExpanded ? <><ChevronUp className="h-3 w-3" />收起</> : <><ChevronDownIcon className="h-3 w-3" />展开</>}
               </span>
             )}
           </div>
-          <p className="mt-1 text-[11px] text-muted-foreground">{item.time}</p>
+          <p className="mt-1 text-2xs-plus text-muted-foreground">{item.time}</p>
         </div>
         {/* 已读标记 */}
         {!item.read && showMarkRead ? (
@@ -388,12 +388,12 @@ export function Header({ onOpenAi }: HeaderProps) {
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-border bg-card/95 px-5 backdrop-blur-md">
       {/* 左侧：时间 + 祝福语 + 主题切换 */}
       <div className="flex items-center gap-3">
-        <div className="flex shrink-0 items-center gap-1.5 font-mono text-[15px] text-slate-500 tabular-nums">
+        <div className="flex shrink-0 items-center gap-1.5 font-mono text-base text-slate-500 tabular-nums">
           <Clock className="h-4 w-4 text-slate-400" />
           <LiveClock />
         </div>
         <div className="h-5 w-px shrink-0 bg-slate-200" />
-        <span className="text-[15px] text-slate-500">
+        <span className="text-base text-slate-500">
           {user?.name ? getGreeting(user.name, customGreetings) : '欢迎使用 智汇轻营'}
         </span>
         <button
@@ -434,7 +434,7 @@ export function Header({ onOpenAi }: HeaderProps) {
             <Newspaper className="h-4 w-4" />
             资讯
             {unreadInfo > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-[10px] font-bold text-white">
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-2xs font-bold text-white">
                 {unreadInfo}
               </span>
             )}
@@ -449,7 +449,7 @@ export function Header({ onOpenAi }: HeaderProps) {
                   {unreadInfo > 0 && (
                     <button
                       onClick={handleMarkAllRead}
-                      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-indigo-600 transition-colors hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+                      className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-2xs-plus text-indigo-600 transition-colors hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
                     >
                       <CheckCheck className="h-3 w-3" />全部已读
                     </button>
@@ -459,7 +459,7 @@ export function Header({ onOpenAi }: HeaderProps) {
                     <button
                       onClick={() => setShowHistory(!showHistory)}
                       className={cn(
-                        'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] transition-colors',
+                        'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-2xs-plus transition-colors',
                         showHistory
                           ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
                           : 'text-muted-foreground hover:bg-accent',
@@ -496,7 +496,7 @@ export function Header({ onOpenAi }: HeaderProps) {
                         key={f.key}
                         onClick={() => setHistoryFilter(f.key)}
                         className={cn(
-                          'rounded-md px-2 py-0.5 text-[11px] transition-colors',
+                          'rounded-md px-2 py-0.5 text-2xs-plus transition-colors',
                           historyFilter === f.key
                             ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 font-medium'
                             : 'text-muted-foreground hover:bg-accent',
@@ -509,7 +509,7 @@ export function Header({ onOpenAi }: HeaderProps) {
                   {/* 历史列表 */}
                   <div className="max-h-56 divide-y overflow-y-auto">
                     {filteredHistory.length === 0 ? (
-                      <div className="px-4 py-4 text-center text-[11px] text-muted-foreground">暂无该类历史消息</div>
+                      <div className="px-4 py-4 text-center text-2xs-plus text-muted-foreground">暂无该类历史消息</div>
                     ) : (
                       filteredHistory.map((item) => renderItem(item, { compact: true }))
                     )}
@@ -535,7 +535,7 @@ export function Header({ onOpenAi }: HeaderProps) {
             <Bell className="h-4 w-4" />
             待办
             {alertCount > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-2xs font-bold text-white">
                 {alertCount}
               </span>
             )}
@@ -574,17 +574,17 @@ export function Header({ onOpenAi }: HeaderProps) {
                           task.priority === 'MEDIUM' ? 'bg-amber-400' : 'bg-slate-300',
                         )} />
                         <div className="min-w-0 flex-1">
-                          <p className={cn('truncate text-[13px] font-medium', isRead ? 'text-muted-foreground line-through' : overdue ? 'text-red-700 dark:text-red-400' : 'text-foreground')}>
+                          <p className={cn('truncate text-sm font-medium', isRead ? 'text-muted-foreground line-through' : overdue ? 'text-red-700 dark:text-red-400' : 'text-foreground')}>
                             {task.title}
-                            {overdue && !isRead && <span className="ml-1 text-[10px] text-red-500 font-normal">逾期</span>}
-                            {soonDue && !isRead && <span className="ml-1 text-[10px] text-orange-500 font-normal">即将到期</span>}
-                            {isRead && <span className="ml-1 text-[10px] text-muted-foreground font-normal">已读</span>}
+                            {overdue && !isRead && <span className="ml-1 text-2xs text-red-500 font-normal">逾期</span>}
+                            {soonDue && !isRead && <span className="ml-1 text-2xs text-orange-500 font-normal">即将到期</span>}
+                            {isRead && <span className="ml-1 text-2xs text-muted-foreground font-normal">已读</span>}
                           </p>
-                          <p className="mt-0.5 text-[12px] text-muted-foreground">{task.project.name}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">{task.project.name}</p>
                         </div>
                         <div className="flex shrink-0 items-center gap-1.5">
                           {task.dueDate && (
-                            <span className={cn('flex items-center gap-1 text-[11px]', overdue && !isRead ? 'text-red-500' : 'text-muted-foreground')}>
+                            <span className={cn('flex items-center gap-1 text-2xs-plus', overdue && !isRead ? 'text-red-500' : 'text-muted-foreground')}>
                               <Clock className="h-3 w-3" />{new Date(task.dueDate).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
                             </span>
                           )}
@@ -634,8 +634,8 @@ export function Header({ onOpenAi }: HeaderProps) {
               </Avatar>
             )}
             <div className="hidden text-left md:block">
-              <p className="text-[13px] font-medium text-foreground">{user?.name || '未登录'}</p>
-              <p className="text-[11px] text-muted-foreground">{roleLabel}</p>
+              <p className="text-sm font-medium text-foreground">{user?.name || '未登录'}</p>
+              <p className="text-2xs-plus text-muted-foreground">{roleLabel}</p>
             </div>
             <ChevronDown className="hidden h-3.5 w-3.5 text-slate-400 md:block" />
           </DropdownMenuTrigger>

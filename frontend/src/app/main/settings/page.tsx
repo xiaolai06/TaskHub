@@ -5,13 +5,14 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
-  Loader2, CheckCircle, AlertCircle, Bot, Link, Shield, Database,
-  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search, Plus, Mail, Send, Bell, Clock, Globe,
+  Loader2, CheckCircle, Check, AlertCircle, Bot, Link, Shield, Database,
+  Eye, EyeOff, Wifi, Trash2, Download, LogOut, Smartphone, Search, Plus, Mail, Send, Bell, Clock, Globe, Mic,
 } from 'lucide-react';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 
 // ========== 类型 ==========
 
-type TabKey = 'ai' | 'search' | 'integration' | 'email' | 'push' | 'security' | 'data';
+type TabKey = 'ai' | 'stt' | 'search' | 'integration' | 'email' | 'push' | 'security' | 'data';
 
 interface Session {
   id: string;
@@ -55,6 +56,7 @@ function AIConfig() {
   const [providers, setProviders] = useState<ProviderInfo[]>([]);
   const [selectedProvider, setSelectedProvider] = useState('deepseek');
   const [apiKey, setApiKey] = useState('');
+  const [hasExistingKey, setHasExistingKey] = useState(false); // 标记当前供应商是否已有保存的 key
   const [baseUrl, setBaseUrl] = useState('');
   const [defaultModel, setDefaultModel] = useState('');
   const [powerfulModel, setPowerfulModel] = useState('');
@@ -100,10 +102,12 @@ function AIConfig() {
   function fillFromProvider(list: ProviderInfo[], name: string) {
     const p = list.find(x => x.name === name);
     if (!p) {
-      setApiKey(''); setBaseUrl(''); setDefaultModel(''); setPowerfulModel(''); setModels([]);
+      setApiKey(''); setHasExistingKey(false); setBaseUrl(''); setDefaultModel(''); setPowerfulModel(''); setModels([]);
       return;
     }
-    setApiKey(p.apiKey && p.apiKey !== '***' ? p.apiKey : '');
+    const keyExists = !!(p.apiKey && p.apiKey === '***'); // 后端返回 '***' 表示有已保存的 key
+    setApiKey(keyExists ? '' : (p.apiKey || '')); // 有旧 key 时输入框留空，让用户决定是否替换
+    setHasExistingKey(keyExists);
     setBaseUrl(p.baseUrl || '');
     setDefaultModel(p.defaultModel || '');
     setPowerfulModel(p.powerfulModel || '');
@@ -123,8 +127,10 @@ function AIConfig() {
     setTesting(true);
     setTestResult(null);
     try {
+      // 有旧 key 且未输入新 key 时，传 '***' 让后端用已保存的 key
+      const keyToSend = apiKey || (hasExistingKey ? '***' : '');
       const res = await api.post<{ success: boolean; message: string; modelCount?: number; url?: string }>(
-        '/settings/ai/test', { provider: selectedProvider, apiKey, baseUrl },
+        '/settings/ai/test', { provider: selectedProvider, apiKey: keyToSend, baseUrl },
       );
       setTestResult(res);
     } catch {
@@ -136,8 +142,9 @@ function AIConfig() {
     setFetchingModels(true);
     setFetchMsg('');
     try {
+      const keyToSend = apiKey || (hasExistingKey ? '***' : '');
       const res = await api.post<{ models: AIModel[]; error?: string; note?: string }>(
-        '/settings/ai/fetch-models', { provider: selectedProvider, apiKey, baseUrl },
+        '/settings/ai/fetch-models', { provider: selectedProvider, apiKey: keyToSend, baseUrl },
       );
       if (res.models && res.models.length > 0) {
         setModels(res.models);
@@ -160,10 +167,11 @@ function AIConfig() {
     setSaved(false);
     try {
       // 1. 保存当前供应商的完整配置到 AI_PROVIDER 表
+      //    apiKey 为空表示未修改，后端会保留已有的加密值
       await api.post('/settings/ai/providers', {
         name: selectedProvider,
         baseUrl,
-        apiKey,
+        ...(apiKey ? { apiKey } : {}),
         defaultModel,
         powerfulModel,
       });
@@ -210,8 +218,8 @@ function AIConfig() {
     } catch (e) { toast.error('添加失败: ' + (e instanceof Error ? e.message : '未知错误')); }
   }
 
-  const inputCls = 'w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
-  const selectCls = 'w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 bg-card';
+  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
+  const selectCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60 bg-card';
 
   const selectedP = providers.find(p => p.name === selectedProvider);
 
@@ -221,11 +229,14 @@ function AIConfig() {
       <div className="flex gap-2">
         <div className="flex-1">
           <label className="mb-1 block text-xs font-medium text-foreground/70">AI 供应商</label>
-          <select value={selectedProvider} onChange={(e) => switchProvider(e.target.value)} className={selectCls}>
-            {providers.map(p => (
-              <option key={p.name} value={p.name}>{p.label}{p.apiKey ? ' ✓' : ''}</option>
-            ))}
-          </select>
+          <Select value={selectedProvider} onValueChange={(v) => switchProvider(v || 'deepseek')}>
+            <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择供应商" /></SelectTrigger>
+            <SelectContent>
+              {providers.map(p => (
+                <SelectItem key={p.name} value={p.name}>{p.label}{p.apiKey ? ' ✓' : ''}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex items-end gap-1">
           <button onClick={() => setAddProviderOpen(true)}
@@ -250,10 +261,16 @@ function AIConfig() {
             placeholder={selectedP?.baseUrl || '自动填充'} className={inputCls} />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-foreground/70">API Key</label>
+          <label className="mb-1 block text-xs font-medium text-foreground/70">
+            API Key
+            {hasExistingKey && !apiKey && (
+              <span className="ml-2 text-2xs text-emerald-500 font-normal">已保存，留空则保留</span>
+            )}
+          </label>
           <div className="relative">
             <input type={showKey ? 'text' : 'password'} value={apiKey} onChange={(e) => setApiKey(e.target.value)}
-              placeholder="sk-xxxx" className={cn(inputCls, 'pr-8')} />
+              placeholder={hasExistingKey && !apiKey ? '••••••••（已保存，无需重新输入）' : 'sk-xxxx'}
+              className={cn(inputCls, 'pr-8', hasExistingKey && !apiKey && 'text-muted-foreground/60')} />
             <button onClick={() => setShowKey(!showKey)}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -268,27 +285,33 @@ function AIConfig() {
           <label className="mb-1 block text-xs font-medium text-foreground/70">默认模型</label>
           <div className="flex gap-2">
             {models.length > 0 ? (
-              <select value={defaultModel} onChange={(e) => setDefaultModel(e.target.value)} className={selectCls}>
-                {models.map((m) => <option key={m.id} value={m.id}>{m.name} ({m.tier})</option>)}
-              </select>
+              <Select value={defaultModel} onValueChange={(v) => setDefaultModel(v || "")}>
+                <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择模型" /></SelectTrigger>
+                <SelectContent>
+                  {models.map((m) => <SelectItem key={m.id} value={m.id}>{m.name} ({m.tier})</SelectItem>)}
+                </SelectContent>
+              </Select>
             ) : (
               <input type="text" value={defaultModel} onChange={(e) => setDefaultModel(e.target.value)}
                 placeholder="手动输入模型名" className={inputCls} />
             )}
-            <button onClick={handleFetchModels} disabled={fetchingModels || !apiKey}
+            <button onClick={handleFetchModels} disabled={fetchingModels || (!apiKey && !hasExistingKey)}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:bg-indigo-50 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
               title="从官方 API 获取模型列表">
               {fetchingModels ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
             </button>
           </div>
-          {fetchMsg && <p className={cn('mt-1 text-[11px]', fetchMsg.startsWith('✅') ? 'text-emerald-500' : 'text-amber-500')}>{fetchMsg}</p>}
+          {fetchMsg && <p className={cn('mt-1 text-2xs-plus', fetchMsg.startsWith('✅') ? 'text-emerald-500' : 'text-amber-500')}>{fetchMsg}</p>}
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-foreground/70">复杂任务模型</label>
           {models.length > 0 ? (
-            <select value={powerfulModel} onChange={(e) => setPowerfulModel(e.target.value)} className={selectCls}>
-              {models.map((m) => <option key={m.id} value={m.id}>{m.name} ({m.tier})</option>)}
-            </select>
+            <Select value={powerfulModel} onValueChange={(v) => setPowerfulModel(v || "")}>
+              <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择模型" /></SelectTrigger>
+              <SelectContent>
+                {models.map((m) => <SelectItem key={m.id} value={m.id}>{m.name} ({m.tier})</SelectItem>)}
+              </SelectContent>
+            </Select>
           ) : (
             <input type="text" value={powerfulModel} onChange={(e) => setPowerfulModel(e.target.value)}
               placeholder="手动输入" className={inputCls} />
@@ -314,7 +337,7 @@ function AIConfig() {
       {/* 工具权限设置 */}
       <div className="rounded-lg border border-border bg-card p-3">
         <label className="mb-1.5 block text-xs font-medium text-foreground/70">写操作权限</label>
-        <p className="mb-2 text-[11px] text-muted-foreground">控制 AI 执行创建、修改、删除等操作时的行为</p>
+        <p className="mb-2 text-2xs-plus text-muted-foreground">控制 AI 执行创建、修改、删除等操作时的行为</p>
         <div className="flex gap-2">
           <button
             onClick={() => setToolPermission('auto')}
@@ -326,7 +349,7 @@ function AIConfig() {
             )}
           >
             自动执行
-            <span className="mt-0.5 block text-[10px] font-normal opacity-70">AI 直接执行写操作</span>
+            <span className="mt-0.5 block text-2xs font-normal opacity-70">AI 直接执行写操作</span>
           </button>
           <button
             onClick={() => setToolPermission('confirm')}
@@ -338,13 +361,13 @@ function AIConfig() {
             )}
           >
             确认后执行
-            <span className="mt-0.5 block text-[10px] font-normal opacity-70">写操作需点击确认</span>
+            <span className="mt-0.5 block text-2xs font-normal opacity-70">写操作需点击确认</span>
           </button>
         </div>
       </div>
 
       <div className="flex gap-2">
-        <button onClick={handleTest} disabled={testing || !apiKey}
+        <button onClick={handleTest} disabled={testing || (!apiKey && !hasExistingKey)}
           className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-xs font-medium text-foreground/70 transition-all hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50">
           {testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wifi className="h-3.5 w-3.5" />}
           测试连接
@@ -363,19 +386,19 @@ function AIConfig() {
             <h3 className="mb-3 text-sm font-semibold text-foreground">添加 AI 供应商</h3>
             <div className="space-y-3">
               <div>
-                <label className="mb-1 block text-[11px] text-muted-foreground">标识 (英文)</label>
+                <label className="mb-1 block text-2xs-plus text-muted-foreground">标识 (英文)</label>
                 <input value={newPName} onChange={e => setNewPName(e.target.value)} placeholder="xiaomi / custom" className={inputCls} />
               </div>
               <div>
-                <label className="mb-1 block text-[11px] text-muted-foreground">显示名</label>
+                <label className="mb-1 block text-2xs-plus text-muted-foreground">显示名</label>
                 <input value={newPLabel} onChange={e => setNewPLabel(e.target.value)} placeholder="小米 MiMo" className={inputCls} />
               </div>
               <div>
-                <label className="mb-1 block text-[11px] text-muted-foreground">API 地址</label>
+                <label className="mb-1 block text-2xs-plus text-muted-foreground">API 地址</label>
                 <input value={newPUrl} onChange={e => setNewPUrl(e.target.value)} placeholder="https://api.xxx.com/v1" className={inputCls} />
               </div>
               <div>
-                <label className="mb-1 block text-[11px] text-muted-foreground">API Key</label>
+                <label className="mb-1 block text-2xs-plus text-muted-foreground">API Key</label>
                 <input type="password" value={newPKey} onChange={e => setNewPKey(e.target.value)} placeholder="sk-xxx" className={inputCls} />
               </div>
               <button onClick={handleAddProvider} disabled={!newPName || !newPUrl}
@@ -386,6 +409,195 @@ function AIConfig() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ========== 语音识别 (STT) 配置 ==========
+
+function SttConfig() {
+  const [providers, setProviders] = useState<{ name: string; label: string; baseUrl: string; apiKey: string; model: string; language: string }[]>([]);
+  const [activeProvider, setActiveProvider] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string; latencyMs?: number } | null>(null);
+  const [showKey, setShowKey] = useState(false);
+  const [hasExistingKey, setHasExistingKey] = useState(false);
+
+  // 表单
+  const [formName, setFormName] = useState('groq');
+  const [formKey, setFormKey] = useState('');
+  const [formUrl, setFormUrl] = useState('https://api.groq.com/openai/v1');
+  const [formModel, setFormModel] = useState('whisper-large-v3-turbo');
+
+  const PRESETS: Record<string, { label: string; url: string; model: string }> = {
+    groq: { label: 'Groq（免费推荐）', url: 'https://api.groq.com/openai/v1', model: 'whisper-large-v3-turbo' },
+    openai: { label: 'OpenAI Whisper', url: 'https://api.openai.com/v1', model: 'whisper-1' },
+    siliconflow: { label: '硅基流动（国内免费）', url: 'https://api.siliconflow.cn/v1', model: 'FunAudioLLM/SenseVoiceSmall' },
+    ollama: { label: 'Ollama（本地）', url: 'http://localhost:11434/v1', model: 'whisper' },
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await api.get<{ providers: typeof providers; active: string }>('/llm/speech/providers');
+        setProviders(data.providers || []);
+        setActiveProvider(data.active || '');
+        // 填充当前激活供应商的配置
+        const active = (data.providers || []).find(p => p.name === data.active);
+        if (active) fillForm(active);
+      } catch { /* 首次无配置 */ }
+      setLoading(false);
+    })();
+  }, []);
+
+  function fillForm(p: { name: string; baseUrl: string; apiKey: string; model: string; language: string }) {
+    setFormName(p.name);
+    setFormUrl(p.baseUrl);
+    if (p.apiKey === '***') {
+      setFormKey('');
+      setHasExistingKey(true);
+    } else {
+      setFormKey(p.apiKey);
+      setHasExistingKey(!!p.apiKey);
+    }
+    setFormModel(p.model);
+    setTestResult(null);
+  }
+
+  function handleProviderChange(name: string) {
+    setFormName(name);
+    // 已配置的供应商 → 填充已有配置
+    const existing = providers.find(p => p.name === name);
+    if (existing) { fillForm(existing); return; }
+    // 预置供应商 → 填充默认值
+    const preset = PRESETS[name];
+    if (preset) { setFormUrl(preset.url); setFormModel(preset.model); setFormKey(''); }
+    setHasExistingKey(false);
+    setTestResult(null);
+  }
+
+  async function handleSave() {
+    if (!formKey.trim() && !hasExistingKey) { toast.error('请填写 API Key'); return; }
+    setSaving(true);
+    try {
+      const label = PRESETS[formName]?.label || formName;
+      await api.post('/llm/speech/providers', { name: formName, label, baseUrl: formUrl, ...(formKey.trim() ? { apiKey: formKey } : {}), model: formModel });
+      // 自动设为默认
+      await api.put('/llm/speech/active', { provider: formName });
+      // 刷新列表
+      const data = await api.get<{ providers: typeof providers; active: string }>('/llm/speech/providers');
+      setProviders(data.providers || []);
+      setActiveProvider(data.active || formName);
+      setSaved(true);
+      setHasExistingKey(true);
+      toast.success('语音识别配置已保存');
+      setTimeout(() => setSaved(false), 1000);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '保存失败');
+    } finally { setSaving(false); }
+  }
+
+  async function handleTest() {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const res = await api.post<{ success: boolean; message: string; latencyMs: number }>('/llm/speech/test', { provider: formName });
+      setTestResult(res);
+      setTimeout(() => setTestResult(null), 3000);
+    } catch (err) {
+      setTestResult({ success: false, message: err instanceof Error ? err.message : '测试失败', latencyMs: -1 });
+      setTimeout(() => setTestResult(null), 3000);
+    } finally { setTesting(false); }
+  }
+
+  if (loading) return <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />加载中...</div>;
+
+  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none transition-all bg-background focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
+
+  return (
+    <div className="space-y-5">
+      {/* 说明 */}
+      <div className="rounded-lg border border-indigo-100 bg-indigo-50/30 px-4 py-3 text-xs leading-relaxed text-indigo-600/70">
+        <span className="font-medium text-indigo-700">语音识别</span> 通过 Whisper API 将录音转为文字。
+        推荐 <b>Groq</b>（免费）或 <b>硅基流动</b>（国内免费）。
+      </div>
+
+      {/* 当前使用的供应商 */}
+      {activeProvider && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          当前默认：<span className="font-medium text-foreground">{PRESETS[activeProvider]?.label || activeProvider}</span>
+        </div>
+      )}
+
+      {/* 供应商选择 */}
+      <div>
+        <label className="mb-1.5 block text-2xs-plus font-medium text-muted-foreground">服务提供商</label>
+        <div className="flex flex-wrap gap-1.5">
+          {Object.entries(PRESETS).map(([key, preset]) => (
+            <button key={key} onClick={() => handleProviderChange(key)}
+              className={cn('rounded-lg border px-3 py-1.5 text-xs font-medium transition-all',
+                formName === key ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : 'border-border text-foreground hover:bg-accent')}>
+              {preset.label}
+              {activeProvider === key && <span className="ml-1 text-2xs text-indigo-500">✓</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* API Key */}
+      <div>
+        <label className="mb-1.5 block text-2xs-plus font-medium text-muted-foreground">
+          API Key {hasExistingKey && !formKey && <span className="text-indigo-500">（已保存，留空则保留）</span>}
+        </label>
+        <div className="relative">
+          <input type={showKey ? 'text' : 'password'} value={formKey} onChange={e => { setFormKey(e.target.value); }}
+            placeholder={formName === 'ollama' ? '本地服务无需填写' : hasExistingKey ? '已配置，如需更新请重新填写' : 'gsk_xxx 或 sk-xxx'} className={inputCls} />
+          <button type="button" onClick={() => setShowKey(!showKey)}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground">
+            {showKey ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+        {formName === 'groq' && <p className="mt-1 text-2xs text-emerald-600">免费获取：console.groq.com → API Keys</p>}
+        {formName === 'siliconflow' && <p className="mt-1 text-2xs text-emerald-600">国内免费注册：siliconflow.cn → API Keys。模型可选 FunAudioLLM/SenseVoiceSmall 或 TeleAI/TeleSpeechASR</p>}
+      </div>
+
+      {/* 地址 + 模型 */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="mb-1.5 block text-2xs-plus font-medium text-muted-foreground">API 地址</label>
+          <input value={formUrl} onChange={e => setFormUrl(e.target.value)} className={inputCls} />
+        </div>
+        <div>
+          <label className="mb-1.5 block text-2xs-plus font-medium text-muted-foreground">模型</label>
+          <input value={formModel} onChange={e => setFormModel(e.target.value)} className={inputCls} />
+        </div>
+      </div>
+
+      {/* 测速结果 */}
+      {testResult && (
+        <div className={cn('flex items-center gap-2 rounded-lg border px-3 py-2 text-xs',
+          testResult.success ? 'border-emerald-200 bg-emerald-50/50 text-emerald-700' : 'border-red-200 bg-red-50/50 text-red-600')}>
+          {testResult.success ? <CheckCircle className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
+          {testResult.message}{testResult.latencyMs != null && testResult.latencyMs > 0 ? ` (${testResult.latencyMs}ms)` : ''}
+        </div>
+      )}
+
+      {/* 按钮 */}
+      <div className="flex gap-2">
+        <button onClick={handleTest} disabled={testing || (!formKey.trim() && !hasExistingKey && formName !== 'ollama')}
+          className="flex h-9 items-center gap-1.5 rounded-lg border border-border bg-background px-4 text-xs font-medium transition-all hover:bg-accent disabled:opacity-50">
+          {testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wifi className="h-3.5 w-3.5" />}
+          测速
+        </button>
+        <button onClick={handleSave} disabled={saving}
+          className="flex h-9 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 text-xs font-medium text-white transition-all hover:bg-indigo-700 disabled:opacity-50">
+          {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
+          保存配置
+        </button>
+      </div>
     </div>
   );
 }
@@ -482,25 +694,28 @@ function SearchConfig() {
         '/settings/proxy/test', { url: proxyUrl.trim() },
       );
       setProxyResult(res);
+      setTimeout(() => setProxyResult(null), 3000);
     } catch {
       setProxyResult({ success: false, message: '测试请求失败' });
+      setTimeout(() => setProxyResult(null), 3000);
     } finally { setProxyTesting(false); }
   }
 
-  // 测试外部访问（直连）
+  // 测试外部访问（直连，用国内可达的目标）
   async function handleExtTest() {
     setExtTesting(true);
     setExtResult(null);
     try {
-      const res = await fetch('https://httpbin.org/ip', { signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const data = await res.json() as { origin?: string };
-        setExtResult({ success: true, message: `直连成功，IP: ${data.origin || '未知'}` });
-      } else {
-        setExtResult({ success: false, message: `HTTP ${res.status}` });
-      }
+      // 用华为连通性检测（国内服务器，稳定且快）
+      const res = await fetch('https://connectivitycheck.platform.hicloud.com/generate_204', {
+        signal: AbortSignal.timeout(5000), mode: 'no-cors',
+      });
+      // no-cors 模式下 status 为 0，但不报错就说明网络通了
+      setExtResult({ success: true, message: '外网连接正常' });
+      setTimeout(() => setExtResult(null), 3000);
     } catch {
-      setExtResult({ success: false, message: '直连失败，可能需要代理才能访问外部网络' });
+      setExtResult({ success: false, message: '直连失败，需要代理才能访问外部网络' });
+      setTimeout(() => setExtResult(null), 3000);
     } finally { setExtTesting(false); }
   }
 
@@ -514,13 +729,15 @@ function SearchConfig() {
         '/settings/searxng/test', { url: searxngUrl.trim() },
       );
       setSearxngResult(res);
+      setTimeout(() => setSearxngResult(null), 3000);
     } catch {
       setSearxngResult({ success: false, message: '测试请求失败' });
+      setTimeout(() => setSearxngResult(null), 3000);
     } finally { setSearxngTesting(false); }
   }
 
-  const inputCls = 'w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
-  const selectCls = 'w-full rounded-lg border border-border px-3 py-1.5 text-xs text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 bg-card';
+  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
+  const selectCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60 bg-card';
 
   return (
     <div className="space-y-5">
@@ -528,11 +745,14 @@ function SearchConfig() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="mb-1 block text-xs font-medium text-foreground/70">搜索供应商</label>
-          <select value={provider} onChange={(e) => setProvider(e.target.value)} className={selectCls}>
-            <option value="none">不使用联网搜索</option>
-            <option value="tavily">Tavily (推荐)</option>
-            <option value="serpapi">SerpAPI (Google)</option>
-          </select>
+          <Select value={provider} onValueChange={(v) => setProvider(v || 'none')}>
+            <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择搜索供应商" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">不使用联网搜索</SelectItem>
+              <SelectItem value="tavily">Tavily (推荐)</SelectItem>
+              <SelectItem value="serpapi">SerpAPI (Google)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {provider !== 'none' && (
           <div>
@@ -558,56 +778,74 @@ function SearchConfig() {
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-foreground/70">搜索主题</label>
-                <select value={cfg.topic || 'general'} onChange={e => setCfg(p => ({ ...p, topic: e.target.value }))} className={selectCls}>
-                  <option value="general">通用</option>
-                  <option value="news">新闻</option>
-                  <option value="finance">财经</option>
-                </select>
+                <Select value={cfg.topic || 'general'} onValueChange={v => setCfg(p => ({ ...p, topic: v || 'general' }))}>
+                  <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择主题" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">通用</SelectItem>
+                    <SelectItem value="news">新闻</SelectItem>
+                    <SelectItem value="finance">财经</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-foreground/70">搜索深度</label>
-                <select value={cfg.depth || 'basic'} onChange={e => setCfg(p => ({ ...p, depth: e.target.value }))} className={selectCls}>
-                  <option value="basic">基础</option>
-                  <option value="advanced">高级</option>
-                </select>
+                <Select value={cfg.depth || 'basic'} onValueChange={v => setCfg(p => ({ ...p, depth: v || 'basic' }))}>
+                  <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择深度" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basic">基础</SelectItem>
+                    <SelectItem value="advanced">高级</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-foreground/70">最大结果数</label>
-                <select value={cfg.maxResults || 5} onChange={e => setCfg(p => ({ ...p, maxResults: +e.target.value }))} className={selectCls}>
-                  {[3, 5, 8, 10, 14, 20].map(n => <option key={n} value={n}>{n} 条</option>)}
-                </select>
+                <Select value={String(cfg.maxResults || 5)} onValueChange={v => setCfg(p => ({ ...p, maxResults: +(v || "5") || 5 }))}>
+                  <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择数量" /></SelectTrigger>
+                  <SelectContent>
+                    {[3, 5, 8, 10, 14, 20].map(n => <SelectItem key={n} value={String(n)}>{n} 条</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             <div className="mt-3 grid grid-cols-3 gap-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-foreground/70">时间范围</label>
-                <select value={cfg.timeRange || 'none'} onChange={e => setCfg(p => ({ ...p, timeRange: e.target.value }))} className={selectCls}>
-                  <option value="none">不限</option>
-                  <option value="day">24小时</option>
-                  <option value="week">一周</option>
-                  <option value="month">一月</option>
-                  <option value="year">一年</option>
-                </select>
+                <Select value={cfg.timeRange || 'none'} onValueChange={v => setCfg(p => ({ ...p, timeRange: v || 'none' }))}>
+                  <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择时间范围" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">不限</SelectItem>
+                    <SelectItem value="day">24小时</SelectItem>
+                    <SelectItem value="week">一周</SelectItem>
+                    <SelectItem value="month">一月</SelectItem>
+                    <SelectItem value="year">一年</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-foreground/70">国家/地区</label>
-                <select value={cfg.country || 'none'} onChange={e => setCfg(p => ({ ...p, country: e.target.value }))} className={selectCls}>
-                  <option value="none">不限</option>
-                  <option value="cn">中国</option>
-                  <option value="us">美国</option>
-                  <option value="jp">日本</option>
-                  <option value="sg">新加坡</option>
-                </select>
+                <Select value={cfg.country || 'none'} onValueChange={v => setCfg(p => ({ ...p, country: v || 'none' }))}>
+                  <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择地区" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">不限</SelectItem>
+                    <SelectItem value="cn">中国</SelectItem>
+                    <SelectItem value="us">美国</SelectItem>
+                    <SelectItem value="jp">日本</SelectItem>
+                    <SelectItem value="sg">新加坡</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-foreground/70">原始内容</label>
-                <select value={cfg.includeRaw || 'none'} onChange={e => setCfg(p => ({ ...p, includeRaw: e.target.value }))} className={selectCls}>
-                  <option value="none">不包含</option>
-                  <option value="text">纯文本</option>
-                  <option value="markdown">Markdown</option>
-                  <option value="html">HTML</option>
-                </select>
+                <Select value={cfg.includeRaw || 'none'} onValueChange={v => setCfg(p => ({ ...p, includeRaw: v || 'none' }))}>
+                  <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择格式" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">不包含</SelectItem>
+                    <SelectItem value="text">纯文本</SelectItem>
+                    <SelectItem value="markdown">Markdown</SelectItem>
+                    <SelectItem value="html">HTML</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -615,14 +853,14 @@ function SearchConfig() {
               <div>
                 <label className="mb-1 block text-xs font-medium text-foreground/70">包含域名（每行一个）</label>
                 <textarea rows={2} value={cfg.includeDomains || ''} onChange={e => setCfg(p => ({ ...p, includeDomains: e.target.value }))}
-                  placeholder="github.com&#10;zhihu.com" className={cn(inputCls, 'text-[11px]')} />
-                <p className="mt-0.5 text-[10px] text-muted-foreground">搜索结果仅限于这些网站</p>
+                  placeholder="github.com&#10;zhihu.com" className={cn(inputCls, 'text-2xs-plus')} />
+                <p className="mt-0.5 text-2xs text-muted-foreground">搜索结果仅限于这些网站</p>
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-foreground/70">排除域名（每行一个）</label>
                 <textarea rows={2} value={cfg.excludeDomains || ''} onChange={e => setCfg(p => ({ ...p, excludeDomains: e.target.value }))}
-                  placeholder="zhihu.com&#10;csdn.net" className={cn(inputCls, 'text-[11px]')} />
-                <p className="mt-0.5 text-[10px] text-muted-foreground">搜索结果中排除这些网站</p>
+                  placeholder="zhihu.com&#10;csdn.net" className={cn(inputCls, 'text-2xs-plus')} />
+                <p className="mt-0.5 text-2xs text-muted-foreground">搜索结果中排除这些网站</p>
               </div>
             </div>
           </div>
@@ -643,7 +881,7 @@ function SearchConfig() {
             {showPh ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           </button>
         </div>
-        <p className="mt-0.5 text-[10px] text-muted-foreground">
+        <p className="mt-0.5 text-2xs text-muted-foreground">
           在 producthunt.com → Settings → API 免费申请，每天 100 次请求
         </p>
       </div>
@@ -651,7 +889,7 @@ function SearchConfig() {
       {/* SearXNG 自托管搜索 */}
       <div className="border-t border-border pt-4">
         <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">SearXNG 自托管搜索</h3>
-        <p className="mb-3 text-[11px] text-muted-foreground">
+        <p className="mb-3 text-2xs-plus text-muted-foreground">
           聚合 Google / Bing / DuckDuckGo / 百度等多个引擎，质量最高。
           <a href="https://docs.searxng.org/" target="_blank" rel="noopener" className="ml-1 text-indigo-500 hover:underline">部署文档</a>
         </p>
@@ -677,7 +915,7 @@ function SearchConfig() {
         )}
 
         {!searxngUrl && (
-          <p className="mt-2 text-[10px] text-muted-foreground">
+          <p className="mt-2 text-2xs text-muted-foreground">
             快速部署: <code className="rounded bg-muted px-1 py-0.5">docker run -d --name searxng -p 8080:8080 searxng/searxng</code>
           </p>
         )}
@@ -686,7 +924,7 @@ function SearchConfig() {
       {/* 网络代理配置 */}
       <div className="border-t border-border pt-4">
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">网络代理（可选）</h3>
-        <p className="mb-3 text-[11px] text-muted-foreground">
+        <p className="mb-3 text-2xs-plus text-muted-foreground">
           配置代理后，DuckDuckGo 和 Google News 等被墙的搜索源会自动通过代理访问。
         </p>
 
@@ -828,8 +1066,8 @@ function PushConfig() {
     } finally { setTesting(''); }
   }
 
-  const inputCls = 'w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
-  const selectCls = 'w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 bg-card';
+  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
+  const selectCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60 bg-card';
 
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-indigo-500" /></div>;
 
@@ -837,7 +1075,7 @@ function PushConfig() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-[12px] text-muted-foreground">配置群机器人 Webhook，定时任务和 AI 可自动推送消息到群聊。每个推送目标需要设置一个昵称，AI 通过昵称识别发送目标。</p>
+          <p className="text-xs text-muted-foreground">配置群机器人 Webhook，定时任务和 AI 可自动推送消息到群聊。每个推送目标需要设置一个昵称，AI 通过昵称识别发送目标。</p>
         </div>
         <button onClick={() => setAddOpen(true)}
           className="flex h-9 items-center gap-1 rounded-lg bg-indigo-600 px-3.5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95">
@@ -848,7 +1086,7 @@ function PushConfig() {
       {webhooks.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border px-4 py-10 text-center">
           <p className="text-sm text-muted-foreground">暂未配置推送目标</p>
-          <p className="mt-1 text-[11px] text-muted-foreground">点击"添加推送"配置企业微信/飞书/钉钉群机器人</p>
+          <p className="mt-1 text-2xs-plus text-muted-foreground">点击"添加推送"配置企业微信/飞书/钉钉群机器人</p>
         </div>
       ) : (
         <div className="space-y-2.5">
@@ -861,14 +1099,14 @@ function PushConfig() {
                 {/* 昵称 + 渠道 */}
                 <div className="w-28 shrink-0">
                   <p className="text-sm font-semibold text-foreground">{wh.name}</p>
-                  <p className="text-[11px] text-muted-foreground">{ch?.label || wh.channel}</p>
+                  <p className="text-2xs-plus text-muted-foreground">{ch?.label || wh.channel}</p>
                 </div>
                 {/* URL */}
-                <p className="min-w-0 flex-1 truncate text-[12px] text-muted-foreground">{wh.url}</p>
+                <p className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{wh.url}</p>
                 {/* 操作按钮 */}
                 <div className="flex shrink-0 items-center gap-1.5">
                   <button onClick={() => handleTest(wh)} disabled={testing === wh.name}
-                    className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-2.5 text-[12px] font-medium text-foreground/60 transition-all hover:bg-accent disabled:opacity-50">
+                    className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-2.5 text-xs font-medium text-foreground/60 transition-all hover:bg-accent disabled:opacity-50">
                     {testing === wh.name ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : '测试'}
                   </button>
                   <button onClick={() => handleRemove(wh.name)}
@@ -911,9 +1149,12 @@ function PushConfig() {
               </div>
               <div>
                 <label className="mb-1 block text-xs text-muted-foreground">渠道</label>
-                <select value={addChannel} onChange={e => setAddChannel(e.target.value)} className={selectCls}>
-                  {CHANNEL_OPTIONS.map(ch => <option key={ch.value} value={ch.value}>{ch.icon} {ch.label}</option>)}
-                </select>
+                <Select value={addChannel} onValueChange={v => setAddChannel(v || 'wechat')}>
+                  <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择渠道" /></SelectTrigger>
+                  <SelectContent>
+                    {CHANNEL_OPTIONS.map(ch => <SelectItem key={ch.value} value={ch.value}>{ch.icon} {ch.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="mb-1 block text-xs text-muted-foreground">Webhook URL</label>
@@ -966,7 +1207,7 @@ function IntegrationConfig() {
     } catch {} finally { setSaving(false); }
   }
 
-  const inputCls = 'w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
+  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
 
   return (
     <div className="space-y-5">
@@ -974,7 +1215,7 @@ function IntegrationConfig() {
         <label className="mb-1.5 block text-sm font-medium text-foreground/80">n8n Webhook 地址</label>
         <input type="url" value={n8nWebhook} onChange={(e) => setN8nWebhook(e.target.value)}
           placeholder="https://n8n.example.com/webhook/xxx" className={inputCls} />
-        <p className="mt-1 text-[11px] text-muted-foreground">n8n 自动化工作流的回调地址</p>
+        <p className="mt-1 text-2xs-plus text-muted-foreground">n8n 自动化工作流的回调地址</p>
       </div>
 
       <div>
@@ -1033,7 +1274,7 @@ function SecuritySettings() {
                 <Smartphone className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-foreground/80">{s.device}</p>
-                  <p className="text-[11px] text-muted-foreground">IP: {s.ip} · {new Date(s.createdAt).toLocaleDateString('zh-CN')}</p>
+                  <p className="text-2xs-plus text-muted-foreground">IP: {s.ip} · {new Date(s.createdAt).toLocaleDateString('zh-CN')}</p>
                 </div>
                 <button onClick={() => handleKick(s.id)}
                   className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30">
@@ -1061,12 +1302,12 @@ function DataManagement() {
         <button className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card transition-all hover:border-indigo-300 hover:shadow-sm">
           <Download className="h-6 w-6 text-indigo-500" />
           <span className="text-sm font-medium text-foreground/80">导出项目数据</span>
-          <span className="text-[11px] text-muted-foreground">CSV 格式</span>
+          <span className="text-2xs-plus text-muted-foreground">CSV 格式</span>
         </button>
         <button className="flex h-24 flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card transition-all hover:border-indigo-300 hover:shadow-sm">
           <Download className="h-6 w-6 text-emerald-500" />
           <span className="text-sm font-medium text-foreground/80">导出客户数据</span>
-          <span className="text-[11px] text-muted-foreground">CSV 格式</span>
+          <span className="text-2xs-plus text-muted-foreground">CSV 格式</span>
         </button>
       </div>
 
@@ -1077,7 +1318,7 @@ function DataManagement() {
 
       <div className="rounded-lg border border-red-200 bg-red-50/30 px-4 py-4 dark:border-red-800/50 dark:bg-red-950/30">
         <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">危险操作</h3>
-        <p className="mt-1 text-[12px] text-red-400">账号注销将删除所有数据，此操作不可恢复</p>
+        <p className="mt-1 text-xs text-red-400">账号注销将删除所有数据，此操作不可恢复</p>
         <button className="mt-3 flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-red-700 active:scale-95">
           <Trash2 className="h-4 w-4" />注销账号
         </button>
@@ -1160,8 +1401,8 @@ function EmailConfig() {
     { value: '25', label: '25 (不加密)' },
   ];
 
-  const inputCls = 'w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200';
-  const selectCls = 'w-full rounded-lg border border-border px-3 py-2 text-sm text-foreground/80 outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200 bg-card';
+  const inputCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60';
+  const selectCls = 'w-full rounded-lg border border-border px-3.5 py-2.5 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60 bg-card';
 
   return (
     <div className="space-y-5">
@@ -1192,13 +1433,15 @@ function EmailConfig() {
         </div>
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground/70">端口</label>
-          <select value={port} onChange={(e) => {
-            const p = e.target.value;
-            setPort(p);
-            setSecure(p === '465');
-          }} className={selectCls}>
-            {portPresets.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
+          <Select value={port} onValueChange={(v) => {
+            setPort(v || '465');
+            setSecure((v || '465') === '465');
+          }}>
+            <SelectTrigger className={cn(selectCls, "w-full")}><SelectValue placeholder="选择端口" /></SelectTrigger>
+            <SelectContent>
+              {portPresets.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -1301,6 +1544,7 @@ export default function SettingsPage() {
 
   const tabs: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { key: 'ai', label: 'AI 配置', icon: Bot },
+    { key: 'stt', label: '语音识别', icon: Mic },
     { key: 'search', label: '搜索配置', icon: Search },
     { key: 'integration', label: '集成管理', icon: Link },
     { key: 'email', label: '邮件设置', icon: Mail },
@@ -1314,12 +1558,12 @@ export default function SettingsPage() {
       <h1 className="mb-5 text-lg font-bold text-foreground">系统设置</h1>
 
       {/* 分类标签 */}
-      <div className="mb-5 flex gap-1 rounded-lg border border-border bg-card p-1">
+      <div className="mb-5 flex gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1 scrollbar-none">
         {tabs.map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={cn('flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-all',
+            className={cn('flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-3.5 py-1.5 text-sm font-medium transition-all',
               activeTab === tab.key ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
-            <tab.icon className="h-4 w-4" />{tab.label}
+            <tab.icon className="h-3.5 w-3.5" />{tab.label}
           </button>
         ))}
       </div>
@@ -1327,6 +1571,7 @@ export default function SettingsPage() {
       {/* 内容区 */}
       <div className="rounded-xl border border-border/60 bg-card p-6 shadow-sm">
         {activeTab === 'ai' && <AIConfig />}
+        {activeTab === 'stt' && <SttConfig />}
         {activeTab === 'search' && <SearchConfig />}
         {activeTab === 'integration' && <IntegrationConfig />}
         {activeTab === 'email' && <EmailConfig />}

@@ -11,6 +11,8 @@ import { EmptyState } from './EmptyState';
 import { LoadingIndicator } from './LoadingIndicator';
 import { ChatInput } from './ChatInput';
 
+
+
 const STORAGE_KEY = 'ai-last-session-id';
 
 type TabKey = 'overview' | 'customers' | 'history' | 'schedule' | 'projects' | 'jobs';
@@ -142,6 +144,28 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
 
   const handleStop = useCallback(() => stopGeneration(), [stopGeneration]);
 
+  // ── 带文件发送 ──
+  const handleSendWithFiles = useCallback(async (files: File[]) => {
+    const content = input.trim() || `请分析这些文件`;
+    setInput('');
+
+    let sessionId = activeSessionId;
+    if (isTempSession || !sessionId) {
+      try {
+        const newSession = await createSession(`📎 ${files[0]?.name || '附件'}`);
+        sessionId = newSession.id;
+        setActiveSessionId(sessionId);
+        setIsTempSession(false);
+        localStorage.setItem(STORAGE_KEY, sessionId);
+        refreshSessions();
+      } catch { return; }
+    }
+
+    const { id: currentModel, provider: currentProvider } = modelRef.current;
+    await sendMessage(content, sessionId!, currentModel, currentProvider, files);
+    refreshSessions();
+  }, [input, isLoading, activeSessionId, isTempSession, sendMessage, createSession, refreshSessions]);
+
   const handleQuickAction = useCallback((text: string) => {
     handleSend(text);
   }, [handleSend]);
@@ -243,8 +267,8 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100">
               <Sparkles className="h-4 w-4 text-indigo-500" />
             </div>
-            <span className="text-[15px] font-bold tracking-tight text-foreground">智汇轻营</span>
-            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-500">小语</span>
+            <span className="text-base font-bold tracking-tight text-foreground">智汇轻营</span>
+            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-2xs font-medium text-indigo-500">小语</span>
           </div>
           <div className="flex items-center gap-1">
             <button onClick={handleNewSession} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none" title="新对话 (⌘N)">
@@ -295,6 +319,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
               value={input}
               onChange={setInput}
               onSend={() => handleSend()}
+              onSendWithFiles={handleSendWithFiles}
               onStop={handleStop}
               isLoading={isLoading}
               toastMessage={modelToast}

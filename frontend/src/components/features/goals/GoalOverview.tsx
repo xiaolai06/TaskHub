@@ -50,7 +50,7 @@ export function GoalOverview({ data, isLoading }: Props) {
       <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3">
         <Target className="h-4 w-4 text-indigo-400 shrink-0" />
         <span className="text-xs font-medium text-slate-600">{summary.total} 个进行中</span>
-        <div className="flex items-center gap-2 text-[11px]">
+        <div className="flex items-center gap-2 text-2xs-plus">
           <span className="flex items-center gap-1 text-slate-500">
             <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />正常 {summary.onTrack}
           </span>
@@ -78,15 +78,15 @@ export function GoalOverview({ data, isLoading }: Props) {
               <div className="flex items-center justify-between">
                 <span className="text-sm">{metricIcon[goal.metricType] || '🎯'}</span>
                 {goal.isAtRisk ? (
-                  <span className="flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-600">
+                  <span className="flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-2xs font-medium text-red-600">
                     <AlertTriangle className="h-2.5 w-2.5" />落后
                   </span>
                 ) : goal.actualProgress >= 100 ? (
-                  <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600">
+                  <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-2xs font-medium text-emerald-600">
                     <CheckCircle2 className="h-2.5 w-2.5" />达标
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-600">
+                  <span className="flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-2xs font-medium text-blue-600">
                     <TrendingUp className="h-2.5 w-2.5" />进行中
                   </span>
                 )}
@@ -96,7 +96,7 @@ export function GoalOverview({ data, isLoading }: Props) {
                 {formatProgress(goal)}
               </p>
               {goal.targetValue != null && (
-                <p className="text-[11px] text-slate-400">
+                <p className="text-2xs-plus text-slate-400">
                   目标 {goal.targetValue >= 10000 ? `¥${(goal.targetValue / 10000).toFixed(1)}万` : `${goal.targetValue}${goal.unit || ''}`}
                 </p>
               )}
@@ -104,7 +104,7 @@ export function GoalOverview({ data, isLoading }: Props) {
                 <div className={cn('h-full rounded-full progress-animate', barColor)}
                   style={{ width: `${Math.min(100, progress)}%` }} />
               </div>
-              <p className="mt-1 text-[10px] text-slate-400">
+              <p className="mt-1 text-2xs text-slate-400">
                 {goal.daysLeft > 0 ? `剩余 ${goal.daysLeft} 天` : '已到期'}
               </p>
             </div>

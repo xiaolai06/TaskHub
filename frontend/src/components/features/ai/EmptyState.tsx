@@ -34,21 +34,21 @@ export function EmptyState({ onPromptClick }: EmptyStateProps) {
             <Sparkles className="h-8 w-8 text-indigo-500" aria-hidden="true" />
           </div>
         )}
-        <span className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[8px] text-white ring-2 ring-card">
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-2xs text-white ring-2 ring-card">
           ✦
         </span>
       </div>
 
       {/* 问候语 */}
-      <p className="mt-5 text-[22px] font-bold tracking-tight text-foreground">
+      <p className="mt-5 text-xl font-bold tracking-tight text-foreground">
         {greeting}，{displayName}！
       </p>
 
       {/* 小语自我介绍 */}
-      <p className="mt-2 text-[15px] font-semibold text-indigo-600">
+      <p className="mt-2 text-base font-semibold text-indigo-600">
         我是小语 👋
       </p>
-      <p className="mt-2 max-w-sm text-center text-[13px] leading-relaxed text-muted-foreground">
+      <p className="mt-2 max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
         你的 AI 工作搭档，可以帮你查看项目进度、分析财务数据、管理任务、跟进客户。
       </p>
 
@@ -63,7 +63,7 @@ export function EmptyState({ onPromptClick }: EmptyStateProps) {
           <button
             key={item.text}
             onClick={() => onPromptClick(item.prompt)}
-            className="flex items-center gap-2.5 rounded-2xl border border-border/50 bg-card/80 px-4 py-3 text-left text-[13px] text-foreground/70 transition-all hover:border-indigo-200 hover:bg-indigo-50/30 hover:text-indigo-600 hover:shadow-sm"
+            className="flex items-center gap-2.5 rounded-2xl border border-border/50 bg-card/80 px-4 py-3 text-left text-sm text-foreground/70 transition-all hover:border-indigo-200 hover:bg-indigo-50/30 hover:text-indigo-600 hover:shadow-sm"
           >
             <span className="text-base">{item.icon}</span>
             <span className="font-medium">{item.text}</span>
@@ -71,7 +71,7 @@ export function EmptyState({ onPromptClick }: EmptyStateProps) {
         ))}
       </div>
 
-      <p className="mt-8 text-[11px] text-muted-foreground/40">
+      <p className="mt-8 text-2xs-plus text-muted-foreground/40">
         或者直接输入你的问题，小语随时待命 ✨
       </p>
     </div>

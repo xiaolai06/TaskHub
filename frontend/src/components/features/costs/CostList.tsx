@@ -35,12 +35,12 @@ export function CostList({
     <div className="divide-y rounded-lg border border-slate-200">
       {records.map((record) => (
         <div key={record.id} className="flex items-center gap-3 px-4 py-3 text-sm">
-          <span className="w-16 rounded-full bg-slate-100 px-2 py-0.5 text-center text-[11px] text-slate-600">
+          <span className="w-16 rounded-full bg-slate-100 px-2 py-0.5 text-center text-2xs-plus text-slate-600">
             {categoryLabel[record.category] || record.category}
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-slate-700">{record.description}</p>
-            <p className="text-[11px] text-slate-400">{new Date(record.date).toLocaleDateString('zh-CN')}</p>
+            <p className="text-2xs-plus text-slate-400">{new Date(record.date).toLocaleDateString('zh-CN')}</p>
           </div>
           <span className="font-mono text-slate-700">{formatYuan(record.amount)}</span>
           {onDelete && (

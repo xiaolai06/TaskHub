@@ -37,20 +37,20 @@ export function CronJobCard({
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-foreground">{job.name}</h3>
             <span className={cn(
-              'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+              'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium',
               ACTION_LABELS[job.action] ? 'bg-indigo-50 text-indigo-600' : 'bg-muted text-muted-foreground',
             )}>
               <Tag className="h-3 w-3" />
               {ACTION_LABELS[job.action] || job.action}
             </span>
             {job.isSystem && (
-              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-600">
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-2xs font-medium text-amber-600">
                 系统
               </span>
             )}
           </div>
 
-          <div className="mt-1.5 flex items-center gap-3 text-[12px] text-muted-foreground">
+          <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {job.cronExpr}
@@ -64,18 +64,18 @@ export function CronJobCard({
           </div>
 
           {config.description && (
-            <p className="mt-1.5 text-[12px] text-muted-foreground">{config.description}</p>
+            <p className="mt-1.5 text-xs text-muted-foreground">{config.description}</p>
           )}
 
           {job.aiModel && (
-            <p className="mt-1 flex items-center gap-1 text-[11px] text-indigo-500">
+            <p className="mt-1 flex items-center gap-1 text-2xs-plus text-indigo-500">
               <Tag className="h-3 w-3" />
               模型: {job.aiModel}
             </p>
           )}
 
           {job.lastRunAt && (
-            <p className="mt-1 text-[11px] text-muted-foreground">
+            <p className="mt-1 text-2xs-plus text-muted-foreground">
               上次执行: {new Date(job.lastRunAt).toLocaleString('zh-CN')}
               {job.lastStatus && (
                 <span className={cn('ml-2', job.lastStatus === 'success' ? 'text-emerald-500' : 'text-red-500')}>

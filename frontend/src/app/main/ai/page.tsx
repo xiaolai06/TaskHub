@@ -8,6 +8,7 @@ import {
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import { CronJobForm } from '@/components/features/cron-job/CronJobForm';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import {
   useCronJobs, useCreateCronJob, useUpdateCronJob,
   useDeleteCronJob, useInitSystemJobs, useRunJob, useTestNotify,
@@ -96,8 +97,8 @@ function NRow({ icon, label, sub, children }: { icon: React.ReactNode; label: st
     <div className="flex items-center justify-between px-3 py-2">
       <div className="flex items-center gap-2 min-w-0">
         <span className="text-sm shrink-0">{icon}</span>
-        <span className="text-[13px] text-foreground/80">{label}</span>
-        {sub && <span className="text-[11px] text-muted-foreground/50">{sub}</span>}
+        <span className="text-sm text-foreground/80">{label}</span>
+        {sub && <span className="text-2xs-plus text-muted-foreground/50">{sub}</span>}
       </div>
       {children}
     </div>
@@ -296,11 +297,11 @@ function JobRow({ job, models, webhooks, onToggle, onEdit, onDelete }: {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">{job.name}</span>
-            <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium', badge.cls)}>{badge.label}</span>
-            {job.isSystem && <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">系统</span>}
-            {job.aiModel && <span className="rounded-full bg-indigo-50 px-1.5 py-0.5 text-[10px] font-medium text-indigo-600"><Cpu className="mr-0.5 inline h-2.5 w-2.5" />{job.aiModel}</span>}
+            <span className={cn('rounded-full px-1.5 py-0.5 text-2xs font-medium', badge.cls)}>{badge.label}</span>
+            {job.isSystem && <span className="rounded-full bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground">系统</span>}
+            {job.aiModel && <span className="rounded-full bg-indigo-50 px-1.5 py-0.5 text-2xs font-medium text-indigo-600"><Cpu className="mr-0.5 inline h-2.5 w-2.5" />{job.aiModel}</span>}
           </div>
-          <p className="mt-0.5 flex items-center gap-2 text-[11px] text-muted-foreground">
+          <p className="mt-0.5 flex items-center gap-2 text-2xs-plus text-muted-foreground">
             <Clock className="h-3 w-3 shrink-0" />
             <code className="font-mono">{job.cronExpr}</code>
             <span className="text-muted-foreground/50">—</span>
@@ -310,8 +311,8 @@ function JobRow({ job, models, webhooks, onToggle, onEdit, onDelete }: {
           </p>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {!job.isSystem && onEdit && <button onClick={onEdit} className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-indigo-50 hover:text-indigo-500">编辑</button>}
-          {!job.isSystem && onDelete && <button onClick={onDelete} className="rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-red-50 hover:text-red-500">删除</button>}
+          {!job.isSystem && onEdit && <button onClick={onEdit} className="rounded-md px-2 py-1 text-2xs-plus text-muted-foreground hover:bg-indigo-50 hover:text-indigo-500">编辑</button>}
+          {!job.isSystem && onDelete && <button onClick={onDelete} className="rounded-md px-2 py-1 text-2xs-plus text-muted-foreground hover:bg-red-50 hover:text-red-500">删除</button>}
           <button onClick={() => setOpen(!open)} className="flex items-center gap-0.5 rounded-md p-1.5 text-muted-foreground hover:bg-accent">
             <Settings className="h-4 w-4" />
             <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
@@ -322,17 +323,17 @@ function JobRow({ job, models, webhooks, onToggle, onEdit, onDelete }: {
       {/* 展开面板 — 单列 */}
       {open && (
         <div className="border-t border-border/60 px-5 py-4 space-y-4">
-          {desc && <p className="rounded-lg bg-muted/40 px-3 py-2 text-[12px] text-muted-foreground">{desc}</p>}
+          {desc && <p className="rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">{desc}</p>}
 
           {/* 频率 */}
           <div>
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">执行频率</p>
+            <p className="mb-1.5 text-2xs-plus font-semibold uppercase tracking-wider text-muted-foreground">执行频率</p>
             <input value={cron} onChange={e => setCron(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 font-mono text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
             <div className="mt-2 flex flex-wrap gap-1.5">
               {CRON_PRESETS.map(p => (
                 <button key={p.expr} type="button" onClick={() => setCron(p.expr)}
-                  className={cn('rounded-md border px-2 py-1 text-[11px] transition-colors',
+                  className={cn('rounded-md border px-2 py-1 text-2xs-plus transition-colors',
                     cron === p.expr ? 'border-indigo-300 bg-indigo-50 text-indigo-600' : 'border-border text-muted-foreground hover:border-indigo-200')}>
                   {p.label}
                 </button>
@@ -342,7 +343,7 @@ function JobRow({ job, models, webhooks, onToggle, onEdit, onDelete }: {
 
           {/* 通知渠道 */}
           <div>
-            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">通知渠道</p>
+            <p className="mb-1.5 text-2xs-plus font-semibold uppercase tracking-wider text-muted-foreground">通知渠道</p>
             <div className="rounded-lg border border-border bg-background divide-y divide-border/50">
               <NRow icon="📧" label="邮件通知"><Toggle on={emailOn} onChange={setEmailOn} /></NRow>
               {webhooks.length > 0 ? webhooks.map(wh => (
@@ -351,7 +352,7 @@ function JobRow({ job, models, webhooks, onToggle, onEdit, onDelete }: {
                     className="h-4 w-4 rounded border-border text-indigo-600 focus:ring-indigo-500" />
                 </NRow>
               )) : (
-                <div className="px-3 py-2 text-[11px] text-muted-foreground/50">暂无推送目标，去系统设置添加</div>
+                <div className="px-3 py-2 text-2xs-plus text-muted-foreground/50">暂无推送目标，去系统设置添加</div>
               )}
             </div>
           </div>
@@ -359,12 +360,15 @@ function JobRow({ job, models, webhooks, onToggle, onEdit, onDelete }: {
           {/* AI 模型 */}
           {job.action === 'AI_ANALYSIS' && (
             <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">AI 模型</p>
-              <select value={model} onChange={e => setModel(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200">
-                <option value="">使用默认模型</option>
-                {models.map(m => <option key={m.id} value={m.id}>{m.name} ({m.providerLabel})</option>)}
-              </select>
+              <p className="mb-1.5 text-2xs-plus font-semibold uppercase tracking-wider text-muted-foreground">AI 模型</p>
+              <Select value={model} onValueChange={(v) => setModel(v || "")}>
+                <SelectTrigger className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60">
+                  <SelectValue placeholder="使用默认模型" />
+                </SelectTrigger>
+                <SelectContent>
+                  {models.map(m => <SelectItem key={m.id} value={m.id}>{m.name} ({m.providerLabel})</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
@@ -392,7 +396,7 @@ function JobRow({ job, models, webhooks, onToggle, onEdit, onDelete }: {
           {testRes && testRes.length > 0 && (
             <div className="rounded-lg border border-border divide-y divide-border/50">
               {testRes.map((r, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-2 text-[12px]">
+                <div key={i} className="flex items-center gap-2 px-3 py-2 text-xs">
                   {r.ok ? <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 shrink-0 text-red-500" />}
                   <span className="font-medium text-foreground/60">{r.channel}</span>
                   <span className={r.ok ? 'text-emerald-600' : 'text-red-500'}>{r.msg}</span>
@@ -402,7 +406,7 @@ function JobRow({ job, models, webhooks, onToggle, onEdit, onDelete }: {
           )}
 
           {job.lastRunAt && (
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-2xs-plus text-muted-foreground">
               上次执行: {new Date(job.lastRunAt).toLocaleString('zh-CN')}
               {job.lastStatus && (job.lastStatus === 'success' ? ' ✅' : ' ❌')}
             </p>

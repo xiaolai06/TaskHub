@@ -75,7 +75,7 @@ function ProjectTaskList({ projectId }: { projectId: string }) {
 
   if (!tasks || tasks.length === 0) {
     return (
-      <p className="px-1 py-2 text-[11px] text-muted-foreground">暂无任务</p>
+      <p className="px-1 py-2 text-2xs-plus text-muted-foreground">暂无任务</p>
     );
   }
 
@@ -90,14 +90,14 @@ function ProjectTaskList({ projectId }: { projectId: string }) {
           className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-background/60"
         >
           <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', taskStatusDot[task.status] || 'bg-slate-400')} />
-          <span className="min-w-0 flex-1 truncate text-[11px] text-foreground/70">{task.title}</span>
-          <span className="shrink-0 text-[9px] text-muted-foreground/50">
+          <span className="min-w-0 flex-1 truncate text-2xs-plus text-foreground/70">{task.title}</span>
+          <span className="shrink-0 text-2xs text-muted-foreground/50">
             {taskStatusLabel[task.status] || task.status}
           </span>
         </div>
       ))}
       {topTasks.length > 8 && (
-        <p className="px-2 py-1 text-[10px] text-muted-foreground/50">还有 {topTasks.length - 8} 个任务...</p>
+        <p className="px-2 py-1 text-2xs text-muted-foreground/50">还有 {topTasks.length - 8} 个任务...</p>
       )}
     </div>
   );
@@ -109,9 +109,9 @@ export function ProjectMiniList({ projects, defaultOpen = false, onQuickAction }
   if (projects.length === 0) {
     return (
       <div>
-        <p className="mb-2 px-1 text-[12px] font-bold text-foreground/80">📂 项目</p>
+        <p className="mb-2 px-1 text-xs font-bold text-foreground/80">📂 项目</p>
         <div className="py-4 text-center">
-          <p className="text-[11px] text-muted-foreground">暂无项目</p>
+          <p className="text-2xs-plus text-muted-foreground">暂无项目</p>
         </div>
       </div>
     );
@@ -119,8 +119,8 @@ export function ProjectMiniList({ projects, defaultOpen = false, onQuickAction }
 
   return (
     <div>
-      <p className="mb-1.5 px-1 text-[12px] font-bold text-foreground/80">
-        📂 项目 <span className="ml-1 text-[10px] font-normal text-muted-foreground/60">{projects.length}</span>
+      <p className="mb-1.5 px-1 text-xs font-bold text-foreground/80">
+        📂 项目 <span className="ml-1 text-2xs font-normal text-muted-foreground/60">{projects.length}</span>
       </p>
 
       <div className="space-y-1">
@@ -142,15 +142,15 @@ export function ProjectMiniList({ projects, defaultOpen = false, onQuickAction }
                 className="flex w-full items-center gap-2 px-2.5 py-2 text-left"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12px] font-medium text-foreground/80">{p.name}</p>
-                  <p className="mt-0.5 text-[10px] text-muted-foreground">
+                  <p className="truncate text-xs font-medium text-foreground/80">{p.name}</p>
+                  <p className="mt-0.5 text-2xs text-muted-foreground">
                     {p.budget ? `¥${(p.budget / 100).toLocaleString()}` : ''}
                     {p.budget && p.startDate ? ' · ' : ''}
                     {p.startDate ? p.startDate.slice(0, 10) : ''}
                   </p>
                 </div>
                 <span className={cn(
-                  'shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium',
+                  'shrink-0 rounded-full px-1.5 py-0.5 text-2xs font-medium',
                   statusCN[p.status] || 'bg-muted text-muted-foreground',
                 )}>
                   {statusLabel[p.status] || p.status}
@@ -166,7 +166,7 @@ export function ProjectMiniList({ projects, defaultOpen = false, onQuickAction }
                 <div className="border-t border-border/30 px-2.5 pb-2.5 pt-1.5">
                   {/* 任务列表 */}
                   <div className="mb-2">
-                    <p className="mb-1 flex items-center gap-1 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <p className="mb-1 flex items-center gap-1 px-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
                       <ListTodo className="h-3 w-3" />任务
                     </p>
                     <ProjectTaskList projectId={p.id} />
@@ -175,7 +175,7 @@ export function ProjectMiniList({ projects, defaultOpen = false, onQuickAction }
                   {/* 项目快捷提问 */}
                   {onQuickAction && (
                     <div>
-                      <p className="mb-1 flex items-center gap-1 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <p className="mb-1 flex items-center gap-1 px-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
                         <Sparkles className="h-3 w-3" />快捷提问
                       </p>
                       <div className="space-y-0.5">
@@ -183,9 +183,9 @@ export function ProjectMiniList({ projects, defaultOpen = false, onQuickAction }
                           <button
                             key={item.label}
                             onClick={(e) => { e.stopPropagation(); onQuickAction(item.prompt); }}
-                            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[11px] text-foreground/60 transition-colors hover:bg-background hover:text-indigo-600"
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-2xs-plus text-foreground/60 transition-colors hover:bg-background hover:text-indigo-600"
                           >
-                            <span className="text-[12px]">{item.icon}</span>
+                            <span className="text-xs">{item.icon}</span>
                             <span>{item.label}</span>
                             <ChevronRight className="ml-auto h-3 w-3 text-muted-foreground/30" />
                           </button>

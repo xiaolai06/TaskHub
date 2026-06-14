@@ -110,10 +110,10 @@ function CostPopup({ task, onSave, onClose }: {
         {/* 已有记录 */}
         {task.costNote && (
           <div className="mt-3 border-t border-border pt-2">
-            <p className="mb-1 text-[11px] font-medium text-muted-foreground">已有记录：</p>
+            <p className="mb-1 text-2xs-plus font-medium text-muted-foreground">已有记录：</p>
             <div className="space-y-0.5">
               {task.costNote.split('；').map((entry, i) => (
-                <p key={i} className="text-[11px] text-muted-foreground">· {entry}</p>
+                <p key={i} className="text-2xs-plus text-muted-foreground">· {entry}</p>
               ))}
             </div>
           </div>
@@ -183,18 +183,18 @@ export function SubtaskList({ tasks, projectId, onCreateSubtask, onUpdateTask, o
 
                 <span className={cn('h-2 w-2 shrink-0 rounded-full', priorityDot[task.priority] || 'bg-accent')} />
 
-                <span className={cn('flex-1 text-[13px] font-medium', task.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground/80')}>
+                <span className={cn('flex-1 text-sm font-medium', task.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground/80')}>
                   {task.title}
                 </span>
 
                 {totalCost > 0 && (
-                  <span className="flex shrink-0 items-center gap-0.5 text-[11px] text-amber-500" title={task.costNote || ''}>
+                  <span className="flex shrink-0 items-center gap-0.5 text-2xs-plus text-amber-500" title={task.costNote || ''}>
                     <DollarSign className="h-3 w-3" />{formatCost(totalCost)}
                   </span>
                 )}
 
-                {children.length > 0 && <span className="shrink-0 text-[11px] text-muted-foreground">{doneCount}/{children.length}</span>}
-                <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium', st.color)}>{st.label}</span>
+                {children.length > 0 && <span className="shrink-0 text-2xs-plus text-muted-foreground">{doneCount}/{children.length}</span>}
+                <span className={cn('shrink-0 rounded-full px-1.5 py-0.5 text-2xs font-medium', st.color)}>{st.label}</span>
 
                 <div className="flex shrink-0 items-center gap-0.5">
                   <button onClick={() => setCostTask(task)}
@@ -223,16 +223,16 @@ export function SubtaskList({ tasks, projectId, onCreateSubtask, onUpdateTask, o
                             child.status === 'DONE' ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-border hover:border-indigo-400')}>
                           {child.status === 'DONE' && <CheckSquare className="h-2.5 w-2.5" />}
                         </button>
-                        <span className={cn('flex-1 text-[12px]', child.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground/70')}>
+                        <span className={cn('flex-1 text-xs', child.status === 'DONE' ? 'text-muted-foreground line-through' : 'text-foreground/70')}>
                           {child.title}
                         </span>
                         {child.cost && child.cost > 0 && (
-                          <span className="text-[11px] text-amber-500" title={child.costNote || ''}>
+                          <span className="text-2xs-plus text-amber-500" title={child.costNote || ''}>
                             {formatCost(child.cost)}
                             {child.costNote && <span className="ml-1 text-muted-foreground">({child.costNote})</span>}
                           </span>
                         )}
-                        <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium', cst.color)}>{cst.label}</span>
+                        <span className={cn('rounded-full px-1.5 py-0.5 text-2xs font-medium', cst.color)}>{cst.label}</span>
                         <button onClick={() => onDeleteTask(child.id)}
                           className="shrink-0 rounded p-0.5 text-muted-foreground/50 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500 group-hover:opacity-100">
                           <Trash2 className="h-3 w-3" />
@@ -247,7 +247,7 @@ export function SubtaskList({ tasks, projectId, onCreateSubtask, onUpdateTask, o
         })}
 
         <button onClick={() => { setEditTask(null); setShowTaskForm(true); }}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[13px] text-muted-foreground transition-colors hover:bg-muted hover:text-indigo-600">
+          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-indigo-600">
           <Plus className="h-4 w-4" />添加任务
         </button>
       </div>

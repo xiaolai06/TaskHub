@@ -28,7 +28,7 @@ export function ToolCallBar({ tools }: ToolCallBarProps) {
 
   return (
     <div className={cn(
-      'rounded-lg border px-3 py-1.5 text-[11px] transition-colors',
+      'rounded-lg border px-3 py-1.5 text-2xs-plus transition-colors',
       isComplete ? 'border-emerald-200 bg-emerald-50/50' : 'border-amber-200 bg-amber-50/50',
     )}>
       <button
@@ -45,7 +45,7 @@ export function ToolCallBar({ tools }: ToolCallBarProps) {
             ? `已查询 ${doneCount} 个数据源`
             : `正在查询数据源 (${doneCount}/${tools.length})`}
         </span>
-        <span className="ml-auto text-[10px] opacity-50">{expanded ? '▲' : '▼'}</span>
+        <span className="ml-auto text-2xs opacity-50">{expanded ? '▲' : '▼'}</span>
       </button>
 
       {expanded && (
@@ -61,7 +61,7 @@ export function ToolCallBar({ tools }: ToolCallBarProps) {
               <span>{t.label}</span>
               {t.durationMs !== undefined && t.durationMs > 0 && (
                 <span className={cn(
-                  'ml-auto text-[10px] tabular-nums',
+                  'ml-auto text-2xs tabular-nums',
                   t.durationMs > 10000 ? 'text-amber-500' : 'text-emerald-500',
                 )}>
                   {t.durationMs >= 1000 ? `${(t.durationMs / 1000).toFixed(1)}s` : `${t.durationMs}ms`}

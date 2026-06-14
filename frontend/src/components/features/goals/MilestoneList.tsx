@@ -46,7 +46,7 @@ export function MilestoneList({
         </span>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-indigo-600 hover:bg-indigo-50"
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-2xs-plus font-medium text-indigo-600 hover:bg-indigo-50"
         >
           <Plus className="h-3 w-3" />
           添加
@@ -120,7 +120,7 @@ export function MilestoneList({
               >
                 {m.title}
               </span>
-              <span className="font-mono text-[11px] text-muted-foreground">
+              <span className="font-mono text-2xs-plus text-muted-foreground">
                 {formatValue(m.targetValue, unit)}
               </span>
               <button

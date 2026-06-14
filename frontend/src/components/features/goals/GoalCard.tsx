@@ -104,14 +104,14 @@ export function GoalCard({ goal, onEdit, onDelete, onCalculate }: GoalCardProps)
             <h3 className={cn('truncate text-sm font-semibold', isComplete ? 'text-slate-400 line-through' : 'text-slate-800')}>
               {goal.title}
             </h3>
-            <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium', status.cls)}>
+            <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-2xs font-medium', status.cls)}>
               {status.label}
             </span>
             {isAtRisk && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-500" />}
           </div>
 
           {/* 元信息 */}
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs-plus text-slate-400">
             <span>{metric.label} · {typeLabel[goal.type]}</span>
             <span className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />{fmtDate(goal.startDate)} → {fmtDate(goal.endDate)}
@@ -189,7 +189,7 @@ export function GoalCard({ goal, onEdit, onDelete, onCalculate }: GoalCardProps)
           <div className="mt-2 flex flex-wrap gap-1.5">
             {milestones.map(m => (
               <span key={m.id} className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium',
                 m.completed ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500',
               )}>
                 {m.completed ? <CheckCircle2 className="h-2.5 w-2.5" /> : <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />}
@@ -201,7 +201,7 @@ export function GoalCard({ goal, onEdit, onDelete, onCalculate }: GoalCardProps)
 
         {/* 风险提示 */}
         {isAtRisk && !isComplete && (
-          <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-[11px] text-red-600">
+          <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-red-50 px-3 py-1.5 text-2xs-plus text-red-600">
             <AlertTriangle className="h-3 w-3 shrink-0" />
             <span>进度落后预期，{remaining <= 3 ? '时间紧迫，请优先推进' : '建议检查并调整计划'}</span>
           </div>

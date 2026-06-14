@@ -83,9 +83,9 @@ function DroppableColumn({
       <div className={cn('mb-2 flex items-center justify-between rounded-lg px-3 py-2', column.accentBg)}>
         <div className="flex items-center gap-2">
           <div className={cn('h-2 w-2 rounded-full', column.color === 'text-foreground/70' ? 'bg-foreground/40' : column.color.replace('text-', 'bg-'))} />
-          <h3 className={cn('text-[13px] font-semibold', column.color)}>{column.label}</h3>
+          <h3 className={cn('text-sm font-semibold', column.color)}>{column.label}</h3>
         </div>
-        <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold', column.countBg)}>
+        <span className={cn('rounded-full px-2 py-0.5 text-2xs-plus font-bold', column.countBg)}>
           {tasks.length}
         </span>
       </div>
@@ -110,7 +110,7 @@ function DroppableColumn({
           />
         ))}
         {tasks.length === 0 && !isOver && (
-          <div className="flex h-20 items-center justify-center text-[12px] text-muted-foreground/50">
+          <div className="flex h-20 items-center justify-center text-xs text-muted-foreground/50">
             暂无任务
           </div>
         )}

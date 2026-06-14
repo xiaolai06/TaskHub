@@ -72,12 +72,12 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
           <div className="min-w-0">
             <h3 className="truncate text-sm font-semibold text-foreground">{project.name}</h3>
             <div className="mt-1 flex flex-wrap items-center gap-1.5">
-              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', status.color)}>
+              <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium', status.color)}>
                 {status.label}
               </span>
               {project.type ? (
                 <span className={cn(
-                  'rounded-full px-2 py-0.5 text-[10px] font-medium',
+                  'rounded-full px-2 py-0.5 text-2xs font-medium',
                   typeColor[project.type] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
                 )}>
                   {project.type}
@@ -103,7 +103,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
                   onEdit?.(project);
                   setShowMenu(false);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-[13px] text-foreground/70 transition-colors hover:bg-muted"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground/70 transition-colors hover:bg-muted"
               >
                 <Edit3 className="h-3.5 w-3.5" />
                 编辑
@@ -115,7 +115,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
                     onArchive?.(project.id);
                     setShowMenu(false);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-[13px] text-amber-600 transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-amber-600 transition-colors hover:bg-amber-50 dark:hover:bg-amber-950/30"
                 >
                   <Archive className="h-3.5 w-3.5" />
                   归档
@@ -127,7 +127,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
                   onDelete?.(project.id);
                   setShowMenu(false);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-[13px] text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 删除
@@ -138,22 +138,22 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
       </div>
 
       {project.description ? (
-        <p className="mt-3 line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
+        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
           {project.description}
         </p>
       ) : null}
 
       <div className="mt-4 grid grid-cols-3 gap-3">
         <div className="rounded-lg bg-muted/50 px-3 py-2.5">
-          <p className="text-[11px] text-muted-foreground">报价</p>
+          <p className="text-2xs-plus text-muted-foreground">报价</p>
           <p className="mt-1 text-sm font-semibold text-foreground">{formatMoney(quote)}</p>
         </div>
         <div className="rounded-lg bg-muted/50 px-3 py-2.5">
-          <p className="text-[11px] text-muted-foreground">成本</p>
+          <p className="text-2xs-plus text-muted-foreground">成本</p>
           <p className="mt-1 text-sm font-semibold text-foreground">{formatMoney(cost)}</p>
         </div>
         <div className="rounded-lg bg-muted/50 px-3 py-2.5">
-          <p className="text-[11px] text-muted-foreground">利润</p>
+          <p className="text-2xs-plus text-muted-foreground">利润</p>
           <p className={cn('mt-1 text-sm font-semibold', profit >= 0 ? 'text-emerald-600' : 'text-red-600')}>
             {formatMoney(profit)}
           </p>
@@ -162,7 +162,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
 
       {quote > 0 ? (
         <div className="mt-3">
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-2xs-plus">
             <span className="text-muted-foreground">成本占报价</span>
             <span className={cn('font-medium', costRisk ? 'text-red-500' : 'text-muted-foreground')}>
               {costRatio}%
@@ -180,7 +180,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
         </div>
       ) : null}
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border pt-3 text-[12px] text-muted-foreground">
+      <div className="mt-3 flex flex-wrap items-center gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
         {project.customer ? (
           <span className="flex items-center gap-1">
             <Building2 className="h-3.5 w-3.5" />

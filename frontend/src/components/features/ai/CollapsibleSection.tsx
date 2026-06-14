@@ -28,7 +28,7 @@ export function CollapsibleSection({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground/70"
+        className="flex w-full items-center gap-1.5 px-1 text-2xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground/70"
       >
         {open ? (
           <ChevronDown className="h-3 w-3 shrink-0" />
@@ -38,7 +38,7 @@ export function CollapsibleSection({
         {icon}
         <span className="flex-1 text-left">{title}</span>
         {badge !== undefined && (
-          <span className="text-[9px] font-normal text-muted-foreground/50">
+          <span className="text-2xs font-normal text-muted-foreground/50">
             {badge}
           </span>
         )}

@@ -92,7 +92,7 @@ function SessionItem({
                 if (e.key === 'Enter') handleConfirmEdit();
                 if (e.key === 'Escape') handleCancelEdit();
               }}
-              className="w-full rounded border border-indigo-300 bg-card px-1.5 py-0.5 text-[12px] text-foreground outline-none"
+              className="w-full rounded border border-indigo-300 bg-card px-1.5 py-0.5 text-xs text-foreground outline-none"
             />
             <button onClick={handleConfirmEdit} className="rounded p-0.5 text-emerald-500 hover:bg-emerald-50">
               <Check className="h-3 w-3" />
@@ -103,14 +103,14 @@ function SessionItem({
           </div>
         ) : (
           <p className={cn(
-            'truncate text-[12px] leading-tight',
+            'truncate text-xs leading-tight',
             isActive ? 'font-semibold text-indigo-700' : 'text-foreground/70',
           )}>
             {session.isPinned && <Pin className="mr-1 inline h-2.5 w-2.5 text-amber-400" />}
             {session.title}
           </p>
         )}
-        <p className="mt-0.5 text-[10px] text-muted-foreground">
+        <p className="mt-0.5 text-2xs text-muted-foreground">
           {session.messageCount} 条消息 · {relativeTime(session.lastMessage)}
         </p>
       </div>
@@ -149,14 +149,14 @@ function SessionItem({
       {/* 删除二次确认 */}
       {confirming && (
         <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <span className="text-[10px] font-medium text-red-500">删除？</span>
+          <span className="text-2xs font-medium text-red-500">删除？</span>
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="rounded px-1.5 py-0.5 text-[10px] font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"
+            className="rounded px-1.5 py-0.5 text-2xs font-medium text-white bg-red-500 hover:bg-red-600 transition-colors"
           >确认</button>
           <button
             onClick={(e) => { e.stopPropagation(); setConfirming(false); }}
-            className="rounded px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-muted transition-colors"
+            className="rounded px-1.5 py-0.5 text-2xs text-muted-foreground hover:bg-muted transition-colors"
           >取消</button>
         </div>
       )}
@@ -188,7 +188,7 @@ export function HistoryTab({
       {/* 新建按钮 */}
       <button
         onClick={onNewSession}
-        className="flex w-full items-center gap-2 rounded-lg border-2 border-dashed border-indigo-200 px-3 py-2.5 text-[13px] font-medium text-indigo-500 transition-all hover:border-indigo-300 hover:bg-indigo-50"
+        className="flex w-full items-center gap-2 rounded-lg border-2 border-dashed border-indigo-200 px-3 py-2.5 text-sm font-medium text-indigo-500 transition-all hover:border-indigo-300 hover:bg-indigo-50"
       >
         <Plus className="h-4 w-4" />
         新对话
@@ -203,7 +203,7 @@ export function HistoryTab({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="搜索会话..."
-            className="w-full rounded-lg border border-border py-1.5 pl-6 pr-2 text-[11px] text-foreground/70 outline-none placeholder:text-muted-foreground/50 focus:border-indigo-300"
+            className="w-full rounded-lg border border-border py-1.5 pl-6 pr-2 text-2xs-plus text-foreground/70 outline-none placeholder:text-muted-foreground/50 focus:border-indigo-300"
           />
         </div>
       )}
@@ -225,7 +225,7 @@ export function HistoryTab({
         {/* 置顶区 */}
         {filteredPinned.length > 0 && (
           <>
-            <p className="mt-2 px-2 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/40">置顶</p>
+            <p className="mt-2 px-2 text-2xs font-semibold uppercase tracking-wider text-muted-foreground/40">置顶</p>
             {filteredPinned.map((s) => (
               <SessionItem
                 key={s.id}
@@ -244,7 +244,7 @@ export function HistoryTab({
         {filteredNormal.length > 0 && (
           <>
             {(filteredPinned.length > 0 || filteredDefault) && (
-              <p className="mt-2 px-2 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/40">最近</p>
+              <p className="mt-2 px-2 text-2xs font-semibold uppercase tracking-wider text-muted-foreground/40">最近</p>
             )}
             {filteredNormal.map((s) => (
               <SessionItem
@@ -263,7 +263,7 @@ export function HistoryTab({
         {/* 空状态 */}
         {filteredPinned.length === 0 && filteredNormal.length === 0 && !filteredDefault && (
           <div className="py-6 text-center">
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-2xs-plus text-muted-foreground">
               {search.trim() ? '没有匹配的会话' : '暂无历史会话'}
             </p>
           </div>

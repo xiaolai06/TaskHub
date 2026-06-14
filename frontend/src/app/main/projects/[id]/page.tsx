@@ -313,12 +313,12 @@ export default function ProjectDetailPage({
                     >
                       {task.title}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-2xs text-muted-foreground">
                       {priorityLabels[task.priority] || task.priority}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">{task.estimatedHours}h</span>
+                    <span className="text-2xs text-muted-foreground">{task.estimatedHours}h</span>
                     {task.dueDate && (
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-2xs text-muted-foreground">
                         截止 {new Date(task.dueDate).toLocaleDateString('zh-CN')}
                       </span>
                     )}
@@ -379,7 +379,7 @@ function StatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${current.bg} ${current.color}`}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-medium ${current.bg} ${current.color}`}
     >
       {current.label}
     </span>

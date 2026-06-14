@@ -34,7 +34,7 @@ export function CostSummary({ summary, quote }: { summary?: CostSummaryData; quo
         <div className="mt-4 space-y-2">
           {summary.byCategory.map((item) => (
             <div key={item.category}>
-              <div className="mb-1 flex justify-between text-[11px] text-slate-500">
+              <div className="mb-1 flex justify-between text-2xs-plus text-slate-500">
                 <span>{categoryLabel[item.category] || item.category}</span>
                 <span>{formatYuan(item.amount)} · {item.percent}%</span>
               </div>
@@ -52,7 +52,7 @@ export function CostSummary({ summary, quote }: { summary?: CostSummaryData; quo
 function Metric({ label, value, tone }: { label: string; value: string; tone?: 'good' | 'bad' }) {
   return (
     <div className="rounded-lg bg-slate-50 p-3">
-      <p className="text-[11px] text-slate-400">{label}</p>
+      <p className="text-2xs-plus text-slate-400">{label}</p>
       <p className={tone === 'bad' ? 'mt-1 text-sm font-bold text-red-600' : tone === 'good' ? 'mt-1 text-sm font-bold text-emerald-600' : 'mt-1 text-sm font-bold text-slate-800'}>
         {value}
       </p>
