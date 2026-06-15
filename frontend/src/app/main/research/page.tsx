@@ -159,7 +159,7 @@ export default function ResearchPage() {
         </div>
         {/* 搜索栏（搜索tab显示） */}
         {activeTab === 'search' && (
-          <div className="flex flex-1 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+          <div className="flex flex-1 items-center gap-2 rounded-lg border border-border/80 bg-card px-3 py-2 transition-all hover:border-indigo-300">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input
               type="text"
@@ -167,7 +167,7 @@ export default function ResearchPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="搜索 GitHub · Hacker News · Dev.to..."
               onKeyDown={(e) => { if (e.key === 'Enter' && searchQuery.trim()) doSearch(); }}
-              className="flex-1 bg-transparent text-sm text-foreground/80 outline-none placeholder:text-muted-foreground/50"
+              className="flex-1 bg-transparent text-sm text-foreground/80 outline-none placeholder:text-muted-foreground/60"
             />
             <button
               onClick={() => { if (searchQuery.trim()) doSearch(); }}

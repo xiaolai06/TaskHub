@@ -78,7 +78,7 @@ function DatePicker({
         )}
       >
         <CalendarIcon className="size-4 shrink-0 text-muted-foreground/70" />
-        <span className="flex-1 truncate text-left font-mono text-[13px]">
+        <span className="flex-1 truncate text-left text-[13px]">
           {date ? toISO(date) : placeholder}
         </span>
         {date && hovered && (

@@ -168,10 +168,10 @@ function GreetingPreview({ onClose }: { onClose: () => void }) {
 
         {/* 筛选 */}
         <div className="flex gap-2 border-b px-5 py-3">
-          <div className="flex flex-1 items-center gap-2 rounded-lg border border-border bg-muted px-3 py-1.5">
+          <div className="flex flex-1 items-center gap-2 rounded-lg border border-border/80 bg-card px-3 py-1.5 transition-all hover:border-indigo-300">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input type="text" value={filter} onChange={(e) => setFilter(e.target.value)}
-              placeholder="搜索语录..." className="flex-1 bg-transparent text-sm text-foreground/70 outline-none" />
+              placeholder="搜索语录..." className="flex-1 bg-transparent text-sm text-foreground/70 outline-none placeholder:text-muted-foreground/60" />
             {filter && <button onClick={() => setFilter('')} className="text-muted-foreground hover:text-foreground"><X className="h-3.5 w-3.5" /></button>}
           </div>
           <Select value={hourFilter !== null ? String(hourFilter) : ''} onValueChange={(v) => setHourFilter(v ? Number(v) : null)}>

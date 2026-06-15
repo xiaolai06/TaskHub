@@ -34,7 +34,7 @@ const navItems: NavItem[] = [
   { href: '/main/projects', label: '项目管理', icon: FolderKanban, color: 'text-violet-600', darkColor: 'dark:text-violet-400', activeBg: 'bg-violet-50', darkActiveBg: 'dark:bg-violet-950/50', activeText: 'text-violet-700', darkActiveText: 'dark:text-violet-300' },
   { href: '/main/tasks', label: '任务中心', icon: CheckSquare, color: 'text-cyan-600', darkColor: 'dark:text-cyan-400', activeBg: 'bg-cyan-50', darkActiveBg: 'dark:bg-cyan-950/50', activeText: 'text-cyan-700', darkActiveText: 'dark:text-cyan-300' },
   { href: '/main/customers', label: '客户管理', icon: Users, color: 'text-emerald-600', darkColor: 'dark:text-emerald-400', activeBg: 'bg-emerald-50', darkActiveBg: 'dark:bg-emerald-950/50', activeText: 'text-emerald-700', darkActiveText: 'dark:text-emerald-300' },
-  { href: '/main/finance', label: '记账', icon: Wallet, color: 'text-teal-600', darkColor: 'dark:text-teal-400', activeBg: 'bg-teal-50', darkActiveBg: 'dark:bg-teal-950/50', activeText: 'text-teal-700', darkActiveText: 'dark:text-teal-300' },
+  { href: '/main/finance', label: '记账中心', icon: Wallet, color: 'text-teal-600', darkColor: 'dark:text-teal-400', activeBg: 'bg-teal-50', darkActiveBg: 'dark:bg-teal-950/50', activeText: 'text-teal-700', darkActiveText: 'dark:text-teal-300' },
   { href: '/main/goals', label: '目标管理', icon: Target, color: 'text-amber-600', darkColor: 'dark:text-amber-400', activeBg: 'bg-amber-50', darkActiveBg: 'dark:bg-amber-950/50', activeText: 'text-amber-700', darkActiveText: 'dark:text-amber-300' },
   { href: '/main/ai', label: 'AI 工作台', icon: Sparkles, color: 'text-indigo-600', darkColor: 'dark:text-indigo-400', activeBg: 'bg-indigo-50', darkActiveBg: 'dark:bg-indigo-950/50', activeText: 'text-indigo-700', darkActiveText: 'dark:text-indigo-300' },
   { href: '/main/reports', label: '经营看板', icon: BarChart3, color: 'text-teal-600', darkColor: 'dark:text-teal-400', activeBg: 'bg-teal-50', darkActiveBg: 'dark:bg-teal-950/50', activeText: 'text-teal-700', darkActiveText: 'dark:text-teal-300' },
@@ -79,7 +79,7 @@ export function Sidebar({ onOpenAi, collapsed, onToggleCollapse }: SidebarProps)
           collapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
         )}>
           <span className="text-base font-extrabold text-foreground whitespace-nowrap leading-none tracking-tight">智汇轻营</span>
-          <span className="mt-1.5 text-2xs-plus font-medium text-muted-foreground/70 whitespace-nowrap leading-none tracking-wide">TaskHub</span>
+          <span className="mt-0.5 text-2xs-plus font-medium text-muted-foreground/70 whitespace-nowrap leading-none tracking-wide">TaskHub</span>
         </div>
         {!collapsed && (
           <div className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
