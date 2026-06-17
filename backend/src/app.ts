@@ -10,11 +10,13 @@ const app = express();
 // ============ 中间件 ============
 app.use(cors({
   origin: (origin, callback) => {
-    // 开发环境允许所有 localhost
-    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    // 无 origin（同源请求/服务端调用）或开发环境 localhost → 放行
+    if (!origin || (config.nodeEnv !== 'production' && (origin.includes('localhost') || origin.includes('127.0.0.1')))) {
       callback(null, true);
     } else {
-      callback(null, config.frontendUrl);
+      // 生产环境只允许 FRONTEND_URL 配置的域名
+      const allowed = config.frontendUrl.split(',').some(u => origin === u.trim());
+      callback(null, allowed ? origin : false);
     }
   },
   credentials: true,

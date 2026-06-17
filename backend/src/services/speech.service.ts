@@ -161,33 +161,48 @@ async function getActiveSttConfig(userId: string): Promise<SttProviderInfo> {
   const first = providers.find(p => p.apiKey);
   if (first) return first;
 
-  // 降级：使用 AI 配置的 API Key + Groq 的地址
+  // 降级：仅当 AI 供应商就是 Groq 时，复用其 key（同供应商 key 通用）
+  // 其他供应商（DeepSeek/Ollama 等）的 key 不能用于 Groq STT
   const aiProviderRow = await prisma.setting.findFirst({
     where: { userId, category: 'AI', key: 'provider' },
   });
   const aiProvider = aiProviderRow?.value || 'deepseek';
 
-  let aiApiKey = '';
-  const aiProviderConfig = await prisma.setting.findFirst({
-    where: { userId, category: 'AI_PROVIDER', key: aiProvider },
-  });
-  if (aiProviderConfig) {
-    try {
-      const parsed = JSON.parse(aiProviderConfig.value);
-      if (parsed.apiKey) {
-        try { aiApiKey = decrypt(parsed.apiKey); } catch { aiApiKey = parsed.apiKey; }
-      }
-    } catch { /* ignore */ }
+  if (aiProvider === 'groq') {
+    let aiApiKey = '';
+    const aiProviderConfig = await prisma.setting.findFirst({
+      where: { userId, category: 'AI_PROVIDER', key: 'groq' },
+    });
+    if (aiProviderConfig) {
+      try {
+        const parsed = JSON.parse(aiProviderConfig.value);
+        if (parsed.apiKey) {
+          try { aiApiKey = decrypt(parsed.apiKey); } catch { aiApiKey = parsed.apiKey; }
+        }
+      } catch { /* ignore */ }
+    }
+    if (aiApiKey) {
+      const preset = STT_PRESETS[0]; // Groq
+      return {
+        name: preset.name,
+        label: preset.label,
+        baseUrl: preset.baseUrl,
+        model: preset.model,
+        language: 'zh',
+        apiKey: aiApiKey,
+      };
+    }
   }
 
-  const preset = STT_PRESETS[0]; // Groq
+  // 无可用 STT 配置 — 返回空 key，由调用方抛出明确错误
+  const preset = STT_PRESETS[0];
   return {
     name: preset.name,
     label: preset.label,
     baseUrl: preset.baseUrl,
     model: preset.model,
     language: 'zh',
-    apiKey: aiApiKey,
+    apiKey: '',
   };
 }
 
@@ -223,14 +238,36 @@ export async function transcribeAudio(
 
   const file = new File([new Uint8Array(audioBuffer)], `audio.${ext}`, { type: mimeType });
 
-  const start = Date.now();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const transcribeParams: any = { file, model: config.model, language: config.language || 'zh' };
-  const response = await client.audio.transcriptions.create(transcribeParams);
-  const durationMs = Date.now() - start;
+  try {
+    const start = Date.now();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const transcribeParams: any = { file, model: config.model, language: config.language || 'zh' };
+    const response = await client.audio.transcriptions.create(transcribeParams);
+    const durationMs = Date.now() - start;
 
-  const text = typeof response === 'string' ? response : (response as unknown as { text: string }).text;
-  return { text: text.trim(), durationMs };
+    const text = typeof response === 'string' ? response : (response as unknown as { text: string }).text;
+    return { text: text.trim(), durationMs };
+  } catch (err: unknown) {
+    // OpenAI SDK 错误：提取状态码和信息
+    const statusCode = (err as { status?: number })?.status || 0;
+    const apiMessage = (err as { message?: string })?.message || String(err);
+
+    if (statusCode === 401 || statusCode === 403) {
+      throw new AppError(
+        `语音识别供应商 "${config.label}" 认证失败（${statusCode}），请检查 API Key 是否正确。当前使用: ${config.baseUrl}`,
+        400,
+        'STT_AUTH_FAILED',
+      );
+    }
+    if (statusCode === 429) {
+      throw new AppError('语音识别请求过于频繁，请稍后再试', 429, 'STT_RATE_LIMIT');
+    }
+    throw new AppError(
+      `语音识别失败（${config.label}）: ${apiMessage.slice(0, 200)}`,
+      502,
+      'STT_API_ERROR',
+    );
+  }
 }
 
 // ═══ 测速 ═══
@@ -290,11 +327,22 @@ export async function testSttConnection(userId: string, providerName?: string): 
       model: config.model,
     };
   } catch (err) {
+    const statusCode = (err as { status?: number })?.status || 0;
     const msg = err instanceof Error ? err.message : String(err);
+
+    let hint = '';
+    if (statusCode === 401 || statusCode === 403) {
+      hint = ` → API Key 无效或与供应商 "${config.label}" 不匹配，请检查是否填写了正确的 Key（不同供应商的 Key 不通用）`;
+    } else if (statusCode === 429) {
+      hint = ' → 请求过于频繁，请稍后再试';
+    } else if (msg.includes('ENOTFOUND') || msg.includes('ECONNREFUSED')) {
+      hint = ` → 无法连接到 ${config.baseUrl}，请检查网络或 Base URL 是否正确`;
+    }
+
     return {
       success: false,
       latencyMs: -1,
-      message: `连接失败: ${msg.slice(0, 200)}`,
+      message: `连接失败（${statusCode || '网络错误'}）: ${msg.slice(0, 150)}${hint}`,
       provider: config.name,
       model: config.model,
     };
