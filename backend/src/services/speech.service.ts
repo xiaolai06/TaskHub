@@ -225,7 +225,7 @@ export async function transcribeAudio(
 
   const start = Date.now();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const transcribeParams: any = { file, model: config.model };
+  const transcribeParams: any = { file, model: config.model, language: config.language || 'zh' };
   const response = await client.audio.transcriptions.create(transcribeParams);
   const durationMs = Date.now() - start;
 
@@ -279,7 +279,7 @@ export async function testSttConnection(userId: string, providerName?: string): 
   try {
     const start = Date.now();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const testParams: any = { file, model: config.model };
+    const testParams: any = { file, model: config.model, language: config.language || 'zh' };
     await client.audio.transcriptions.create(testParams);
     const latencyMs = Date.now() - start;
     return {

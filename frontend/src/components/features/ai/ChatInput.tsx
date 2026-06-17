@@ -18,21 +18,32 @@ interface ChatInputProps {
 
 interface FileWithPreview { file: File; preview?: string }
 
+const DEFAULT_CHIPS: { icon: string; text: string }[] = [
+  { icon: '✨', text: '今日简报' },
+  { icon: '📊', text: '项目进度' },
+  { icon: '👤', text: '客户分析' },
+];
+
 function getTimeChips(): { icon: string; text: string }[] {
   const hour = new Date().getHours();
   if (hour >= 6 && hour < 10) return [{ icon: '🌅', text: '今日简报' }, { icon: '📋', text: '查看任务' }, { icon: '⚠️', text: '风险扫描' }];
   if (hour >= 10 && hour < 17) return [{ icon: '📝', text: '创建任务' }, { icon: '⏱', text: '记录工时' }, { icon: '📞', text: '客户跟进' }];
   if (hour >= 17 && hour < 22) return [{ icon: '🌙', text: '今日总结' }, { icon: '📅', text: '明日计划' }, { icon: '💰', text: '财务概览' }];
-  return [{ icon: '✨', text: '今日简报' }, { icon: '📊', text: '项目进度' }, { icon: '👤', text: '客户分析' }];
+  return DEFAULT_CHIPS;
 }
 
 export function ChatInput({ value, onChange, onSend, onSendWithFiles, onStop, isLoading, toastMessage }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const chips = getTimeChips();
+  const [chips, setChips] = useState(DEFAULT_CHIPS);
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [networkStatus, setNetworkStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [checkingNetwork, setCheckingNetwork] = useState(false);
+
+  // 客户端挂载后再根据实际时间更新 chips，避免 SSR hydration 不匹配
+  useEffect(() => {
+    setChips(getTimeChips());
+  }, []);
 
   // 网络状态自动消失（2 秒）
   useEffect(() => {

@@ -27,7 +27,7 @@ interface UseSpeechRecognitionReturn {
 
 // ═══ 工具函数 ═══
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 const PREFERRED_MIME = [
   'audio/webm;codecs=opus', 'audio/webm',

@@ -142,7 +142,7 @@ export function useAiChat() {
     provider?: string,
     showStopMsg = true,
   ): Promise<void> => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -189,7 +189,7 @@ export function useAiChat() {
     model?: string,
     provider?: string,
   ): Promise<void> => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
     const controller = new AbortController();
     abortRef.current = controller;
 
