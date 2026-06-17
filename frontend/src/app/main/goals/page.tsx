@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, AlertTriangle, Target, Plus, Sparkles } from 'lucide-react';
+import { Loader2, AlertTriangle, Target, Plus, Sparkles, LayoutList, Columns3, Search, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import {
   useGoalList,
-  useGoalOverview,
   useCreateGoal,
   useUpdateGoal,
   useDeleteGoal,
@@ -13,23 +13,29 @@ import {
   useProjectList,
   useCustomerList,
 } from '@/hooks/useGoals';
-import type { Goal } from '@/hooks/useGoals';
-import { GoalCard } from '@/components/features/goals/GoalCard';
+import type { Goal, MetricCategory } from '@/hooks/useGoals';
+import { GoalCard, METRIC_CATEGORIES } from '@/components/features/goals/GoalCard';
 import { GoalForm } from '@/components/features/goals/GoalForm';
 import { GoalFilter } from '@/components/features/goals/GoalFilter';
-import { GoalOverview } from '@/components/features/goals/GoalOverview';
+import { GoalBoard } from '@/components/features/goals/GoalBoard';
+
+const categoryMetricMap: Record<MetricCategory, string[]> = Object.fromEntries(
+  METRIC_CATEGORIES.map(c => [c.key, c.metrics])
+) as Record<MetricCategory, string[]>;
 
 export default function GoalsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editGoal, setEditGoal] = useState<Goal | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'board'>('list');
   const [statusFilter, setStatusFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [search, setSearch] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   const { data: goals, isLoading, error } = useGoalList({
     status: statusFilter || undefined,
-    type: typeFilter || undefined,
   });
-  const { data: overview } = useGoalOverview();
   const { data: projects } = useProjectList();
   const { data: customers } = useCustomerList();
 
@@ -38,7 +44,14 @@ export default function GoalsPage() {
   const deleteMutation = useDeleteGoal();
   const calcMutation = useCalculateProgress();
 
-  const goalList = goals?.data || [];
+  // 客户端筛选：搜索 + 日期 + 分类
+  const goalList = (goals?.data || []).filter((g) => {
+    if (search && !g.title.toLowerCase().includes(search.toLowerCase())) return false;
+    if (dateFrom && g.startDate < dateFrom) return false;
+    if (dateTo && g.startDate > dateTo) return false;
+    if (categoryFilter && !categoryMetricMap[categoryFilter as MetricCategory]?.includes(g.metricType)) return false;
+    return true;
+  });
 
   function handleCreate(input: unknown) {
     createMutation.mutate(input, {
@@ -72,23 +85,51 @@ export default function GoalsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 page-enter">
-      {/* 总览卡片 */}
-      <GoalOverview data={overview} isLoading={isLoading} />
+    <div className="mx-auto max-w-5xl space-y-3 page-enter">
+      {/* 第一行：视图切换 + 搜索 + 新建 */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-0.5 rounded-lg border border-border/80 bg-card p-0.5 h-8">
+          <button onClick={() => setViewMode('list')}
+            className={cn('flex items-center gap-1 rounded-md px-2.5 text-xs font-medium transition-all h-7',
+              viewMode === 'list' ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
+            <LayoutList className="h-3.5 w-3.5" />列表
+          </button>
+          <button onClick={() => setViewMode('board')}
+            className={cn('flex items-center gap-1 rounded-md px-2.5 text-xs font-medium transition-all h-7',
+              viewMode === 'board' ? 'bg-indigo-600 text-white shadow-sm' : 'text-muted-foreground hover:bg-accent')}>
+            <Columns3 className="h-3.5 w-3.5" />看板
+          </button>
+        </div>
 
-      {/* 新建 + 筛选 */}
-      <div className="flex items-center justify-between gap-3">
-        <GoalFilter
-          status={statusFilter} type={typeFilter}
-          onStatusChange={setStatusFilter} onTypeChange={setTypeFilter}
-        />
-        <button
-          onClick={() => { setEditGoal(null); setShowForm(true); }}
-          className="flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-indigo-700 active:scale-95"
-        >
-          <Plus className="h-4 w-4" />新建目标
-        </button>
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/60" />
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="搜索目标..."
+            className="h-8 w-full rounded-lg border border-border/80 bg-card pl-8 pr-7 text-xs text-foreground/80 outline-none placeholder:text-muted-foreground/60 transition-all hover:border-indigo-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
+          {search && (
+            <button onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground/40 hover:bg-muted hover:text-foreground">
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
+          <button onClick={() => { setEditGoal(null); setShowForm(true); }}
+            className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 active:scale-95">
+            <Plus className="h-3.5 w-3.5" />新建目标
+          </button>
+        </div>
       </div>
+
+      {/* 第二行：状态Tab + 分类 + 日期 */}
+      <GoalFilter
+        status={statusFilter} category={categoryFilter}
+        dateFrom={dateFrom} dateTo={dateTo}
+        onStatusChange={setStatusFilter}
+        onCategoryChange={setCategoryFilter}
+        onDateFromChange={setDateFrom} onDateToChange={setDateTo}
+      />
 
       {/* 加载态 */}
       {isLoading && (
@@ -107,17 +148,17 @@ export default function GoalsPage() {
 
       {/* 空状态 */}
       {!isLoading && !error && goalList.length === 0 && (
-        <div className="flex flex-col items-center rounded-xl border border-dashed border-slate-200 py-20">
+        <div className="flex flex-col items-center rounded-xl border border-dashed border-border py-20">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50">
             <Target className="h-7 w-7 text-indigo-400" />
           </div>
-          <p className="mt-4 text-sm font-medium text-slate-600">还没有经营目标</p>
-          <p className="mt-1 text-xs text-slate-400">
-            {statusFilter || typeFilter
+          <p className="mt-4 text-sm font-medium text-foreground/80">还没有经营目标</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {statusFilter || categoryFilter || search || dateFrom || dateTo
               ? '没有符合条件的目标，试试调整筛选'
               : '设定第一个目标，追踪你的经营进度'}
           </p>
-          {!statusFilter && !typeFilter && (
+          {!statusFilter && !categoryFilter && !search && !dateFrom && !dateTo && (
             <button onClick={() => { setEditGoal(null); setShowForm(true); }}
               className="mt-4 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
               <Sparkles className="h-4 w-4" />创建第一个目标
@@ -126,8 +167,8 @@ export default function GoalsPage() {
         </div>
       )}
 
-      {/* 目标列表 */}
-      {!isLoading && !error && goalList.length > 0 && (
+      {/* 目标列表 / 看板 */}
+      {!isLoading && !error && goalList.length > 0 && viewMode === 'list' && (
         <div className="space-y-3">
           {goalList.map(goal => (
             <GoalCard
@@ -139,6 +180,15 @@ export default function GoalsPage() {
             />
           ))}
         </div>
+      )}
+
+      {!isLoading && !error && viewMode === 'board' && (
+        <GoalBoard
+          goals={goalList}
+          onEdit={(g) => { setEditGoal(g); setShowForm(true); }}
+          onDelete={handleDelete}
+          onCalculate={handleCalculate}
+        />
       )}
 
       {/* 弹窗 */}

@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { Loader2, Info, Sparkles } from 'lucide-react';
 import type { Goal, MetricType, ProjectOption, CustomerOption } from '@/hooks/useGoals';
+import { metricConfig, METRIC_CATEGORIES } from '@/components/features/goals/GoalCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -12,15 +13,6 @@ const typeOptions = [
   { value: 'MONTHLY', label: '月度', autoRange: 'month' },
   { value: 'QUARTERLY', label: '季度', autoRange: 'quarter' },
   { value: 'YEARLY', label: '年度', autoRange: 'year' },
-];
-
-const metricOptions: { value: MetricType; label: string; unit: string; hint: string; icon: string }[] = [
-  { value: 'REVENUE', label: '收入目标', unit: '元', hint: '追踪已完成订单的回款', icon: '💰' },
-  { value: 'PROFIT', label: '利润目标', unit: '元', hint: '追踪订单实际利润（收入-成本）', icon: '📈' },
-  { value: 'NEW_ORDERS', label: '新订单目标', unit: '个', hint: '追踪新接订单数量', icon: '📦' },
-  { value: 'PROJECT_COUNT', label: '完成目标', unit: '个', hint: '追踪按时完成的项目数', icon: '✅' },
-  { value: 'DELIVERY_RATE', label: '交付率目标', unit: '%', hint: '追踪按时交付的比例', icon: '🎯' },
-  { value: 'MILESTONE', label: '里程碑', unit: '', hint: '按里程碑节点追踪进度', icon: '🏁' },
 ];
 
 function getDefaultDates(type: string) {
@@ -71,7 +63,8 @@ export function GoalForm({
   const [customerId, setCustomerId] = useState('');
 
   const isEdit = !!editGoal;
-  const currentMetric = metricOptions.find(m => m.value === metricType);
+  const currentMetric = metricConfig[metricType as MetricType];
+  const isCheckinType = metricType === 'HABIT_STREAK';
 
   useEffect(() => {
     if (!open) return;
@@ -94,10 +87,10 @@ export function GoalForm({
   useEffect(() => {
     if (isEdit || !currentMetric) return;
     setUnit(currentMetric.unit);
-    if (currentMetric.value === 'MILESTONE') setTargetValue('');
+    if (metricType === 'MILESTONE' || metricType === 'HABIT_STREAK') setTargetValue('');
     if (!title) {
       const periodLabel = typeOptions.find(t => t.value === type)?.label || '月度';
-      setTitle(`${periodLabel}${currentMetric.label.replace('目标', '')}`);
+      setTitle(`${periodLabel}${currentMetric.label}`);
     }
   }, [metricType]);
 
@@ -119,6 +112,7 @@ export function GoalForm({
       title: title.trim(),
       description: description.trim() || undefined,
       type, metricType,
+      progressMode: metricType === 'MILESTONE' ? 'MILESTONE' : metricType === 'HABIT_STREAK' ? 'CHECKIN' : undefined,
       targetValue: targetValue ? Number(targetValue) : null,
       unit: unit.trim() || null,
       startDate, endDate,
@@ -146,23 +140,33 @@ export function GoalForm({
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-5">
             <div className="space-y-4">
-              {/* 指标类型 */}
+              {/* 指标类型 - 分组展示 */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground/80">选择目标类型</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {metricOptions.map(m => (
-                    <button key={m.value} type="button" onClick={() => setMetricType(m.value)}
-                      className={`flex flex-col items-center gap-1 rounded-xl border-2 px-2 py-3 text-center transition-all ${
-                        metricType === m.value ? 'border-indigo-500 bg-indigo-50' : 'border-border hover:border-indigo-200'
-                      }`}>
-                      <span className="text-lg">{m.icon}</span>
-                      <span className={`text-xs font-medium ${metricType === m.value ? 'text-indigo-700' : 'text-muted-foreground'}`}>{m.label}</span>
-                    </button>
+                <div className="space-y-3">
+                  {METRIC_CATEGORIES.map(cat => (
+                    <div key={cat.key}>
+                      <p className="mb-1.5 text-2xs font-medium text-muted-foreground/70">{cat.label}</p>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {cat.metrics.map(m => {
+                          const cfg = metricConfig[m];
+                          return (
+                            <button key={m} type="button" onClick={() => setMetricType(m)}
+                              className={`flex flex-col items-center gap-0.5 rounded-lg border-2 px-2 py-2 text-center transition-all ${
+                                metricType === m ? 'border-indigo-500 bg-indigo-50' : 'border-border hover:border-indigo-200'
+                              }`}>
+                              <span className="text-base">{cfg.icon}</span>
+                              <span className={`text-2xs font-medium ${metricType === m ? 'text-indigo-700' : 'text-muted-foreground'}`}>{cfg.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   ))}
                 </div>
                 {currentMetric && (
                   <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Sparkles className="h-3 w-3" />{currentMetric.hint}
+                    <Sparkles className="h-3 w-3" />{currentMetric.desc}
                   </p>
                 )}
               </div>
@@ -184,18 +188,30 @@ export function GoalForm({
                     </SelectContent>
                   </Select>
                 </div>
-                {metricType !== 'MILESTONE' && (
+                {metricType !== 'MILESTONE' && metricType !== 'HABIT_STREAK' && (
                   <div>
                     <label className={labelCls}>目标值 <span className="text-xs font-normal text-muted-foreground">({unit})</span></label>
-                    <input type="number" value={targetValue} onChange={e => setTargetValue(e.target.value)} placeholder="0" min="0" className={inputCls} required />
+                    <input type="number" value={targetValue} onChange={e => setTargetValue(e.target.value)}
+                      placeholder={metricType === 'SATISFACTION' ? '0 ~ 100' : '0'}
+                      min="0" max={metricType === 'SATISFACTION' ? '100' : undefined}
+                      className={inputCls} required />
+                    {metricType === 'SATISFACTION' && (
+                      <p className="mt-1 text-2xs text-muted-foreground">0-100 分，建议目标 80 分以上</p>
+                    )}
+                  </div>
+                )}
+                {metricType === 'HABIT_STREAK' && (
+                  <div>
+                    <label className={labelCls}>期望打卡天数 <span className="text-xs font-normal text-muted-foreground">(天)</span></label>
+                    <input type="number" value={targetValue} onChange={e => setTargetValue(e.target.value)} placeholder="如 30" min="1" className={inputCls} />
                   </div>
                 )}
               </div>
 
-              {metricType === 'MILESTONE' && (
+              {(metricType === 'MILESTONE' || metricType === 'HABIT_STREAK') && (
                 <div className="flex items-start gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-600">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  <span>里程碑类型不需要设置目标值，进度将根据里程碑完成情况自动计算</span>
+                  <span>{metricType === 'HABIT_STREAK' ? '打卡类目标，每天签到即记录进度，可设置期望打卡天数' : '里程碑类型不需要设置目标值，进度将根据里程碑完成情况自动计算'}</span>
                 </div>
               )}
 

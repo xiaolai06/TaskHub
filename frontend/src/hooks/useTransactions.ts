@@ -1,3 +1,5 @@
+'use client';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
@@ -86,6 +88,7 @@ export function useUpdateTransaction() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY] });
       qc.invalidateQueries({ queryKey: ['finance'] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }

@@ -6,6 +6,7 @@ import type {
   UpdateProgressInput,
   CreateProgressLogInput,
   CreateMilestoneInput,
+  CreateCheckinInput,
 } from '../validators/goal.schema';
 
 // ======================== 类型定义 ========================
@@ -22,11 +23,12 @@ interface CalculateResult {
 
 function getUnitForMetric(metricType: string): string | null {
   const unitMap: Record<string, string | null> = {
-    REVENUE: '元',
-    PROFIT: '元',
-    NEW_ORDERS: '个',
-    PROJECT_COUNT: '个',
+    REVENUE: '元', PROFIT: '元',
+    NEW_ORDERS: '个', PROJECT_COUNT: '个',
     DELIVERY_RATE: '%',
+    TASK_COMPLETION: '个', TASK_RATE: '%', OVERDUE_REDUCTION: '%',
+    NEW_CUSTOMERS: '位', CUSTOMER_VISITS: '次', SATISFACTION: '分',
+    SKILL_HOURS: '小时', HABIT_STREAK: '天',
     MILESTONE: null,
   };
   return unitMap[metricType] || null;
@@ -34,6 +36,8 @@ function getUnitForMetric(metricType: string): string | null {
 
 function getProgressModeForMetric(metricType: string): string {
   if (metricType === 'MILESTONE') return 'MILESTONE';
+  if (metricType === 'HABIT_STREAK') return 'CHECKIN';
+  if (metricType === 'SATISFACTION' || metricType === 'SKILL_HOURS') return 'MANUAL';
   return 'AUTO';
 }
 
@@ -55,6 +59,7 @@ export async function findAll(userId: string, filters?: {
       orderBy: { updatedAt: 'desc' },
       include: {
         milestones: { orderBy: { sortOrder: 'asc' } },
+        checkins: { orderBy: { date: 'desc' }, take: 31 },
         project: { select: { id: true, name: true, status: true } },
         customer: { select: { id: true, name: true, company: true } },
       },
@@ -70,6 +75,7 @@ export async function findById(userId: string, id: string) {
     where: { id, userId },
     include: {
       milestones: { orderBy: { sortOrder: 'asc' } },
+      checkins: { orderBy: { date: 'desc' } },
       project: { select: { id: true, name: true, status: true } },
       customer: { select: { id: true, name: true, company: true } },
     },
@@ -100,6 +106,7 @@ export async function create(userId: string, data: CreateGoalInput) {
     },
     include: {
       milestones: true,
+      checkins: true,
       project: { select: { id: true, name: true, status: true } },
       customer: { select: { id: true, name: true, company: true } },
     },
@@ -135,6 +142,7 @@ export async function update(userId: string, id: string, data: UpdateGoalInput) 
     data: updateData,
     include: {
       milestones: true,
+      checkins: true,
       project: { select: { id: true, name: true, status: true } },
       customer: { select: { id: true, name: true, company: true } },
     },
@@ -157,6 +165,7 @@ export async function updateProgress(userId: string, id: string, data: UpdatePro
     data: { currentValue: data.currentValue, status: newStatus },
     include: {
       milestones: true,
+      checkins: true,
       project: { select: { id: true, name: true, status: true } },
       customer: { select: { id: true, name: true, company: true } },
     },
@@ -303,6 +312,95 @@ export async function calculateAutoProgress(userId: string, id: string): Promise
       source = '已完成项目交付';
       break;
     }
+    case 'TASK_COMPLETION': {
+      const where: Record<string, unknown> = {
+        project: { ownerId: userId },
+        status: 'DONE',
+        completedAt: dateFilter,
+      };
+      if (projectIds.length > 0) where.projectId = { in: projectIds };
+      sourceCount = await prisma.task.count({ where });
+      currentValue = sourceCount;
+      source = '已完成任务';
+      break;
+    }
+    case 'TASK_RATE': {
+      const baseWhere: Record<string, unknown> = {
+        project: { ownerId: userId },
+        createdAt: dateFilter,
+      };
+      if (projectIds.length > 0) baseWhere.projectId = { in: projectIds };
+      const total = await prisma.task.count({ where: baseWhere });
+      const done = await prisma.task.count({ where: { ...baseWhere, status: 'DONE' } });
+      currentValue = total > 0 ? Math.round((done / total) * 100) : 0;
+      sourceCount = total;
+      source = '任务完成率';
+      break;
+    }
+    case 'OVERDUE_REDUCTION': {
+      const overdueWhere: Record<string, unknown> = {
+        project: { ownerId: userId },
+        dueDate: { lt: new Date() },
+        status: { not: 'DONE' },
+      };
+      if (projectIds.length > 0) overdueWhere.projectId = { in: projectIds };
+      const totalAllWhere: Record<string, unknown> = {
+        project: { ownerId: userId },
+        createdAt: dateFilter,
+      };
+      if (projectIds.length > 0) totalAllWhere.projectId = { in: projectIds };
+      const totalAll = await prisma.task.count({ where: totalAllWhere });
+      const overdue = await prisma.task.count({ where: overdueWhere });
+      currentValue = totalAll > 0 ? Math.round((overdue / totalAll) * 100) : 0;
+      sourceCount = totalAll;
+      source = '逾期任务占比';
+      break;
+    }
+    case 'NEW_CUSTOMERS': {
+      const where: Record<string, unknown> = { userId, createdAt: dateFilter };
+      sourceCount = await prisma.customer.count({ where });
+      currentValue = sourceCount;
+      source = '新增客户';
+      break;
+    }
+    case 'CUSTOMER_VISITS': {
+      const where: Record<string, unknown> = { userId, createdAt: dateFilter };
+      if (goal.customerId) where.customerId = goal.customerId;
+      if (projectIds.length > 0) where.projectId = { in: projectIds };
+      sourceCount = await prisma.communication.count({ where });
+      currentValue = sourceCount;
+      source = '客户回访';
+      break;
+    }
+    case 'SKILL_HOURS': {
+      const where: Record<string, unknown> = { userId, date: dateFilter };
+      if (projectIds.length > 0) where.projectId = { in: projectIds };
+      const agg = await prisma.timeEntry.aggregate({ where, _sum: { hours: true } });
+      currentValue = Math.round((agg._sum.hours ?? 0) * 10) / 10;
+      sourceCount = await prisma.timeEntry.count({ where });
+      source = '学习/工时';
+      break;
+    }
+    case 'HABIT_STREAK': {
+      await calculateCheckinProgress(goal);
+      const refreshed = await prisma.goal.findUnique({
+        where: { id: goal.id },
+        include: {
+          milestones: true,
+          checkins: true,
+          project: { select: { id: true, name: true, status: true } },
+          customer: { select: { id: true, name: true, company: true } },
+        },
+      });
+      const checkinCount = await prisma.goalCheckin.count({ where: { goalId: goal.id } });
+      return {
+        goal: refreshed!,
+        calculated: refreshed!.currentValue,
+        source: '打卡记录',
+        sourceCount: checkinCount,
+        message: `已打卡 ${checkinCount} 天`,
+      };
+    }
     default: {
       return {
         goal,
@@ -315,18 +413,29 @@ export async function calculateAutoProgress(userId: string, id: string): Promise
   }
 
   // 判断状态
+  const INVERSE_METRICS = ['OVERDUE_REDUCTION']; // 越低越好的指标
+  const isInverse = INVERSE_METRICS.includes(goal.metricType);
   let newStatus: string;
-  if (goal.targetValue && currentValue >= goal.targetValue) {
+
+  if (goal.targetValue && (isInverse ? currentValue <= goal.targetValue : currentValue >= goal.targetValue)) {
     newStatus = 'COMPLETED';
   } else {
-    // 检查是否落后
     const now = new Date();
     const totalDays = Math.max(1, (goal.endDate.getTime() - goal.startDate.getTime()) / 86400000);
     const elapsedDays = Math.max(0, (now.getTime() - goal.startDate.getTime()) / 86400000);
     const expectedProgress = Math.min(100, (elapsedDays / totalDays) * 100);
-    const actualProgress = goal.targetValue ? Math.min(100, (currentValue / goal.targetValue) * 100) : 0;
 
-    newStatus = actualProgress < expectedProgress * 0.8 && actualProgress < 100 ? 'AT_RISK' : 'ACTIVE';
+    let atRisk = false;
+    if (isInverse && goal.targetValue) {
+      // 反向指标：当前值越高于目标值越危险
+      // 容忍度：当前值 > 目标值 * 1.2 才标红
+      atRisk = currentValue > goal.targetValue * 1.2 && currentValue > 0;
+    } else if (goal.targetValue) {
+      const actualProgress = Math.min(100, (currentValue / goal.targetValue) * 100);
+      atRisk = actualProgress < expectedProgress * 0.8 && actualProgress < 100;
+    }
+
+    newStatus = atRisk ? 'AT_RISK' : 'ACTIVE';
   }
 
   const updatedGoal = await prisma.goal.update({
@@ -334,6 +443,7 @@ export async function calculateAutoProgress(userId: string, id: string): Promise
     data: { currentValue, status: newStatus },
     include: {
       milestones: true,
+      checkins: true,
       project: { select: { id: true, name: true, status: true } },
       customer: { select: { id: true, name: true, company: true } },
     },
@@ -365,6 +475,7 @@ async function calculateMilestoneProgress(goal: Awaited<ReturnType<typeof findBy
     data: { currentValue, status: newStatus },
     include: {
       milestones: true,
+      checkins: true,
       project: { select: { id: true, name: true, status: true } },
       customer: { select: { id: true, name: true, company: true } },
     },
@@ -485,6 +596,7 @@ export async function addProgressLog(userId: string, goalId: string, data: Creat
     data: { currentValue: newValue, status: newStatus },
     include: {
       milestones: true,
+      checkins: true,
       project: { select: { id: true, name: true, status: true } },
       customer: { select: { id: true, name: true, company: true } },
     },
@@ -512,6 +624,7 @@ export async function deleteProgressLog(userId: string, goalId: string, logId: s
     data: { currentValue: newValue, status: newStatus },
     include: {
       milestones: true,
+      checkins: true,
       project: { select: { id: true, name: true, status: true } },
       customer: { select: { id: true, name: true, company: true } },
     },
@@ -576,4 +689,92 @@ export async function deleteMilestone(userId: string, goalId: string, milestoneI
   await calculateMilestoneProgress(goal);
 
   return { deleted: true };
+}
+
+// ======================== 打卡管理 ========================
+
+export async function checkin(userId: string, goalId: string, data: CreateCheckinInput) {
+  const goal = await findById(userId, goalId);
+
+  if (goal.progressMode !== 'CHECKIN') {
+    throw new AppError('该目标不支持打卡，请使用进度日记', 400, 'INVALID_OPERATION');
+  }
+
+  const existing = await prisma.goalCheckin.findFirst({ where: { goalId, date: data.date } });
+  if (existing) throw new AppError('该日期已打卡', 409, 'ALREADY_CHECKED_IN');
+
+  const record = await prisma.goalCheckin.create({
+    data: { goalId, userId, date: data.date, note: data.note },
+  });
+
+  // 更新进度
+  await calculateCheckinProgress(goal);
+  return record;
+}
+
+export async function uncheckin(userId: string, goalId: string, date: string) {
+  const goal = await findById(userId, goalId);
+
+  const record = await prisma.goalCheckin.findFirst({ where: { goalId, date } });
+  if (!record) throw new NotFoundError('打卡记录');
+
+  await prisma.goalCheckin.delete({ where: { id: record.id } });
+  await calculateCheckinProgress(goal);
+  return { deleted: true };
+}
+
+export async function getCheckins(userId: string, goalId: string, month?: string) {
+  await findById(userId, goalId);
+
+  const where: Record<string, unknown> = { goalId };
+  if (month) {
+    // month 格式 "2026-06"，筛选该月所有打卡
+    where.date = { startsWith: month };
+  }
+
+  return prisma.goalCheckin.findMany({
+    where,
+    orderBy: { date: 'desc' },
+  });
+}
+
+async function calculateCheckinProgress(goal: Awaited<ReturnType<typeof prisma.goal.findFirst>>) {
+  if (!goal) return;
+
+  const checkins = await prisma.goalCheckin.findMany({
+    where: { goalId: goal.id },
+    orderBy: { date: 'asc' },
+  });
+
+  const totalDays = checkins.length;
+
+  // 计算连续天数（从最近一天往前数）
+  let streak = 0;
+  if (checkins.length > 0) {
+    const today = new Date().toISOString().split('T')[0];
+    const dates = checkins.map(c => c.date).sort().reverse();
+    let expected = today;
+    for (const d of dates) {
+      if (d === expected || d === getYesterday(expected)) {
+        if (d === expected) { streak++; expected = getYesterday(d); }
+        else if (d === getYesterday(expected) && streak === 0) { streak++; expected = getYesterday(d); }
+        else break;
+      } else break;
+    }
+  }
+
+  // 进度 = 打卡天数（targetValue 为期望打卡天数）
+  const currentValue = totalDays;
+  const newStatus = goal.targetValue && totalDays >= goal.targetValue ? 'COMPLETED' : 'ACTIVE';
+
+  await prisma.goal.update({
+    where: { id: goal.id },
+    data: { currentValue, status: newStatus },
+  });
+}
+
+function getYesterday(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
 }

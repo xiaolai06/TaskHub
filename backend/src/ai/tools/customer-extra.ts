@@ -66,7 +66,14 @@ export const listCustomersTool: ToolDefinition = {
 
 export const deleteCustomerTool: ToolDefinition = {
   name: 'delete_customer',
-  description: '删除客户。有关联项目时不能删除。用户说"删除客户""删掉XX客户"时调用。写操作需确认。',
+  description: `删除客户。有关联项目时不能删除，需先解除项目关联。
+
+使用时机:
+- "删除客户"、"删掉XX客户"
+
+不使用时机:
+- 客户有进行中的项目 → 先解除项目关联
+- 只想更新客户信息 → 用 update_customer`,
   category: 'client',
   access: 'write',
   requiresConfirmation: true,
@@ -77,6 +84,7 @@ export const deleteCustomerTool: ToolDefinition = {
       customerId: { type: 'string', description: '客户 ID' },
       customerName: { type: 'string', description: '客户名，模糊匹配' },
     },
+    required: [],
   },
   handler: async (args, userId) => {
     let customerId = args.customerId as string | undefined;

@@ -5,6 +5,7 @@ import * as notificationService from '../services/notification.service';
 import * as dashboardService from '../services/dashboard.service';
 import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
+import { logExecution } from '../utils/job-logger';
 
 function reportBullets(text: string): string[] {
   const lines = text
@@ -89,11 +90,17 @@ cron.schedule('0 9 * * 1', async () => {
     });
 
     for (const user of users) {
+      const userStart = Date.now();
       try {
-        if (user.preferences && !user.preferences.systemNotify) continue;
+        if (user.preferences && !user.preferences.systemNotify) {
+          await logExecution({ jobSlug: 'weekly-report', userId: user.id, status: 'skipped' });
+          continue;
+        }
         await runWeeklyReport(user.id);
+        await logExecution({ jobSlug: 'weekly-report', userId: user.id, status: 'success', durationMs: Date.now() - userStart });
       } catch (e) {
         console.error(`[weekly-report] user ${user.id} failed:`, e);
+        await logExecution({ jobSlug: 'weekly-report', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
       }
     }
     console.log('[weekly-report] done');

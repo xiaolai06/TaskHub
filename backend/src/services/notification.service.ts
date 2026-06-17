@@ -5,7 +5,7 @@ import { decrypt } from './encryption.service';
 import { AppError, NotFoundError } from '../utils/errors';
 import type { NotificationFilters } from '../validators/notification.schema';
 
-export type NotificationType = 'TASK_DUE' | 'COST_ALERT' | 'PROJECT_CHANGE' | 'AI_INSIGHT' | 'AI_REPORT' | 'SYSTEM';
+export type NotificationType = 'TASK_DUE' | 'COST_ALERT' | 'PROJECT_CHANGE' | 'AI_INSIGHT' | 'AI_REPORT' | 'SYSTEM' | 'REMINDER';
 
 export interface N8nNotificationPayload {
   userId: string;
@@ -13,6 +13,33 @@ export interface N8nNotificationPayload {
   title: string;
   content: string;
   relatedId?: string;
+}
+
+export async function getUserEmail(userId: string): Promise<string | null> {
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+  return user?.email ?? null;
+}
+
+export async function checkSmtpConfigured(userId: string): Promise<{ configured: boolean; message?: string }> {
+  const smtp = await prisma.setting.findMany({
+    where: { category: 'EMAIL', OR: [{ userId: 'system' }, { userId }] },
+  });
+  const hasHost = smtp.some(s => ['host', 'smtp_host'].includes(s.key.toLowerCase()));
+  const hasPass = smtp.some(s => ['pass', 'password', 'smtp_pass'].includes(s.key.toLowerCase()));
+  if (!hasHost || !hasPass) {
+    return { configured: false, message: 'SMTP 未配置，请在系统设置→邮件中填写' };
+  }
+  return { configured: true };
+}
+
+export async function getWebhookSettings(): Promise<Array<{ name: string; channel: string; url: string }>> {
+  const setting = await prisma.setting.findFirst({ where: { category: 'NOTIFY', key: 'webhooks' } });
+  if (!setting?.value) return [];
+  try {
+    return JSON.parse(setting.value);
+  } catch {
+    return [];
+  }
 }
 
 export interface EmailSummaryItem {
@@ -107,6 +134,7 @@ export async function sendWebhook(channel: string, data: Record<string, unknown>
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {

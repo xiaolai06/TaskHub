@@ -5,13 +5,14 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import {
   Loader2, AlertTriangle, CheckSquare, Plus, LayoutList, Columns3,
-  CalendarDays, X, Search, FolderKanban,
+  CalendarDays, X, Search,
   RefreshCw, WandSparkles, Sparkles, CheckCircle2,
   Clock, ListChecks, CalendarX, Timer, BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { DatePicker } from '@/components/ui/date-picker';
 import { api } from '@/lib/api';
+import { CustomSelect } from '@/components/ui/custom-select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useTaskList, useCreateTask, useUpdateTask, useUpdateTaskStatus, useDeleteTask } from '@/hooks/useTasks';
 import { useProjectList } from '@/hooks/useProjects';
 import { useRefreshSchedule, useSchedule } from '@/hooks/useSchedule';
@@ -23,7 +24,6 @@ import { GanttChart } from '@/components/features/schedule/GanttChart';
 import { InsertionDialog } from '@/components/features/schedule/InsertionDialog';
 import { formatDate } from '@/lib/task-utils';
 import { toast } from 'sonner';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import type { Task, CreateTaskInput, TaskQueryParams } from '@/hooks/useTasks';
 
 // ======================== 常量 ========================
@@ -63,6 +63,7 @@ function TasksPageContent() {
   const [priorityFilter, setPriorityFilter] = useState(searchParams.get('priority') || '');
   const [dateFrom, setDateFrom] = useState(searchParams.get('dateFrom') || '');
   const [dateTo, setDateTo] = useState(searchParams.get('dateTo') || '');
+  const [datePreset, setDatePreset] = useState('');
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [projectFilter, setProjectFilter] = useState(searchParams.get('projectId') || '');
   const [showForm, setShowForm] = useState(false);
@@ -263,18 +264,11 @@ function TasksPageContent() {
         {/* 甘特：排期工具栏 */}
         {isGantt && (
           <div className="flex items-center gap-2">
-            <div className={cn(filterBoxCls, 'w-40 overflow-hidden')}>
-              <FolderKanban className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <Select value={projectFilter || 'all_projects_placeholder'} onValueChange={(v) => setProjectFilter(v === 'all_projects_placeholder' ? '' : (v ?? ''))}>
-                <SelectTrigger className={cn(filterBoxInner, 'w-full truncate pr-4')}>
-                  <SelectValue placeholder="全部项目" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all_projects_placeholder">全部项目</SelectItem>
-                  {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            <CustomSelect
+              value={projectFilter}
+              options={[{ value: '', label: '全部项目' }, ...projects.map(p => ({ value: p.id, label: p.name }))]}
+              onChange={setProjectFilter}
+            />
 
             <label className={cn(toolBtnCls, 'cursor-default')}>
               每日
@@ -317,18 +311,11 @@ function TasksPageContent() {
       {/* 第二行：筛选栏（看板/列表） / 排期关键指标（甘特） */}
       {!isGantt ? (
         <div className="flex flex-wrap items-center gap-2">
-          <div className={cn(filterBoxCls, 'w-36 overflow-hidden')}>
-            <FolderKanban className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <Select value={projectFilter || 'all_projects_placeholder'} onValueChange={(v) => setProjectFilter(v === 'all_projects_placeholder' ? '' : (v ?? ''))}>
-              <SelectTrigger className={cn(filterBoxInner, 'w-full truncate pr-4')}>
-                <SelectValue placeholder="全部项目" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all_projects_placeholder">全部项目</SelectItem>
-                {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
+          <CustomSelect
+            value={projectFilter}
+            options={[{ value: '', label: '全部项目' }, ...projects.map(p => ({ value: p.id, label: p.name }))]}
+            onChange={setProjectFilter}
+          />
 
           <div className="flex h-9 items-center gap-0.5 rounded-lg border border-border bg-card p-0.5">
             {statusFilters.map((f) => (
@@ -350,9 +337,45 @@ function TasksPageContent() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <DatePicker value={dateFrom} onChange={setDateFrom} />
-            <DatePicker value={dateTo} onChange={setDateTo} />
+          <div className="flex items-center gap-2">
+            <CustomSelect
+              value={datePreset}
+              options={[
+                { value: '', label: '全部日期' },
+                { value: 'today', label: '今日' },
+                { value: 'week', label: '本周' },
+                { value: 'month', label: '本月' },
+                { value: 'year', label: '本年' },
+                { value: 'custom', label: '自定义' },
+              ]}
+              onChange={(v) => {
+                if (v === 'custom') { setDatePreset('custom'); return; }
+                setDatePreset(v);
+                const now = new Date();
+                const toISO = (d: Date) => d.toISOString().slice(0, 10);
+                if (v === '') { setDateFrom(''); setDateTo(''); }
+                else if (v === 'today') { const t = toISO(now); setDateFrom(t); setDateTo(t); }
+                else if (v === 'week') {
+                  const day = now.getDay() || 7;
+                  const mon = new Date(now); mon.setDate(now.getDate() - day + 1);
+                  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+                  setDateFrom(toISO(mon)); setDateTo(toISO(sun));
+                } else if (v === 'month') {
+                  const first = new Date(now.getFullYear(), now.getMonth(), 1);
+                  const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                  setDateFrom(toISO(first)); setDateTo(toISO(last));
+                } else if (v === 'year') {
+                  setDateFrom(`${now.getFullYear()}-01-01`); setDateTo(`${now.getFullYear()}-12-31`);
+                }
+              }}
+              className="w-[110px]"
+            />
+            {datePreset === 'custom' && (
+              <>
+                <DatePicker value={dateFrom} onChange={setDateFrom} />
+                <DatePicker value={dateTo} onChange={setDateTo} />
+              </>
+            )}
           </div>
 
           {hasActiveFilters && (

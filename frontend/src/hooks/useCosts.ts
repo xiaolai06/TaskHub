@@ -1,4 +1,6 @@
-﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+﻿'use client';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
 const QUERY_KEY = 'costs';

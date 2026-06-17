@@ -20,7 +20,7 @@ export const createPaymentTool: ToolDefinition = {
       receivedAt: { type: 'string', description: '到账日期 YYYY-MM-DD，默认今天' },
       note: { type: 'string', description: '备注' },
     },
-    required: ['amount', 'projectId'],
+    required: ['amount'],
   },
   handler: async (args, userId) => {
     const amount = Math.round((args.amount as number) * 100);
@@ -36,30 +36,31 @@ export const createPaymentTool: ToolDefinition = {
     const project = await prisma.project.findFirst({ where: { id: projectId, ownerId: userId } });
     if (!project) return { error: '项目不存在或无权访问' };
 
-    const payment = await prisma.payment.create({
-      data: {
-        amount,
-        type: (args.type as string) || 'OTHER',
-        method: (args.method as string) || 'BANK_TRANSFER',
-        receivedAt: args.receivedAt ? new Date(args.receivedAt as string) : new Date(),
-        note: (args.note as string) || null,
-        projectId,
-      },
-    });
-
-    // 自动创建关联收入流水
-    await prisma.transaction.create({
-      data: {
-        userId,
-        amount,
-        direction: 'INCOME',
-        category: 'PROJECT_PAYMENT',
-        description: `项目收款 - ${project.name}`,
-        date: payment.receivedAt,
-        source: 'PAYMENT',
-        paymentId: payment.id,
-        projectId,
-      },
+    const { payment, transaction: txn } = await prisma.$transaction(async (tx) => {
+      const p = await tx.payment.create({
+        data: {
+          amount,
+          type: (args.type as string) || 'OTHER',
+          method: (args.method as string) || 'BANK_TRANSFER',
+          receivedAt: args.receivedAt ? new Date(args.receivedAt as string) : new Date(),
+          note: (args.note as string) || null,
+          projectId,
+        },
+      });
+      const t = await tx.transaction.create({
+        data: {
+          userId,
+          amount,
+          direction: 'INCOME',
+          category: 'PROJECT_PAYMENT',
+          description: `项目收款 - ${project.name}`,
+          date: p.receivedAt,
+          source: 'PAYMENT',
+          paymentId: p.id,
+          projectId,
+        },
+      });
+      return { payment: p, transaction: t };
     });
 
     const typeLabel: Record<string, string> = { DOWN_PAYMENT: '首付款', PROGRESS: '进度款', FINAL: '尾款', ADJUSTMENT: '调整款', OTHER: '其他' };

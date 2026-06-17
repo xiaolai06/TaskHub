@@ -5,6 +5,7 @@ import * as notificationService from '../services/notification.service';
 import * as dashboardService from '../services/dashboard.service';
 import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
+import { logExecution } from '../utils/job-logger';
 
 function briefBullets(text: string): string[] {
   const lines = text
@@ -82,8 +83,12 @@ cron.schedule('0 8 * * *', async () => {
     });
 
     for (const user of users) {
+      const userStart = Date.now();
       try {
-        if (user.preferences && !user.preferences.systemNotify) continue;
+        if (user.preferences && !user.preferences.systemNotify) {
+          await logExecution({ jobSlug: 'morning-briefing', userId: user.id, status: 'skipped' });
+          continue;
+        }
 
         const stats = await dashboardService.getStats(user.id);
         const today = new Date();
@@ -150,8 +155,10 @@ cron.schedule('0 8 * * *', async () => {
             },
           });
         }
+        await logExecution({ jobSlug: 'morning-briefing', userId: user.id, status: 'success', result: result?.slice(0, 200), durationMs: Date.now() - userStart });
       } catch (e) {
         console.error(`[morning-briefing] user ${user.id} failed:`, e);
+        await logExecution({ jobSlug: 'morning-briefing', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
       }
     }
     console.log(`[morning-briefing] done, users=${users.length}`);

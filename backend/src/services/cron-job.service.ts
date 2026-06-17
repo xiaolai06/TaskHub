@@ -1,5 +1,5 @@
 import { prisma } from '../server';
-import { NotFoundError } from '../utils/errors';
+import { AppError, NotFoundError } from '../utils/errors';
 import type { CreateCronJobInput, UpdateCronJobInput } from '../validators/cron-job.schema';
 
 function parseCfg(s: string): Record<string, unknown> {
@@ -9,6 +9,7 @@ function parseCfg(s: string): Record<string, unknown> {
 export const SYSTEM_JOBS = [
   {
     name: '晨间简报',
+    jobSlug: 'morning-briefing',
     cronExpr: '0 8 * * *',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
@@ -20,7 +21,8 @@ export const SYSTEM_JOBS = [
   },
   {
     name: '客户雷达',
-    cronExpr: '30 8 * * *',
+    jobSlug: 'client-radar',
+    cronExpr: '0 9 * * *',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
       type: 'client_radar',
@@ -31,7 +33,8 @@ export const SYSTEM_JOBS = [
   },
   {
     name: '成本预警',
-    cronExpr: '0 9 * * *',
+    jobSlug: 'cost-alert',
+    cronExpr: '0 10 * * *',
     action: 'NOTIFY',
     config: JSON.stringify({
       type: 'cost_alert',
@@ -41,7 +44,8 @@ export const SYSTEM_JOBS = [
   },
   {
     name: '订单利润简报',
-    cronExpr: '30 9 * * *',
+    jobSlug: 'finance-pulse',
+    cronExpr: '0 10 * * *',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
       type: 'finance_pulse',
@@ -52,6 +56,7 @@ export const SYSTEM_JOBS = [
   },
   {
     name: '自动周报',
+    jobSlug: 'weekly-report',
     cronExpr: '0 9 * * 1',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
@@ -63,6 +68,7 @@ export const SYSTEM_JOBS = [
   },
   {
     name: '业务体检',
+    jobSlug: 'health-check',
     cronExpr: '0 10 * * 0',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
@@ -74,6 +80,7 @@ export const SYSTEM_JOBS = [
   },
   {
     name: '记忆沉淀',
+    jobSlug: 'weekly-memory',
     cronExpr: '0 20 * * 0',
     action: 'AI_ANALYSIS',
     config: JSON.stringify({
@@ -81,6 +88,17 @@ export const SYSTEM_JOBS = [
       description: '从本周对话中提取偏好、决策和重要信息',
       aiPrompt: 'memory-extract.txt',
       dataQueries: ['weeklyConversations'],
+    }),
+  },
+  {
+    name: '到期提醒',
+    jobSlug: 'due-reminder',
+    cronExpr: '0 8 * * *',
+    action: 'NOTIFY',
+    config: JSON.stringify({
+      type: 'due_reminder',
+      description: '检查逾期任务并发送提醒通知',
+      dataQueries: ['overdueTasks', 'detectDelays'],
     }),
   },
 ] as const;
@@ -121,7 +139,7 @@ export async function update(userId: string, id: string, data: UpdateCronJobInpu
 
 export async function remove(userId: string, id: string) {
   const existing = await findById(userId, id);
-  if (existing.isSystem) throw new Error('系统预置任务不可删除');
+  if (existing.isSystem) throw new AppError('系统预置任务不可删除', 403, 'FORBIDDEN');
   return prisma.cronJob.delete({ where: { id } });
 }
 
@@ -166,6 +184,7 @@ export async function ensureSystemJobs(userId: string) {
           cronExpr: job.cronExpr,
           action: job.action,
           config: job.config,
+          jobSlug: job.jobSlug,
           isSystem: true,
           user: { connect: { id: userId } },
         },
@@ -193,11 +212,48 @@ export async function ensureSystemJobs(userId: string) {
       });
       await prisma.cronJob.update({
         where: { id: keep.id },
-        data: { cronExpr: job.cronExpr, config: merged },
+        data: { cronExpr: job.cronExpr, config: merged, jobSlug: job.jobSlug },
       });
       updated++;
     }
   }
 
   return { created, updated, removed };
+}
+
+export async function getExecutionHistory(jobSlug: string, userId: string, limit = 20) {
+  return prisma.jobExecutionLog.findMany({
+    where: { jobSlug, userId },
+    orderBy: { executedAt: 'desc' },
+    take: limit,
+    select: {
+      id: true,
+      status: true,
+      result: true,
+      error: true,
+      durationMs: true,
+      executedAt: true,
+    },
+  });
+}
+
+export async function getAllExecutionHistory(userId: string, limit = 50) {
+  const logs = await prisma.jobExecutionLog.findMany({
+    where: { userId },
+    orderBy: { executedAt: 'desc' },
+    take: limit,
+  });
+
+  // 批量查 jobSlug → jobName 映射
+  const slugs = [...new Set(logs.map(l => l.jobSlug))];
+  const jobs = await prisma.cronJob.findMany({
+    where: { userId, jobSlug: { in: slugs } },
+    select: { jobSlug: true, name: true },
+  });
+  const nameMap = new Map(jobs.map(j => [j.jobSlug, j.name]));
+
+  return logs.map(log => ({
+    ...log,
+    jobName: nameMap.get(log.jobSlug) || log.jobSlug,
+  }));
 }

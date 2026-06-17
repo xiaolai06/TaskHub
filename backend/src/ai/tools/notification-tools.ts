@@ -79,7 +79,14 @@ export const getUnreadCountTool: ToolDefinition = {
 
 export const markAsReadTool: ToolDefinition = {
   name: 'mark_as_read',
-  description: '标记通知已读。用户说"标记已读""全部已读"时调用。写操作需确认。',
+  description: `标记通知为已读状态。低风险操作，无需确认。
+
+使用时机:
+- "标记已读"、"全部已读"、"清除未读"
+
+不使用时机:
+- 查看通知内容 → 用 list_notifications
+- 查看未读数量 → 用 get_unread_count`,
   category: 'notification',
   access: 'write',
   requiresConfirmation: false,

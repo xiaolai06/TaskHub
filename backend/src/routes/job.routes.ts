@@ -5,6 +5,9 @@ import { runWeeklyReport } from '../jobs/weekly-report.job';
 import { runFinancePulse } from '../jobs/finance-pulse.job';
 import { runClientRadar } from '../jobs/client-radar.job';
 import { runHealthCheck } from '../jobs/health-check.job';
+import { runCostAlert } from '../jobs/cost-alert.job';
+import { runDueReminder } from '../jobs/due-reminder.job';
+import { runWeeklyMemory } from '../jobs/weekly-memory.job';
 
 const router = Router();
 
@@ -14,6 +17,9 @@ const JOB_MAP: Record<string, { fn: (userId: string) => Promise<string>; label: 
   'finance-pulse': { fn: runFinancePulse, label: '订单利润简报' },
   'client-radar': { fn: runClientRadar, label: '客户雷达' },
   'health-check': { fn: runHealthCheck, label: '业务体检' },
+  'cost-alert': { fn: runCostAlert, label: '成本预警' },
+  'due-reminder': { fn: runDueReminder, label: '到期提醒' },
+  'weekly-memory': { fn: runWeeklyMemory, label: '记忆沉淀' },
 };
 
 // POST /api/jobs/:name/run — 手动触发定时任务

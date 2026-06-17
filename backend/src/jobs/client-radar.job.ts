@@ -4,6 +4,7 @@ import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
+import { logExecution } from '../utils/job-logger';
 const PROMPT = loadPrompt('system-client-radar.txt', '你是客户关系管理助手，请分析客户动态。');
 
 export async function runClientRadar(userId: string): Promise<string> {
@@ -56,12 +57,23 @@ cron.schedule('0 9 * * *', async () => {
       select: { id: true, preferences: { select: { systemNotify: true } } },
     });
     for (const user of users) {
+      const userStart = Date.now();
       try {
-        if (user.preferences && !user.preferences.systemNotify) continue;
+        if (user.preferences && !user.preferences.systemNotify) {
+          await logExecution({ jobSlug: 'client-radar', userId: user.id, status: 'skipped' });
+          continue;
+        }
         const customerCount = await prisma.customer.count({ where: { userId: user.id } });
-        if (customerCount === 0) continue;
+        if (customerCount === 0) {
+          await logExecution({ jobSlug: 'client-radar', userId: user.id, status: 'skipped' });
+          continue;
+        }
         await runClientRadar(user.id);
-      } catch (e) { console.error(`[client-radar] 用户 ${user.id} 失败:`, e); }
+        await logExecution({ jobSlug: 'client-radar', userId: user.id, status: 'success', durationMs: Date.now() - userStart });
+      } catch (e) {
+        console.error(`[client-radar] 用户 ${user.id} 失败:`, e);
+        await logExecution({ jobSlug: 'client-radar', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
+      }
     }
     console.log(`[client-radar] 完成`);
   } catch (e) { console.error('[client-radar] 失败:', e); }

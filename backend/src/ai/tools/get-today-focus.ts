@@ -78,7 +78,7 @@ export const getProjectProgressTool: ToolDefinition = {
 
 返回数据: 项目名、状态、任务统计（done/inProgress/blocked/total）、完成百分比`,
   category: 'work', access: 'read', requiresConfirmation: false, preferredModel: 'fast',
-  parameters: { type: 'object', properties: { projectId: { type: 'string' }, projectName: { type: 'string', description: '项目名模糊匹配' } } },
+  parameters: { type: 'object', properties: { projectId: { type: 'string', description: '项目 ID' }, projectName: { type: 'string', description: '项目名模糊匹配' } }, required: [] },
   handler: async (args, userId) => {
     let project;
     if (args.projectId) project = await prisma.project.findFirst({ where: { id: args.projectId as string, ownerId: userId } });

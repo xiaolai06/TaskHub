@@ -7,6 +7,7 @@ import {
   createProgressLogSchema,
   createMilestoneSchema,
   updateMilestoneSchema,
+  createCheckinSchema,
 } from '../validators/goal.schema';
 import * as goalService from '../services/goal.service';
 import { success, error } from '../utils/response';
@@ -237,6 +238,42 @@ router.delete('/:id/milestones/:milestoneId', async (req: Request, res: Response
       error(res, err.code, err.message, err.statusCode);
       return;
     }
+    next(err);
+  }
+});
+
+// ======================== 打卡管理 ========================
+
+// GET /:id/checkins - 获取打卡记录
+router.get('/:id/checkins', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const month = typeof req.query.month === 'string' ? req.query.month : undefined;
+    const data = await goalService.getCheckins(req.userId!, String(req.params.id), month);
+    success(res, data);
+  } catch (err) {
+    if (err instanceof AppError) { error(res, err.code, err.message, err.statusCode); return; }
+    next(err);
+  }
+});
+
+// POST /:id/checkin - 打卡
+router.post('/:id/checkin', validate(createCheckinSchema), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await goalService.checkin(req.userId!, String(req.params.id), req.body);
+    success(res, data, '打卡成功', 201);
+  } catch (err) {
+    if (err instanceof AppError) { error(res, err.code, err.message, err.statusCode); return; }
+    next(err);
+  }
+});
+
+// DELETE /:id/checkin/:date - 取消打卡
+router.delete('/:id/checkin/:date', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await goalService.uncheckin(req.userId!, String(req.params.id), String(req.params.date));
+    success(res, data, '已取消打卡');
+  } catch (err) {
+    if (err instanceof AppError) { error(res, err.code, err.message, err.statusCode); return; }
     next(err);
   }
 });

@@ -59,15 +59,22 @@ import { getDashboardSummaryTool, getRecentActivityTool } from './dashboard-tool
 import { listNotificationsTool, getUnreadCountTool, markAsReadTool } from './notification-tools';
 // P3: 订阅
 import { listSubscriptionsTool, getSubscriptionCostTool, createSubscriptionTool, pauseSubscriptionTool, resumeSubscriptionTool } from './subscription-tools';
+// P4: 新增补全工具
+import { deleteProjectTool } from './delete-project';
+import { updateSubscriptionTool, deleteSubscriptionTool } from './update-subscription';
+import { startTimerTool, stopTimerTool } from './timer-tools';
+import { getFinancialTrendsTool, getComparisonTool } from './get-financial-trends';
 
 const allTools: ToolDefinition[] = [
-  // 💰 finance（原 5 + 新增 2 = 7）
+  // 💰 finance（原 5 + 新增 2 + 补全 2 = 9）
   getProfitAnalysisTool, getCashFlowTool, getCostBreakdownTool, getRevenueByClientTool, getProjectMarginRankingTool,
   createCostTool, deleteCostTool,
+  getFinancialTrendsTool, getComparisonTool,
   // 📋 work（原 10 + 新增 6 = 16）
   getTodayFocusTool, getOverdueTasksTool, getProjectProgressTool, getScheduleTool,
   createProjectTool, updateProjectTool, createTaskTool, updateTaskStatusTool, logTimeTool, deleteTaskTool,
   listProjectsTool, getProjectDetailTool, archiveProjectTool,
+  deleteProjectTool,
   listTasksTool, getTaskStatsTool,
   // 👥 client（原 6 + 新增 2 = 8）
   createCustomerTool, updateCustomerTool, getClientFollowUpTool, getClientInsightsTool, logCommunicationTool, getClientRankingTool,
@@ -79,16 +86,18 @@ const allTools: ToolDefinition[] = [
   listTransactionsTool, createTransactionTool, updateTransactionTool, deleteTransactionTool,
   // 💵 payment（新增 4）
   createPaymentTool, listPaymentsTool, getReceivablesTool, getAgingAnalysisTool,
-  // ⏱ work_timer（新增 5）
+  // ⏱ work_timer（新增 5 + 补全 2 = 7）
   getTodayEntriesTool, getActiveTimerTool, listTodosTool, addTodoTool, toggleTodoTool,
+  startTimerTool, stopTimerTool,
   // 📊 report（新增 4）
   getReportOverviewTool, getProjectRankingTool, getCostStructureTool, getTimeAnalysisTool,
   // 📈 dashboard（新增 2）
   getDashboardSummaryTool, getRecentActivityTool,
   // 🔔 notification（原 3 + 新增 3 = 6，其中 send_email/send_webhook/undo_last_tool 保留）
   listNotificationsTool, getUnreadCountTool, markAsReadTool,
-  // 📦 subscription（新增 5）
+  // 📦 subscription（新增 5 + 补全 2 = 7）
   listSubscriptionsTool, getSubscriptionCostTool, createSubscriptionTool, pauseSubscriptionTool, resumeSubscriptionTool,
+  updateSubscriptionTool, deleteSubscriptionTool,
   // 🔍 搜索（命名明确，AI 自主选择）
   searchSearXNGTool,
   searchTavilyTool, searchDuckDuckGoTool,

@@ -44,7 +44,8 @@ export async function getSummaryByProject(userId: string, projectId: string) {
       _count: true,
     }),
     prisma.costRecord.aggregate({ where: { projectId }, _sum: { amount: true } }),
-    prisma.task.aggregate({ where: { projectId, cost: { gt: 0 } }, _sum: { cost: true }, _count: true }),
+    // 排除已有关联 CostRecord 的任务，避免重复计算
+    prisma.task.aggregate({ where: { projectId, cost: { gt: 0 }, costRecords: { none: {} } }, _sum: { cost: true }, _count: true }),
   ]);
 
   const taskCost = taskCostAgg._sum.cost || 0;

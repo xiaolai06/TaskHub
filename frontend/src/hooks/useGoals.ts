@@ -1,3 +1,5 @@
+'use client';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
@@ -5,7 +7,21 @@ const QUERY_KEY = 'goals';
 
 // ======================== 类型定义 ========================
 
-export type MetricType = 'REVENUE' | 'PROFIT' | 'NEW_ORDERS' | 'PROJECT_COUNT' | 'DELIVERY_RATE' | 'MILESTONE';
+export type MetricType =
+  | 'REVENUE' | 'PROFIT' | 'NEW_ORDERS' | 'PROJECT_COUNT' | 'DELIVERY_RATE'
+  | 'TASK_COMPLETION' | 'TASK_RATE' | 'OVERDUE_REDUCTION'
+  | 'NEW_CUSTOMERS' | 'CUSTOMER_VISITS' | 'SATISFACTION'
+  | 'SKILL_HOURS' | 'HABIT_STREAK' | 'MILESTONE';
+
+export type MetricCategory = 'business' | 'tasks' | 'customers' | 'growth';
+
+export interface GoalCheckin {
+  id: string;
+  goalId: string;
+  date: string;
+  note?: string;
+  createdAt: string;
+}
 
 export interface Goal {
   id: string;
@@ -17,7 +33,7 @@ export interface Goal {
   targetValue?: number | null;
   currentValue: number;
   unit?: string | null;
-  progressMode: 'AUTO' | 'MANUAL' | 'MILESTONE';
+  progressMode: 'AUTO' | 'MANUAL' | 'MILESTONE' | 'CHECKIN';
   status: 'ACTIVE' | 'COMPLETED' | 'ABANDONED' | 'AT_RISK';
   startDate: string;
   endDate: string;
@@ -28,6 +44,7 @@ export interface Goal {
   createdAt: string;
   updatedAt: string;
   milestones: GoalMilestone[];
+  checkins?: GoalCheckin[];
   project?: { id: string; name: string; status: string } | null;
   customer?: { id: string; name: string; company?: string } | null;
 }
@@ -93,6 +110,7 @@ interface GoalParams {
   limit?: number;
   status?: string;
   type?: string;
+  category?: string;
 }
 
 // ======================== 目标 Hooks ========================
@@ -224,6 +242,33 @@ export function useDeleteMilestone(goalId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (milestoneId: string) => api.delete(`/goals/${goalId}/milestones/${milestoneId}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
+  });
+}
+
+// ======================== 打卡 Hooks ========================
+
+export function useCheckins(goalId: string, month?: string) {
+  return useQuery<GoalCheckin[]>({
+    queryKey: [QUERY_KEY, 'checkins', goalId, month],
+    queryFn: () => api.get<GoalCheckin[]>(`/goals/${goalId}/checkins` + (month ? `?month=${month}` : '')),
+    enabled: !!goalId,
+  });
+}
+
+export function useCheckin(goalId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { date: string; note?: string }) =>
+      api.post<GoalCheckin>(`/goals/${goalId}/checkin`, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
+  });
+}
+
+export function useUncheckin(goalId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (date: string) => api.delete(`/goals/${goalId}/checkin/${date}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: [QUERY_KEY] }); },
   });
 }

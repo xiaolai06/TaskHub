@@ -37,12 +37,14 @@ const TOOL_GROUPS: ToolGroup[] = [
       'get_profit_analysis', 'get_cash_flow', 'get_cost_breakdown',
       'get_revenue_by_client', 'get_project_margin_ranking',
       'create_cost', 'delete_cost',
+      'get_financial_trends', 'get_comparison',
     ],
     keywords: [
       '利润', '盈利', '盈亏', '赚', '亏', '收入', '支出', '成本', '费用',
       '报价', '预算', '现金流', '收支', '财务', '账', '金额', '价格',
       '赚钱', '不划算', '利润率', '毛利', '净利润', 'margin', 'profit',
       '客户价值', '哪个客户最赚钱', '排名', '记一笔成本', '成本录入',
+      '趋势', '走势', '变化', '环比', '对比', '上月',
     ],
   },
 
@@ -52,7 +54,7 @@ const TOOL_GROUPS: ToolGroup[] = [
     tools: [
       'get_today_focus', 'get_overdue_tasks', 'get_project_progress', 'get_schedule',
       'create_project', 'update_project', 'create_task', 'update_task_status',
-      'log_time', 'delete_task',
+      'log_time', 'delete_task', 'delete_project',
       'list_projects', 'get_project_detail', 'archive_project',
       'list_tasks', 'get_task_stats',
     ],
@@ -121,10 +123,11 @@ const TOOL_GROUPS: ToolGroup[] = [
   // ⏱ 工时/待办（新增）
   {
     name: 'work_timer',
-    tools: ['get_today_entries', 'get_active_timer', 'list_todos', 'add_todo', 'toggle_todo'],
+    tools: ['get_today_entries', 'get_active_timer', 'list_todos', 'add_todo', 'toggle_todo', 'start_timer', 'stop_timer'],
     keywords: [
       '工时', '计时', '待办', '今日任务', '打卡',
       '计时器', '工作时间', '记录工时',
+      '开始计时', '停止计时', '计时开始', '计时结束',
       '今日待办', '加个待办', '完成待办',
     ],
   },
@@ -163,7 +166,7 @@ const TOOL_GROUPS: ToolGroup[] = [
   // 📦 订阅（新增）
   {
     name: 'subscription',
-    tools: ['list_subscriptions', 'get_subscription_cost', 'create_subscription', 'pause_subscription', 'resume_subscription'],
+    tools: ['list_subscriptions', 'get_subscription_cost', 'create_subscription', 'pause_subscription', 'resume_subscription', 'update_subscription', 'delete_subscription'],
     keywords: [
       '订阅', '续费', '会员', 'SaaS',
       '订阅费', '暂停订阅', '恢复订阅',
@@ -175,7 +178,7 @@ const TOOL_GROUPS: ToolGroup[] = [
   {
     name: 'schedule',
     tools: [
-      'complexity_assessment', 'insertion_evaluation', 'rebalance_suggest',
+      'assess_complexity', 'evaluate_insertion', 'rebalance_suggest',
       'schedule_advice', 'historical_accuracy',
     ],
     keywords: [

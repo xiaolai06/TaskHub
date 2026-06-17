@@ -1,22 +1,15 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import {
   CalendarDays,
   ZoomIn,
   ZoomOut,
   AlertTriangle,
-  Clock,
   FolderOpen,
-  ChevronRight,
 } from 'lucide-react';
 import type { ScheduledTask, DailyWorkload } from '@/hooks/useSchedule';
 
@@ -417,48 +410,134 @@ const GanttHeader = function GanttHeader({
 // ======================== 周/月共用任务行 ========================
 
 const GanttRow = function GanttRow({
-  task, dates, startDate, cellW, labelW, rowH, taskDayMap, useFlex,
+  task, dates, startDate, cellW, labelW, rowH, taskDayMap, useFlex, isSelected, onSelect,
 }: {
   task: ScheduledTask; dates: Date[]; startDate: Date;
   cellW: number; labelW: number; rowH: number;
   taskDayMap: Map<string, Map<string, number>>; useFlex?: boolean;
+  isSelected?: boolean; onSelect?: (id: string) => void;
 }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const labelRef = useRef<HTMLDivElement>(null);
   const colors = getColors(task.priority);
   const dayMap = taskDayMap.get(task.id);
-  const totalInView = dayMap
-    ? Array.from(dayMap.entries())
-      .filter(([d]) => d >= fmtDate(startDate))
-      .reduce((s, [, h]) => s + h, 0)
-    : 0;
 
   const colStyle = useFlex ? undefined : { width: cellW };
   const cellCls = useFlex
     ? 'flex-1 border-r border-border flex items-center justify-center min-w-0'
     : 'flex-shrink-0 border-r border-border flex items-center justify-center';
 
+  const rect = labelRef.current?.getBoundingClientRect();
+
   return (
-    <div className="flex border-b border-border last:border-b-0 hover:bg-indigo-50/20 transition-colors" style={{ height: rowH }}>
+    <div
+      className={cn(
+        'flex border-b border-border last:border-b-0 transition-colors cursor-pointer',
+        isSelected ? 'bg-transparent' : 'hover:bg-indigo-50/20',
+      )}
+      style={{ height: rowH }}
+      onClick={() => onSelect?.(task.id)}
+    >
       {/* 左列：任务名称 */}
-      <Tooltip>
-        <TooltipTrigger>
-          <div className="flex-shrink-0 border-r border-border flex items-center gap-2.5 px-4 overflow-hidden cursor-default" style={{ width: labelW }}>
-            <div className={cn('w-1.5 h-6 rounded-full flex-shrink-0', getBarColor(task))} />
-            <div className="min-w-0 flex-1">
-              <span className={cn('text-sm truncate block leading-tight', task.isDelayed ? 'text-red-600 font-semibold' : 'text-foreground font-medium')}>
-                {task.title}
-              </span>
-              <span className="text-2xs text-muted-foreground/60 truncate block leading-tight mt-0.5">
-                {task.effectiveHours}h · {PRIORITY_LABEL[task.priority]}优先
-                {task.isOverdue && <span className="text-rose-600 ml-1 font-semibold">已逾期</span>}
-                {!task.isOverdue && task.isDelayed && <span className="text-red-500 ml-1">延期{task.delayDays}天</span>}
-              </span>
-            </div>
-            {task.isOverdue && <AlertTriangle className="h-3.5 w-3.5 text-rose-500 flex-shrink-0" />}
-            {!task.isOverdue && task.isDelayed && <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />}
+      <div
+        ref={labelRef}
+        className="flex-shrink-0 border-r border-border flex items-center gap-2.5 px-4 overflow-hidden"
+        style={{ width: labelW }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className={cn('w-1.5 h-6 rounded-full flex-shrink-0', getBarColor(task))} />
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <span className={cn('text-sm truncate block leading-tight', task.isDelayed ? 'text-red-600 font-semibold' : 'text-foreground font-medium')}>
+            {task.title}
+          </span>
+          <span className="text-2xs text-muted-foreground/60 truncate block leading-tight mt-0.5">
+            {task.effectiveHours}h · {PRIORITY_LABEL[task.priority]}优先
+            {task.isOverdue && <span className="text-rose-600 ml-1 font-semibold">已逾期</span>}
+            {!task.isOverdue && task.isDelayed && <span className="text-red-500 ml-1">延期{task.delayDays}天</span>}
+          </span>
+        </div>
+        {task.isOverdue && <AlertTriangle className="h-3.5 w-3.5 text-rose-500 flex-shrink-0" />}
+        {!task.isOverdue && task.isDelayed && <AlertTriangle className="h-3.5 w-3.5 text-red-500 flex-shrink-0" />}
+      </div>
+
+      {/* hover 悬浮卡片 — portal 到 body，fixed 定位在标签右侧 */}
+      {isHovered && rect && createPortal(
+        <div
+          className="fixed z-50 w-64 rounded-xl border border-border bg-card shadow-xl animate-in fade-in-0 zoom-in-95 duration-150"
+          style={{ left: rect.right + 8, top: rect.top }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* 标题 */}
+          <div className="px-4 pt-3 pb-2">
+            <p className="text-sm font-semibold text-foreground leading-snug truncate">{task.title}</p>
           </div>
-        </TooltipTrigger>
-        <TaskTooltipContent task={task} totalInView={totalInView} />
-      </Tooltip>
+
+          {/* 元信息 */}
+          <div className="flex items-center gap-1.5 px-4 pb-2.5 text-2xs text-muted-foreground">
+            <span className={cn(
+              'inline-block h-1.5 w-1.5 rounded-full',
+              task.status === 'IN_PROGRESS' ? 'bg-blue-500'
+                : task.status === 'DONE' ? 'bg-emerald-500'
+                  : task.status === 'BLOCKED' ? 'bg-red-400'
+                    : 'bg-slate-400',
+            )} />
+            <span>
+              {task.status === 'TODO' ? '待办' : task.status === 'IN_PROGRESS' ? '进行中' : task.status === 'BLOCKED' ? '阻塞' : task.status === 'DONE' ? '已完成' : task.status}
+            </span>
+            <span className="text-border/60">·</span>
+            <span>{PRIORITY_LABEL[task.priority]}</span>
+            {task.projectName && (
+              <>
+                <span className="text-border/60">·</span>
+                <span className="text-indigo-500 truncate">{task.projectName}</span>
+              </>
+            )}
+          </div>
+
+          <div className="border-t border-border/40" />
+
+          {/* 字段行 */}
+          <div className="flex flex-col divide-y divide-border/30">
+            <div className="flex items-center justify-between px-4 py-2 text-xs">
+              <span className="text-muted-foreground">排期</span>
+              <span className="font-medium text-foreground tabular-nums">{task.scheduledStart} → {task.scheduledEnd}</span>
+            </div>
+            <div className="flex items-center justify-between px-4 py-2 text-xs">
+              <span className="text-muted-foreground">工时</span>
+              <span className="font-medium text-foreground">{task.effectiveHours}h{task.actualHours ? `（实际 ${task.actualHours}h）` : ''}</span>
+            </div>
+            {task.originalDueDate && (
+              <div className="flex items-center justify-between px-4 py-2 text-xs">
+                <span className="text-muted-foreground">原始截止</span>
+                <span className="font-medium text-foreground tabular-nums">{task.originalDueDate}</span>
+              </div>
+            )}
+            {task.originalDueDate && task.originalDueDate !== task.scheduledEnd && (
+              <div className="flex items-center justify-between px-4 py-2 text-xs">
+                <span className="text-muted-foreground">实际完成</span>
+                <span className={cn('font-semibold tabular-nums', (task.isOverdue || task.isDelayed) ? 'text-rose-600' : 'text-foreground')}>
+                  {task.scheduledEnd}
+                  {(task.isOverdue || task.isDelayed) && <span className="text-rose-500 ml-1">+{task.delayDays}天</span>}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* 警告条 */}
+          {(task.isOverdue || task.isConflict) && (
+            <div className={cn(
+              'flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium border-t rounded-b-xl',
+              task.isOverdue ? 'bg-rose-50/80 text-rose-600 border-rose-100' : 'bg-orange-50/80 text-orange-600 border-orange-100',
+            )}>
+              <AlertTriangle className="h-3 w-3" />
+              <span>{task.isOverdue ? `已逾期 ${task.delayDays} 天` : '存在工时冲突'}</span>
+            </div>
+          )}
+        </div>,
+        document.body,
+      )}
 
       {/* 右列：每日工时格子 */}
       <div className={useFlex ? 'flex flex-1 min-w-0' : 'flex relative'} style={useFlex ? undefined : { width: dates.length * cellW }}>
@@ -494,11 +573,6 @@ const GanttRow = function GanttRow({
                   <span className="font-bold text-xs leading-none">
                     {hours % 1 === 0 ? `${hours}h` : `${hours.toFixed(1)}h`}
                   </span>
-                  {task.isDelayed && (
-                    <div className="text-2xs font-bold text-red-500 leading-none mt-0.5">
-                      +{task.delayDays}天
-                    </div>
-                  )}
                 </div>
               ) : isToday ? (
                 <span className="text-2xs-plus text-indigo-300">—</span>
@@ -510,57 +584,6 @@ const GanttRow = function GanttRow({
     </div>
   );
 };
-
-// ======================== 任务 Tooltip ========================
-
-function TaskTooltipContent({ task, totalInView }: { task: ScheduledTask; totalInView: number }) {
-  const colors = getColors(task.priority);
-
-  return (
-    <TooltipContent side="right" sideOffset={8} className="w-72 p-0 bg-card text-foreground border border-border shadow-xl overflow-hidden">
-      <div className="px-4 pt-3 pb-2 bg-muted/40">
-        <p className="text-sm font-semibold leading-snug">{task.title}</p>
-        {task.projectName && (
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-indigo-600">
-            <FolderOpen className="h-3.5 w-3.5" />{task.projectName}
-          </p>
-        )}
-        {task.description && (
-          <p className="mt-1 text-2xs-plus text-muted-foreground line-clamp-2">{task.description}</p>
-        )}
-      </div>
-
-      <div className="px-4 py-2.5 space-y-2">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className={cn('rounded px-1.5 py-0.5 text-2xs font-medium border', colors.text, colors.border, colors.bg)}>
-            {PRIORITY_LABEL[task.priority]}
-          </span>
-          <span className="rounded bg-muted px-1.5 py-0.5 text-2xs text-muted-foreground">
-            {task.status === 'TODO' ? '待办' : task.status === 'IN_PROGRESS' ? '进行中' : task.status === 'BLOCKED' ? '阻塞' : task.status}
-          </span>
-          {task.isOverdue && <span className="rounded bg-rose-100 px-1.5 py-0.5 text-2xs font-semibold text-rose-600">已逾期</span>}
-          {!task.isOverdue && task.isDelayed && <span className="rounded bg-red-100 px-1.5 py-0.5 text-2xs font-semibold text-red-600">延期 {task.delayDays} 天</span>}
-          {task.isConflict && <span className="rounded bg-orange-100 px-1.5 py-0.5 text-2xs font-semibold text-orange-600">工时冲突</span>}
-        </div>
-
-        <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-xs">
-          <span className="text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />总工时</span>
-          <span className="font-medium">{task.effectiveHours}h{task.actualHours ? <span className="text-muted-foreground ml-1">(实际 {task.actualHours}h)</span> : <span className="text-muted-foreground ml-1">(预估)</span>}</span>
-          <span className="text-muted-foreground flex items-center gap-1"><CalendarDays className="h-3 w-3" />排期</span>
-          <span className="font-medium">{task.scheduledStart} ~ {task.scheduledEnd}</span>
-          <span className="text-muted-foreground flex items-center gap-1"><ChevronRight className="h-3 w-3" />当前视图</span>
-          <span className="font-medium">{totalInView % 1 === 0 ? `${totalInView}h` : `${totalInView.toFixed(1)}h`}</span>
-          {task.originalDueDate && (
-            <>
-              <span className="text-muted-foreground">截止</span>
-              <span className={task.isDelayed ? 'text-red-500 font-semibold' : 'font-medium'}>{task.originalDueDate}</span>
-            </>
-          )}
-        </div>
-      </div>
-    </TooltipContent>
-  );
-}
 
 // ======================== 周/月共用工时底栏 ========================
 
@@ -621,6 +644,7 @@ function TimelineView({
   totalDays: number;
   workloadMap: Map<string, DailyWorkload>;
 }) {
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const cellW = CELL_W[zoom];
   const labelW = LABEL_W[zoom];
   const rowH = ROW_H[zoom];
@@ -639,7 +663,7 @@ function TimelineView({
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
-      <div className={useFlex ? 'overflow-x-hidden' : 'overflow-x-auto'} style={{ maxHeight: 'calc(100vh - 260px)' }}>
+      <div className="overflow-x-auto" style={{ maxHeight: 'calc(100vh - 260px)' }}>
         <div style={useFlex ? { minWidth: labelW + totalDays * 48 } : { minWidth: chartWidth }}>
           <GanttHeader dates={dates} cellW={cellW} labelW={labelW} useFlex={useFlex} />
 
@@ -654,6 +678,8 @@ function TimelineView({
               rowH={rowH}
               taskDayMap={taskDayMap}
               useFlex={useFlex}
+              isSelected={task.id === selectedTaskId}
+              onSelect={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
             />
           ))}
 
@@ -673,8 +699,7 @@ export function GanttChart({ tasks, dailyWorkload, dailyLimit = 8 }: GanttChartP
   const workloadMap = useWorkloadMap(dailyWorkload);
 
   return (
-    <TooltipProvider>
-      <div className="space-y-3">
+    <div className="space-y-3">
         <GanttToolbar zoom={zoom} onZoom={setZoom} />
 
         {zoom === 'day' ? (
@@ -691,6 +716,5 @@ export function GanttChart({ tasks, dailyWorkload, dailyLimit = 8 }: GanttChartP
           />
         )}
       </div>
-    </TooltipProvider>
   );
 }

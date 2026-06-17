@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Loader2, Plus } from 'lucide-react';
 import type { CreateCostInput } from '@/hooks/useCosts';
 import { DatePicker } from '@/components/ui/date-picker';
+import { CustomSelect } from '@/components/ui/custom-select';
 
 const categories = [
   { value: 'LABOR', label: '人工' },
@@ -49,13 +50,7 @@ export function CostForm({ onSubmit, isLoading }: CostFormProps) {
         placeholder="成本金额"
         className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300"
       />
-      <select
-        value={category}
-        onChange={(event) => setCategory(event.target.value)}
-        className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-300"
-      >
-        {categories.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-      </select>
+      <CustomSelect value={category} options={categories} onChange={setCategory} />
       <input
         value={description}
         onChange={(event) => setDescription(event.target.value)}

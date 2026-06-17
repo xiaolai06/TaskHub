@@ -1,3 +1,5 @@
+'use client';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
@@ -63,6 +65,9 @@ export function useCreateSubscription() {
     mutationFn: (data: CreateSubscriptionInput) => api.post('/subscriptions', data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['finance'] });
+      qc.invalidateQueries({ queryKey: ['transactions'] });
     },
   });
 }
@@ -74,6 +79,9 @@ export function useUpdateSubscription() {
       api.put(`/subscriptions/${id}`, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['finance'] });
+      qc.invalidateQueries({ queryKey: ['transactions'] });
     },
   });
 }
@@ -84,6 +92,7 @@ export function usePauseSubscription() {
     mutationFn: (id: string) => api.put(`/subscriptions/${id}/pause`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }
@@ -94,6 +103,7 @@ export function useResumeSubscription() {
     mutationFn: (id: string) => api.put(`/subscriptions/${id}/resume`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }
@@ -104,6 +114,9 @@ export function useDeleteSubscription() {
     mutationFn: (id: string) => api.delete(`/subscriptions/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY] });
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: ['finance'] });
+      qc.invalidateQueries({ queryKey: ['transactions'] });
     },
   });
 }

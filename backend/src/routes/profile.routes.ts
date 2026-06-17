@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as profileService from '../services/profile.service';
 import { success } from '../utils/response';
+import { validate } from '../middleware/validate';
+import { updateProfileSchema } from '../validators/profile.schema';
 
 const router = Router();
 
@@ -15,7 +17,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // PUT / - 更新个人资料
-router.put('/', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/', validate(updateProfileSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const profile = await profileService.updateProfile(req.userId!, req.body);
     success(res, profile);

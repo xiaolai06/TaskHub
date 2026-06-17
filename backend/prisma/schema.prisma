@@ -34,6 +34,7 @@ model User {
   preferences    UserPreference?
   goals          Goal[]
   goalProgressLogs GoalProgressLog[]
+  goalCheckins     GoalCheckin[]
   timeEntries    TimeEntry[]
   communications Communication[]
   insights       AiInsight[]
@@ -43,6 +44,7 @@ model User {
   toolExecutions ToolExecutionLog[]
   transactions     Transaction[]
   subscriptions    Subscription[]
+  briefings        Briefing[]
 }
 
 // ======================== 个人资料 ========================
@@ -118,7 +120,7 @@ model Task {
   priority       String   @default("MEDIUM")   // URGENT / HIGH / MEDIUM / LOW
   estimatedHours Float
   actualHours    Float?
-  cost           Int      @default(0)          // 任务花销（分），自动从 CostRecord 聚合
+  cost           Int      @default(0)          // 任务花销（分），手动输入或通过 CostRecord.taskId 关联
   costNote       String?                       // 花销说明（自动从 CostRecord 汇总）
   blockedReason  String?                       // 阻塞原因（status=BLOCKED 时填写）
   startDate      DateTime?
@@ -229,6 +231,24 @@ model SavedResearch {
   updatedAt      DateTime @updatedAt
   user           User          @relation(fields: [userId], references: [id])
   searchResult   SearchResult? @relation(fields: [searchResultId], references: [id], onDelete: SetNull)
+}
+
+// ======================== 行业简报 ========================
+model Briefing {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  mode      String   @default("manual")
+  query     String?
+  tags      String   @default("[]")
+  saved     Boolean  @default(false)
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, mode])
+  @@index([userId, saved])
 }
 
 // ======================== AI 会话 ========================
@@ -364,6 +384,7 @@ model Goal {
   customer      Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
   milestones    GoalMilestone[]
   progressLogs  GoalProgressLog[]
+  checkins      GoalCheckin[]
 
   @@index([userId, status])
   @@index([userId, type])
@@ -399,6 +420,22 @@ model GoalMilestone {
   goal        Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   @@index([goalId])
+}
+
+// 目标打卡记录 - 用于习惯养成类目标
+model GoalCheckin {
+  id        String   @id @default(cuid())
+  goalId    String
+  userId    String
+  date      String                         // "2026-06-17" 格式，每天一条
+  note      String?
+  createdAt DateTime @default(now())
+  goal      Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([goalId, date])
+  @@index([goalId])
+  @@index([userId])
 }
 
 // ======================== 工时记录 ========================
@@ -513,12 +550,29 @@ model CronJob {
   lastStatus String?                      // success / error
   lastResult String?                      // 上次执行结果摘要
   aiModel    String?                      // 指定 AI 模型（空=使用默认模型）
+  jobSlug    String?                      // 映射 job 文件，如 'morning-briefing'
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, enabled])
   @@index([userId, action])
+  @@index([userId, jobSlug])
+}
+
+// ======================== 定时任务执行日志 ========================
+model JobExecutionLog {
+  id         String    @id @default(cuid())
+  jobSlug    String                      // 如 'morning-briefing'
+  userId     String?
+  status     String                      // success / error / skipped
+  result     String?                     // 摘要，截断 2000 字符
+  error      String?
+  durationMs Int?
+  executedAt DateTime  @default(now())
+
+  @@index([jobSlug, executedAt(sort: Desc)])
+  @@index([userId, executedAt(sort: Desc)])
 }
 
 // ======================== 收支流水 ========================

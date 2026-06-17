@@ -3,7 +3,7 @@ import { validate } from '../middleware/validate';
 import { createCronJobSchema, updateCronJobSchema } from '../validators/cron-job.schema';
 import * as cronJobService from '../services/cron-job.service';
 import * as notificationService from '../services/notification.service';
-import { prisma } from '../server';
+import { executeCustomJob, testCustomJob, refreshCustomJobs } from '../jobs/custom-job.executor';
 import { success, error } from '../utils/response';
 
 const router = Router();
@@ -28,6 +28,15 @@ router.post('/system/init', async (req: Request, res: Response, next) => {
   } catch (err) { next(err); }
 });
 
+// GET /history — 全部执行历史
+router.get('/history', async (req: Request, res: Response, next) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const data = await cronJobService.getAllExecutionHistory(req.userId!, limit);
+    success(res, data);
+  } catch (err) { next(err); }
+});
+
 // GET /:id
 router.get('/:id', async (req: Request, res: Response, next) => {
   try {
@@ -40,7 +49,19 @@ router.get('/:id', async (req: Request, res: Response, next) => {
 router.post('/', validate(createCronJobSchema), async (req: Request, res: Response, next) => {
   try {
     const data = await cronJobService.create(req.userId!, req.body);
+    await refreshCustomJobs();
     success(res, data, '创建成功', 201);
+  } catch (err) { next(err); }
+});
+
+// GET /:id/history — 执行历史
+router.get('/:id/history', async (req: Request, res: Response, next) => {
+  try {
+    const job = await cronJobService.findById(req.userId!, String(req.params.id));
+    if (!job.jobSlug) { success(res, []); return; }
+    const limit = Math.min(Number(req.query.limit) || 20, 100);
+    const history = await cronJobService.getExecutionHistory(job.jobSlug, req.userId!, limit);
+    success(res, history);
   } catch (err) { next(err); }
 });
 
@@ -48,7 +69,9 @@ router.post('/', validate(createCronJobSchema), async (req: Request, res: Respon
 router.put('/:id', validate(updateCronJobSchema), async (req: Request, res: Response, next) => {
   try {
     const data = await cronJobService.update(req.userId!, String(req.params.id), req.body);
-    success(res, data, '更新成功');
+    await refreshCustomJobs();
+    const msg = data.isSystem ? '已保存，重启服务后生效' : '更新成功';
+    success(res, data, msg);
   } catch (err) { next(err); }
 });
 
@@ -56,6 +79,7 @@ router.put('/:id', validate(updateCronJobSchema), async (req: Request, res: Resp
 router.delete('/:id', async (req: Request, res: Response, next) => {
   try {
     await cronJobService.remove(req.userId!, String(req.params.id));
+    await refreshCustomJobs();
     success(res, null, '已删除');
   } catch (err) { next(err); }
 });
@@ -71,20 +95,16 @@ router.post('/:id/test-notify', async (req: Request, res: Response, next) => {
     // 1. 邮件（仅用户勾选了才测）
     if (config.emailEnabled) {
       try {
-        const user = await prisma.user.findUnique({ where: { id: req.userId! }, select: { email: true } });
-        if (!user?.email) {
+        const email = await notificationService.getUserEmail(req.userId!);
+        if (!email) {
           results.push({ channel: '邮件', ok: false, msg: '未设置邮箱，请在个人资料中填写' });
         } else {
-          const smtp = await prisma.setting.findMany({
-            where: { category: 'EMAIL', OR: [{ userId: 'system' }, { userId: req.userId! }] },
-          });
-          const hasHost = smtp.some(s => ['host', 'smtp_host'].includes(s.key.toLowerCase()));
-          const hasPass = smtp.some(s => ['pass', 'password', 'smtp_pass'].includes(s.key.toLowerCase()));
-          if (!hasHost || !hasPass) {
-            results.push({ channel: '邮件', ok: false, msg: 'SMTP 未配置，请在系统设置→邮件中填写' });
+          const smtpCheck = await notificationService.checkSmtpConfigured(req.userId!);
+          if (!smtpCheck.configured) {
+            results.push({ channel: '邮件', ok: false, msg: smtpCheck.message || 'SMTP 未配置' });
           } else {
-            await notificationService.sendTestEmail(user.email, req.userId!);
-            results.push({ channel: '邮件', ok: true, msg: `已发送至 ${user.email}` });
+            await notificationService.sendTestEmail(email, req.userId!);
+            results.push({ channel: '邮件', ok: true, msg: `已发送至 ${email}` });
           }
         }
       } catch (err) {
@@ -94,8 +114,7 @@ router.post('/:id/test-notify', async (req: Request, res: Response, next) => {
 
     // 2. Webhook（仅用户勾选的才测，没勾选就跳过）
     if (webhookTargets.length > 0) {
-      const setting = await prisma.setting.findFirst({ where: { category: 'NOTIFY', key: 'webhooks' } });
-      const allWH: Array<{ name: string; channel: string; url: string }> = setting?.value ? JSON.parse(setting.value) : [];
+      const allWH = await notificationService.getWebhookSettings();
       for (const targetName of webhookTargets) {
         const wh = allWH.find(w => w.name === targetName);
         if (!wh) {
@@ -122,6 +141,33 @@ router.post('/:id/test-notify', async (req: Request, res: Response, next) => {
 
     const allOk = results.every(r => r.ok);
     success(res, { results, allOk }, allOk ? '全部通过' : '部分失败');
+  } catch (err) { next(err); }
+});
+
+// POST /:id/run — 立即执行自定义任务
+router.post('/:id/run', async (req: Request, res: Response, next) => {
+  try {
+    const job = await cronJobService.findById(req.userId!, String(req.params.id));
+    if (job.isSystem) {
+      error(res, 'FORBIDDEN', '系统任务请通过"执行"按钮触发', 400);
+      return;
+    }
+    const start = Date.now();
+    const result = await executeCustomJob(req.userId!, job);
+    success(res, { result, durationMs: Date.now() - start }, '执行完成');
+  } catch (err) { next(err); }
+});
+
+// POST /:id/test — 测试自定义任务（不实际发送）
+router.post('/:id/test', async (req: Request, res: Response, next) => {
+  try {
+    const job = await cronJobService.findById(req.userId!, String(req.params.id));
+    if (job.isSystem) {
+      error(res, 'FORBIDDEN', '系统任务请使用"测试通知"功能', 400);
+      return;
+    }
+    const result = await testCustomJob(req.userId!, job);
+    success(res, result, '测试完成');
   } catch (err) { next(err); }
 });
 

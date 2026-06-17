@@ -1,5 +1,4 @@
 import { Router, Request, Response } from 'express';
-import { prisma } from '../server';
 import { validate } from '../middleware/validate';
 import { notificationFiltersSchema } from '../validators/notification.schema';
 import * as notificationService from '../services/notification.service';
@@ -24,16 +23,13 @@ router.get('/unread-count', async (req: Request, res: Response, next) => {
 
 router.post('/test-email', async (req: Request, res: Response, next) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.userId! },
-      select: { email: true },
-    });
-    if (!user?.email) {
+    const email = await notificationService.getUserEmail(req.userId!);
+    if (!email) {
       success(res, null, '当前账号没有可用邮箱');
       return;
     }
-    await notificationService.sendTestEmail(user.email, req.userId!);
-    success(res, { email: user.email }, '测试邮件已发送');
+    await notificationService.sendTestEmail(email, req.userId!);
+    success(res, { email }, '测试邮件已发送');
   } catch (err) { next(err); }
 });
 

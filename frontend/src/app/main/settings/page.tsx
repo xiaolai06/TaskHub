@@ -1555,7 +1555,6 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-4xl page-enter">
-      <h1 className="mb-5 text-lg font-bold text-foreground">系统设置</h1>
 
       {/* 分类标签 */}
       <div className="mb-5 flex gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1 scrollbar-none">

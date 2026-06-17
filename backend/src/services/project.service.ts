@@ -139,7 +139,15 @@ export async function archive(userId: string, id: string) {
     data: { status: 'ARCHIVED' },
   });
   if (result.count === 0) return null;
-  return prisma.project.findUnique({ where: { id } });
+  const project = await prisma.project.findUnique({ where: { id } });
+  if (!project) return null;
+
+  const [costAgg, taskCostAgg] = await Promise.all([
+    prisma.costRecord.aggregate({ where: { projectId: id }, _sum: { amount: true } }),
+    prisma.task.aggregate({ where: { projectId: id }, _sum: { cost: true } }),
+  ]);
+  const actualCost = (costAgg._sum.amount ?? 0) + (taskCostAgg._sum.cost ?? 0);
+  return { ...project, quote: project.budget ?? 0, actualCost, usedBudget: actualCost, profit: (project.budget ?? 0) - actualCost };
 }
 
 export async function remove(userId: string, id: string) {

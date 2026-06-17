@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { DatePicker } from '@/components/ui/date-picker';
+import { CustomSelect } from '@/components/ui/custom-select';
 
 const CATEGORIES = [
   { value: 'SOFTWARE', label: 'AI/软件' },
@@ -183,15 +184,11 @@ export function SubscriptionForm({ open, onOpenChange, subscription }: Subscript
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">币种</Label>
-              <select
+              <CustomSelect
                 value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="flex h-9 w-full rounded-lg border border-border bg-card px-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c.value} value={c.value}>{c.label}</option>
-                ))}
-              </select>
+                options={CURRENCIES.map(c => ({ value: c.value, label: c.label }))}
+                onChange={setCurrency}
+              />
             </div>
           </div>
 

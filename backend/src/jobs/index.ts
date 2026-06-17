@@ -2,6 +2,8 @@
 // 每个 job 文件在 import 时通过 node-cron 注册
 // startAllCronJobs 由 server.ts 在数据库连接成功后调用
 
+import { startCustomJobScheduler } from './custom-job.executor';
+
 export function startAllCronJobs(): void {
   // 动态 require 确保依赖已加载
   require('./due-reminder.job');
@@ -13,4 +15,7 @@ export function startAllCronJobs(): void {
   require('./weekly-memory.job');
   require('./health-check.job');
   console.log('⏰ 定时任务已全部注册 (8 个 Job)');
+
+  // 注册自定义任务
+  startCustomJobScheduler();
 }

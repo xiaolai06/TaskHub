@@ -21,16 +21,15 @@ import type { Task } from '@/hooks/useTasks';
 interface ColumnDef {
   key: string;
   label: string;
-  color: string;
-  accentBg: string;
-  countBg: string;
+  borderColor: string;
+  bgColor: string;
 }
 
 const columns: ColumnDef[] = [
-  { key: 'TODO', label: '待办', color: 'text-slate-700 dark:text-slate-300', accentBg: 'bg-slate-200/70 dark:bg-slate-700/50', countBg: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300' },
-  { key: 'IN_PROGRESS', label: '进行中', color: 'text-blue-700 dark:text-blue-300', accentBg: 'bg-blue-100 dark:bg-blue-900/40', countBg: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
-  { key: 'DONE', label: '已完成', color: 'text-emerald-700 dark:text-emerald-300', accentBg: 'bg-emerald-100 dark:bg-emerald-900/40', countBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
-  { key: 'BLOCKED', label: '阻塞', color: 'text-red-700 dark:text-red-300', accentBg: 'bg-red-100 dark:bg-red-900/40', countBg: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+  { key: 'TODO', label: '📝 待办', borderColor: 'border-slate-200', bgColor: 'bg-slate-50/50' },
+  { key: 'IN_PROGRESS', label: '🔄 进行中', borderColor: 'border-blue-200', bgColor: 'bg-blue-50/30' },
+  { key: 'DONE', label: '✅ 已完成', borderColor: 'border-emerald-200', bgColor: 'bg-emerald-50/30' },
+  { key: 'BLOCKED', label: '🚫 阻塞', borderColor: 'border-red-200', bgColor: 'bg-red-50/30' },
 ];
 
 // ========== 可拖拽卡片 ==========
@@ -79,13 +78,10 @@ function DroppableColumn({
 }) {
   return (
     <div className="flex flex-col">
-      {/* 列头 */}
-      <div className={cn('mb-2 flex items-center justify-between rounded-lg px-3 py-2', column.accentBg)}>
-        <div className="flex items-center gap-2">
-          <div className={cn('h-2 w-2 rounded-full', column.color === 'text-foreground/70' ? 'bg-foreground/40' : column.color.replace('text-', 'bg-'))} />
-          <h3 className={cn('text-sm font-semibold', column.color)}>{column.label}</h3>
-        </div>
-        <span className={cn('rounded-full px-2 py-0.5 text-2xs-plus font-bold', column.countBg)}>
+      {/* 列头 — 与 GoalBoard 统一样式 */}
+      <div className={cn('mb-2 flex items-center gap-2 rounded-lg border px-3 py-2', column.borderColor, column.bgColor)}>
+        <span className="text-sm font-semibold">{column.label}</span>
+        <span className="rounded-full bg-white/60 px-1.5 py-0.5 text-2xs font-medium text-muted-foreground">
           {tasks.length}
         </span>
       </div>

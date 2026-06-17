@@ -6,6 +6,14 @@ import { success } from '../utils/response';
 
 const router = Router();
 
+// GET /api/subscriptions/cost-summary — 月度成本汇总（静态路由必须在 /:id 之前）
+router.get('/cost-summary', async (req: Request, res: Response, next) => {
+  try {
+    const data = await subscriptionService.getCostSummary(req.userId!);
+    success(res, data);
+  } catch (err) { next(err); }
+});
+
 // GET /api/subscriptions — 列表
 router.get('/', async (req: Request, res: Response, next) => {
   try {
@@ -51,14 +59,6 @@ router.delete('/:id', async (req: Request, res: Response, next) => {
   try {
     await subscriptionService.remove(req.userId!, String(req.params.id));
     success(res, null, '删除成功');
-  } catch (err) { next(err); }
-});
-
-// GET /api/subscriptions/cost-summary — 月度成本汇总
-router.get('/cost-summary', async (req: Request, res: Response, next) => {
-  try {
-    const data = await subscriptionService.getCostSummary(req.userId!);
-    success(res, data);
   } catch (err) { next(err); }
 });
 

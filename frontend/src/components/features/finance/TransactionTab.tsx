@@ -15,7 +15,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 import { TransactionForm } from './TransactionForm';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { CustomSelect } from '@/components/ui/custom-select';
 
 /* ═══════════ 格式化 ═══════════ */
 
@@ -331,93 +331,85 @@ export function TransactionTab() {
       {/* ── 筛选栏 ── */}
       <div className="flex items-center gap-3 flex-wrap">
         {/* 方向 */}
-        <div className="flex h-9 items-center gap-0.5 rounded-xl border border-border/50 bg-card p-0.5 shadow-sm">
+        <div className="flex h-9 items-center gap-0.5 rounded-lg border border-border/80 bg-card p-0.5 transition-all hover:border-indigo-300">
           {DIRECTION_FILTERS.map((opt) => (
             <button key={opt.value}
               onClick={() => handleDirectionChange(opt.value)}
-              className={cn('rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200',
+              className={cn('rounded-md px-2.5 py-1 text-xs font-medium transition-all',
                 direction === opt.value
                   ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground')}>
+                  : 'text-muted-foreground hover:bg-accent')}>
               {opt.label}
             </button>
           ))}
         </div>
-
-        {/* 日期快捷 */}
-        <div className="flex h-9 items-center gap-0.5 rounded-xl border border-border/50 bg-card p-0.5 shadow-sm">
-          {DATE_PRESETS.map((p) => (
-            <button key={p.value}
-              onClick={() => { setDatePreset(p.value); setShowCustomDate(false); setCustomStart(''); setCustomEnd(''); setPage(1); }}
-              className={cn('rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200',
-                datePreset === p.value && !showCustomDate
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground')}>
-              {p.label}
-            </button>
-          ))}
-        </div>
-
-        {/* 来源 */}
-        <Select value={source || 'all_source_placeholder'} onValueChange={(v) => { setSource(v === 'all_source_placeholder' ? '' : (v ?? '')); setPage(1); }}>
-          <SelectTrigger className="w-auto h-9 rounded-lg border border-border bg-card px-3 pr-8 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60">
-            <SelectValue placeholder="全部来源" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all_source_placeholder">全部来源</SelectItem>
-            <SelectItem value="MANUAL">手动录入</SelectItem>
-            <SelectItem value="PAYMENT">回款触发</SelectItem>
-            <SelectItem value="SUBSCRIPTION">订阅自动</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* 分类 */}
-        <Select value={category || 'all_category_placeholder'} onValueChange={(v) => { setCategory(v === 'all_category_placeholder' ? '' : (v ?? '')); setPage(1); }}>
-          <SelectTrigger className="w-auto h-9 rounded-lg border border-border bg-card px-3 pr-8 text-sm text-foreground/80 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60">
-            <SelectValue placeholder="全部分类" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all_category_placeholder">全部分类</SelectItem>
-            {filteredCategories.map((c) => (
-              <SelectItem key={c} value={c}>{CATEGORY_LABELS[c]}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
 
         {/* 搜索 */}
         <div className="relative flex-1 min-w-[160px] max-w-[220px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input placeholder="搜索描述或备注..." value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="h-9 w-full rounded-xl border border-border/50 bg-transparent pl-9 pr-3 text-sm text-foreground/80 outline-none placeholder:text-muted-foreground focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
+            className="h-9 w-full rounded-lg border border-border/80 bg-card pl-9 pr-3 text-sm text-foreground/80 outline-none transition-all placeholder:text-muted-foreground/60 hover:border-indigo-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200/60" />
         </div>
 
-        {/* 自定义日期按钮 */}
-        <button
-          onClick={() => setShowCustomDate(!showCustomDate)}
-          className={cn('flex h-9 items-center gap-1.5 rounded-xl border px-3 text-sm font-medium transition-all duration-200',
-            showCustomDate
-              ? 'border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-400'
-              : 'border-border/50 text-muted-foreground hover:text-foreground hover:border-border')}>
-          <CalendarDays className="h-4 w-4" />
-          自定义日期
-        </button>
+        {/* 日期快捷 */}
+        <CustomSelect
+          value={showCustomDate ? 'custom' : datePreset}
+          options={[
+            { value: '', label: '全部日期' },
+            { value: 'today', label: '今日' },
+            { value: 'week', label: '本周' },
+            { value: 'month', label: '本月' },
+            { value: 'quarter', label: '本季' },
+            { value: 'year', label: '本年' },
+            { value: 'custom', label: '自定义' },
+          ]}
+          onChange={(v) => {
+            if (v === 'custom') {
+              setShowCustomDate(true);
+              setDatePreset('');
+            } else {
+              setShowCustomDate(false);
+              setCustomStart('');
+              setCustomEnd('');
+              setDatePreset(v);
+              setPage(1);
+            }
+          }}
+        />
+
+        {showCustomDate && (
+          <>
+            <DatePicker value={customStart} onChange={(v) => { setCustomStart(v); setPage(1); }} />
+            <DatePicker value={customEnd} onChange={(v) => { setCustomEnd(v); setPage(1); }} />
+            {(customStart || customEnd) && (
+              <button onClick={() => { setCustomStart(''); setCustomEnd(''); setPage(1); }}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </>
+        )}
+
+        {/* 来源 */}
+        <CustomSelect
+          value={source}
+          options={[
+            { value: '', label: '全部来源' },
+            { value: 'MANUAL', label: '手动录入' },
+            { value: 'PAYMENT', label: '回款触发' },
+            { value: 'SUBSCRIPTION', label: '订阅自动' },
+          ]}
+          onChange={(v) => { setSource(v); setPage(1); }}
+        />
+
+        {/* 分类 */}
+        <CustomSelect
+          value={category}
+          options={[{ value: '', label: '全部分类' }, ...filteredCategories.map(c => ({ value: c, label: CATEGORY_LABELS[c] }))]}
+          onChange={(v) => { setCategory(v); setPage(1); }}
+        />
       </div>
-
-      {/* ── 自定义日期范围（独立区域） ── */}
-      {showCustomDate && (
-        <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-card px-4 py-3 shadow-sm">
-          <span className="text-sm text-foreground/70 shrink-0">时间范围</span>
-          <DatePicker value={customStart} onChange={(v) => { setCustomStart(v); setPage(1); }} />
-          <DatePicker value={customEnd} onChange={(v) => { setCustomEnd(v); setPage(1); }} />
-          {(customStart || customEnd) && (
-            <button onClick={() => { setCustomStart(''); setCustomEnd(''); setPage(1); }}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      )}
 
       {/* ── 列表 ── */}
       <div className="rounded-xl border border-border/60 bg-card shadow-sm">

@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as workService from '../services/work.service';
 import { success, error } from '../utils/response';
+import { validate } from '../middleware/validate';
+import { startTimerSchema, addTodoSchema } from '../validators/work.schema';
 
 const router = Router();
 
@@ -13,7 +15,7 @@ router.get('/timer/active', async (req: Request, res: Response, next: NextFuncti
 });
 
 // POST /timer/start — 开始计时
-router.post('/timer/start', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/timer/start', validate(startTimerSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const timer = await workService.startTimer(req.userId!, req.body);
     success(res, timer, undefined, 201);
@@ -64,11 +66,9 @@ router.get('/todos', async (req: Request, res: Response, next: NextFunction) => 
 });
 
 // POST /todos — 添加待办
-router.post('/todos', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/todos', validate(addTodoSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { content } = req.body;
-    if (!content || !content.trim()) { error(res, 'VALIDATION_ERROR', '内容不能为空', 400); return; }
-    const todo = await workService.addTodo(req.userId!, content.trim());
+    const todo = await workService.addTodo(req.userId!, req.body.content.trim());
     success(res, todo, undefined, 201);
   } catch (err) { next(err); }
 });

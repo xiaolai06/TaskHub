@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { DatePicker } from '@/components/ui/date-picker';
+import { CustomSelect } from '@/components/ui/custom-select';
 
 const PAYMENT_TYPES = [
   { value: 'DOWN_PAYMENT', label: '预付款' },
@@ -91,16 +92,11 @@ export function PaymentForm({ open, onOpenChange, projectId, projectName }: Paym
             {projectName ? (
               <div className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm">{projectName}</div>
             ) : (
-              <select
+              <CustomSelect
                 value={selectedProjectId}
-                onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="flex h-9 w-full rounded-lg border border-border bg-card px-3 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
-              >
-                <option value="">选择项目...</option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
+                options={[{ value: '', label: '选择项目...' }, ...projects.map(p => ({ value: p.id, label: p.name }))]}
+                onChange={setSelectedProjectId}
+              />
             )}
           </div>
 

@@ -168,7 +168,14 @@ export const getProjectDetailTool: ToolDefinition = {
 
 export const archiveProjectTool: ToolDefinition = {
   name: 'archive_project',
-  description: '归档已完成的项目。用户说"归档XX项目""这个项目可以归档了"时调用。写操作需确认。',
+  description: `归档已完成的项目。归档后项目不再出现在默认列表中，但数据保留可恢复。
+
+使用时机:
+- "归档XX项目"、"这个项目可以归档了"
+
+不使用时机:
+- 项目还在进行中 → 请先完成所有任务
+- 永久删除项目 → 用 delete_project`,
   category: 'work',
   access: 'write',
   requiresConfirmation: true,
@@ -179,6 +186,7 @@ export const archiveProjectTool: ToolDefinition = {
       projectId: { type: 'string', description: '项目 ID' },
       projectName: { type: 'string', description: '项目名，模糊匹配' },
     },
+    required: [],
   },
   handler: async (args, userId) => {
     let projectId = args.projectId as string | undefined;

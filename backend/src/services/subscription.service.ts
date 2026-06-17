@@ -89,7 +89,7 @@ export async function remove(userId: string, id: string) {
 }
 
 /**
- * 月度/年度成本汇总
+ * 月度/年度成本汇总（返回单位：分）
  */
 export async function getCostSummary(userId: string) {
   const subs = await prisma.subscription.findMany({
@@ -100,11 +100,12 @@ export async function getCostSummary(userId: string) {
   const byCategory: Record<string, number> = {};
 
   for (const sub of subs) {
-    const amountYuan = (sub.amount / 100) * sub.exchangeRate;
+    // amount 是分，exchangeRate 是汇率（CNY 默认 1.0）
+    const amountFen = Math.round(sub.amount * sub.exchangeRate);
     let monthlyCost: number;
-    if (sub.cycle === 'MONTHLY') monthlyCost = amountYuan;
-    else if (sub.cycle === 'QUARTERLY') monthlyCost = amountYuan / 3;
-    else monthlyCost = amountYuan / 12;
+    if (sub.cycle === 'MONTHLY') monthlyCost = amountFen;
+    else if (sub.cycle === 'QUARTERLY') monthlyCost = Math.round(amountFen / 3);
+    else monthlyCost = Math.round(amountFen / 12);
 
     monthlyTotal += monthlyCost;
 
@@ -113,12 +114,12 @@ export async function getCostSummary(userId: string) {
   }
 
   return {
-    monthlyTotal: Math.round(monthlyTotal * 100) / 100,
-    yearlyEstimate: Math.round(monthlyTotal * 12 * 100) / 100,
+    monthlyTotal,
+    yearlyEstimate: monthlyTotal * 12,
     activeCount: subs.length,
     byCategory: Object.entries(byCategory).map(([category, amount]) => ({
       category,
-      amount: Math.round(amount * 100) / 100,
+      amount,
       percent: monthlyTotal > 0 ? Math.round((amount / monthlyTotal) * 1000) / 10 : 0,
     })),
   };
@@ -137,7 +138,7 @@ export async function processDueSubscriptions() {
 
   for (const sub of dueSubs) {
     try {
-      const amountCNY = Math.round(sub.amount * sub.exchangeRate);
+      const amountCNY = Math.round((sub.amount / 100) * sub.exchangeRate);
 
       await prisma.$transaction(async (tx) => {
         await tx.transaction.create({

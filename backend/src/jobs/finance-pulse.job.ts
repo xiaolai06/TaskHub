@@ -4,6 +4,7 @@ import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
+import { logExecution } from '../utils/job-logger';
 
 const PROMPT = loadPrompt(
   'system-finance-pulse.txt',
@@ -96,13 +97,22 @@ cron.schedule('0 10 * * *', async () => {
     });
 
     for (const user of users) {
+      const userStart = Date.now();
       try {
-        if (user.preferences && !user.preferences.systemNotify) continue;
+        if (user.preferences && !user.preferences.systemNotify) {
+          await logExecution({ jobSlug: 'finance-pulse', userId: user.id, status: 'skipped' });
+          continue;
+        }
         const projectCount = await prisma.project.count({ where: { ownerId: user.id } });
-        if (projectCount === 0) continue;
+        if (projectCount === 0) {
+          await logExecution({ jobSlug: 'finance-pulse', userId: user.id, status: 'skipped' });
+          continue;
+        }
         await runFinancePulse(user.id);
+        await logExecution({ jobSlug: 'finance-pulse', userId: user.id, status: 'success', durationMs: Date.now() - userStart });
       } catch (error) {
         console.error(`[finance-pulse] user ${user.id} failed:`, error);
+        await logExecution({ jobSlug: 'finance-pulse', userId: user.id, status: 'error', error: error instanceof Error ? error.message : String(error), durationMs: Date.now() - userStart });
       }
     }
     console.log('[finance-pulse] done');

@@ -62,11 +62,15 @@ router.post('/incoming', async (req: Request, res: Response) => {
 
     if (body.status === 'success' && body.data.notify) {
       const channels = ['wechat', 'feishu', 'dingtalk', 'slack'];
-      for (const channel of channels) {
-        await notificationService.sendWebhook(channel, {
+      const results = await Promise.allSettled(
+        channels.map(channel => notificationService.sendWebhook(channel, {
           title: body.data.title,
           content: body.data.content,
-        });
+        })),
+      );
+      const failed = results.filter(r => r.status === 'rejected');
+      if (failed.length > 0) {
+        console.error(`[webhook] ${failed.length}/${channels.length} channels failed`);
       }
     }
 
@@ -110,11 +114,15 @@ router.post('/notify', async (req: Request, res: Response) => {
     });
 
     if (body.channels?.length) {
-      for (const channel of body.channels) {
-        await notificationService.sendWebhook(channel, {
+      const results = await Promise.allSettled(
+        body.channels.map(channel => notificationService.sendWebhook(channel, {
           title: body.title,
           content: body.content,
-        });
+        })),
+      );
+      const failed = results.filter(r => r.status === 'rejected');
+      if (failed.length > 0) {
+        console.error(`[webhook] ${failed.length}/${body.channels.length} channels failed`);
       }
     }
 

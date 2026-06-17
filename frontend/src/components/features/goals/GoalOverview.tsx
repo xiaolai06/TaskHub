@@ -3,24 +3,21 @@
 import { cn } from '@/lib/utils';
 import { TrendingUp, AlertTriangle, CheckCircle2, Loader2, Target } from 'lucide-react';
 import type { GoalOverview as GoalOverviewType, GoalOverviewItem, MetricType } from '@/hooks/useGoals';
+import { metricConfig } from '@/components/features/goals/GoalCard';
 
 interface Props {
   data?: GoalOverviewType;
   isLoading?: boolean;
 }
 
-const metricIcon: Record<MetricType, string> = {
-  REVENUE: '💰', PROFIT: '📈', NEW_ORDERS: '📦',
-  PROJECT_COUNT: '✅', DELIVERY_RATE: '🎯', MILESTONE: '🏁',
-};
-
 function formatProgress(goal: GoalOverviewItem): string {
   if (goal.metricType === 'REVENUE' || goal.metricType === 'PROFIT') {
     const v = goal.currentValue;
     return v >= 10000 ? `¥${(v / 10000).toFixed(1)}万` : `¥${v.toLocaleString('zh-CN', { maximumFractionDigits: 0 })}`;
   }
-  if (goal.metricType === 'DELIVERY_RATE') return `${Math.round(goal.currentValue)}%`;
-  return `${goal.currentValue}${goal.unit || ''}`;
+  if (['DELIVERY_RATE', 'TASK_RATE', 'OVERDUE_REDUCTION'].includes(goal.metricType)) return `${Math.round(goal.currentValue)}%`;
+  if (goal.metricType === 'SATISFACTION') return `${Math.round(goal.currentValue)}分`;
+  return `${goal.currentValue}${goal.unit || metricConfig[goal.metricType as MetricType]?.unit || ''}`;
 }
 
 export function GoalOverview({ data, isLoading }: Props) {
@@ -76,7 +73,7 @@ export function GoalOverview({ data, isLoading }: Props) {
               goal.isAtRisk ? 'border-red-200' : 'border-slate-200',
             )}>
               <div className="flex items-center justify-between">
-                <span className="text-sm">{metricIcon[goal.metricType] || '🎯'}</span>
+                <span className="text-sm">{metricConfig[goal.metricType as MetricType]?.icon || '🎯'}</span>
                 {goal.isAtRisk ? (
                   <span className="flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-2xs font-medium text-red-600">
                     <AlertTriangle className="h-2.5 w-2.5" />落后

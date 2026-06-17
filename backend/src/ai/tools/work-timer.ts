@@ -168,7 +168,14 @@ export const addTodoTool: ToolDefinition = {
 
 export const toggleTodoTool: ToolDefinition = {
   name: 'toggle_todo',
-  description: '完成/取消完成待办。用户说"完成XX待办""XX做好了"时调用。写操作需确认。',
+  description: `切换待办的完成状态。未完成→已完成，已完成→未完成。
+
+使用时机:
+- "完成XX待办"、"XX做好了"、"取消完成XX"
+
+不使用时机:
+- 新增待办 → 用 add_todo
+- 删除待办 → 请联系前端操作`,
   category: 'work_timer',
   access: 'write',
   requiresConfirmation: true,
@@ -179,6 +186,7 @@ export const toggleTodoTool: ToolDefinition = {
       todoId: { type: 'string', description: '待办 ID' },
       content: { type: 'string', description: '待办内容，模糊匹配' },
     },
+    required: [],
   },
   handler: async (args, userId) => {
     let todoId = args.todoId as string | undefined;

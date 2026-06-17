@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import * as greetingService from '../services/greeting.service';
 import { success, error } from '../utils/response';
+import { validate } from '../middleware/validate';
+import { createGreetingSchema, updateGreetingSchema } from '../validators/greeting.schema';
 
 const router = Router();
 
@@ -26,17 +28,12 @@ router.get('/all', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // POST / - 添加自定义祝福语
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', validate(createGreetingSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { content, hourStart, hourEnd } = req.body;
-    if (!content || typeof content !== 'string' || content.trim().length === 0) {
-      error(res, 'VALIDATION_ERROR', '语录内容不能为空', 400);
-      return;
-    }
     const greeting = await greetingService.create(req.userId!, {
-      content: content.trim(),
-      hourStart,
-      hourEnd,
+      content: req.body.content.trim(),
+      hourStart: req.body.hourStart,
+      hourEnd: req.body.hourEnd,
       source: 'custom',
     });
     success(res, greeting, undefined, 201);
@@ -46,7 +43,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // PUT /:id - 更新祝福语
-router.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
+router.put('/:id', validate(updateGreetingSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = String(req.params.id);
     const greeting = await greetingService.update(req.userId!, id, req.body);

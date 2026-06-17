@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2, AlertTriangle, FolderKanban, Plus, X } from 'lucide-react';
+import { Loader2, AlertTriangle, FolderKanban, Plus } from 'lucide-react';
+import { CustomSelect } from '@/components/ui/custom-select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useProjectList, useCreateProject, useUpdateProject, useDeleteProject, useArchiveProject } from '@/hooks/useProjects';
-import { useProjectTasks, useCreateTask, useUpdateTask, useDeleteTask } from '@/hooks/useTasks';
+import { useProjectTasks, useCreateTask, useUpdateTask, useUpdateTaskStatus, useDeleteTask } from '@/hooks/useTasks';
 import { ProjectCard } from '@/components/features/projects/ProjectCard';
 import { ProjectForm } from '@/components/features/projects/ProjectForm';
-import { SubtaskList } from '@/components/features/projects/SubtaskList';
+import { ProjectTaskSheet } from '@/components/features/projects/ProjectTaskSheet';
 import type { Project, CreateProjectInput, UpdateProjectInput } from '@/hooks/useProjects';
 import type { CreateTaskInput } from '@/hooks/useTasks';
 
@@ -17,7 +18,8 @@ export default function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(null);
+  const [datePreset, setDatePreset] = useState('');
+  const [sheetProject, setSheetProject] = useState<Project | null>(null);
 
   const { data, isLoading, error } = useProjectList({
     status: statusFilter || undefined,
@@ -29,9 +31,10 @@ export default function ProjectsPage() {
   const deleteMutation = useDeleteProject();
   const archiveMutation = useArchiveProject();
 
-  const { data: tasks, isLoading: tasksLoading } = useProjectTasks(expandedProjectId || '');
+  const { data: tasks, isLoading: tasksLoading } = useProjectTasks(sheetProject?.id || '');
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
+  const updateStatusMutation = useUpdateTaskStatus();
   const deleteTaskMutation = useDeleteTask();
 
   function handleCreate(input: CreateProjectInput) {
@@ -63,13 +66,12 @@ export default function ProjectsPage() {
     }
   }
 
-  function toggleExpand(projectId: string) {
-    setExpandedProjectId((prev) => (prev === projectId ? null : projectId));
+  function handleOpenSheet(project: Project) {
+    setSheetProject(project);
   }
 
-  function handleCreateTask(data: CreateTaskInput) {
-    if (!expandedProjectId) return;
-    createTaskMutation.mutate({ ...data, projectId: expandedProjectId });
+  function handleStatusChange(taskId: string, newStatus: string) {
+    updateStatusMutation.mutate({ id: taskId, status: newStatus });
   }
 
   function handleUpdateTask(id: string, data: Record<string, unknown>) {
@@ -107,13 +109,44 @@ export default function ProjectsPage() {
         </div>
 
         {/* 日期筛选 */}
-        <div className="flex items-center gap-1.5">
-          <DatePicker value={startDate} onChange={setStartDate} />
-          <DatePicker value={endDate} onChange={setEndDate} />
-          {(startDate || endDate) && (
-            <button onClick={() => { setStartDate(''); setEndDate(''); }} className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
-              <X className="h-3.5 w-3.5" />
-            </button>
+        <div className="flex items-center gap-2">
+          <CustomSelect
+            value={datePreset}
+            options={[
+              { value: '', label: '全部日期' },
+              { value: 'today', label: '今日' },
+              { value: 'week', label: '本周' },
+              { value: 'month', label: '本月' },
+              { value: 'year', label: '本年' },
+              { value: 'custom', label: '自定义' },
+            ]}
+            onChange={(v) => {
+              if (v === 'custom') { setDatePreset('custom'); return; }
+              setDatePreset(v);
+              const now = new Date();
+              const toISO = (d: Date) => d.toISOString().slice(0, 10);
+              if (v === '') { setStartDate(''); setEndDate(''); }
+              else if (v === 'today') { const t = toISO(now); setStartDate(t); setEndDate(t); }
+              else if (v === 'week') {
+                const day = now.getDay() || 7;
+                const mon = new Date(now); mon.setDate(now.getDate() - day + 1);
+                const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+                setStartDate(toISO(mon)); setEndDate(toISO(sun));
+              } else if (v === 'month') {
+                const first = new Date(now.getFullYear(), now.getMonth(), 1);
+                const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                setStartDate(toISO(first)); setEndDate(toISO(last));
+              } else if (v === 'year') {
+                setStartDate(`${now.getFullYear()}-01-01`); setEndDate(`${now.getFullYear()}-12-31`);
+              }
+            }}
+            className="w-[110px]"
+          />
+          {datePreset === 'custom' && (
+            <>
+              <DatePicker value={startDate} onChange={setStartDate} />
+              <DatePicker value={endDate} onChange={setEndDate} />
+            </>
           )}
         </div>
 
@@ -155,39 +188,41 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {data.data.map((project) => (
-            <div key={project.id} className="flex flex-col">
-              <div onClick={() => toggleExpand(project.id)} className="cursor-pointer">
-                <ProjectCard
-                  project={project}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onArchive={handleArchive}
-                />
-              </div>
-
-              {expandedProjectId === project.id && (
-                <div className="mt-2 rounded-xl border border-border/60 bg-card shadow-sm">
-                  <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-                    <h3 className="text-sm font-semibold text-foreground/80">任务列表</h3>
-                    <button onClick={() => setExpandedProjectId(null)} className="rounded p-1 text-muted-foreground hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none">
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                  <div className="max-h-[400px] overflow-y-auto p-2">
-                    <SubtaskList
-                      tasks={tasks || []}
-                      projectId={project.id}
-                      onCreateSubtask={handleCreateTask}
-                      onUpdateTask={handleUpdateTask}
-                      onDeleteTask={handleDeleteTask}
-                      isLoading={tasksLoading}
-                    />
-                  </div>
-                </div>
-              )}
+            <div key={project.id} className="cursor-pointer" onClick={() => handleOpenSheet(project)}>
+              <ProjectCard
+                project={project}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onArchive={handleArchive}
+              />
             </div>
           ))}
         </div>
+      )}
+
+      {/* 任务 Sheet 面板 */}
+      {sheetProject && (
+        <ProjectTaskSheet
+          project={sheetProject}
+          tasks={tasks || []}
+          open={!!sheetProject}
+          onClose={() => setSheetProject(null)}
+          onCreateTask={(data) => {
+            if (data.title === '__OPEN_FORM__') {
+              setEditProject(null);
+              setShowForm(true);
+            } else {
+              createTaskMutation.mutate(data);
+            }
+          }}
+          onUpdateTask={handleUpdateTask}
+          onDeleteTask={handleDeleteTask}
+          onEditProject={(p) => { setEditProject(p); setShowForm(true); }}
+          onArchiveProject={handleArchive}
+          onDeleteProject={handleDelete}
+          onStatusChange={handleStatusChange}
+          isLoading={tasksLoading}
+        />
       )}
 
       {/* 新建/编辑表单 */}

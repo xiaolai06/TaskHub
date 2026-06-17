@@ -238,3 +238,12 @@ async function updateParentProgress(parentId: string) {
     },
   });
 }
+
+export async function getStats(userId: string) {
+  const now = new Date();
+  const [todoCount, overdueCount] = await Promise.all([
+    prisma.task.count({ where: { project: { ownerId: userId }, status: { in: ['TODO', 'IN_PROGRESS'] } } }),
+    prisma.task.count({ where: { project: { ownerId: userId }, status: { not: 'DONE' }, dueDate: { lt: now } } }),
+  ]);
+  return { todoCount, overdueCount };
+}

@@ -3,7 +3,16 @@ import { z } from 'zod';
 // ======================== 目标校验 ========================
 
 const metricTypeEnum = z.enum(
-  ['REVENUE', 'PROFIT', 'NEW_ORDERS', 'PROJECT_COUNT', 'DELIVERY_RATE', 'MILESTONE'],
+  [
+    // 经营业务
+    'REVENUE', 'PROFIT', 'NEW_ORDERS', 'PROJECT_COUNT', 'DELIVERY_RATE',
+    // 任务管理
+    'TASK_COMPLETION', 'TASK_RATE', 'OVERDUE_REDUCTION',
+    // 客户关系
+    'NEW_CUSTOMERS', 'CUSTOMER_VISITS', 'SATISFACTION',
+    // 个人成长
+    'SKILL_HOURS', 'HABIT_STREAK', 'MILESTONE',
+  ],
   { message: '指标类型无效' },
 );
 
@@ -14,7 +23,7 @@ export const createGoalSchema = z.object({
   metricType: metricTypeEnum,
   targetValue: z.number().positive('目标值必须大于0').nullable().optional(),
   unit: z.string().max(10, '单位最多10字').nullable().optional(),
-  progressMode: z.enum(['AUTO', 'MANUAL', 'MILESTONE']).optional(),
+  progressMode: z.enum(['AUTO', 'MANUAL', 'MILESTONE', 'CHECKIN']).optional(),
   startDate: z.string().refine(d => !isNaN(Date.parse(d)), '开始日期格式无效'),
   endDate: z.string().refine(d => !isNaN(Date.parse(d)), '结束日期格式无效'),
   projectId: z.string().nullable().optional(),
@@ -34,8 +43,8 @@ export const updateGoalSchema = z.object({
   metricType: metricTypeEnum.optional(),
   targetValue: z.number().positive().nullable().optional(),
   unit: z.string().max(10).nullable().optional(),
-  progressMode: z.enum(['AUTO', 'MANUAL', 'MILESTONE']).optional(),
-  status: z.enum(['ACTIVE', 'ABANDONED', 'AT_RISK']).optional(),
+  progressMode: z.enum(['AUTO', 'MANUAL', 'MILESTONE', 'CHECKIN']).optional(),
+  status: z.enum(['ACTIVE', 'COMPLETED', 'ABANDONED', 'AT_RISK']).optional(),
   startDate: z.string().refine(d => !isNaN(Date.parse(d))).optional(),
   endDate: z.string().refine(d => !isNaN(Date.parse(d))).optional(),
   projectId: z.string().nullable().optional(),
@@ -73,6 +82,13 @@ export const updateMilestoneSchema = z.object({
   sortOrder: z.number().int().min(0).optional(),
 });
 
+// ======================== 打卡校验 ========================
+
+export const createCheckinSchema = z.object({
+  date: z.string().refine(d => /^\d{4}-\d{2}-\d{2}$/.test(d), '日期格式无效，需 YYYY-MM-DD'),
+  note: z.string().max(200, '备注最多200字').optional(),
+});
+
 // ======================== 类型导出 ========================
 
 export type CreateGoalInput = z.infer<typeof createGoalSchema>;
@@ -81,3 +97,4 @@ export type UpdateProgressInput = z.infer<typeof updateProgressSchema>;
 export type CreateProgressLogInput = z.infer<typeof createProgressLogSchema>;
 export type CreateMilestoneInput = z.infer<typeof createMilestoneSchema>;
 export type UpdateMilestoneInput = z.infer<typeof updateMilestoneSchema>;
+export type CreateCheckinInput = z.infer<typeof createCheckinSchema>;

@@ -43,6 +43,8 @@ async function safeParseJSON(res: Response): Promise<ApiResponse> {
   }
 }
 
+let isRedirecting = false;
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
   const config: RequestInit = {
@@ -67,7 +69,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   const json = await safeParseJSON(res);
   if (!json.success) {
-    if (res.status === 401 && typeof window !== 'undefined') window.location.href = '/auth-pages/login';
+    if (res.status === 401 && typeof window !== 'undefined' && !isRedirecting) {
+      isRedirecting = true;
+      window.location.href = '/auth-pages/login';
+    }
     throw new ApiError(json.error?.message || '请求失败', json.error?.code || 'UNKNOWN_ERROR', res.status, json.error?.details);
   }
   return json.data as T;

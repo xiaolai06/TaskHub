@@ -171,7 +171,15 @@ export const updateTaskStatusTool: ToolDefinition = {
 
 export const deleteTaskTool: ToolDefinition = {
   name: 'delete_task',
-  description: '删除任务。不可恢复。用户说“删除XX任务”“删掉XX”时调用。写操作需确认。',
+  description: `删除任务。不可恢复，子任务也会一并删除。
+
+使用时机:
+- “删除XX任务”、”删掉XX”
+
+不使用时机:
+- 任务只是暂时搁置 → 建议改状态为 BLOCKED
+- 任务已做完 → 用 update_task_status 标记 DONE
+- 只想修改任务内容 → 用 update_task_status`,
   category: 'work',
   access: 'write',
   requiresConfirmation: true,
@@ -188,9 +196,10 @@ export const deleteTaskTool: ToolDefinition = {
     let task;
     if (args.taskId) task = await prisma.task.findFirst({ where: { id: args.taskId as string, project: { ownerId: userId } } });
     else if (args.taskTitle) task = await prisma.task.findFirst({ where: { title: { contains: args.taskTitle as string }, project: { ownerId: userId } } });
-    if (!task) return { error: '未找到任务' };
+    else return { error: '请提供任务 ID 或名称' };
+    if (!task) return { error: '未找到匹配的任务' };
     await prisma.task.delete({ where: { id: task.id } });
-    return { success: true, action: '删除任务', summary: `已删除任务「${task.title}」`, details: {} };
+    return { success: true, action: '删除任务', summary: `已删除任务「${task.title}」（含子任务）`, details: {} };
   },
 };
 

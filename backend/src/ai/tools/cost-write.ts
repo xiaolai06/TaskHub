@@ -70,7 +70,13 @@ export const createCostTool: ToolDefinition = {
 
 export const deleteCostTool: ToolDefinition = {
   name: 'delete_cost',
-  description: '删除成本记录。不可恢复。用户说"删掉那笔成本""删除成本记录"时调用。写操作需确认。',
+  description: `删除成本记录。不可恢复。
+
+使用时机:
+- "删掉那笔成本"、"删除成本记录"
+
+不使用时机:
+- 只想修改金额或类别 → 请联系前端编辑（AI 暂不支持更新成本）`,
   category: 'finance',
   access: 'write',
   requiresConfirmation: true,

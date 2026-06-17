@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { CalendarIcon, XIcon } from 'lucide-react';
+import { CalendarIcon, XIcon, ChevronDown } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Calendar } from '@/components/ui/calendar';
@@ -68,7 +68,7 @@ function DatePicker({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className={cn(
-          'flex h-9 w-40 shrink-0 items-center gap-2 rounded-lg border border-border/80 bg-card px-3 text-sm',
+          'relative flex h-9 w-40 shrink-0 items-center gap-2 rounded-lg border border-border/80 bg-card pl-3 pr-7 text-sm',
           'transition-all select-none',
           'hover:border-indigo-300 hover:bg-indigo-50/40',
           'focus-visible:border-indigo-400 focus-visible:ring-2 focus-visible:ring-indigo-200/60 focus-visible:outline-none',
@@ -81,7 +81,7 @@ function DatePicker({
         <span className="flex-1 truncate text-left text-[13px]">
           {date ? toISO(date) : placeholder}
         </span>
-        {date && hovered && (
+        {date && hovered ? (
           <span
             role="button"
             tabIndex={-1}
@@ -95,10 +95,12 @@ function DatePicker({
                 onChange?.('');
               }
             }}
-            className="shrink-0 rounded p-0.5 text-muted-foreground/40 transition-colors hover:bg-muted hover:text-foreground"
+            className="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 rounded p-0.5 text-muted-foreground/40 transition-colors hover:bg-muted hover:text-foreground"
           >
             <XIcon className="size-3" />
           </span>
+        ) : (
+          <ChevronDown className={cn('absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/60 transition-transform', open && 'rotate-180')} />
         )}
       </PopoverTrigger>
       <PopoverContent

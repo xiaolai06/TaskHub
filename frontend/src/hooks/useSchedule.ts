@@ -1,3 +1,5 @@
+'use client';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
@@ -122,7 +124,10 @@ export function useSchedule(projectId: string, dailyHourLimit = 8) {
 export function useDelays(projectId: string) {
   return useQuery<DelayedTask[]>({
     queryKey: [QUERY_KEY, 'delays', projectId],
-    queryFn: () => api.get<DelayedTask[]>(`/scheduler/delays/${projectId}`),
+    queryFn: () => {
+      const endpoint = projectId ? `/scheduler/delays/${projectId}` : '/scheduler/delays';
+      return api.get<DelayedTask[]>(endpoint);
+    },
     enabled: true,
   });
 }
@@ -131,10 +136,12 @@ export function useDelays(projectId: string) {
 export function useConflicts(projectId: string, dailyHourLimit = 8) {
   return useQuery<ConflictData>({
     queryKey: [QUERY_KEY, 'conflicts', projectId, dailyHourLimit],
-    queryFn: () =>
-      api.get<ConflictData>(
-        `/scheduler/conflicts/${projectId}?dailyHourLimit=${dailyHourLimit}`,
-      ),
+    queryFn: () => {
+      const endpoint = projectId
+        ? `/scheduler/conflicts/${projectId}?dailyHourLimit=${dailyHourLimit}`
+        : `/scheduler/conflicts?dailyHourLimit=${dailyHourLimit}`;
+      return api.get<ConflictData>(endpoint);
+    },
     enabled: true,
   });
 }

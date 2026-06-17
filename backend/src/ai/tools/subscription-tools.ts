@@ -181,7 +181,14 @@ export const createSubscriptionTool: ToolDefinition = {
 
 export const pauseSubscriptionTool: ToolDefinition = {
   name: 'pause_subscription',
-  description: '暂停订阅。用户说"暂停XX订阅""先不续费了"时调用。写操作需确认。',
+  description: `暂停订阅，暂停后不再自动扣费，订阅记录保留。
+
+使用时机:
+- "暂停XX订阅"、"先不续费了"
+
+不使用时机:
+- 永久取消 → 用 delete_subscription
+- 查看订阅列表 → 用 list_subscriptions`,
   category: 'subscription',
   access: 'write',
   requiresConfirmation: true,
@@ -192,6 +199,7 @@ export const pauseSubscriptionTool: ToolDefinition = {
       subscriptionId: { type: 'string', description: '订阅 ID' },
       name: { type: 'string', description: '订阅名，模糊匹配' },
     },
+    required: [],
   },
   handler: async (args, userId) => {
     let subId = args.subscriptionId as string | undefined;
@@ -217,7 +225,13 @@ export const pauseSubscriptionTool: ToolDefinition = {
 
 export const resumeSubscriptionTool: ToolDefinition = {
   name: 'resume_subscription',
-  description: '恢复已暂停的订阅。用户说"恢复订阅""继续续费"时调用。写操作需确认。',
+  description: `恢复已暂停的订阅，恢复后将按原周期自动扣费。
+
+使用时机:
+- "恢复订阅"、"继续续费"
+
+不使用时机:
+- 创建新订阅 → 用 create_subscription`,
   category: 'subscription',
   access: 'write',
   requiresConfirmation: true,
@@ -228,6 +242,7 @@ export const resumeSubscriptionTool: ToolDefinition = {
       subscriptionId: { type: 'string', description: '订阅 ID' },
       name: { type: 'string', description: '订阅名，模糊匹配' },
     },
+    required: [],
   },
   handler: async (args, userId) => {
     let subId = args.subscriptionId as string | undefined;

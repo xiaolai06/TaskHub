@@ -4,6 +4,7 @@ import { AIService } from '../services/ai.service';
 import { pushReport } from '../utils/push-helper';
 import * as dashboardService from '../services/dashboard.service';
 import { loadPrompt } from '../utils/prompt-loader';
+import { logExecution } from '../utils/job-logger';
 const PROMPT = loadPrompt('health-check.txt', '你是项目健康度检查助手，请分析项目状态。');
 
 export async function runHealthCheck(userId: string): Promise<string> {
@@ -58,10 +59,18 @@ cron.schedule('0 10 * * 0', async () => {
       select: { id: true, preferences: { select: { systemNotify: true } } },
     });
     for (const user of users) {
+      const userStart = Date.now();
       try {
-        if (user.preferences && !user.preferences.systemNotify) continue;
+        if (user.preferences && !user.preferences.systemNotify) {
+          await logExecution({ jobSlug: 'health-check', userId: user.id, status: 'skipped' });
+          continue;
+        }
         await runHealthCheck(user.id);
-      } catch (e) { console.error(`[health-check] 用户 ${user.id} 失败:`, e); }
+        await logExecution({ jobSlug: 'health-check', userId: user.id, status: 'success', durationMs: Date.now() - userStart });
+      } catch (e) {
+        console.error(`[health-check] 用户 ${user.id} 失败:`, e);
+        await logExecution({ jobSlug: 'health-check', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
+      }
     }
     console.log(`[health-check] 完成`);
   } catch (e) { console.error('[health-check] 失败:', e); }
