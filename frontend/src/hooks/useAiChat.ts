@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { api, API_BASE } from '@/lib/api';
 
 /** AI 写操作工具执行后需失效的缓存 key */
 const WRITE_TOOL_CACHE_MAP: Record<string, string[]> = {
@@ -117,9 +117,8 @@ async function consumeSSEStream(
             opts.onDone([...tools]);
             return;
         }
-      } catch (e) {
+      } catch {
         // SSE JSON 解析失败 — 记录但不中断流
-        console.warn('[SSE] JSON 解析失败:', data.slice(0, 100), e);
       }
     }
   }
@@ -142,7 +141,6 @@ export function useAiChat() {
     provider?: string,
     showStopMsg = true,
   ): Promise<void> => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -189,7 +187,6 @@ export function useAiChat() {
     model?: string,
     provider?: string,
   ): Promise<void> => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
     const controller = new AbortController();
     abortRef.current = controller;
 

@@ -18,6 +18,9 @@ const REFRESH_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 /** Cookie 有效期：7 天 */
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
+/** Cookie 安全标志：与 auth.routes.ts 保持一致 */
+const COOKIE_SECURE = process.env.COOKIE_SECURE === 'true';
+
 export function auth(req: Request, res: Response, next: NextFunction): void {
   // 从 Cookie 或 Authorization header 获取 token（Cookie 优先）
   const cookieToken = req.cookies?.token;
@@ -46,8 +49,8 @@ export function auth(req: Request, res: Response, next: NextFunction): void {
         });
         res.cookie('token', newToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
+          secure: COOKIE_SECURE,
+          sameSite: COOKIE_SECURE ? 'none' : 'lax',
           maxAge: COOKIE_MAX_AGE,
           path: '/',
         });

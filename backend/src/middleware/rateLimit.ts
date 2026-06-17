@@ -45,12 +45,12 @@ export function rateLimit(options: RateLimitOptions) {
       return;
     }
 
-    if (record.count >= max) {
+    record.count++;
+    if (record.count > max) {
       error(res, 'RATE_LIMITED', message, 429);
       return;
     }
 
-    record.count++;
     next();
   };
 }
@@ -60,6 +60,12 @@ export const loginLimit = rateLimit({
   windowMs: 60 * 1000,  // 1 分钟
   max: 5,               // 最多 5 次
   message: '登录尝试过于频繁，请 1 分钟后再试',
+});
+
+export const registerLimit = rateLimit({
+  windowMs: 60 * 1000,  // 1 分钟
+  max: 3,               // 最多 3 次
+  message: '注册过于频繁，请 1 分钟后再试',
 });
 
 export const apiLimit = rateLimit({

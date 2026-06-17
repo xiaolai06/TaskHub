@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { success } from '../utils/response';
+import { success, error } from '../utils/response';
+import { prisma } from '../server';
 
 // 导入各模块路由
 import authRoutes from './auth.routes';
@@ -35,8 +36,18 @@ import { apiLimit } from '../middleware/rateLimit';
 const router = Router();
 
 // ============ 公开接口（不需要登录） ============
-router.get('/health', (_req: Request, res: Response) => {
-  success(res, { status: 'ok', timestamp: new Date().toISOString() }, '服务运行正常');
+router.get('/health', async (_req: Request, res: Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    success(res, {
+      status: 'ok',
+      database: 'connected',
+      uptime: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString(),
+    }, '服务运行正常');
+  } catch {
+    error(res, 'HEALTH_CHECK_FAILED', '数据库连接异常', 503);
+  }
 });
 
 router.use('/auth', authRoutes);          // /api/auth/*（登录/注册是公开的）

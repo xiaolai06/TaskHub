@@ -238,6 +238,8 @@ export async function transcribeAudio(
 
   const file = new File([new Uint8Array(audioBuffer)], `audio.${ext}`, { type: mimeType });
 
+  console.log(`[STT] 供应商: ${config.label} (${config.name}) | URL: ${config.baseUrl} | Model: ${config.model} | Key: ${config.apiKey.slice(0, 6)}...${config.apiKey.slice(-4)} | File: audio.${ext} (${(audioBuffer.length / 1024).toFixed(1)}KB)`);
+
   try {
     const start = Date.now();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -56,7 +56,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     loadHistory, getSessions, createSession, updateSession, deleteSession, setMessages,
   } = useAiChat();
 
-  const { data: projectData } = useProjectList({});
+  const { data: projectData } = useProjectList(undefined);
 
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<TabKey>('overview');
@@ -245,7 +245,13 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
     return () => document.removeEventListener('keydown', onKey);
   }, [open, handleClose, handleNewSession]);
 
-  const projects = (projectData as any)?.data || projectData || [];
+  const projects = (projectData?.data || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    status: p.status,
+    budget: p.budget ?? undefined,
+    startDate: p.startDate ?? undefined,
+  }));
 
   return (
     <>

@@ -2,16 +2,21 @@ import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../utils/errors';
 import { error } from '../utils/response';
 
+interface PrismaError extends Error {
+  code: string;
+  meta?: Record<string, unknown>;
+}
+
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): void {
   // 已知业务错误
   if (err instanceof AppError) {
-    error(res, err.code, err.message, err.statusCode, (err as any).details);
+    error(res, err.code, err.message, err.statusCode);
     return;
   }
 
   // Prisma 错误
   if (err.name === 'PrismaClientKnownRequestError') {
-    const prismaErr = err as any;
+    const prismaErr = err as PrismaError;
     if (prismaErr.code === 'P2002') {
       error(res, 'CONFLICT', '数据已存在（唯一约束冲突）', 409);
       return;
@@ -29,6 +34,6 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
   }
 
   // 未知错误
-  console.error('未捕获错误:', err);
+  console.error('[ErrorHandler] 未捕获错误:', err.message);
   error(res, 'INTERNAL_ERROR', '服务器内部错误', 500);
 }

@@ -32,6 +32,10 @@ export const config = {
   // ===== 加密 =====
   encryptionKey: requireEnv('ENCRYPTION_KEY'),
 
+  // ===== 安全 =====
+  cookieSecure: process.env.COOKIE_SECURE === 'true',
+  trustProxy: process.env.TRUST_PROXY || '1',
+
   // ===== 限频 =====
   limitEnabled: process.env.LIMIT_ENABLED !== 'false',
 

@@ -40,16 +40,17 @@ export function SmartDigest({ onDigestClick, open }: SmartDigestProps) {
     setError(false);
 
     Promise.all([
-      api.get<any>('/dashboard/summary').catch(() => null),
-      api.get<any>('/tasks/stats').catch(() => null),
-      api.get<any[]>('/customers').catch(() => []),
+      api.get<Record<string, unknown>>('/dashboard/summary').catch(() => null),
+      api.get<Record<string, unknown>>('/tasks/stats').catch(() => null),
+      api.get<{ data: unknown[] }>('/customers').catch(() => null),
     ])
       .then(([dashSummary, taskStats, customers]) => {
-        const custArr = Array.isArray(customers) ? customers : (customers as any)?.data || [];
-        const overdueCount = taskStats?.overdueCount || 0;
-        const todoCount = taskStats?.todoCount || 0;
-        const revenue = (dashSummary?.monthIncome || dashSummary?.income || 0) / 100;
-        const expense = (dashSummary?.monthExpense || dashSummary?.expense || 0) / 100;
+        const custArr = Array.isArray(customers) ? customers : (customers as { data?: unknown[] })?.data || [];
+        const overdueCount = (taskStats as Record<string, unknown>)?.overdueCount as number || 0;
+        const todoCount = (taskStats as Record<string, unknown>)?.todoCount as number || 0;
+        const dash = dashSummary as Record<string, unknown> || {};
+        const revenue = ((dash.monthIncome as number) || (dash.income as number) || 0) / 100;
+        const expense = ((dash.monthExpense as number) || (dash.expense as number) || 0) / 100;
         const profit = revenue - expense;
         const margin = revenue > 0 ? Math.round((profit / revenue) * 100) : 0;
 

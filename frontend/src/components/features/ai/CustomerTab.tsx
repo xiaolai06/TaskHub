@@ -44,17 +44,19 @@ function daysSince(dateStr: string | null | undefined): number | null {
 export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
   const [customers, setCustomers] = useState<CustomerItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setLoading(true);
+    setFetchError(false);
     api.get<{ data: CustomerItem[] }>('/customers?limit=100')
       .then((res) => {
-        // API 返回 { data: [...], total, page, limit }，api.get 解包外层 data
-        const list = Array.isArray(res) ? res : (res as any)?.data || [];
+        // api.get 解包外层 data 后，res 可能是数组或带 data 的对象
+        const list = Array.isArray(res) ? res : (res as unknown as { data?: CustomerItem[] })?.data || [];
         setCustomers(list);
       })
-      .catch(() => {})
+      .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
   }, [open]);
 
@@ -77,6 +79,15 @@ export function CustomerTab({ onCustomerClick, open }: CustomerTabProps) {
         <div className="h-12 w-full rounded-lg bg-muted" />
         <div className="h-12 w-full rounded-lg bg-muted" />
         <div className="h-12 w-full rounded-lg bg-muted" />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-xs text-red-500">加载客户数据失败</p>
+        <p className="mt-1 text-2xs-plus text-muted-foreground/50">请检查网络连接</p>
       </div>
     );
   }

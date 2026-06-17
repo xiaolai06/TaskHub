@@ -1,7 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { validate } from '../middleware/validate';
 import { auth } from '../middleware/auth';
-import { loginLimit } from '../middleware/rateLimit';
+import { loginLimit, registerLimit, rateLimit } from '../middleware/rateLimit';
+
+const passwordLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: '密码修改尝试过于频繁，请 1 分钟后再试',
+});
 import { registerSchema, loginSchema } from '../validators/auth.schema';
 import * as authService from '../services/auth.service';
 import { success, error } from '../utils/response';
@@ -14,15 +20,17 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 /**
  * 设置 httpOnly Cookie
  * - httpOnly: JS 无法读取，防 XSS
- * - secure: 仅 HTTPS（开发环境 localhost 用 false）
+ * - secure: COOKIE_SECURE 环境变量控制（HTTP=false, HTTPS=true）
  * - sameSite: lax，防 CSRF
  * - path: /，全站可用
  */
+const COOKIE_SECURE = process.env.COOKIE_SECURE === 'true';
+
 function setTokenCookie(res: Response, token: string): void {
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.COOKIE_SECURE === 'true',
-    sameSite: 'lax',
+    secure: COOKIE_SECURE,
+    sameSite: COOKIE_SECURE ? 'none' : 'lax', // HTTPS 时用 none 以支持跨站 cookie
     maxAge: COOKIE_MAX_AGE,
     path: '/',
   });
@@ -37,8 +45,8 @@ function extractToken(req: Request): string | undefined {
 
 // ============ 公开接口（不需要登录） ============
 
-/** POST /register — 用户注册 */
-router.post('/register', validate(registerSchema), async (req: Request, res: Response, next) => {
+/** POST /register — 用户注册（限频：3次/分钟） */
+router.post('/register', registerLimit, validate(registerSchema), async (req: Request, res: Response, next) => {
   try {
     const { email, password, name } = req.body;
     const result = await authService.register(email, password, name, req);
@@ -99,8 +107,8 @@ router.put('/profile', auth, async (req: Request, res: Response, next) => {
   }
 });
 
-/** PUT /password — 修改密码 */
-router.put('/password', auth, async (req: Request, res: Response, next) => {
+/** PUT /password — 修改密码（限频：5次/分钟） */
+router.put('/password', auth, passwordLimit, async (req: Request, res: Response, next) => {
   try {
     const { oldPassword, newPassword } = req.body;
     if (!oldPassword || !newPassword) {

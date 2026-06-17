@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useCallback, useEffect } from 'react';
+import { API_BASE } from '@/lib/api';
 
 /**
  * 语音识别 — 后端 Whisper API：
@@ -26,8 +27,6 @@ interface UseSpeechRecognitionReturn {
 }
 
 // ═══ 工具函数 ═══
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 const PREFERRED_MIME = [
   'audio/webm;codecs=opus', 'audio/webm',

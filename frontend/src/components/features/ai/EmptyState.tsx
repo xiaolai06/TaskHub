@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -7,15 +8,21 @@ interface EmptyStateProps {
   onPromptClick: (text: string) => void;
 }
 
+function getGreetingText(hour: number): string {
+  if (hour >= 6 && hour < 12) return '早上好';
+  if (hour >= 12 && hour < 14) return '中午好';
+  if (hour >= 14 && hour < 18) return '下午好';
+  if (hour >= 18 && hour < 22) return '晚上好';
+  return '你好';
+}
+
 export function EmptyState({ onPromptClick }: EmptyStateProps) {
   const user = useAuth((s) => s.user);
-  const hour = new Date().getHours();
+  const [greeting, setGreeting] = useState('你好');
 
-  let greeting = '你好';
-  if (hour >= 6 && hour < 12) greeting = '早上好';
-  else if (hour >= 12 && hour < 14) greeting = '中午好';
-  else if (hour >= 14 && hour < 18) greeting = '下午好';
-  else if (hour >= 18 && hour < 22) greeting = '晚上好';
+  useEffect(() => {
+    setGreeting(getGreetingText(new Date().getHours()));
+  }, []);
 
   const displayName = user?.name || '朋友';
 

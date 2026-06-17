@@ -165,6 +165,7 @@ export function Header({ onOpenAi }: HeaderProps) {
   const { theme, setTheme, resolved } = useTheme();
   const queryClient = useQueryClient();
   const [customGreetings, setCustomGreetings] = useState<string[]>([]);
+  const [greeting, setGreeting] = useState('欢迎使用 智汇轻营');
 
   /* panel visibility */
   const [showTasks, setShowTasks] = useState(false);
@@ -244,6 +245,13 @@ export function Header({ onOpenAi }: HeaderProps) {
       .catch(() => {});
   }, []);
 
+  // 客户端挂载后再计算问候语，避免 SSR hydration 不匹配
+  useEffect(() => {
+    if (user?.name) {
+      setGreeting(getGreeting(user.name, customGreetings));
+    }
+  }, [user?.name, customGreetings]);
+
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (taskRef.current && !taskRef.current.contains(e.target as Node)) setShowTasks(false);
@@ -273,8 +281,8 @@ export function Header({ onOpenAi }: HeaderProps) {
     queryKey: ['header', 'notifications'],
     queryFn: async () => {
       const res = await api.get<Array<{ id: string; type: string; title: string; content: string; read: boolean; createdAt: string }>>('/notifications?limit=20');
-      const raw = Array.isArray(res) ? res : (res as any)?.data || [];
-      return raw.map((n: any) => ({
+      const raw = Array.isArray(res) ? res : (res as unknown as { data?: unknown[] })?.data || [];
+      return (raw as Array<{ id: string; type: string; title: string; content: string; read: boolean; createdAt: string }>).map((n) => ({
         id: n.id,
         type: n.type === 'TASK_DUE' ? 'alert' : n.type === 'PROJECT_CHANGE' ? 'project' : n.type === 'AI_REPORT' ? 'system' : 'system',
         title: n.title,
@@ -394,7 +402,7 @@ export function Header({ onOpenAi }: HeaderProps) {
         </div>
         <div className="h-5 w-px shrink-0 bg-slate-200" />
         <span className="text-base text-slate-500">
-          {user?.name ? getGreeting(user.name, customGreetings) : '欢迎使用 智汇轻营'}
+          {greeting}
         </span>
         <button
           onClick={toggleTheme}

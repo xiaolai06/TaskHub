@@ -7,7 +7,7 @@ export function selectSystemPrompt(userMessage: string, hasApiKey: boolean): str
   const msg = userMessage.toLowerCase();
 
   if (!hasApiKey) {
-    return '你是 TaskFlow+ 智能助手。当前未配置 AI API Key，使用 Mock 模式。';
+    return '你是 TaskFlow+ 智能助手。当前未配置 AI API Key，使用 Mock 模式。请在设置中配置 API Key 以启用完整功能。';
   }
 
   // 创建类：创建/添加/新建/记录

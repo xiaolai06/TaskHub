@@ -1,8 +1,8 @@
 import { prisma } from '../server';
+import { NotFoundError, ForbiddenError } from '../utils/errors';
 
 /** 执行业务搜索（保存搜索记录） */
 export async function search(userId: string, query: string, source = 'manual') {
-  // 保存搜索记录
   const record = await prisma.searchResult.create({
     data: {
       query,
@@ -29,8 +29,11 @@ export async function getHistory(userId: string, limit = 20) {
 /** 删除搜索记录 */
 export async function remove(id: string, userId: string) {
   const record = await prisma.searchResult.findUnique({ where: { id } });
-  if (!record || record.userId !== userId) {
-    throw new Error('搜索记录不存在');
+  if (!record) {
+    throw new NotFoundError('搜索记录');
+  }
+  if (record.userId !== userId) {
+    throw new ForbiddenError('无权删除他人的搜索记录');
   }
   return prisma.searchResult.delete({ where: { id } });
 }
