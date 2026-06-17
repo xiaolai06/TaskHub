@@ -79,11 +79,23 @@ export function useSpeechRecognition(
   // ═══ 初始化 ═══
 
   useEffect(() => {
+    // 检查是否在安全上下文（HTTPS 或 localhost）
+    const isSecureContext = typeof window !== 'undefined' && window.isSecureContext;
+    if (!isSecureContext) {
+      setMode('none');
+      setError('语音识别需要 HTTPS 环境，当前 HTTP 不支持麦克风访问');
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMode('none');
+      setError('浏览器不支持麦克风 API，请使用 Chrome 或 Edge');
+      return;
+    }
     if (getSupportedMime()) {
       setMode('whisper');
     } else {
       setMode('none');
-      setError('浏览器不支持录音，请使用 Chrome 或 Edge');
+      setError('浏览器不支持录音格式，请使用 Chrome 或 Edge');
     }
   }, []);
 
