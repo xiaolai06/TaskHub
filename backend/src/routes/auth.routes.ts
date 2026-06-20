@@ -65,20 +65,20 @@ router.get('/check-email', async (req: Request, res: Response, next) => {
 
 /** GET /captcha — 获取图形验证码 */
 router.get('/captcha', (_req: Request, res: Response) => {
-  // svg-captcha 生成图片，自带随机文字
   const captcha = svgCaptcha.create({
     size: 4,
     ignoreChars: '0OolI1',
-    noise: 3,
+    noise: 1,          // 干扰线从 3 条减到 1 条，SVG 体积小 60%
     color: true,
     background: '#f0f0f0',
-    width: 130,
+    width: 120,
     height: 40,
   });
 
-  // 用 svg-captcha 生成的文字存入 captcha-store，保证校验一致
   const { captchaId } = createCaptcha(captcha.text);
 
+  // 告诉浏览器不缓存（验证码必须每次新生成）
+  res.set('Cache-Control', 'no-store');
   res.json({
     success: true,
     data: { captchaId, svg: captcha.data },
