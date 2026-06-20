@@ -32,13 +32,23 @@ export const useAuth = create<AuthState>((set) => ({
   setUser: (user) => set({ user, isLoading: false }),
 
   login: async (email, password, captcha, captchaId) => {
-    const data = await api.post<AuthResponse>('/auth/login', { email, password, captcha, captchaId });
-    set({ user: data.user });
+    try {
+      const data = await api.post<AuthResponse>('/auth/login', { email, password, captcha, captchaId });
+      set({ user: data.user, isLoading: false });
+    } catch (err) {
+      set({ isLoading: false });
+      throw err;
+    }
   },
 
   register: async (email, password, name, captcha, captchaId) => {
-    const data = await api.post<AuthResponse>('/auth/register', { email, password, name, captcha, captchaId });
-    set({ user: data.user });
+    try {
+      const data = await api.post<AuthResponse>('/auth/register', { email, password, name, captcha, captchaId });
+      set({ user: data.user, isLoading: false });
+    } catch (err) {
+      set({ isLoading: false });
+      throw err;
+    }
   },
 
   logout: async () => {

@@ -200,6 +200,22 @@ export async function forgotPassword(email: string, captcha: string, captchaId: 
 }
 
 /**
+ * 重发重置码（不需要图形验证码，靠冷却期防滥用）
+ * 从 reset-password 页面直接重发时调用
+ */
+export async function resendResetCode(email: string): Promise<{ emailSent: boolean }> {
+  // 不暴露邮箱是否存在
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return { emailSent: false };
+
+  const { code, ok } = createResetCode(email);
+  if (!ok) return { emailSent: true }; // 冷却期内，静默返回成功
+
+  await sendResetEmail(email, code);
+  return { emailSent: true };
+}
+
+/**
  * 重置密码 — 用验证码设置新密码
  */
 export async function resetPassword(email: string, code: string, newPassword: string): Promise<void> {

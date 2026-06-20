@@ -9,11 +9,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, Eye, EyeOff, Lock, KeyRound, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { api, ApiError } from '@/lib/api';
+import { api, ApiError, getFriendlyMessage } from '@/lib/api';
 import { toast } from 'sonner';
 
 const schema = z.object({
-  code: z.string().length(6, '验证码为6位数字'),
+  code: z.string().length(6, '验证码为6位数字').regex(/^\d+$/, '验证码只能包含数字'),
   newPassword: z.string()
     .min(8, '密码至少8位')
     .regex(/[a-zA-Z]/, '密码必须包含字母')
@@ -42,6 +42,7 @@ function ResetPasswordForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
@@ -59,12 +60,20 @@ function ResetPasswordForm() {
   useEffect(() => { setCooldown(60); }, []);
 
   async function handleResend() {
+    if (!email || resending) return;
+    setResending(true);
     try {
-      await api.post('/auth/forgot-password', { email, captcha: '', captchaId: '' });
-      toast.success('验证码已重新发送');
+      await api.post('/auth/resend-reset-code', { email });
+      toast.success('验证码已重新发送到你的邮箱');
       setCooldown(60);
-    } catch {
-      toast.error('发送失败，请稍后再试');
+    } catch (err) {
+      if (err instanceof ApiError) {
+        toast.error(getFriendlyMessage(err.code, err.message));
+      } else {
+        toast.error('发送失败，请稍后再试');
+      }
+    } finally {
+      setResending(false);
     }
   }
 
@@ -83,8 +92,13 @@ function ResetPasswordForm() {
       toast.success('密码重置成功，请重新登录');
       router.push('/auth-pages/login');
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : err instanceof Error ? err.message : '重置失败';
-      toast.error(message);
+      if (err instanceof ApiError) {
+        toast.error(getFriendlyMessage(err.code, err.message));
+      } else if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('重置失败，请重试');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -119,10 +133,10 @@ function ResetPasswordForm() {
             <button
               type="button"
               onClick={handleResend}
-              disabled={cooldown > 0}
+              disabled={cooldown > 0 || resending}
               className="text-xs font-medium text-indigo-600 transition-colors hover:text-indigo-500 disabled:text-slate-400 disabled:cursor-not-allowed"
             >
-              {cooldown > 0 ? `${cooldown} 秒后可重发` : '重新发送'}
+              {resending ? '发送中...' : cooldown > 0 ? `${cooldown} 秒后可重发` : '重新发送'}
             </button>
           </div>
           <div className="relative">
@@ -151,7 +165,7 @@ function ResetPasswordForm() {
             <Input
               id="newPassword"
               type={showPassword ? 'text' : 'password'}
-              placeholder="至少6位"
+              placeholder="至少8位，含字母和数字"
               autoComplete="new-password"
               aria-invalid={!!errors.newPassword}
               className="h-11 pl-11 pr-11 text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:ring-offset-0"

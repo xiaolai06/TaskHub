@@ -10,7 +10,7 @@ const passwordLimit = rateLimit({
   max: 5,
   message: '密码修改尝试过于频繁，请 1 分钟后再试',
 });
-import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema } from '../validators/auth.schema';
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema, resendResetCodeSchema } from '../validators/auth.schema';
 import * as authService from '../services/auth.service';
 import { prisma } from '../server';
 import { success, error } from '../utils/response';
@@ -77,11 +77,17 @@ router.get('/captcha', (_req: Request, res: Response) => {
 
   const { captchaId } = createCaptcha(captcha.text);
 
+  // 防御性净化 SVG（移除 script/foreignObject/on* 事件处理器）
+  const safeSvg = captcha.data
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<foreignObject[\s\S]*?<\/foreignObject>/gi, '')
+    .replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+
   // 告诉浏览器不缓存（验证码必须每次新生成）
   res.set('Cache-Control', 'no-store');
   res.json({
     success: true,
-    data: { captchaId, svg: captcha.data },
+    data: { captchaId, svg: safeSvg },
   });
 });
 
@@ -163,6 +169,22 @@ router.post('/forgot-password', registerLimit, validate(forgotPasswordSchema), a
   try {
     const { email, captcha, captchaId } = req.body;
     const result = await authService.forgotPassword(email, captcha, captchaId);
+    success(res, { emailSent: result.emailSent }, '如果该邮箱已注册，重置码将发送到你的邮箱');
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /resend-reset-code — 重发重置码（不需要图形验证码，靠冷却期+限频防滥用） */
+const resendLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 2,
+  message: '重发过于频繁，请 1 分钟后再试',
+});
+router.post('/resend-reset-code', resendLimit, validate(resendResetCodeSchema), async (req: Request, res: Response, next) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.resendResetCode(email);
     success(res, { emailSent: result.emailSent }, '如果该邮箱已注册，重置码将发送到你的邮箱');
   } catch (err) {
     next(err);

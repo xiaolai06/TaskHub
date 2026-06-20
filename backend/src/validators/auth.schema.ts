@@ -45,7 +45,7 @@ export const forgotPasswordSchema = z.object({
  */
 export const resetPasswordSchema = z.object({
   email: z.string().email('请输入正确的邮箱地址'),
-  code: z.string().length(6, '验证码为6位数字'),
+  code: z.string().length(6, '验证码为6位数字').regex(/^\d{6}$/, '验证码只能包含6位数字'),
   newPassword: passwordSchema,
 });
 
@@ -55,6 +55,13 @@ export const resetPasswordSchema = z.object({
 export const changePasswordSchema = z.object({
   oldPassword: z.string().min(1, '请输入原密码'),
   newPassword: passwordSchema,
+});
+
+/**
+ * 重发重置码校验 Schema（仅需邮箱，不需要图形验证码）
+ */
+export const resendResetCodeSchema = z.object({
+  email: z.string().email('请输入正确的邮箱地址'),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,7 +10,8 @@ import { Loader2, Eye, EyeOff, Mail, Lock, User, CheckCircle2, XCircle, ShieldCh
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { api, ApiError } from '@/lib/api';
+import { api, ApiError, getFriendlyMessage } from '@/lib/api';
+import { getCachedCaptcha, setCachedCaptcha, clearCachedCaptcha } from '@/lib/captcha-cache';
 import { toast } from 'sonner';
 
 const registerSchema = z
@@ -37,14 +38,17 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // 邮箱可用性检查状态：null=未检查, true=可用, false=已注册
+  // 邮箱可用性检查状态
   const [emailStatus, setEmailStatus] = useState<boolean | null>(null);
   const [emailChecking, setEmailChecking] = useState(false);
+  const emailAbort = useRef<AbortController | null>(null);
 
-  // 验证码状态
-  const [captchaId, setCaptchaId] = useState('');
-  const [captchaSvg, setCaptchaSvg] = useState('');
-  const [captchaLoading, setCaptchaLoading] = useState(false);
+  // 验证码状态（优先从跨页面缓存读取）
+  const cached = getCachedCaptcha();
+  const [captchaId, setCaptchaId] = useState(cached?.captchaId ?? '');
+  const [captchaSvg, setCaptchaSvg] = useState(cached?.svg ?? '');
+  const [captchaLoading, setCaptchaLoading] = useState(!cached);
+  const captchaAbort = useRef<AbortController | null>(null);
 
   const {
     register,
@@ -55,34 +59,55 @@ export default function RegisterPage() {
     defaultValues: { name: '', email: '', password: '', confirmPassword: '', captcha: '' },
   });
 
-  /** 获取验证码 */
+  /** 获取验证码（快速点击时取消旧请求） */
   const fetchCaptcha = useCallback(async () => {
+    captchaAbort.current?.abort();
+    const ctrl = new AbortController();
+    captchaAbort.current = ctrl;
     setCaptchaLoading(true);
     try {
-      const data = await api.get<{ captchaId: string; svg: string }>('/auth/captcha');
-      setCaptchaId(data.captchaId);
-      setCaptchaSvg(data.svg);
-    } catch {
-      toast.error('验证码加载失败');
+      const data = await api.get<{ captchaId: string; svg: string }>('/auth/captcha', { signal: ctrl.signal });
+      if (captchaAbort.current === ctrl) {
+        setCaptchaId(data.captchaId);
+        setCaptchaSvg(data.svg);
+        setCachedCaptcha(data.captchaId, data.svg);
+      }
+    } catch (err: unknown) {
+      if (!(err instanceof DOMException && err.name === 'AbortError')) {
+        toast.error('验证码加载失败，请点击图片刷新');
+      }
     } finally {
-      setCaptchaLoading(false);
+      if (captchaAbort.current === ctrl) setCaptchaLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchCaptcha(); }, [fetchCaptcha]);
+  useEffect(() => {
+    if (!getCachedCaptcha()) fetchCaptcha();
+    return () => {
+      captchaAbort.current?.abort();
+      emailAbort.current?.abort();
+    };
+  }, [fetchCaptcha]);
 
-  /** 邮箱失焦时检查是否已注册 */
+  /** 邮箱失焦时检查是否已注册（快速切换时取消旧请求） */
   const checkEmail = useCallback(async (email: string) => {
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!emailValid) { setEmailStatus(null); return; }
+    emailAbort.current?.abort();
+    const ctrl = new AbortController();
+    emailAbort.current = ctrl;
     setEmailChecking(true);
     try {
-      const data = await api.get<{ available: boolean }>(`/auth/check-email?email=${encodeURIComponent(email)}`);
-      setEmailStatus(data.available);
-    } catch {
-      setEmailStatus(null); // 接口异常不显示状态
+      const data = await api.get<{ available: boolean }>(
+        '/auth/check-email',
+        { params: { email }, signal: ctrl.signal },
+      );
+      if (emailAbort.current === ctrl) setEmailStatus(data.available);
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      setEmailStatus(null);
     } finally {
-      setEmailChecking(false);
+      if (emailAbort.current === ctrl) setEmailChecking(false);
     }
   }, []);
 
@@ -97,12 +122,18 @@ export default function RegisterPage() {
       toast.success('注册成功');
       router.push('/main/dashboard');
     } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message
-        : err instanceof Error ? err.message
-        : '注册失败，请重试';
-      toast.error(message);
-      if (err instanceof ApiError && err.code === 'CAPTCHA_INVALID') fetchCaptcha();
+      if (err instanceof ApiError) {
+        const message = getFriendlyMessage(err.code, err.message);
+        toast.error(message);
+        if (err.code === 'CAPTCHA_INVALID') {
+          clearCachedCaptcha();
+          fetchCaptcha();
+        }
+      } else if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('注册失败，请重试');
+      }
     } finally {
       setIsSubmitting(false);
     }
