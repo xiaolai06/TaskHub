@@ -1,2 +1,5 @@
-// TODO: Zustand 认证 store - user/token/login/logout 状态管理
-// 注：useAuth.ts 中已有类似逻辑，此文件为文档要求的 lib/auth.ts
+/**
+ * 前端认证工具
+ * 注：Token 存储在 httpOnly Cookie 中，前端无法直接读写。
+ * useAuth.ts 提供用户状态管理，api.ts 处理 401 自动跳转。
+ */

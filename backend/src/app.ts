@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
@@ -14,6 +15,12 @@ const trustProxy = process.env.TRUST_PROXY;
 if (trustProxy && trustProxy !== 'false') {
   app.set('trust proxy', parseInt(trustProxy, 10) || 1);
 }
+
+// ============ 安全头 ============
+app.use(helmet({
+  contentSecurityPolicy: false, // 由前端 Nginx 层处理 CSP
+  crossOriginEmbedderPolicy: false,
+}));
 
 // ============ 中间件 ============
 app.use(cors({
@@ -46,12 +53,15 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+// ============ 请求体解析 ============
+// 默认 1MB，特殊路由（如 AI 聊天、文件处理）单独加大
+app.use(express.json({ limit: '1mb' }));
+// API 只接受 JSON，关闭 urlencoded 防原型污染
+app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // ============ 静态文件（生产环境可选） ============

@@ -41,12 +41,10 @@ router.get('/health', async (_req: Request, res: Response) => {
     await prisma.$queryRaw`SELECT 1`;
     success(res, {
       status: 'ok',
-      database: 'connected',
       uptime: Math.floor(process.uptime()),
-      timestamp: new Date().toISOString(),
     }, '服务运行正常');
   } catch {
-    error(res, 'HEALTH_CHECK_FAILED', '数据库连接异常', 503);
+    error(res, 'HEALTH_CHECK_FAILED', '服务异常', 503);
   }
 });
 

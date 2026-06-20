@@ -44,6 +44,7 @@ async function safeParseJSON(res: Response): Promise<ApiResponse> {
 }
 
 let isRedirecting = false;
+let redirectResetTimer: ReturnType<typeof setTimeout> | null = null;
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
@@ -72,6 +73,9 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     if (res.status === 401 && typeof window !== 'undefined' && !isRedirecting) {
       isRedirecting = true;
       window.location.href = '/auth-pages/login';
+      // 5 秒后重置标志，允许下次 401 再次触发跳转（登录回来后）
+      if (redirectResetTimer) clearTimeout(redirectResetTimer);
+      redirectResetTimer = setTimeout(() => { isRedirecting = false; }, 5000);
     }
     throw new ApiError(json.error?.message || '请求失败', json.error?.code || 'UNKNOWN_ERROR', res.status, json.error?.details);
   }

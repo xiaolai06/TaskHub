@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import {
   Lock, Loader2, CheckCircle, AlertCircle,
@@ -86,8 +86,19 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isDirtyRef = useRef(false); // 标记用户是否实际修改过，避免加载数据时误触发保存
+
+  // Bug fix: fetchUser 是异步的，user 可能在组件挂载后才到达
+  // 同步 user.name 到本地 state（仅在 profile API 还没返回之前）
+  useEffect(() => {
+    if (user?.name && !profileLoaded) {
+      setName(user.name);
+    }
+  }, [user?.name, profileLoaded]);
 
   // 加载资料
   useEffect(() => {
@@ -111,9 +122,16 @@ export default function ProfilePage() {
           // 同步 Header 用户数据
           if (user) setUser({ ...user, name: user.name, avatar: p.avatarValue || user.avatar });
         }
+        setProfileLoaded(true);
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch(() => {
+        setProfileLoaded(true);
+      })
+      .finally(() => {
+        setLoading(false);
+        // 数据加载完毕后标记脏位，后续用户修改才触发自动保存
+        setTimeout(() => { isDirtyRef.current = true; }, 200);
+      });
   }, []);
 
   // 头像预览
@@ -124,41 +142,50 @@ export default function ProfilePage() {
     setTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
   }
 
-  // 自动保存（防抖 1 秒）
-  const autoSave = useCallback(() => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(async () => {
-      setSaving(true);
-      setSaved(false);
-      try {
-        // 同时更新 User 表（名字+头像）和 Profile 表（扩展资料）
-        await Promise.all([
-          api.put('/profile', {
-            bio, birthday: birthday || undefined, zodiac, mbti,
-            phone, location, company, title, website,
-            tags, avatarType, avatarValue,
-          }),
-          api.put<{ user: { id: string; name: string; avatar: string | null; email: string; role: string } }>('/auth/profile', {
-            name: name.trim(),
-            avatar: avatarType === 'image' ? avatarValue : undefined,
-          }),
-        ]);
-        // 同步 Header 用户数据
-        if (user) {
-          setUser({
-            ...user,
-            name: name.trim() || user.name,
-            avatar: avatarType === 'image' ? avatarValue : user.avatar,
-          });
-        }
-        setSaved(true);
-      } catch {
-        // 静默失败
-      } finally {
-        setSaving(false);
+  // 自动保存（防抖 1 秒）— 用 ref 传参，避免 useCallback 依赖所有字段导致重复触发
+  const formRef = useRef({ name, bio, birthday, zodiac, mbti, phone, location, company, title, website, tags, avatarType, avatarValue });
+  formRef.current = { name, bio, birthday, zodiac, mbti, phone, location, company, title, website, tags, avatarType, avatarValue };
+
+  const doSave = useCallback(async () => {
+    const f = formRef.current;
+    setSaving(true);
+    setSaved(false);
+    try {
+      await Promise.all([
+        api.put('/profile', {
+          bio: f.bio, birthday: f.birthday || undefined, zodiac: f.zodiac, mbti: f.mbti,
+          phone: f.phone, location: f.location, company: f.company, title: f.title,
+          website: f.website, tags: f.tags, avatarType: f.avatarType, avatarValue: f.avatarValue,
+        }),
+        api.put<{ user: { id: string; name: string; avatar: string | null; email: string; role: string } }>('/auth/profile', {
+          name: f.name.trim(),
+          avatar: f.avatarValue,
+        }),
+      ]);
+      // 同步 Header 用户数据
+      const u = useAuth.getState().user;
+      if (u) {
+        useAuth.getState().setUser({
+          ...u,
+          name: f.name.trim() || u.name,
+          avatar: f.avatarValue,
+        });
       }
-    }, 1000);
-  }, [name, bio, birthday, zodiac, mbti, phone, location, company, title, website, tags, avatarType, avatarValue, user, setUser]);
+      setSaved(true);
+      setSaveError(null);
+    } catch (err) {
+      let msg = err instanceof Error ? err.message : '保存失败，请重试';
+      if (msg === '请求参数校验失败' && err instanceof ApiError && Array.isArray(err.details)) {
+        const fields = (err.details as Array<{ field?: string; message?: string }>)
+          .map(d => d.field ? `${d.field}: ${d.message}` : d.message)
+          .join('；');
+        if (fields) msg = `校验失败 — ${fields}`;
+      }
+      setSaveError(msg);
+    } finally {
+      setSaving(false);
+    }
+  }, []); // 无依赖，通过 ref 读最新值
 
   // 已保存提示 3 秒后消失
   useEffect(() => {
@@ -167,11 +194,13 @@ export default function ProfilePage() {
     return () => clearTimeout(timer);
   }, [saved]);
 
-  // 任何字段变化触发自动保存
+  // 任何字段变化触发自动保存（防抖 1 秒）
   useEffect(() => {
-    if (!loading) autoSave();
+    if (loading || !isDirtyRef.current) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => { doSave(); }, 1000);
     return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
-  }, [bio, birthday, zodiac, mbti, phone, location, company, title, website, tags, avatarType, avatarValue, loading, autoSave]);
+  }, [name, bio, birthday, zodiac, mbti, phone, location, company, title, website, tags, avatarType, avatarValue, loading, doSave]);
 
   // 修改密码
   async function handleChangePassword(e: React.FormEvent) {
@@ -197,8 +226,16 @@ export default function ProfilePage() {
     }
   }
 
-  // 图片上传
+  // 图片上传（限制 2MB，压缩到合理大小）
   function handleImageUpload(file: File) {
+    if (file.size > 2 * 1024 * 1024) {
+      setSaveError('头像图片不能超过 2MB，请压缩后再上传');
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      setSaveError('请选择图片文件');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const img = reader.result as string;
@@ -229,6 +266,11 @@ export default function ProfilePage() {
         <div className="flex items-center gap-2 text-sm">
           {saving && <span className="flex items-center gap-1 text-muted-foreground"><Loader2 className="h-3.5 w-3.5 animate-spin" />保存中...</span>}
           {saved && <span className="flex items-center gap-1 text-emerald-500"><CheckCircle className="h-3.5 w-3.5" />已保存</span>}
+          {saveError && (
+            <button onClick={() => setSaveError(null)} className="flex items-center gap-1 text-red-500 hover:text-red-600">
+              <AlertCircle className="h-3.5 w-3.5" />{saveError}
+            </button>
+          )}
         </div>
       </div>
 
@@ -265,6 +307,9 @@ export default function ProfilePage() {
                     className={cn('h-8 w-8 rounded-full transition-all', color,
                       avatarType === 'color' && avatarValue === color ? 'ring-2 ring-offset-2 ring-indigo-500 scale-110' : 'hover:scale-105')} />
                 ))}
+                {avatarType === 'image' && (
+                  <span className="ml-1 text-2xs text-muted-foreground">↑ 点击色块可切换回纯色头像</span>
+                )}
                 {savedImage && avatarType === 'color' && (
                   <button type="button" onClick={() => { setAvatarType('image'); setAvatarValue(savedImage); }}
                     className="ml-2 flex h-8 items-center gap-1 rounded-full border border-dashed border-border px-2 text-2xs-plus text-muted-foreground transition-colors hover:border-indigo-300 hover:text-indigo-500">
@@ -433,7 +478,7 @@ export default function ProfilePage() {
           )}
           <div className="flex justify-end">
             <button type="submit" disabled={savingPassword || !oldPassword || !newPassword}
-              className="flex h-10 items-center gap-1.5 rounded-lg bg-red-600 px-5 text-sm font-medium text-white transition-all hover:bg-red-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
+              className="flex h-10 items-center gap-1.5 rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
               {savingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
               修改密码
             </button>

@@ -19,7 +19,7 @@ function optionalEnv(key: string, defaultValue: string = ''): string {
 export const config = {
   // ===== 服务 =====
   port: parseInt(process.env.PORT || '3001', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv: process.env.NODE_ENV || 'production',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
 
   // ===== 数据库 =====

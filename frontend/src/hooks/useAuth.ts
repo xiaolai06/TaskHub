@@ -19,7 +19,7 @@ interface AuthState {
   user: User | null;
   isLoading: boolean;
   setUser: (user: User | null) => void;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, captcha: string, captchaId: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
@@ -31,10 +31,8 @@ export const useAuth = create<AuthState>((set) => ({
 
   setUser: (user) => set({ user, isLoading: false }),
 
-  login: async (email, password) => {
-    // 后端返回 { success: true, data: { user: {...} } }
-    // api.post 解包后得到 { user: {...} }
-    const data = await api.post<AuthResponse>('/auth/login', { email, password });
+  login: async (email, password, captcha, captchaId) => {
+    const data = await api.post<AuthResponse>('/auth/login', { email, password, captcha, captchaId });
     set({ user: data.user });
   },
 

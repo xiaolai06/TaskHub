@@ -3,9 +3,9 @@ import type { NextConfig } from 'next';
 const isDev = process.env.NODE_ENV !== 'production';
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: process.cwd(),
-  },
+  // 隐藏 X-Powered-By: Next.js 头
+  poweredByHeader: false,
+
   // 仅开发环境使用 rewrite 代理 API（生产环境由 Nginx 处理）
   ...(isDev && {
     async rewrites() {
@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
       ];
     },
   }),
+
+  // 生产安全头
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -4,14 +4,40 @@ import { PrismaClient } from '@prisma/client';
 
 export const prisma = new PrismaClient();
 
+// ============ 全局错误处理 ============
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[FATAL] Unhandled Rejection:', reason);
+  // 不退出进程，让 PM2 管理重启
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err.message);
+  process.exit(1);
+});
+
 async function main() {
   // 测试数据库连接
   await prisma.$connect();
+
+  // SQLite 生产优化：WAL 模式 + 忙等超时
+  if (config.databaseUrl.includes('file:')) {
+    try {
+      await prisma.$executeRawUnsafe('PRAGMA journal_mode=WAL');
+      await prisma.$executeRawUnsafe('PRAGMA busy_timeout=5000');
+      if (config.nodeEnv !== 'production') {
+        console.log('✅ SQLite WAL 模式已启用');
+      }
+    } catch (e) {
+      console.warn('SQLite PRAGMA 设置失败:', (e as Error).message);
+    }
+  }
+
   if (config.nodeEnv !== 'production') {
     console.log('✅ 数据库连接成功');
   }
 
   // 初始化所有用户的系统预置定时任务
+  let stopAllCronJobs: (() => void) | undefined;
   try {
     const { ensureSystemJobs } = await import('./services/cron-job.service');
     const users = await prisma.user.findMany({ select: { id: true } });
@@ -29,8 +55,9 @@ async function main() {
 
   // 启动定时任务（替代 n8n）
   if (config.cronEnabled) {
-    const { startAllCronJobs } = await import('./jobs');
-    startAllCronJobs();
+    const cronModule = await import('./jobs');
+    cronModule.startAllCronJobs();
+    stopAllCronJobs = cronModule.stopAllCronJobs;
     if (config.nodeEnv !== 'production') {
       console.log('⏰ 定时任务已启动');
     }
@@ -46,9 +73,20 @@ async function main() {
     }
   });
 
+  // 请求超时保护（AI 流式端点自行管理更长超时）
+  server.timeout = 60000;
+  server.keepAliveTimeout = 65000;
+
   // ============ 优雅关闭 ============
   const shutdown = async (signal: string) => {
     console.log(`\n📦 收到 ${signal}，正在优雅关闭...`);
+
+    // 先停止定时任务，避免在 DB 断连后继续执行
+    if (stopAllCronJobs) {
+      stopAllCronJobs();
+      console.log('⏰ 定时任务已停止');
+    }
+
     server.close(async () => {
       console.log('🔌 HTTP 服务器已关闭');
       await prisma.$disconnect();

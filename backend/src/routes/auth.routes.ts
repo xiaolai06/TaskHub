@@ -1,14 +1,16 @@
 import { Router, Request, Response } from 'express';
+import svgCaptcha from 'svg-captcha';
 import { validate } from '../middleware/validate';
 import { auth } from '../middleware/auth';
 import { loginLimit, registerLimit, rateLimit } from '../middleware/rateLimit';
+import { createCaptcha } from '../utils/captcha-store';
 
 const passwordLimit = rateLimit({
   windowMs: 60 * 1000,
   max: 5,
   message: '密码修改尝试过于频繁，请 1 分钟后再试',
 });
-import { registerSchema, loginSchema } from '../validators/auth.schema';
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema } from '../validators/auth.schema';
 import * as authService from '../services/auth.service';
 import { success, error } from '../utils/response';
 
@@ -30,7 +32,7 @@ function setTokenCookie(res: Response, token: string): void {
   res.cookie('token', token, {
     httpOnly: true,
     secure: COOKIE_SECURE,
-    sameSite: COOKIE_SECURE ? 'none' : 'lax', // HTTPS 时用 none 以支持跨站 cookie
+    sameSite: COOKIE_SECURE ? 'strict' : 'lax', // HTTPS 时用 strict 防 CSRF
     maxAge: COOKIE_MAX_AGE,
     path: '/',
   });
@@ -44,6 +46,28 @@ function extractToken(req: Request): string | undefined {
 }
 
 // ============ 公开接口（不需要登录） ============
+
+/** GET /captcha — 获取图形验证码 */
+router.get('/captcha', (_req: Request, res: Response) => {
+  // svg-captcha 生成图片，自带随机文字
+  const captcha = svgCaptcha.create({
+    size: 4,
+    ignoreChars: '0OolI1',
+    noise: 3,
+    color: true,
+    background: '#f0f0f0',
+    width: 130,
+    height: 40,
+  });
+
+  // 用 svg-captcha 生成的文字存入 captcha-store，保证校验一致
+  const { captchaId } = createCaptcha(captcha.text);
+
+  res.json({
+    success: true,
+    data: { captchaId, svg: captcha.data },
+  });
+});
 
 /** POST /register — 用户注册（限频：3次/分钟） */
 router.post('/register', registerLimit, validate(registerSchema), async (req: Request, res: Response, next) => {
@@ -60,8 +84,8 @@ router.post('/register', registerLimit, validate(registerSchema), async (req: Re
 /** POST /login — 用户登录（限频：5次/分钟） */
 router.post('/login', loginLimit, validate(loginSchema), async (req: Request, res: Response, next) => {
   try {
-    const { email, password } = req.body;
-    const result = await authService.login(email, password, req);
+    const { email, password, captcha, captchaId } = req.body;
+    const result = await authService.login(email, password, captcha, captchaId, req);
     setTokenCookie(res, result.token);
     success(res, { user: result.user }, '登录成功');
   } catch (err) {
@@ -108,19 +132,33 @@ router.put('/profile', auth, async (req: Request, res: Response, next) => {
 });
 
 /** PUT /password — 修改密码（限频：5次/分钟） */
-router.put('/password', auth, passwordLimit, async (req: Request, res: Response, next) => {
+router.put('/password', auth, passwordLimit, validate(changePasswordSchema), async (req: Request, res: Response, next) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    if (!oldPassword || !newPassword) {
-      error(res, 'VALIDATION_ERROR', '请输入原密码和新密码', 400);
-      return;
-    }
-    if (newPassword.length < 6) {
-      error(res, 'VALIDATION_ERROR', '新密码至少6位', 400);
-      return;
-    }
     await authService.changePassword(req.userId!, oldPassword, newPassword);
     success(res, null, '密码修改成功');
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /forgot-password — 发送密码重置码（限频：3次/分钟） */
+router.post('/forgot-password', registerLimit, validate(forgotPasswordSchema), async (req: Request, res: Response, next) => {
+  try {
+    const { email, captcha, captchaId } = req.body;
+    const result = await authService.forgotPassword(email, captcha, captchaId);
+    success(res, { emailSent: result.emailSent }, '如果该邮箱已注册，重置码将发送到你的邮箱');
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** POST /reset-password — 用验证码重置密码（限频：5次/分钟） */
+router.post('/reset-password', loginLimit, validate(resetPasswordSchema), async (req: Request, res: Response, next) => {
+  try {
+    const { email, code, newPassword } = req.body;
+    await authService.resetPassword(email, code, newPassword);
+    success(res, null, '密码重置成功，请重新登录');
   } catch (err) {
     next(err);
   }

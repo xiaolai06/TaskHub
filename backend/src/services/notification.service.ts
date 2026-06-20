@@ -125,9 +125,50 @@ export async function createFromN8n(payload: N8nNotificationPayload) {
   return create(payload.userId, payload.type, payload.title, payload.content, payload.relatedId);
 }
 
+/**
+ * SSRF 防护：校验 webhook URL 不是内网地址
+ * 防止攻击者通过 webhook 配置访问云元数据、内部服务等
+ */
+function assertSafeWebhookUrl(urlString: string): void {
+  let url: URL;
+  try {
+    url = new URL(urlString);
+  } catch {
+    throw new AppError('无效的 Webhook URL', 400, 'INVALID_URL');
+  }
+
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    throw new AppError('Webhook URL 仅支持 http/https 协议', 400, 'INVALID_URL_PROTOCOL');
+  }
+
+  const hostname = url.hostname;
+  // 禁止内网/环回/链路本地地址
+  const blocked = [
+    'localhost',
+    '127.',
+    '10.',
+    '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.',
+    '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.',
+    '192.168.',
+    '169.254.',
+    '0.',
+    '::1',
+    'fd',
+    'fe80',
+  ];
+
+  const isBlocked = blocked.some(prefix => hostname === prefix || hostname.startsWith(prefix));
+  if (isBlocked) {
+    throw new AppError('Webhook URL 不允许访问内网地址', 400, 'WEBHOOK_URL_BLOCKED');
+  }
+}
+
 export async function sendWebhook(channel: string, data: Record<string, unknown>, directUrl?: string) {
   const webhookUrl = directUrl || await getWebhookUrl(channel);
   if (!webhookUrl) return { sent: false, channel, skipped: true };
+
+  // SSRF 防护：禁止访问内网地址
+  assertSafeWebhookUrl(webhookUrl);
 
   const body = formatWebhookPayload(channel, data);
   const response = await fetch(webhookUrl, {

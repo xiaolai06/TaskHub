@@ -153,7 +153,8 @@ export function useAiChat() {
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const reader = res.body!.getReader();
+    if (!res.body) throw new Error('响应体为空，无法读取流数据');
+    const reader = res.body.getReader();
 
     await consumeSSEStream(reader, aiId, {
       onText: (content) => {
@@ -207,7 +208,8 @@ export function useAiChat() {
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const reader = res.body!.getReader();
+    if (!res.body) throw new Error('响应体为空，无法读取流数据');
+    const reader = res.body.getReader();
 
     await consumeSSEStream(reader, aiId, {
       onText: (content) => {
@@ -271,7 +273,7 @@ export function useAiChat() {
       setIsLoading(false);
       setCurrentToolCalls([]);
     }
-  }, [startStream]);
+  }, [startStream, startStreamWithFiles]);
 
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();

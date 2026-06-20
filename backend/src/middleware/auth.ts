@@ -50,7 +50,7 @@ export function auth(req: Request, res: Response, next: NextFunction): void {
         res.cookie('token', newToken, {
           httpOnly: true,
           secure: COOKIE_SECURE,
-          sameSite: COOKIE_SECURE ? 'none' : 'lax',
+          sameSite: COOKIE_SECURE ? 'strict' : 'lax',
           maxAge: COOKIE_MAX_AGE,
           path: '/',
         });
