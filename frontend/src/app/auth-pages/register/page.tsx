@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Loader2, Eye, EyeOff, Mail, Lock, User, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Mail, Lock, User, CheckCircle2, XCircle, ShieldCheck, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +19,7 @@ const registerSchema = z
     email: z.string().min(1, '请输入邮箱').email('请输入正确的邮箱地址（如 name@example.com）'),
     password: z.string().min(6, '密码至少6位'),
     confirmPassword: z.string().min(1, '请确认密码'),
+    captcha: z.string().min(1, '请输入验证码'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: '两次输入的密码不一致',
@@ -37,14 +38,35 @@ export default function RegisterPage() {
   const [emailStatus, setEmailStatus] = useState<boolean | null>(null);
   const [emailChecking, setEmailChecking] = useState(false);
 
+  // 验证码状态
+  const [captchaId, setCaptchaId] = useState('');
+  const [captchaSvg, setCaptchaSvg] = useState('');
+  const [captchaLoading, setCaptchaLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: '', email: '', password: '', confirmPassword: '' },
+    defaultValues: { name: '', email: '', password: '', confirmPassword: '', captcha: '' },
   });
+
+  /** 获取验证码 */
+  const fetchCaptcha = useCallback(async () => {
+    setCaptchaLoading(true);
+    try {
+      const data = await api.get<{ captchaId: string; svg: string }>('/auth/captcha');
+      setCaptchaId(data.captchaId);
+      setCaptchaSvg(data.svg);
+    } catch {
+      toast.error('验证码加载失败');
+    } finally {
+      setCaptchaLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchCaptcha(); }, [fetchCaptcha]);
 
   /** 邮箱失焦时检查是否已注册 */
   const checkEmail = useCallback(async (email: string) => {
@@ -52,16 +74,10 @@ export default function RegisterPage() {
     if (!emailValid) { setEmailStatus(null); return; }
     setEmailChecking(true);
     try {
-      await api.post('/auth/register', { email, password: '__check_only__', name: '__check__' });
-      // 不应该走到这里（密码太短会被校验拦截），但以防万一
-      setEmailStatus(true);
-    } catch (err) {
-      if (err instanceof ApiError && err.code === 'EMAIL_EXISTS') {
-        setEmailStatus(false);
-      } else {
-        // 其他错误（如密码校验）说明邮箱本身没问题
-        setEmailStatus(true);
-      }
+      const data = await api.get<{ available: boolean }>(`/auth/check-email?email=${encodeURIComponent(email)}`);
+      setEmailStatus(data.available);
+    } catch {
+      setEmailStatus(null); // 接口异常不显示状态
     } finally {
       setEmailChecking(false);
     }
@@ -74,7 +90,7 @@ export default function RegisterPage() {
     }
     setIsSubmitting(true);
     try {
-      await registerUser(data.email, data.password, data.name);
+      await registerUser(data.email, data.password, data.name, data.captcha, captchaId);
       toast.success('注册成功');
       router.push('/main/dashboard');
     } catch (err) {
@@ -83,6 +99,7 @@ export default function RegisterPage() {
         : err instanceof Error ? err.message
         : '注册失败，请重试';
       toast.error(message);
+      if (err instanceof ApiError && err.code === 'CAPTCHA_INVALID') fetchCaptcha();
     } finally {
       setIsSubmitting(false);
     }
@@ -223,6 +240,43 @@ export default function RegisterPage() {
           {errors.confirmPassword && (
             <p className="animate-in fade-in text-xs text-red-500">{errors.confirmPassword.message}</p>
           )}
+        </div>
+
+        {/* 验证码 */}
+        <div className="space-y-2">
+          <label htmlFor="captcha" className="text-sm font-medium text-slate-700">验证码</label>
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <ShieldCheck className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+              <Input
+                id="captcha"
+                type="text"
+                placeholder="输入验证码"
+                autoComplete="off"
+                aria-invalid={!!errors.captcha}
+                className="h-11 pl-11 text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:ring-offset-0"
+                disabled={isSubmitting}
+                maxLength={4}
+                {...register('captcha')}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={fetchCaptcha}
+              disabled={captchaLoading || isSubmitting}
+              className="group relative h-11 w-[130px] flex-shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 transition-all duration-200 hover:border-indigo-300 hover:shadow-sm disabled:opacity-50"
+            >
+              {captchaSvg ? (
+                <div className="flex h-full w-full items-center justify-center" dangerouslySetInnerHTML={{ __html: captchaSvg }} />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-slate-400" /></div>
+              )}
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                <RefreshCw className="h-4 w-4 text-indigo-600" />
+              </div>
+            </button>
+          </div>
+          {errors.captcha && <p className="animate-in fade-in text-xs text-red-500">{errors.captcha.message}</p>}
         </div>
 
         {/* 按钮 */}

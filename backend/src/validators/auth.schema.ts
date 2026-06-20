@@ -17,6 +17,8 @@ export const registerSchema = z.object({
   email: z.string().email('邮箱格式不正确'),
   password: passwordSchema,
   name: z.string().min(2, '姓名至少2个字符').max(20, '姓名不超过20个字符'),
+  captcha: z.string().min(1, '请输入验证码'),
+  captchaId: z.string().min(1, '验证码已失效，请刷新'),
 });
 
 /**

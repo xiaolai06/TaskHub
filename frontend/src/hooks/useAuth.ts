@@ -20,7 +20,7 @@ interface AuthState {
   isLoading: boolean;
   setUser: (user: User | null) => void;
   login: (email: string, password: string, captcha: string, captchaId: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string, captcha: string, captchaId: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
 }
@@ -36,8 +36,8 @@ export const useAuth = create<AuthState>((set) => ({
     set({ user: data.user });
   },
 
-  register: async (email, password, name) => {
-    const data = await api.post<AuthResponse>('/auth/register', { email, password, name });
+  register: async (email, password, name, captcha, captchaId) => {
+    const data = await api.post<AuthResponse>('/auth/register', { email, password, name, captcha, captchaId });
     set({ user: data.user });
   },
 

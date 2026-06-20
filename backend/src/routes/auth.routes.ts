@@ -12,6 +12,7 @@ const passwordLimit = rateLimit({
 });
 import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema } from '../validators/auth.schema';
 import * as authService from '../services/auth.service';
+import { prisma } from '../server';
 import { success, error } from '../utils/response';
 
 const router = Router();
@@ -47,6 +48,21 @@ function extractToken(req: Request): string | undefined {
 
 // ============ 公开接口（不需要登录） ============
 
+/** GET /check-email — 检查邮箱是否已注册 */
+router.get('/check-email', async (req: Request, res: Response, next) => {
+  try {
+    const email = (req.query.email as string || '').trim().toLowerCase();
+    if (!email || !email.includes('@')) {
+      res.json({ success: true, data: { available: true } });
+      return;
+    }
+    const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+    res.json({ success: true, data: { available: !existing } });
+  } catch (err) {
+    next(err);
+  }
+});
+
 /** GET /captcha — 获取图形验证码 */
 router.get('/captcha', (_req: Request, res: Response) => {
   // svg-captcha 生成图片，自带随机文字
@@ -72,8 +88,8 @@ router.get('/captcha', (_req: Request, res: Response) => {
 /** POST /register — 用户注册（限频：3次/分钟） */
 router.post('/register', registerLimit, validate(registerSchema), async (req: Request, res: Response, next) => {
   try {
-    const { email, password, name } = req.body;
-    const result = await authService.register(email, password, name, req);
+    const { email, password, name, captcha, captchaId } = req.body;
+    const result = await authService.register(email, password, name, captcha, captchaId, req);
     setTokenCookie(res, result.token);
     success(res, { user: result.user }, '注册成功', 201);
   } catch (err) {

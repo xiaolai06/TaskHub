@@ -43,7 +43,12 @@ async function createSession(userId: string, email: string, role: string, req: R
  * 2. bcrypt 加密密码
  * 3. 创建用户 + 自动签发 Token（注册后免登录）
  */
-export async function register(email: string, password: string, name: string, req: Request) {
+export async function register(email: string, password: string, name: string, captcha: string, captchaId: string, req: Request) {
+  // 先校验验证码
+  if (!verifyCaptcha(captchaId, captcha)) {
+    throw new AppError('验证码错误或已失效', 400, 'CAPTCHA_INVALID');
+  }
+
   // 检查邮箱是否已注册
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
