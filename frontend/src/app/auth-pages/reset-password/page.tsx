@@ -14,7 +14,10 @@ import { toast } from 'sonner';
 
 const schema = z.object({
   code: z.string().length(6, '验证码为6位数字'),
-  newPassword: z.string().min(6, '新密码至少6位'),
+  newPassword: z.string()
+    .min(8, '密码至少8位')
+    .regex(/[a-zA-Z]/, '密码必须包含字母')
+    .regex(/[0-9]/, '密码必须包含数字'),
   confirmPassword: z.string().min(1, '请确认密码'),
 }).refine(d => d.newPassword === d.confirmPassword, {
   message: '两次输入的密码不一致',

@@ -17,7 +17,10 @@ const registerSchema = z
   .object({
     name: z.string().min(2, '姓名至少2个字符').max(20, '姓名不超过20个字符'),
     email: z.string().min(1, '请输入邮箱').email('请输入正确的邮箱地址（如 name@example.com）'),
-    password: z.string().min(6, '密码至少6位'),
+    password: z.string()
+      .min(8, '密码至少8位')
+      .regex(/[a-zA-Z]/, '密码必须包含字母')
+      .regex(/[0-9]/, '密码必须包含数字'),
     confirmPassword: z.string().min(1, '请确认密码'),
     captcha: z.string().min(1, '请输入验证码'),
   })
@@ -193,7 +196,7 @@ export default function RegisterPage() {
             <Input
               id="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="至少6位"
+              placeholder="至少8位，含字母和数字"
               autoComplete="new-password"
               aria-invalid={!!errors.password}
               className="h-11 pl-11 pr-11 text-base transition-all duration-200 focus-visible:ring-2 focus-visible:ring-indigo-500/20 focus-visible:ring-offset-0"
