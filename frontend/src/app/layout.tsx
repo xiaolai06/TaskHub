@@ -5,10 +5,13 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "智汇轻营 TaskHub — 智能订单执行工作台",
+  title: {
+    default: "智汇轻营",
+    template: "%s — 智汇轻营",
+  },
   description: "面向一人公司的智能订单执行工作台，集项目管理、AI 助手、财务追踪于一体",
   openGraph: {
-    title: "智汇轻营 TaskHub",
+    title: "智汇轻营",
     description: "面向一人公司的智能订单执行工作台",
     type: "website",
     locale: "zh_CN",
