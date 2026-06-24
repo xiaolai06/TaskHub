@@ -5,6 +5,7 @@ import * as notificationService from '../services/notification.service';
 import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
 import { logExecution } from '../utils/job-logger';
+import logger from '../utils/logger';
 
 const PROMPT = loadPrompt('memory-extract.txt', '从以下对话中提取关键信息。');
 
@@ -60,7 +61,7 @@ export async function runWeeklyMemory(userId: string): Promise<string> {
 }
 
 cron.schedule('0 20 * * 0', async () => {
-  console.log('[weekly-memory] 开始...');
+  logger.info({ job: 'weekly-memory' }, '开始');
   try {
     const weekAgo = new Date(Date.now() - 7 * 86400000);
     const users = await prisma.user.findMany({
@@ -77,10 +78,10 @@ cron.schedule('0 20 * * 0', async () => {
         const result = await runWeeklyMemory(user.id);
         await logExecution({ jobSlug: 'weekly-memory', userId: user.id, status: 'success', result, durationMs: Date.now() - userStart });
       } catch (e) {
-        console.error(`[weekly-memory] 用户 ${user.id} 失败:`, e);
+        logger.error({ job: 'weekly-memory', userId: user.id, err: e }, '用户失败');
         await logExecution({ jobSlug: 'weekly-memory', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
       }
     }
-    console.log('[weekly-memory] 完成');
-  } catch (e) { console.error('[weekly-memory] 失败:', e); }
+    logger.info({ job: 'weekly-memory' }, '完成');
+  } catch (e) { logger.error({ job: 'weekly-memory', err: e }, '失败'); }
 }, { timezone: 'Asia/Shanghai' });

@@ -104,7 +104,7 @@ function ListSkeleton({ rows = 4 }: { rows?: number }) {
 function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-4 page-enter">
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         {Array.from({ length: 6 }).map((_, i) => <StatCardSkeleton key={i} />)}
       </div>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -192,7 +192,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-4 page-enter">
       {/* ── Stats Grid ── */}
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <StatCard
           icon={FolderKanban} label="进行中订单" value={stats.projectCount}
           hint="项目总数"
@@ -327,7 +327,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-semibold text-foreground">任务情况</CardTitle>
           </CardHeader>
           <CardContent className="px-4 py-3">
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {[
                 { label: '全部', value: stats.totalTasks, color: 'text-foreground' },
                 { label: '未完成', value: pendingTasks, color: 'text-foreground' },

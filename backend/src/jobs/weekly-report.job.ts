@@ -6,6 +6,7 @@ import * as dashboardService from '../services/dashboard.service';
 import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
 import { logExecution } from '../utils/job-logger';
+import logger from '../utils/logger';
 
 function reportBullets(text: string): string[] {
   const lines = text
@@ -77,7 +78,7 @@ export async function runWeeklyReport(userId: string): Promise<string> {
 }
 
 cron.schedule('0 9 * * 1', async () => {
-  console.log('[weekly-report] start');
+  logger.info({ job: 'weekly-report' }, 'start');
   try {
     const weekAgo = new Date(Date.now() - 7 * 86400000);
     const users = await prisma.user.findMany({
@@ -99,12 +100,12 @@ cron.schedule('0 9 * * 1', async () => {
         await runWeeklyReport(user.id);
         await logExecution({ jobSlug: 'weekly-report', userId: user.id, status: 'success', durationMs: Date.now() - userStart });
       } catch (e) {
-        console.error(`[weekly-report] user ${user.id} failed:`, e);
+        logger.error({ job: 'weekly-report', userId: user.id, err: e }, 'user failed');
         await logExecution({ jobSlug: 'weekly-report', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
       }
     }
-    console.log('[weekly-report] done');
+    logger.info({ job: 'weekly-report' }, 'done');
   } catch (e) {
-    console.error('[weekly-report] failed:', e);
+    logger.error({ job: 'weekly-report', err: e }, 'failed');
   }
 }, { timezone: 'Asia/Shanghai' });

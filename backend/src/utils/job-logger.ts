@@ -1,4 +1,5 @@
 import { prisma } from '../server';
+import logger from './logger';
 
 interface LogExecutionParams {
   jobSlug: string;
@@ -42,6 +43,6 @@ export async function logExecution(params: LogExecutionParams): Promise<void> {
     }
   } catch (err) {
     // 日志写入失败不应影响任务执行
-    console.error(`[job-logger] Failed to log ${jobSlug}:`, err);
+    logger.error({ jobSlug, err }, 'job-logger 日志写入失败');
   }
 }

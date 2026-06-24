@@ -3,6 +3,7 @@ import { prisma } from '../server';
 import * as costService from '../services/cost.service';
 import * as notificationService from '../services/notification.service';
 import { logExecution } from '../utils/job-logger';
+import logger from '../utils/logger';
 
 const formatFen = (fen: number) => `¥${(fen / 100).toLocaleString('zh-CN', { maximumFractionDigits: 0 })}`;
 
@@ -32,7 +33,7 @@ export async function runCostAlert(userId: string): Promise<string> {
 }
 
 cron.schedule('0 10 * * *', async () => {
-  console.log('[cost-alert] start');
+  logger.info({ job: 'cost-alert' }, 'start');
   try {
     const users = await prisma.user.findMany({
       where: { projects: { some: { status: 'ACTIVE', budget: { gt: 0 } } } },
@@ -49,12 +50,12 @@ cron.schedule('0 10 * * *', async () => {
         const result = await runCostAlert(user.id);
         await logExecution({ jobSlug: 'cost-alert', userId: user.id, status: 'success', result, durationMs: Date.now() - userStart });
       } catch (error) {
-        console.error(`[cost-alert] user ${user.id} failed:`, error);
+        logger.error({ job: 'cost-alert', userId: user.id, err: error }, 'user failed');
         await logExecution({ jobSlug: 'cost-alert', userId: user.id, status: 'error', error: error instanceof Error ? error.message : String(error), durationMs: Date.now() - userStart });
       }
     }
-    console.log('[cost-alert] done');
+    logger.info({ job: 'cost-alert' }, 'done');
   } catch (error) {
-    console.error('[cost-alert] failed:', error);
+    logger.error({ job: 'cost-alert', err: error }, 'failed');
   }
 }, { timezone: 'Asia/Shanghai' });

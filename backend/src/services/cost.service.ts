@@ -1,8 +1,6 @@
 import { prisma } from '../server';
 import { AppError } from '../utils/errors';
 
-export type CostCategory = 'LABOR' | 'MATERIAL' | 'OVERHEAD' | 'OTHER';
-
 async function verifyProjectOwnership(userId: string, projectId: string) {
   const project = await prisma.project.findFirst({
     where: { id: projectId, ownerId: userId },
@@ -44,7 +42,6 @@ export async function getSummaryByProject(userId: string, projectId: string) {
       _count: true,
     }),
     prisma.costRecord.aggregate({ where: { projectId }, _sum: { amount: true } }),
-    // 排除已有关联 CostRecord 的任务，避免重复计算
     prisma.task.aggregate({ where: { projectId, cost: { gt: 0 }, costRecords: { none: {} } }, _sum: { cost: true }, _count: true }),
   ]);
 
@@ -57,10 +54,9 @@ export async function getSummaryByProject(userId: string, projectId: string) {
   }));
 
   if (taskCost > 0) {
-    const labor = rows.find((item) => item.category === 'LABOR');
-    if (labor) {
-      labor.amount += taskCost;
-      labor.count += taskCostAgg._count;
+    const idx = rows.findIndex((item) => item.category === 'LABOR');
+    if (idx >= 0) {
+      rows[idx] = { ...rows[idx], amount: rows[idx].amount + taskCost, count: rows[idx].count + taskCostAgg._count };
     } else {
       rows.push({ category: 'LABOR', amount: taskCost, count: taskCostAgg._count });
     }
@@ -75,17 +71,131 @@ export async function getSummaryByProject(userId: string, projectId: string) {
   };
 }
 
-export async function create(userId: string, projectId: string, data: { amount: number; category: string; description: string; date: string; taskId?: string }) {
+export async function create(
+  userId: string,
+  projectId: string,
+  data: { amount: number; direction?: 'INCOME' | 'EXPENSE'; category: string; description: string; date: string; taskId?: string; note?: string },
+) {
   await verifyProjectOwnership(userId, projectId);
-  return prisma.costRecord.create({ data: { ...data, projectId, date: new Date(data.date) } });
+  const costDate = new Date(data.date);
+  const direction = data.direction || 'EXPENSE';
+
+  const costRecord = await prisma.costRecord.create({
+    data: { amount: data.amount, category: data.category, description: data.description, date: costDate, projectId, taskId: data.taskId },
+  });
+
+  // 同步到记账中心 Transaction
+  try {
+    await prisma.transaction.create({
+      data: {
+        amount: data.amount,
+        direction,
+        category: data.category,
+        description: data.description,
+        date: costDate,
+        source: 'COST_RECORD_SYNC',
+        projectId,
+        taskId: data.taskId || null,
+        note: data.note || null,
+        userId,
+      },
+    });
+  } catch (err) {
+    console.error('[cost.service] Transaction sync failed:', { costRecordId: costRecord.id, projectId, error: err });
+  }
+
+  return costRecord;
 }
 
 export async function remove(userId: string, id: string) {
-  await verifyCostOwnership(userId, id);
-  return prisma.costRecord.delete({ where: { id } });
+  const record = await verifyCostOwnership(userId, id);
+
+  // 先读取完整记录用于精确匹配 Transaction
+  const costRecord = await prisma.costRecord.findUnique({ where: { id } });
+
+  // 删除 CostRecord
+  const deleted = await prisma.costRecord.delete({ where: { id } });
+
+  // 清理同步产生的 Transaction
+  if (costRecord) {
+    try {
+      await prisma.transaction.deleteMany({
+        where: {
+          source: 'COST_RECORD_SYNC',
+          projectId: costRecord.projectId,
+          taskId: costRecord.taskId,
+          amount: costRecord.amount,
+          date: costRecord.date,
+        },
+      });
+    } catch (err) {
+      console.error('[cost.service] Transaction cleanup failed:', { costId: id, error: err });
+    }
+  }
+
+  return deleted;
+}
+
+/**
+ * 批量同步：把任务中心已有 cost>0 但无 CostRecord 的记录，
+ * 一次性创建 CostRecord + Transaction，让记账中心能看到历史数据。
+ */
+export async function syncTaskCostsToTransactions(userId: string, projectId?: string) {
+  const where: Record<string, unknown> = {
+    cost: { gt: 0 },
+    costRecords: { none: {} }, // 没有关联 CostRecord 的任务
+  };
+  if (projectId) {
+    where.projectId = projectId;
+    await verifyProjectOwnership(userId, projectId);
+  } else {
+    where.project = { ownerId: userId };
+  }
+
+  const tasks = await prisma.task.findMany({
+    where,
+    select: { id: true, title: true, cost: true, projectId: true, createdAt: true },
+  });
+
+  let synced = 0;
+  for (const task of tasks) {
+    try {
+      const description = `任务成本同步（任务：${task.title}）`;
+      const costRecord = await prisma.costRecord.create({
+        data: {
+          amount: task.cost,
+          category: 'PROJECT_COST',
+          description,
+          date: task.createdAt,
+          projectId: task.projectId,
+          taskId: task.id,
+        },
+      });
+
+      await prisma.transaction.create({
+        data: {
+          amount: task.cost,
+          direction: 'EXPENSE',
+          category: 'PROJECT_COST',
+          description,
+          date: task.createdAt,
+          source: 'COST_RECORD_SYNC',
+          projectId: task.projectId,
+          taskId: task.id,
+          userId,
+        },
+      });
+      synced++;
+    } catch (err) {
+      console.error('[cost.service] sync task cost failed:', { taskId: task.id, error: err });
+    }
+  }
+
+  return { synced, total: tasks.length };
 }
 
 export async function getMonthlySummary(userId: string, month?: string) {
+
   const selectedMonth = month || new Date().toISOString().slice(0, 7);
   const start = new Date(`${selectedMonth}-01`);
   const end = new Date(start);

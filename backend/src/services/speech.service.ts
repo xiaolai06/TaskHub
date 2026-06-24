@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { prisma } from '../server';
 import { decrypt } from './encryption.service';
 import { AppError } from '../utils/errors';
+import logger from '../utils/logger';
 
 // ═══ STT 供应商预置 ═══
 
@@ -218,6 +219,19 @@ async function createSttClient(config: SttProviderInfo, _userId: string, timeout
 
 // ═══ 语音转文字 ═══
 
+interface TranscriptionParams {
+  file: Blob | File;
+  model: string;
+  language?: string;
+  response_format?: string;
+}
+
+// Type-safe wrapper: the OpenAI SDK's create() has union overloads where
+// each branch expects a different literal `stream` value.  We build a plain
+// object and assert it to the non-streaming variant so it resolves cleanly.
+import type Audio from 'openai/resources/audio/transcriptions';
+type NonStreamingParams = Audio.TranscriptionCreateParamsNonStreaming;
+
 export async function transcribeAudio(
   userId: string,
   audioBuffer: Buffer,
@@ -238,12 +252,11 @@ export async function transcribeAudio(
 
   const file = new File([new Uint8Array(audioBuffer)], `audio.${ext}`, { type: mimeType });
 
-  console.log(`[STT] 供应商: ${config.label} (${config.name}) | URL: ${config.baseUrl} | Model: ${config.model} | Key: ${config.apiKey.slice(0, 6)}...${config.apiKey.slice(-4)} | File: audio.${ext} (${(audioBuffer.length / 1024).toFixed(1)}KB)`);
+  logger.info({ provider: config.label, model: config.model, fileExt: ext, fileSizeKB: (audioBuffer.length / 1024).toFixed(1) }, 'STT 请求');
 
   try {
     const start = Date.now();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const transcribeParams: any = { file, model: config.model, language: config.language || 'zh' };
+    const transcribeParams = { file, model: config.model, language: config.language || 'zh' } satisfies NonStreamingParams;
     const response = await client.audio.transcriptions.create(transcribeParams);
     const durationMs = Date.now() - start;
 
@@ -317,8 +330,7 @@ export async function testSttConnection(userId: string, providerName?: string): 
 
   try {
     const start = Date.now();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const testParams: any = { file, model: config.model, language: config.language || 'zh' };
+    const testParams = { file, model: config.model, language: config.language || 'zh' } satisfies NonStreamingParams;
     await client.audio.transcriptions.create(testParams);
     const latencyMs = Date.now() - start;
     return {

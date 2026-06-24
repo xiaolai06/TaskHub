@@ -3,6 +3,7 @@ import { prisma } from '../server';
 import * as schedulerService from '../services/scheduler.service';
 import * as notificationService from '../services/notification.service';
 import { logExecution } from '../utils/job-logger';
+import logger from '../utils/logger';
 
 /** 手动触发到期提醒（供当前用户使用） */
 export async function runDueReminder(userId: string): Promise<string> {
@@ -21,7 +22,7 @@ export async function runDueReminder(userId: string): Promise<string> {
 }
 
 cron.schedule('0 8 * * *', async () => {
-  console.log('[due-reminder] 开始...');
+  logger.info({ job: 'due-reminder' }, '开始');
   try {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const users = await prisma.user.findMany({
@@ -38,10 +39,10 @@ cron.schedule('0 8 * * *', async () => {
         const result = await runDueReminder(user.id);
         await logExecution({ jobSlug: 'due-reminder', userId: user.id, status: 'success', result, durationMs: Date.now() - userStart });
       } catch (e) {
-        console.error(`[due-reminder] 用户 ${user.id} 失败:`, e);
+        logger.error({ job: 'due-reminder', userId: user.id, err: e }, '用户失败');
         await logExecution({ jobSlug: 'due-reminder', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
       }
     }
-    console.log(`[due-reminder] 完成，${users.length} 用户`);
-  } catch (e) { console.error('[due-reminder] 失败:', e); }
+    logger.info({ job: 'due-reminder', userCount: users.length }, '完成');
+  } catch (e) { logger.error({ job: 'due-reminder', err: e }, '失败'); }
 }, { timezone: 'Asia/Shanghai' });

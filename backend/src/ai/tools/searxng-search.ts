@@ -2,6 +2,7 @@ import { ToolDefinition } from './types';
 import { fetchWithTimeout } from './fetch-with-timeout';
 import { prisma } from '../../server';
 import { applySearchQualityGate, type RawSearchResult } from './search-quality';
+import logger from '../../utils/logger';
 
 // ═══ SearXNG 自托管搜索引擎工具 ═══
 // 聚合 Google / Bing / DuckDuckGo / 百度等多个引擎
@@ -108,7 +109,7 @@ async function callSearXNG(
   }
 
   const url = `${baseUrl}/search?${params.toString()}`;
-  console.log(`[SearXNG] 请求: ${url}`);
+  logger.info({ url }, 'SearXNG 请求');
 
   const res = await fetchWithTimeout(url, {
     headers: {
@@ -221,7 +222,7 @@ AI 自适应提示: SearXNG 聚合多个搜索引擎，质量最高，优先使�
     const cacheKey = `${baseUrl}:${query}:${language}:${timeRange || ''}:${engines || ''}:${categories || ''}`;
     const cached = getCached(cacheKey);
     if (cached) {
-      console.log(`[SearXNG] 缓存命中: "${query.slice(0, 30)}..."`);
+      logger.debug({ query: query.slice(0, 30) }, 'SearXNG 缓存命中');
       return cached;
     }
 
@@ -264,7 +265,7 @@ AI 自适应提示: SearXNG 聚合多个搜索引擎，质量最高，优先使�
       return result;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'SearXNG 搜索失败';
-      console.warn(`[SearXNG] failed: ${message}`);
+      logger.warn({ error: message }, 'SearXNG failed');
       return { error: message, results: [] };
     }
   },

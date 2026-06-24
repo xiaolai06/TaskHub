@@ -1,17 +1,18 @@
 import app from './app';
 import { config } from './config';
 import { PrismaClient } from '@prisma/client';
+import logger from './utils/logger';
 
 export const prisma = new PrismaClient();
 
 // ============ 全局错误处理 ============
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('[FATAL] Unhandled Rejection:', reason);
+  logger.error({ err: reason }, 'Unhandled Rejection');
   // 不退出进程，让 PM2 管理重启
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('[FATAL] Uncaught Exception:', err.message);
+  logger.fatal({ err }, 'Uncaught Exception');
   process.exit(1);
 });
 
@@ -20,20 +21,21 @@ async function main() {
   await prisma.$connect();
 
   // SQLite 生产优化：WAL 模式 + 忙等超时
+  // Prisma 6 中 PRAGMA 可能返回结果，$executeRawUnsafe 不允许，改用 $queryRawUnsafe
   if (config.databaseUrl.includes('file:')) {
     try {
-      await prisma.$executeRawUnsafe('PRAGMA journal_mode=WAL');
-      await prisma.$executeRawUnsafe('PRAGMA busy_timeout=5000');
+      await prisma.$queryRawUnsafe('PRAGMA journal_mode=WAL');
+      await prisma.$queryRawUnsafe('PRAGMA busy_timeout=5000');
       if (config.nodeEnv !== 'production') {
-        console.log('✅ SQLite WAL 模式已启用');
+        logger.info('SQLite WAL 模式已启用');
       }
     } catch (e) {
-      console.warn('SQLite PRAGMA 设置失败:', (e as Error).message);
+      logger.warn({ err: e }, 'SQLite PRAGMA 设置失败');
     }
   }
 
   if (config.nodeEnv !== 'production') {
-    console.log('✅ 数据库连接成功');
+    logger.info('数据库连接成功');
   }
 
   // 初始化所有用户的系统预置定时任务
@@ -47,10 +49,10 @@ async function main() {
       totalCreated += created;
     }
     if (totalCreated > 0) {
-      console.log(`📋 已为 ${users.length} 个用户初始化 ${totalCreated} 个系统定时任务`);
+      logger.info({ userCount: users.length, created: totalCreated }, '已初始化系统定时任务');
     }
   } catch (e) {
-    console.warn('初始化系统定时任务失败（可能表还未创建）:', (e as Error).message);
+    logger.warn({ err: e }, '初始化系统定时任务失败（可能表还未创建）');
   }
 
   // 启动定时任务（替代 n8n）
@@ -59,17 +61,17 @@ async function main() {
     cronModule.startAllCronJobs();
     stopAllCronJobs = cronModule.stopAllCronJobs;
     if (config.nodeEnv !== 'production') {
-      console.log('⏰ 定时任务已启动');
+      logger.info('定时任务已启动');
     }
   }
 
   // 启动服务器
   const server = app.listen(config.port, '0.0.0.0', () => {
-    console.log(`🚀 服务器运行在 http://0.0.0.0:${config.port}`);
-    console.log(`📡 API 地址: http://0.0.0.0:${config.port}/api`);
-    console.log(`💚 健康检查: http://0.0.0.0:${config.port}/api/health`);
+    logger.info({ port: config.port }, '服务器运行在 http://0.0.0.0');
+    logger.info({ port: config.port }, 'API 地址: /api');
+    logger.info({ port: config.port }, '健康检查: /api/health');
     if (config.nodeEnv === 'production') {
-      console.log(`🌐 前端地址: ${config.frontendUrl}`);
+      logger.info({ frontendUrl: config.frontendUrl }, '前端地址');
     }
   });
 
@@ -79,23 +81,23 @@ async function main() {
 
   // ============ 优雅关闭 ============
   const shutdown = async (signal: string) => {
-    console.log(`\n📦 收到 ${signal}，正在优雅关闭...`);
+    logger.info({ signal }, '收到信号，正在优雅关闭');
 
     // 先停止定时任务，避免在 DB 断连后继续执行
     if (stopAllCronJobs) {
       stopAllCronJobs();
-      console.log('⏰ 定时任务已停止');
+      logger.info('定时任务已停止');
     }
 
     server.close(async () => {
-      console.log('🔌 HTTP 服务器已关闭');
+      logger.info('HTTP 服务器已关闭');
       await prisma.$disconnect();
-      console.log('🗄️ 数据库连接已断开');
+      logger.info('数据库连接已断开');
       process.exit(0);
     });
     // 超时 10 秒强制退出
     setTimeout(() => {
-      console.error('⚠️ 关闭超时，强制退出');
+      logger.fatal('关闭超时，强制退出');
       process.exit(1);
     }, 10000);
   };
@@ -105,7 +107,7 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('❌ 启动失败:', err);
+  logger.fatal({ err }, '启动失败');
   prisma.$disconnect();
   process.exit(1);
 });

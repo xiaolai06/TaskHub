@@ -97,6 +97,7 @@ export interface CustomerListParams {
 export function useCustomerList(params?: CustomerListParams) {
   return useQuery<CustomerListResponse>({
     queryKey: [QUERY_KEY, params],
+    staleTime: 2 * 60 * 1000,
     queryFn: () => {
       const sp = new URLSearchParams();
       if (params?.page) sp.set('page', String(params.page));

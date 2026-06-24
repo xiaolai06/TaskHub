@@ -6,11 +6,15 @@ import { CustomSelect } from '@/components/ui/custom-select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useProjectList, useCreateProject, useUpdateProject, useDeleteProject, useArchiveProject } from '@/hooks/useProjects';
 import { useProjectTasks, useCreateTask, useUpdateTask, useUpdateTaskStatus, useDeleteTask } from '@/hooks/useTasks';
+import { useCreateCost } from '@/hooks/useCosts';
 import { ProjectCard } from '@/components/features/projects/ProjectCard';
-import { ProjectForm } from '@/components/features/projects/ProjectForm';
+import { ProjectListSkeleton } from '@/components/features/projects/ProjectListSkeleton';
+import { ProjectFormContent } from '@/components/features/projects/ProjectForm';
 import { ProjectTaskSheet } from '@/components/features/projects/ProjectTaskSheet';
+import { TaskFormContent } from '@/components/features/tasks/TaskForm';
+import { LeftSidePanel } from '@/components/ui/left-side-panel';
 import type { Project, CreateProjectInput, UpdateProjectInput } from '@/hooks/useProjects';
-import type { CreateTaskInput } from '@/hooks/useTasks';
+import type { Task, CreateTaskInput } from '@/hooks/useTasks';
 
 export default function ProjectsPage() {
   const [showForm, setShowForm] = useState(false);
@@ -20,6 +24,8 @@ export default function ProjectsPage() {
   const [endDate, setEndDate] = useState('');
   const [datePreset, setDatePreset] = useState('');
   const [sheetProject, setSheetProject] = useState<Project | null>(null);
+  const [editTask, setEditTask] = useState<Task | null>(null);
+  const [showTaskForm, setShowTaskForm] = useState(false);
 
   const { data, isLoading, error } = useProjectList({
     status: statusFilter || undefined,
@@ -36,6 +42,7 @@ export default function ProjectsPage() {
   const updateTaskMutation = useUpdateTask();
   const updateStatusMutation = useUpdateTaskStatus();
   const deleteTaskMutation = useDeleteTask();
+  const createCostMutation = useCreateCost(sheetProject?.id || '');
 
   function handleCreate(input: CreateProjectInput) {
     createMutation.mutate(input, { onSuccess: () => setShowForm(false) });
@@ -80,6 +87,19 @@ export default function ProjectsPage() {
 
   function handleDeleteTask(id: string) {
     deleteTaskMutation.mutate(id);
+  }
+
+  function handleEditTask(task: Task) {
+    setEditTask(task);
+    setShowTaskForm(true);
+  }
+
+  function handleUpdateTaskFromForm(data: CreateTaskInput) {
+    if (!editTask) return;
+    updateTaskMutation.mutate(
+      { id: editTask.id, data },
+      { onSuccess: () => { setShowTaskForm(false); setEditTask(null); } },
+    );
   }
 
   const filters = [
@@ -155,18 +175,16 @@ export default function ProjectsPage() {
         {/* 新建按钮 */}
         <button
           onClick={() => { setEditProject(null); setShowForm(true); }}
-          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95"
+          className="flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 md:px-4"
         >
           <Plus className="h-4 w-4" />
-          新建项目
+          <span className="hidden sm:inline">新建项目</span>
         </button>
       </div>
 
       {/* 内容区 */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-        </div>
+        <ProjectListSkeleton />
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-24">
           <AlertTriangle className="h-10 w-10 text-red-300" />
@@ -215,24 +233,48 @@ export default function ProjectsPage() {
               createTaskMutation.mutate(data);
             }
           }}
+          onEditTask={handleEditTask}
           onUpdateTask={handleUpdateTask}
           onDeleteTask={handleDeleteTask}
           onEditProject={(p) => { setEditProject(p); setShowForm(true); }}
           onArchiveProject={handleArchive}
           onDeleteProject={handleDelete}
           onStatusChange={handleStatusChange}
+          onCreateCost={(data) => createCostMutation.mutate(data)}
           isLoading={tasksLoading}
         />
       )}
 
-      {/* 新建/编辑表单 */}
-      <ProjectForm
+      {/* 新建/编辑订单 — 左侧滑入面板 */}
+      <LeftSidePanel
         open={showForm}
         onClose={() => { setShowForm(false); setEditProject(null); }}
-        onSubmit={editProject ? handleUpdate : handleCreate}
-        isLoading={createMutation.isPending || updateMutation.isPending}
-        editProject={editProject}
-      />
+        title={editProject ? '编辑订单' : '新建订单'}
+        subtitle={editProject ? '修改项目信息后将实时更新' : '填写项目信息后创建'}
+      >
+        <ProjectFormContent
+          onSubmit={editProject ? handleUpdate : handleCreate}
+          onCancel={() => { setShowForm(false); setEditProject(null); }}
+          isLoading={createMutation.isPending || updateMutation.isPending}
+          editProject={editProject}
+        />
+      </LeftSidePanel>
+
+      {/* 编辑任务 — 左侧滑入面板 */}
+      <LeftSidePanel
+        open={showTaskForm}
+        onClose={() => { setShowTaskForm(false); setEditTask(null); }}
+        title="编辑任务"
+        subtitle={editTask?.title || '修改任务信息'}
+      >
+        <TaskFormContent
+          onSubmit={handleUpdateTaskFromForm}
+          onCancel={() => { setShowTaskForm(false); setEditTask(null); }}
+          isLoading={updateTaskMutation.isPending}
+          editTask={editTask}
+          projects={[]}
+        />
+      </LeftSidePanel>
     </div>
   );
 }

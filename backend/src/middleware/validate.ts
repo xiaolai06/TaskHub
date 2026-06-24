@@ -10,9 +10,12 @@ export function validate(schema: ZodSchema, part: RequestPart = 'body') {
       const result = schema.parse(req[part]);
       // query/params 在 Express 5 中是只读 getter，挂到 validated 自定义属性
       if (part === 'body') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Express req type doesn't include validated properties
         (req as any)[part] = result;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Express req type doesn't include validated properties
         (req as any).validated = (req as any).validated || {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Express req type doesn't include validated properties
         (req as any).validated[part] = result;
       }
       next();

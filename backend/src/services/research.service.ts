@@ -3,6 +3,7 @@ import { AIService } from './ai.service';
 import { getProxyUrl } from './proxy-config';
 import { NotFoundError } from '../utils/errors';
 import type { CreateBriefingInput, ListBriefingsInput } from '../validators/research.schema';
+import logger from '../utils/logger';
 
 // ═══ 类型 ═══
 
@@ -41,7 +42,7 @@ export async function search(userId: string, query: string): Promise<SearchResul
     .sort((a, b) => (b.heat || 0) - (a.heat || 0));
 
   saveSearchResults(userId, q, filtered.slice(0, 20)).catch((err) => {
-    console.warn('[research] 保存搜索结果失败:', err instanceof Error ? err.message : err);
+    logger.warn({ err }, 'research 保存搜索结果失败');
   });
 
   return filtered.slice(0, 20);
@@ -115,14 +116,22 @@ async function searchGitHub(query: string): Promise<SearchResultItem[]> {
       { headers: { Accept: 'application/vnd.github.v3+json', 'User-Agent': 'TaskFlow-AI/1.0' }, signal: AbortSignal.timeout(15_000) },
     );
     if (!res.ok) return [];
-    const data = await res.json() as any;
-    return (data.items || []).map((r: any) => ({
-      title: r.full_name,
+    interface GitHubSearchResponse {
+      items?: Array<{
+        full_name?: string;
+        description?: string;
+        html_url?: string;
+        stargazers_count?: number;
+      }>;
+    }
+    const data = await res.json() as GitHubSearchResponse;
+    return (data.items || []).map((r) => ({
+      title: r.full_name || '',
       snippet: r.description || '(无描述)',
-      url: r.html_url,
+      url: r.html_url || '',
       source: 'github',
-      heat: Math.min(100, r.stargazers_count / 500),
-      extra: `⭐ ${r.stargazers_count?.toLocaleString()}`,
+      heat: Math.min(100, (r.stargazers_count || 0) / 500),
+      extra: `⭐ ${(r.stargazers_count || 0).toLocaleString()}`,
     }));
   } catch { return []; }
 }
@@ -136,8 +145,20 @@ async function searchHNAlgolia(query: string): Promise<SearchResultItem[]> {
       { signal: AbortSignal.timeout(15_000) },
     );
     if (!res.ok) return [];
-    const data = await res.json() as any;
-    return (data.hits || []).map((h: any) => ({
+    interface HNHit {
+      title?: string;
+      story_text?: string;
+      comment_text?: string;
+      url?: string;
+      objectID?: string;
+      points?: number;
+      num_comments?: number;
+    }
+    interface HNResponse {
+      hits?: HNHit[];
+    }
+    const data = await res.json() as HNResponse;
+    return (data.hits || []).map((h) => ({
       title: h.title || '',
       snippet: (h.story_text || h.comment_text || '').slice(0, 250) || `HN 热门 · ${h.points || 0} 分`,
       url: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`,
@@ -158,7 +179,15 @@ async function searchDevToSearch(query: string): Promise<SearchResultItem[]> {
       { signal: AbortSignal.timeout(15_000) },
     );
     if (!res.ok) return [];
-    const articles = await res.json() as any[];
+    interface DevToArticle {
+      title?: string;
+      tag_list?: string[];
+      description?: string;
+      url?: string;
+      reading_time_minutes?: number;
+      positive_reactions_count?: number;
+    }
+    const articles = await res.json() as DevToArticle[];
 
     // 本地关键词匹配过滤
     const keywords = query.toLowerCase().split(/\s+/);
@@ -169,9 +198,9 @@ async function searchDevToSearch(query: string): Promise<SearchResultItem[]> {
       })
       .slice(0, 5)
       .map(a => ({
-        title: a.title,
+        title: a.title || '',
         snippet: (a.description || '').slice(0, 200) || `${a.reading_time_minutes} min read`,
-        url: a.url,
+        url: a.url || '',
         source: 'devto',
         heat: Math.min(100, (a.positive_reactions_count || 0) / 3),
         extra: `❤️ ${a.positive_reactions_count || 0}`,

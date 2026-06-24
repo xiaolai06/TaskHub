@@ -110,6 +110,7 @@ export function useProjectTasks(projectId: string) {
 export function useTaskList(params?: TaskQueryParams) {
   return useQuery<TaskListResponse>({
     queryKey: [QUERY_KEY, 'list', params],
+    staleTime: 2 * 60 * 1000,
     queryFn: () => {
       const sp = new URLSearchParams();
       if (params?.status) sp.set('status', params.status);

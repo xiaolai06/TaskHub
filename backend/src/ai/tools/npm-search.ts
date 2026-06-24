@@ -22,8 +22,15 @@ async function searchPackages(query: string, size = 10): Promise<NPMPackage[]> {
   const url = `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(query)}&size=${size}`;
   const res = await fetchWithTimeout(url);
   if (!res.ok) throw new Error(`NPM API HTTP ${res.status}`);
-  const data = await res.json() as any;
-  return (data.objects || []).map((obj: any) => ({
+  interface NPMRegistryResponse {
+    objects?: Array<{
+      package?: { name?: string; version?: string; description?: string; keywords?: string[]; links?: { homepage?: string; repository?: string }; maintainers?: Array<{ username?: string }>; date?: string };
+      downloads?: { weekly?: number };
+    }>;
+  }
+
+  const data = await res.json() as NPMRegistryResponse;
+  return (data.objects || []).map((obj) => ({
     name: obj.package?.name || '',
     version: obj.package?.version || '',
     description: obj.package?.description || '',
@@ -31,7 +38,7 @@ async function searchPackages(query: string, size = 10): Promise<NPMPackage[]> {
     homepage: obj.package?.links?.homepage,
     repository: obj.package?.links?.repository ? { url: obj.package.links.repository } : undefined,
     weeklyDownloads: obj.downloads?.weekly || 0,
-    maintainers: (obj.package?.maintainers || []).map((m: any) => m.username),
+    maintainers: (obj.package?.maintainers || []).map((m) => m.username || ''),
     updatedAt: obj.package?.date || '',
   }));
 }

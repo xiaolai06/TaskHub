@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   Calendar, MoreVertical, Edit3, Trash2, AlertTriangle,
@@ -100,7 +100,7 @@ interface GoalCardProps {
 
 // ═══ 组件 ═══
 
-export function GoalCard({ goal, onEdit, onDelete, onCalculate }: GoalCardProps) {
+export const GoalCard = memo(function GoalCard({ goal, onEdit, onDelete, onCalculate }: GoalCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
@@ -307,7 +307,7 @@ export function GoalCard({ goal, onEdit, onDelete, onCalculate }: GoalCardProps)
       </div>
     </div>
   );
-}
+})
 
 // ═══ 迷你打卡日历 ═══
 
@@ -355,8 +355,6 @@ function MiniCheckinCalendar({ checkins }: { checkins: string[] }) {
     </div>
   );
 }
-
-// ═══ 庆祝纸屑 ═══
 
 function Confetti() {
   const colors = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#8b5cf6'];

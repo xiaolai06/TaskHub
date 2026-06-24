@@ -15,6 +15,7 @@ import { fetchWithTimeout } from '../ai/tools/fetch-with-timeout';
 import { processFiles, buildMultimodalContent, buildAttachmentMeta } from '../services/file-process.service';
 import * as convService from '../services/conversation.service';
 import OpenAI from 'openai';
+import logger from '../utils/logger';
 
 // 允许的文件扩展名 → MIME 映射
 const EXT_MIME_MAP: Record<string, string[]> = {
@@ -143,7 +144,7 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
 
     // 动态工具加载：根据用户消息只加载相关工具，减少 token 浪费
     const { tools, matchedGroups, totalTools } = selectRelevantTools(message, allTools);
-    console.log(`[ToolRouter] 消息: "${message.slice(0, 30)}..." → 匹配组: [${matchedGroups.join(', ')}] → 加载 ${totalTools}/${allTools.length} 个工具`);
+    logger.info({ message: message.slice(0, 30), groups: matchedGroups, loaded: totalTools, total: allTools.length }, 'ToolRouter 消息');
 
     ai.registerTools(tools);
 
@@ -180,7 +181,7 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
       ? `\n\n## 用户记忆（你已了解的用户偏好和业务知识）\n${relevantMemories.join('\n')}\n在回答时参考这些记忆，让回复更个性化。`
       : '';
 
-    console.log(`[Memory] 总记忆: ${allMemories.length}条, 相关: ${relevantMemories.length}条`);
+    logger.debug({ total: allMemories.length, relevant: relevantMemories.length }, 'Memory 统计');
 
     // 读取工具权限设置（支持请求级覆盖，否则读 DB）
     const toolPerm = await getCachedToolPermission(req.userId!);
@@ -188,11 +189,11 @@ router.post('/chat/stream', validate(chatSchema), async (req: Request, res: Resp
 
     // 检测代理状态（含健康检查，结果缓存 5 分钟）
     const proxyStatus = await getProxyStatus(req.userId!);
-    console.log(`[Proxy] 聊天时代理状态: available=${proxyStatus.available}, message=${proxyStatus.message}`);
+    logger.debug({ available: proxyStatus.available, message: proxyStatus.message }, 'Proxy 聊天时代理状态');
 
     // 检测 SearXNG 状态（缓存 5 分钟，避免每次聊天都 HTTP 探测）
     const searxngStatus = await getCachedSearXNGStatus(req.userId!);
-    console.log(`[SearXNG] 聊天时状态: configured=${searxngStatus.configured}, available=${searxngStatus.available}`);
+    logger.debug({ configured: searxngStatus.configured, available: searxngStatus.available }, 'SearXNG 聊天时状态');
 
     // 构建网络环境说明
     const networkLines: string[] = [];
@@ -436,7 +437,7 @@ router.post('/chat/upload', upload.array('files', 5), validate(uploadChatSchema)
     const allTools = getAllTools();
 
     const { tools, matchedGroups, totalTools } = selectRelevantTools(message, allTools);
-    console.log(`[ToolRouter] 文件消息: "${message.slice(0, 30)}..." → 匹配组: [${matchedGroups.join(', ')}] → 加载 ${totalTools}/${allTools.length} 个工具`);
+    logger.info({ message: message.slice(0, 30), groups: matchedGroups, loaded: totalTools, total: allTools.length }, 'ToolRouter 文件消息');
     ai.registerTools(tools);
 
     const resolvedProvider = ai.getProvider();

@@ -1,6 +1,7 @@
 import { ToolDefinition } from './types';
 import { fetchWithProxy, fetchWithTimeout } from './fetch-with-timeout';
 import { getProxyUrl } from '../../services/proxy-config';
+import logger from '../../utils/logger';
 
 // ═══ 网页内容提取工具 ═══
 // 三级降级策略：
@@ -238,7 +239,7 @@ AI 自适应提示: 通常是搜索后的第二步。如果 fetch 失败，不�
     // 缓存检查
     const cached = getCached(url);
     if (cached) {
-      console.log(`[FetchContent] 缓存命中: ${url.slice(0, 60)}`);
+      logger.debug({ url: url.slice(0, 60) }, 'FetchContent 缓存命中');
       return { ...(cached as Record<string, unknown>), cached: true };
     }
 
@@ -271,7 +272,7 @@ AI 自适应提示: 通常是搜索后的第二步。如果 fetch 失败，不�
     const errors: string[] = [];
     for (const s of strategies) {
       try {
-        console.log(`[FetchContent] 尝试 ${s.name}: ${url.slice(0, 60)}`);
+        logger.info({ strategy: s.name, url: url.slice(0, 60) }, 'FetchContent 尝试');
         const result = await s.fn();
         const response = {
           success: true,
@@ -288,11 +289,11 @@ AI 自适应提示: 通常是搜索后的第二步。如果 fetch 失败，不�
           cached: false,
         };
         setCache(url, response);
-        console.log(`[FetchContent] ✅ ${s.name} 成功: ${result.length} 字符`);
+        logger.info({ strategy: s.name, length: result.length }, 'FetchContent 成功');
         return response;
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        console.warn(`[FetchContent] ❌ ${s.name} 失败: ${msg}`);
+        logger.warn({ strategy: s.name, error: msg }, 'FetchContent 失败');
         errors.push(`${s.name}: ${msg}`);
         continue;
       }

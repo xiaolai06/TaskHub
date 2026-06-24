@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { config } from '../config';
+import logger from './logger';
 
 const { smtp } = config;
 
@@ -12,7 +13,7 @@ function getTransporter(): nodemailer.Transporter | null {
   _transporterReady = true;
 
   if (!smtp.host || !smtp.user || !smtp.pass) {
-    console.error('[Email] ❌ SMTP 未配置！请在 .env 中设置 SMTP_HOST / SMTP_USER / SMTP_PASS');
+    logger.warn('Email SMTP 未配置，请在 .env 中设置 SMTP_HOST / SMTP_USER / SMTP_PASS');
     return null;
   }
 

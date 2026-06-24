@@ -5,6 +5,7 @@ import * as notificationService from '../services/notification.service';
 import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
 import { logExecution } from '../utils/job-logger';
+import logger from '../utils/logger';
 
 const PROMPT = loadPrompt(
   'system-finance-pulse.txt',
@@ -89,7 +90,7 @@ export async function runFinancePulse(userId: string): Promise<string> {
 }
 
 cron.schedule('0 10 * * *', async () => {
-  console.log('[finance-pulse] start');
+  logger.info({ job: 'finance-pulse' }, 'start');
   try {
     const users = await prisma.user.findMany({
       where: { projects: { some: {} } },
@@ -111,12 +112,12 @@ cron.schedule('0 10 * * *', async () => {
         await runFinancePulse(user.id);
         await logExecution({ jobSlug: 'finance-pulse', userId: user.id, status: 'success', durationMs: Date.now() - userStart });
       } catch (error) {
-        console.error(`[finance-pulse] user ${user.id} failed:`, error);
+        logger.error({ job: 'finance-pulse', userId: user.id, err: error }, 'user failed');
         await logExecution({ jobSlug: 'finance-pulse', userId: user.id, status: 'error', error: error instanceof Error ? error.message : String(error), durationMs: Date.now() - userStart });
       }
     }
-    console.log('[finance-pulse] done');
+    logger.info({ job: 'finance-pulse' }, 'done');
   } catch (error) {
-    console.error('[finance-pulse] failed:', error);
+    logger.error({ job: 'finance-pulse', err: error }, 'failed');
   }
 }, { timezone: 'Asia/Shanghai' });

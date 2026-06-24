@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 function requireEnv(key: string, defaultValue?: string): string {
   const value = process.env[key] || defaultValue;
   if (!value) {
-    console.error(`❌ 缺少必需的环境变量: ${key}`);
+    console.error(`[FATAL] 缺少必需的环境变量: ${key}`);
     process.exit(1);
   }
   return value;

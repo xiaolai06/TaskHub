@@ -4,6 +4,30 @@ import { Loader2, Trash2 } from 'lucide-react';
 import type { CostRecord } from '@/hooks/useCosts';
 
 const categoryLabel: Record<string, string> = {
+  // 支出类
+  PROJECT_COST: '项目成本',
+  SALARY: '工资薪酬',
+  RENT: '房租水电',
+  MEAL: '餐饮招待',
+  TRAVEL: '差旅交通',
+  EQUIPMENT: '设备采购',
+  OFFICE: '办公用品',
+  SUBSCRIPTION: '软件订阅',
+  MARKETING: '推广广告',
+  TAX: '税费',
+  INSURANCE: '保险',
+  LOAN_LEND: '借款支出',
+  OTHER_EXPENSE: '其他支出',
+  // 收入类
+  PROJECT_PAYMENT: '项目回款',
+  INTEREST: '利息收益',
+  REFUND: '退款返佣',
+  SUBSIDY: '补贴奖金',
+  FREELANCE: '兼职收入',
+  LOAN_REPAYMENT: '借款还款',
+  ASSET_SALE: '资产出售',
+  OTHER_INCOME: '其他收入',
+  // 兼容旧数据
   LABOR: '人工',
   MATERIAL: '材料',
   OVERHEAD: '运营',

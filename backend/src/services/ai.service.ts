@@ -4,6 +4,7 @@ import { prisma } from '../server';
 import { decrypt } from './encryption.service';
 import { getBaseUrl as getDynamicBaseUrl } from './setting.service';
 import type { ToolDefinition } from '../ai/tools/types';
+import logger from '../utils/logger';
 
 // ═══ 类型 ═══
 
@@ -141,13 +142,13 @@ async function logToolExecution(userId: string, toolName: string, args: Record<s
     // 耗时监控日志
     if (durationMs !== undefined) {
       if (durationMs > 10_000) {
-        console.warn(`[ToolPerf] ⚠️ ${toolName}: ${durationMs}ms (慢) ${success ? '✅' : '❌'}`);
+        logger.warn({ toolName, durationMs, success }, 'Tool 执行较慢');
       } else {
-        console.log(`[ToolPerf] ${toolName}: ${durationMs}ms ${success ? '✅' : '❌'}`);
+        logger.info({ toolName, durationMs, success }, 'Tool 执行');
       }
     }
   } catch (err) {
-    console.warn('[AI] 执行日志写入失败:', err instanceof Error ? err.message : err);
+    logger.warn({ err }, '执行日志写入失败');
   }
 }
 
@@ -182,7 +183,7 @@ export class AIService {
     const get = (key: string) => settings.find(s => s.key === key)?.value;
     const provider = providerOverride || get('provider');
     if (!provider) {
-      console.warn(`[AI] 用户 ${this.userId} 未配置 AI 供应商`);
+      logger.warn({ userId: this.userId }, '用户未配置 AI 供应商');
       return false;
     }
 
@@ -193,10 +194,10 @@ export class AIService {
 
     // 如果请求的供应商不存在于 AI_PROVIDER 表，回退到 'AI' 分类的默认供应商
     if (!providerRow && providerOverride) {
-      console.warn(`[AI] 供应商 "${provider}" 未在 AI_PROVIDER 表中找到配置，回退到默认供应商`);
+      logger.warn({ provider }, '供应商未在 AI_PROVIDER 表中找到配置，回退到默认供应商');
       const fallbackProvider = get('provider');
       if (fallbackProvider && fallbackProvider !== provider) {
-        console.warn(`[AI] 回退到默认供应商: "${fallbackProvider}"`);
+        logger.warn({ fallbackProvider }, '回退到默认供应商');
         return this.init(); // 递归调用，不传 override
       }
     }
@@ -245,7 +246,7 @@ export class AIService {
     }
 
     const redactedUrl = (() => { try { return new URL(baseUrl).hostname; } catch { return '***'; } })();
-    console.log(`[AI] init: provider=${provider}, host=${redactedUrl}, model=${defaultModel}, isSwitch=${isSwitch}`);
+    logger.info({ provider, host: redactedUrl, model: defaultModel, isSwitch }, 'AI init');
 
     const toolPermission = (get('tool_permission') as 'auto' | 'confirm') || 'auto';
     this.config = { provider, apiKey, baseUrl, model: defaultModel, powerfulModel, toolPermission };
@@ -287,7 +288,7 @@ export class AIService {
         } catch (modelErr: unknown) {
           // 主模型失败，尝试 fallback 到 powerfulModel
           if (model !== this.config.powerfulModel) {
-            console.warn(`[AI] 模型 ${model} 失败，尝试 fallback 到 ${this.config.powerfulModel}`);
+            logger.warn({ model, fallback: this.config.powerfulModel }, '模型失败，尝试 fallback');
             yield { type: 'text', content: `⚠️ 模型 \`${model}\` 不可用，已自动切换到 \`${this.config.powerfulModel}\`。\n\n` };
             stream = await this.client.chat.completions.create({
               model: this.config.powerfulModel, messages, tools, stream: true, temperature: 0.7, max_tokens: 2048,

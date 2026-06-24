@@ -104,9 +104,24 @@ ithome(IT之家) sspai(少数派) cls(财联社)
       const res = await fetchWithTimeout(url, {}, 15_000);
 
       if (!res.ok) throw new Error(`orz.ai HTTP ${res.status}`);
-      const data = await res.json() as any;
+      interface OrzItem {
+        title?: string;
+        name?: string;
+        url?: string;
+        link?: string;
+        hot?: string | number;
+        index?: string | number;
+        desc?: string;
+        description?: string;
+      }
+      interface OrzResponse {
+        data?: OrzItem[];
+        items?: OrzItem[];
+      }
 
-      const items: HotItem[] = (data.data || data.items || []).slice(0, maxResults).map((r: any) => ({
+      const data = await res.json() as OrzResponse;
+
+      const items: HotItem[] = (data.data || data.items || []).slice(0, maxResults).map((r) => ({
         title: r.title || r.name || '',
         url: r.url || r.link || '',
         hot: r.hot || r.index || 0,

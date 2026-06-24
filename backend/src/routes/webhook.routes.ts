@@ -3,6 +3,7 @@ import { z } from 'zod';
 import * as notificationService from '../services/notification.service';
 import { config } from '../config';
 import { success, error } from '../utils/response';
+import logger from '../utils/logger';
 
 const router = Router();
 
@@ -28,7 +29,7 @@ router.post('/incoming', async (req: Request, res: Response) => {
   try {
     const body = n8nCallbackSchema.parse(req.body);
 
-    console.log(`n8n callback: workflow=${body.workflowId} status=${body.status}`);
+    logger.info({ workflowId: body.workflowId, status: body.status }, 'n8n callback');
 
     switch (body.workflowId) {
       case 'daily-digest':
@@ -57,7 +58,7 @@ router.post('/incoming', async (req: Request, res: Response) => {
         break;
 
       default:
-        console.log(`Unknown workflow: ${body.workflowId}`);
+        logger.warn({ workflowId: body.workflowId }, 'Unknown workflow');
     }
 
     if (body.status === 'success' && body.data.notify) {
@@ -70,7 +71,7 @@ router.post('/incoming', async (req: Request, res: Response) => {
       );
       const failed = results.filter(r => r.status === 'rejected');
       if (failed.length > 0) {
-        console.error(`[webhook] ${failed.length}/${channels.length} channels failed`);
+        logger.error({ failed: failed.length, total: channels.length }, 'webhook channels failed');
       }
     }
 
@@ -80,7 +81,7 @@ router.post('/incoming', async (req: Request, res: Response) => {
       error(res, 'VALIDATION_ERROR', '回调数据格式错误', 400, err.errors);
       return;
     }
-    console.error('n8n callback failed:', err);
+    logger.error({ err }, 'n8n callback failed');
     error(res, 'INTERNAL_ERROR', '回调处理失败', 500);
   }
 });
@@ -122,7 +123,7 @@ router.post('/notify', async (req: Request, res: Response) => {
       );
       const failed = results.filter(r => r.status === 'rejected');
       if (failed.length > 0) {
-        console.error(`[webhook] ${failed.length}/${body.channels.length} channels failed`);
+        logger.error({ failed: failed.length, total: body.channels.length }, 'webhook channels failed');
       }
     }
 
@@ -132,7 +133,7 @@ router.post('/notify', async (req: Request, res: Response) => {
       error(res, 'VALIDATION_ERROR', '通知数据格式错误', 400, err.errors);
       return;
     }
-    console.error('notification webhook failed:', err);
+    logger.error({ err }, 'notification webhook failed');
     error(res, 'INTERNAL_ERROR', '通知创建失败', 500);
   }
 });

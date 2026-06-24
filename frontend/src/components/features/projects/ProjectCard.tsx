@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Archive, Building2, Calendar, DollarSign, Edit3, FolderKanban, MoreVertical, Trash2, TrendingUp } from 'lucide-react';
 import type { Project } from '@/hooks/useProjects';
 import { cn } from '@/lib/utils';
@@ -39,7 +39,7 @@ interface ProjectCardProps {
   onArchive?: (id: string) => void;
 }
 
-export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCardProps) {
+export const ProjectCard = memo(function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -143,7 +143,7 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
         </p>
       ) : null}
 
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className="rounded-lg bg-muted/50 px-3 py-2.5">
           <p className="text-2xs-plus text-muted-foreground">报价</p>
           <p className="mt-1 text-sm font-semibold text-foreground">{formatMoney(quote)}</p>
@@ -206,4 +206,4 @@ export function ProjectCard({ project, onEdit, onDelete, onArchive }: ProjectCar
       </div>
     </div>
   );
-}
+})

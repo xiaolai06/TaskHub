@@ -20,7 +20,7 @@ import {
   Bell, Clock, CheckSquare, Plus, FolderKanban, Users,
   Newspaper, TrendingUp, AlertCircle, Sun, Moon,
   CheckCheck, ChevronUp, ChevronDown as ChevronDownIcon,
-  History, X, Filter,
+  History, X, Filter, Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WorkTools } from '@/components/features/work/WorkTools';
@@ -48,6 +48,8 @@ interface InfoItem {
 
 interface HeaderProps {
   onOpenAi?: () => void;
+  isMobile?: boolean;
+  onToggleMobileSidebar?: () => void;
 }
 
 /* ── Constants ────────────────────────────────── */
@@ -159,7 +161,7 @@ const infoIcon = (type: InfoItem['type']) => {
 
 /* ── Component ────────────────────────────────── */
 
-export function Header({ onOpenAi }: HeaderProps) {
+export function Header({ onOpenAi, isMobile, onToggleMobileSidebar }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const { theme, setTheme, resolved } = useTheme();
@@ -190,7 +192,9 @@ export function Header({ onOpenAi }: HeaderProps) {
       // 清除超过1天的
       const fresh = Object.entries(map).filter(([, ts]) => now - ts < ONE_DAY);
       return new Set(fresh.map(([id]) => id));
-    } catch { return new Set(); }
+    } catch {
+      return new Set();
+    }
   });
 
   // 持久化到 localStorage
@@ -204,7 +208,9 @@ export function Header({ onOpenAi }: HeaderProps) {
         const old = JSON.parse(raw) as Record<string, number>;
         Object.assign(map, old);
       }
-    } catch { /* 忽略 */ }
+    } catch (err) {
+      console.error('[Header] Failed to persist read tasks:', err);
+    }
     localStorage.setItem(READ_TASKS_KEY, JSON.stringify(map));
   }, [readTaskIds]);
 
@@ -306,7 +312,9 @@ export function Header({ onOpenAi }: HeaderProps) {
     try {
       await api.patch(`/notifications/${id}/read`);
       queryClient.invalidateQueries({ queryKey: ['header', 'notifications'] });
-    } catch { /* 静默 */ }
+    } catch (err) {
+      console.error('[Header] Failed to mark notification as read:', err);
+    }
   }, [queryClient]);
 
   const handleMarkAllRead = useCallback(async () => {
@@ -314,7 +322,9 @@ export function Header({ onOpenAi }: HeaderProps) {
     try {
       await api.patch('/notifications/read-all');
       queryClient.invalidateQueries({ queryKey: ['header', 'notifications'] });
-    } catch { /* 静默 */ }
+    } catch (err) {
+      console.error('[Header] Failed to mark all notifications as read:', err);
+    }
   }, [queryClient]);
 
   const toggleExpand = useCallback((id: string) => {
@@ -394,19 +404,31 @@ export function Header({ onOpenAi }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-border bg-card/95 px-5 backdrop-blur-md">
-      {/* 左侧：时间 + 祝福语 + 主题切换 */}
-      <div className="flex items-center gap-3">
-        <div className="flex shrink-0 items-center gap-1.5 font-mono text-base text-slate-500 tabular-nums">
+      {/* 左侧：汉堡菜单(手机) + 时间 + 祝福语 + 主题切换 */}
+      <div className="flex items-center gap-2 md:gap-3">
+        {/* 手机端汉堡菜单 */}
+        {isMobile && (
+          <button
+            onClick={onToggleMobileSidebar}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            title="打开菜单"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+        {/* 时钟 — 手机端隐藏 */}
+        <div className="hidden shrink-0 items-center gap-1.5 font-mono text-base text-slate-500 tabular-nums md:flex">
           <Clock className="h-4 w-4 text-slate-400" />
           <LiveClock />
         </div>
-        <div className="h-5 w-px shrink-0 bg-slate-200" />
-        <span className="text-base text-slate-500">
+        <div className="hidden h-5 w-px shrink-0 bg-slate-200 md:block" />
+        {/* 问候语 — 手机端隐藏 */}
+        <span className="hidden text-base text-slate-500 md:inline">
           {greeting}
         </span>
         <button
           onClick={toggleTheme}
-          className="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
           title={resolved === 'light' ? '切换到暗色模式' : '切换到亮色模式'}
         >
           {resolved === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
@@ -414,14 +436,17 @@ export function Header({ onOpenAi }: HeaderProps) {
       </div>
 
       {/* 右侧：操作按钮组 */}
-      <div className="flex shrink-0 items-center gap-2">
-        <WorkTools />
+      <div className="flex shrink-0 items-center gap-1.5 md:gap-2">
+        {/* WorkTools — 桌面端显示 */}
+        <div className="hidden md:block">
+          <WorkTools />
+        </div>
 
-        {/* 新建 */}
+        {/* 新建 — 手机端只显示图标 */}
         <DropdownMenu>
-          <DropdownMenuTrigger className={navBtn}>
+          <DropdownMenuTrigger className={cn(navBtn, 'px-2 md:px-3.5')}>
             <Plus className="h-4 w-4" />
-            新建
+            <span className="hidden md:inline">新建</span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
             <DropdownMenuItem onClick={() => router.push('/main/projects')}>
@@ -438,9 +463,9 @@ export function Header({ onOpenAi }: HeaderProps) {
 
         {/* ─── 资讯 ─── */}
         <div className="relative" ref={infoRef}>
-          <button onClick={() => { setShowInfo(!showInfo); setShowTasks(false); }} onMouseDown={(e) => e.stopPropagation()} className={cn(navBtn, 'relative')}>
+          <button onClick={() => { setShowInfo(!showInfo); setShowTasks(false); }} onMouseDown={(e) => e.stopPropagation()} className={cn(navBtn, 'relative px-2 md:px-3.5')}>
             <Newspaper className="h-4 w-4" />
-            资讯
+            <span className="hidden md:inline">资讯</span>
             {unreadInfo > 0 && (
               <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-500 px-1 text-2xs font-bold text-white">
                 {unreadInfo}
@@ -449,7 +474,7 @@ export function Header({ onOpenAi }: HeaderProps) {
           </button>
 
           {showInfo && (
-            <div className="absolute right-0 top-full z-50 mt-2 w-96 rounded-xl border border-border bg-card shadow-xl">
+            <div className="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-96 rounded-xl border border-border bg-card shadow-xl sm:w-96">
               {/* 头部 */}
               <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
                 <span className="text-sm font-semibold text-foreground">消息资讯</span>
@@ -539,9 +564,9 @@ export function Header({ onOpenAi }: HeaderProps) {
 
         {/* ─── 待办 ─── */}
         <div className="relative" ref={taskRef}>
-          <button onClick={() => { setShowTasks(!showTasks); setShowInfo(false); }} onMouseDown={(e) => e.stopPropagation()} className={cn(navBtn, 'relative')}>
+          <button onClick={() => { setShowTasks(!showTasks); setShowInfo(false); }} onMouseDown={(e) => e.stopPropagation()} className={cn(navBtn, 'relative px-2 md:px-3.5')}>
             <Bell className="h-4 w-4" />
-            待办
+            <span className="hidden md:inline">待办</span>
             {alertCount > 0 && (
               <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-2xs font-bold text-white">
                 {alertCount}
@@ -550,7 +575,7 @@ export function Header({ onOpenAi }: HeaderProps) {
           </button>
 
           {showTasks && (
-            <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-border bg-card shadow-xl">
+            <div className="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-80 rounded-xl border border-border bg-card shadow-xl sm:w-80">
               <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
                 <span className="text-sm font-semibold text-foreground">待办任务</span>
                 <span className="text-xs text-muted-foreground">
@@ -618,10 +643,10 @@ export function Header({ onOpenAi }: HeaderProps) {
           )}
         </div>
 
-        {/* AI */}
-        <button onClick={onOpenAi} className={navBtn}>
+        {/* AI — 手机端只显示图标 */}
+        <button onClick={onOpenAi} className={cn(navBtn, 'px-2 md:px-3.5')}>
           <Sparkles className="h-4 w-4" />
-          AI
+          <span className="hidden md:inline">AI</span>
         </button>
 
         {/* 分隔 */}
@@ -631,13 +656,13 @@ export function Header({ onOpenAi }: HeaderProps) {
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-100 hover:bg-accent active:scale-95">
             {user?.avatar && user.avatar.startsWith('data:') ? (
-              <img src={user.avatar} alt="头像" className="h-9 w-9 rounded-full object-cover" />
+              <img src={user.avatar} alt="头像" className="h-8 w-8 rounded-full object-cover md:h-9 md:w-9" />
             ) : user?.avatar && user.avatar.startsWith('bg-') ? (
-              <div className={cn('flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white', user.avatar)}>
+              <div className={cn('flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white md:h-9 md:w-9', user.avatar)}>
                 {initials}
               </div>
             ) : (
-              <Avatar className="h-9 w-9" size="default">
+              <Avatar className="h-8 w-8 md:h-9 md:w-9" size="default">
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             )}

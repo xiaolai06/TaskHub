@@ -8,6 +8,7 @@ import {
   Loader2, CheckCircle, Settings, Bell, Monitor, MessageSquare,
   Sun, Moon, Search, X, Eye,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 
 // ========== 类型 ==========
@@ -136,7 +137,7 @@ function GreetingPreview({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     api.get<GreetingItem[]>('/greetings/all')
       .then((res) => setGreetings(res))
-      .catch(() => {})
+      .catch(() => { /* greetings 加载失败，非关键 */ })
       .finally(() => setLoading(false));
   }, []);
 
@@ -234,7 +235,7 @@ function GreetingManager() {
   useEffect(() => {
     api.get<GreetingItem[]>('/greetings/all')
       .then((res) => setGreetings(res))
-      .catch(() => {})
+      .catch(() => { /* greetings 加载失败，非关键 */ })
       .finally(() => setLoading(false));
   }, []);
 
@@ -246,21 +247,27 @@ function GreetingManager() {
       });
       setGreetings((prev) => [created, ...prev]);
       setNewContent('');
-    } catch {}
+    } catch (err) {
+      console.error('[Preferences] Failed to add greeting:', err);
+    }
   }
 
   async function handleToggle(id: string, isActive: boolean) {
     try {
       await api.put(`/greetings/${id}`, { isActive: !isActive });
       setGreetings((prev) => prev.map((g) => g.id === id ? { ...g, isActive: !isActive } : g));
-    } catch {}
+    } catch (err) {
+      console.error('[Preferences] Failed to toggle greeting:', err);
+    }
   }
 
   async function handleDelete(id: string) {
     try {
       await api.delete(`/greetings/${id}`);
       setGreetings((prev) => prev.filter((g) => g.id !== id));
-    } catch {}
+    } catch (err) {
+      console.error('[Preferences] Failed to delete greeting:', err);
+    }
   }
 
   if (loading) return <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-indigo-500" /></div>;
@@ -344,7 +351,7 @@ export default function PreferencesPage() {
   useEffect(() => {
     api.get<Preferences>('/preferences')
       .then((res) => setPrefs(res))
-      .catch(() => {})
+      .catch(() => { /* greetings 加载失败，非关键 */ })
       .finally(() => setLoading(false));
   }, []);
 
@@ -356,7 +363,7 @@ export default function PreferencesPage() {
     setSaved(false);
     api.put('/preferences', patch)
       .then(() => { setSaved(true); setTimeout(() => setSaved(false), 2000); })
-      .catch(() => {})
+      .catch(() => { toast.error('偏好保存失败，请重试'); })
       .finally(() => setSaving(false));
   }
 

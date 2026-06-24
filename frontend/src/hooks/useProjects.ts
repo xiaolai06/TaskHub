@@ -72,6 +72,7 @@ export interface ProjectListParams {
 export function useProjectList(params?: ProjectListParams) {
   return useQuery<ProjectListResponse>({
     queryKey: [QUERY_KEY, params],
+    staleTime: 2 * 60 * 1000,
     queryFn: () => {
       const sp = new URLSearchParams();
       if (params?.page) sp.set('page', String(params.page));

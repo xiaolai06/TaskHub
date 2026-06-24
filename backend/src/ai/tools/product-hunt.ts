@@ -100,15 +100,30 @@ export const productHuntTool: ToolDefinition = {
         throw new Error(`Product Hunt HTTP ${res.status}: ${err.slice(0, 200)}`);
       }
 
-      const data = await res.json() as any;
+      interface PHPostNode {
+        name: string;
+        tagline: string;
+        description?: string;
+        url: string;
+        website?: string;
+        votesCount: number;
+        commentsCount: number;
+        topics?: { edges?: Array<{ node?: { name: string } }> };
+      }
+      interface PHResponse {
+        data?: { posts?: { edges?: Array<{ node?: PHPostNode }> } };
+      }
+
+      const data = await res.json() as PHResponse;
       const edges = data?.data?.posts?.edges || [];
 
       return {
         configured: true,
         since,
         total: edges.length,
-        products: edges.map((e: any) => {
+        products: edges.map((e) => {
           const n = e.node;
+          if (!n) return null;
           return {
             name: n.name,
             tagline: n.tagline,
@@ -117,11 +132,11 @@ export const productHuntTool: ToolDefinition = {
             website: n.website,
             votes: n.votesCount,
             comments: n.commentsCount,
-            topics: (n.topics?.edges || []).map((t: any) => t.node.name),
+            topics: (n.topics?.edges || []).map((t) => t.node?.name || ''),
             // 热度: 1 vote + 3 评论 = 综合热度
             heat: n.votesCount + (n.commentsCount || 0) * 3,
           };
-        }),
+        }).filter(Boolean),
       };
     } catch (err: unknown) {
       return { configured: true, error: err instanceof Error ? err.message : '获取失败' };

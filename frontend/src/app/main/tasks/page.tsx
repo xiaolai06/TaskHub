@@ -6,8 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import {
   Loader2, AlertTriangle, CheckSquare, Plus, LayoutList, Columns3,
   CalendarDays, X, Search,
-  RefreshCw, WandSparkles, Sparkles, CheckCircle2,
-  Clock, ListChecks, CalendarX, Timer, BarChart3,
+  RefreshCw, WandSparkles, Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
@@ -15,16 +14,21 @@ import { CustomSelect } from '@/components/ui/custom-select';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useTaskList, useCreateTask, useUpdateTask, useUpdateTaskStatus, useDeleteTask } from '@/hooks/useTasks';
 import { useProjectList } from '@/hooks/useProjects';
+import { useCreateCost } from '@/hooks/useCosts';
 import { useRefreshSchedule, useSchedule } from '@/hooks/useSchedule';
 import { TaskBoard } from '@/components/features/tasks/TaskBoard';
 import { TaskList } from '@/components/features/tasks/TaskList';
-import { TaskForm } from '@/components/features/tasks/TaskForm';
+import { TaskListSkeleton } from '@/components/features/tasks/TaskListSkeleton';
+import { TaskFormContent } from '@/components/features/tasks/TaskForm';
 import { TaskDetailSheet } from '@/components/features/tasks/TaskDetailSheet';
-import { GanttChart } from '@/components/features/schedule/GanttChart';
+import { LeftSidePanel } from '@/components/ui/left-side-panel';
+import { CostFormContent } from '@/components/features/costs/CostForm';
 import { InsertionDialog } from '@/components/features/schedule/InsertionDialog';
-import { formatDate } from '@/lib/task-utils';
+import { GanttMetricCards } from '@/components/features/tasks/GanttMetricCards';
+import { GanttContent } from '@/components/features/tasks/GanttContent';
 import { toast } from 'sonner';
 import type { Task, CreateTaskInput, TaskQueryParams } from '@/hooks/useTasks';
+import type { CreateCostInput } from '@/hooks/useCosts';
 
 // ======================== 常量 ========================
 
@@ -57,7 +61,6 @@ function TasksPageContent() {
   const router = useRouter();
   const pathname = usePathname();
 
-  // 视图 & 筛选状态
   const [viewMode, setViewMode] = useState<ViewMode>((searchParams.get('view') as ViewMode) || 'board');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
   const [priorityFilter, setPriorityFilter] = useState(searchParams.get('priority') || '');
@@ -69,13 +72,12 @@ function TasksPageContent() {
   const [showForm, setShowForm] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [detailTask, setDetailTask] = useState<Task | null>(null);
+  const [costTask, setCostTask] = useState<Task | null>(null);
 
-  // 甘特视图专用状态
   const [dailyHourLimit, setDailyHourLimit] = useState(8);
   const [insertionOpen, setInsertionOpen] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
 
-  // URL 同步
   useEffect(() => {
     const sp = new URLSearchParams();
     if (viewMode !== 'board') sp.set('view', viewMode);
@@ -89,7 +91,6 @@ function TasksPageContent() {
     router.replace(`${pathname}${qs ? `?${qs}` : ''}`, { scroll: false });
   }, [viewMode, statusFilter, priorityFilter, dateFrom, dateTo, search, projectFilter, pathname, router]);
 
-  // 数据
   const queryParams: TaskQueryParams = {
     status: statusFilter || undefined,
     priority: priorityFilter || undefined,
@@ -112,8 +113,6 @@ function TasksPageContent() {
   const taskCount = tasks.length;
   const hasActiveFilters = statusFilter || priorityFilter || dateFrom || dateTo || search || projectFilter;
 
-  // ---- 甘特视图数据 ----
-  // projectFilter 为空 = 全部项目（后端会查所有任务）
   const selectedProject = useMemo(
     () => projectFilter ? projects.find(p => p.id === projectFilter) : undefined,
     [projects, projectFilter],
@@ -177,7 +176,6 @@ function TasksPageContent() {
     }
   }
 
-  // ---- 操作 ----
   function handleCreate(input: CreateTaskInput) {
     createMutation.mutate(input, {
       onSuccess: () => { setShowForm(false); setEditTask(null); },
@@ -210,6 +208,22 @@ function TasksPageContent() {
     setDetailTask(task);
   }
 
+  function handleCost(task: Task) {
+    setCostTask(task);
+  }
+
+  function handleCostSave(id: string, data: { cost: number; costNote?: string }) {
+    updateMutation.mutate({ id, data });
+  }
+
+  function handleCreateCost(projectId: string, data: CreateCostInput) {
+    api.post(`/costs/project/${projectId}`, data).then(() => {
+      toast.success('已同步到记账中心');
+    }).catch(() => {
+      toast.error('同步记账中心失败');
+    });
+  }
+
   function clearFilters() {
     setStatusFilter(''); setPriorityFilter(''); setDateFrom(''); setDateTo('');
     setSearch(''); setProjectFilter('');
@@ -222,8 +236,7 @@ function TasksPageContent() {
   return (
     <div className="flex flex-col gap-3 page-enter">
       {/* 第一行：视图切换 + 工具栏 + 操作按钮 */}
-      <div className="flex items-center gap-3">
-        {/* 视图切换 — 加大 */}
+      <div className="flex flex-wrap items-center gap-2 md:gap-3">
         <div className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card p-1">
           <button onClick={() => setViewMode('board')}
             className={cn('flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-all',
@@ -242,13 +255,12 @@ function TasksPageContent() {
           </button>
         </div>
 
-        {/* 看板/列表：搜索框 + 计数 */}
         {!isGantt && (
           <>
             <div className={filterBoxCls}>
               <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
               <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-                placeholder="搜索任务..." className={cn(filterBoxInner, 'w-64')} />
+                placeholder="搜索任务..." className={cn(filterBoxInner, 'w-32 sm:w-64')} />
               {search && (
                 <button onClick={() => setSearch('')} className="shrink-0 text-muted-foreground/50 hover:text-muted-foreground">
                   <X className="h-3 w-3" />
@@ -261,7 +273,6 @@ function TasksPageContent() {
           </>
         )}
 
-        {/* 甘特：排期工具栏 */}
         {isGantt && (
           <div className="flex items-center gap-2">
             <CustomSelect
@@ -299,16 +310,15 @@ function TasksPageContent() {
           </div>
         )}
 
-        {/* 新建任务（甘特模式隐藏） */}
         {!isGantt && (
           <button onClick={() => { setEditTask(null); setShowForm(true); }}
-            className="ml-auto flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95">
-            <Plus className="h-4 w-4" />新建任务
+            className="ml-auto flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-3 text-sm font-medium text-white transition-all hover:bg-indigo-700 active:scale-95 md:px-4">
+            <Plus className="h-4 w-4" /><span className="hidden sm:inline">新建任务</span>
           </button>
         )}
       </div>
 
-      {/* 第二行：筛选栏（看板/列表） / 排期关键指标（甘特） */}
+      {/* 第二行：筛选栏 / 排期关键指标 */}
       {!isGantt ? (
         <div className="flex flex-wrap items-center gap-2">
           <CustomSelect
@@ -402,9 +412,7 @@ function TasksPageContent() {
           dailyHourLimit={dailyHourLimit}
         />
       ) : isLoading ? (
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-        </div>
+        <TaskListSkeleton />
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-24">
           <AlertTriangle className="h-10 w-10 text-red-300" />
@@ -430,14 +438,20 @@ function TasksPageContent() {
         <TaskList tasks={tasks} onEdit={handleEdit} onDelete={handleDelete} onStatusChange={handleStatusChange} />
       )}
 
-      <TaskForm
+      <LeftSidePanel
         open={showForm}
         onClose={() => { setShowForm(false); setEditTask(null); }}
-        onSubmit={editTask ? handleUpdate : handleCreate}
-        isLoading={createMutation.isPending || updateMutation.isPending}
-        editTask={editTask}
-        projects={projects}
-      />
+        title={editTask ? '编辑任务' : '新建任务'}
+        subtitle={editTask ? '修改任务信息后将实时更新' : '填写任务信息后创建'}
+      >
+        <TaskFormContent
+          onSubmit={editTask ? handleUpdate : handleCreate}
+          onCancel={() => { setShowForm(false); setEditTask(null); }}
+          isLoading={createMutation.isPending || updateMutation.isPending}
+          editTask={editTask}
+          projects={projects}
+        />
+      </LeftSidePanel>
 
       <TaskDetailSheet
         task={detailTask}
@@ -446,129 +460,26 @@ function TasksPageContent() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onStatusChange={handleStatusChange}
+        onCost={handleCost}
       />
-    </div>
-  );
-}
 
-// ======================== 甘特指标卡片 ========================
-
-function GanttMetricCards({ schedule }: { schedule: NonNullable<ReturnType<typeof useSchedule>['data']> }) {
-  const { summary, dailyWorkload } = schedule;
-  const workDays = dailyWorkload.filter(d => d.hours > 0).length;
-  const avgHours = workDays > 0 ? Math.round((summary.totalHours / workDays) * 10) / 10 : 0;
-  const daysLeft = summary.projectEnd
-    ? Math.max(0, Math.ceil((new Date(summary.projectEnd).getTime() - Date.now()) / 86400000))
-    : null;
-
-  const items = [
-    { icon: <ListChecks className="h-4 w-4" />, label: '待排任务', value: `${summary.totalTasks}`, color: 'text-indigo-500' },
-    { icon: <Clock className="h-4 w-4" />, label: '总工时', value: `${summary.totalHours}h`, color: 'text-sky-500' },
-    { icon: <BarChart3 className="h-4 w-4" />, label: '日均工时', value: `${avgHours}h`, color: avgHours > 8 ? 'text-amber-500' : 'text-violet-500' },
-    { icon: <CalendarDays className="h-4 w-4" />, label: '工作日', value: `${workDays}天`, color: 'text-teal-500' },
-    { icon: <AlertTriangle className="h-4 w-4" />, label: '延期', value: `${summary.delayedTasks}`, color: summary.delayedTasks > 0 ? 'text-red-500' : 'text-emerald-500' },
-    { icon: <CalendarX className="h-4 w-4" />, label: '冲突', value: `${summary.conflictDays}`, color: summary.conflictDays > 0 ? 'text-orange-500' : 'text-emerald-500' },
-    { icon: <Timer className="h-4 w-4" />, label: '预计完成', value: daysLeft !== null ? `${daysLeft}天` : '—', color: daysLeft !== null && daysLeft <= 7 ? 'text-red-500' : 'text-indigo-500' },
-  ];
-
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      {items.map((c, i) => (
-        <div key={i} className="flex h-9 items-center gap-2.5 rounded-lg border border-border bg-card px-3.5">
-          <span className={cn('flex shrink-0', c.color)}>{c.icon}</span>
-          <span className="whitespace-nowrap text-2xs-plus text-muted-foreground">{c.label}</span>
-          <span className="whitespace-nowrap text-sm font-bold text-foreground">{c.value}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ======================== 甘特内容区 ========================
-
-function GanttContent({
-  schedule,
-  scheduleLoading,
-  scheduleError,
-  selectedProject,
-  applyMutation,
-  projects,
-  projectsLoading,
-  dailyHourLimit,
-}: {
-  schedule: ReturnType<typeof useSchedule>['data'];
-  scheduleLoading: boolean;
-  scheduleError: Error | null;
-  selectedProject: { name?: string | null; description?: string | null } | undefined;
-  applyMutation: ReturnType<typeof useMutation<void, Error, void>>;
-  projects: { id: string; name: string }[];
-  projectsLoading: boolean;
-  dailyHourLimit: number;
-}) {
-  if (projectsLoading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-      </div>
-    );
-  }
-
-  if (projects.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card py-24">
-        <CalendarDays className="mb-3 h-12 w-12 text-slate-200" />
-        <p className="text-sm text-muted-foreground">暂无进行中的项目</p>
-      </div>
-    );
-  }
-
-  if (scheduleError) {
-    return (
-      <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-        <AlertTriangle className="h-4 w-4" />排期计算失败，请稍后重试
-      </div>
-    );
-  }
-
-  if (scheduleLoading || !schedule) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {/* 甘特图头部 + 应用按钮 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">
-            {selectedProject?.name || '全部项目'}
-            <span className="ml-2 text-xs font-normal text-muted-foreground">
-              {formatDate(schedule.summary.projectStart)} ~ {formatDate(schedule.summary.projectEnd)}
-            </span>
-          </h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-muted px-2.5 py-0.5 text-2xs-plus text-muted-foreground">
-            {schedule.tasks.length} 个任务
-          </span>
-          <button
-            onClick={() => applyMutation.mutate()}
-            disabled={!schedule.tasks.length || applyMutation.isPending}
-            className="flex h-8 items-center gap-1.5 rounded-lg bg-indigo-600 px-3 text-sm font-medium text-white transition-all hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {applyMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-            应用排期
-          </button>
-        </div>
-      </div>
-
-      {/* 甘特图全宽 */}
-      <div className="rounded-xl border border-border bg-card p-4">
-        <GanttChart tasks={schedule.tasks} dailyWorkload={schedule.dailyWorkload} dailyLimit={dailyHourLimit} />
-      </div>
+      <LeftSidePanel
+        open={!!costTask}
+        onClose={() => setCostTask(null)}
+        title="快捷记账"
+        subtitle={costTask?.title || ''}
+        width={380}
+      >
+        {costTask && (
+          <CostFormContent
+            task={costTask}
+            projectId={costTask.projectId}
+            onSave={handleCostSave}
+            onCreateCost={(data) => handleCreateCost(costTask.projectId, data)}
+            onClose={() => setCostTask(null)}
+          />
+        )}
+      </LeftSidePanel>
     </div>
   );
 }

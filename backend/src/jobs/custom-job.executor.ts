@@ -4,6 +4,7 @@ import { AIService } from '../services/ai.service';
 import * as notificationService from '../services/notification.service';
 import * as dashboardService from '../services/dashboard.service';
 import { logExecution } from '../utils/job-logger';
+import logger from '../utils/logger';
 
 // AI 分析模板 prompt 映射（与前端 AI_TEMPLATES 对应）
 const TEMPLATE_PROMPTS: Record<string, string> = {
@@ -78,7 +79,7 @@ async function sendToWebhooks(userId: string, title: string, content: string, we
     try {
       await notificationService.sendWebhook(wh.channel, { title, content }, wh.url);
     } catch (err) {
-      console.error(`[custom-job] webhook ${targetName} failed:`, err);
+      logger.error({ job: 'custom-job', target: targetName, err }, 'webhook failed');
     }
   }
 }
@@ -90,7 +91,7 @@ async function sendToEmail(userId: string, title: string, content: string) {
   try {
     await notificationService.sendEmail(user.email, title, content, userId);
   } catch (err) {
-    console.error(`[custom-job] email failed:`, err);
+    logger.error({ job: 'custom-job', err }, 'email failed');
   }
 }
 
@@ -229,20 +230,20 @@ async function registerCustomJobs(): Promise<void> {
 
   for (const job of jobs) {
     if (!cron.validate(job.cronExpr)) {
-      console.warn(`[custom-job] 跳过无效 cron: ${job.name} (${job.cronExpr})`);
+      logger.warn({ job: 'custom-job', name: job.name, cronExpr: job.cronExpr }, '跳过无效 cron');
       continue;
     }
 
     const jobData = { ...job };
     const task = cron.schedule(job.cronExpr, async () => {
       const start = Date.now();
-      console.log(`[custom-job] 执行: ${jobData.name}`);
+      logger.info({ job: 'custom-job', name: jobData.name }, '执行');
       try {
         const result = await executeCustomJob(jobData.userId, jobData);
         await logExecution({ jobSlug: `custom-${jobData.id}`, userId: jobData.userId, status: 'success', result, durationMs: Date.now() - start });
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        console.error(`[custom-job] 失败: ${jobData.name}`, err);
+        logger.error({ job: 'custom-job', name: jobData.name, err }, '失败');
         await logExecution({ jobSlug: `custom-${jobData.id}`, userId: jobData.userId, status: 'error', error: msg, durationMs: Date.now() - start });
       }
     }, { timezone: 'Asia/Shanghai' });
@@ -250,7 +251,7 @@ async function registerCustomJobs(): Promise<void> {
     stopCustomJobs.push(() => task.stop());
   }
 
-  console.log(`[custom-job] 已注册 ${jobs.length} 个自定义任务`);
+  logger.info({ job: 'custom-job', count: jobs.length }, '已注册自定义任务');
 }
 
 /** 刷新自定义任务（创建/更新/删除后调用） */
@@ -261,6 +262,6 @@ export async function refreshCustomJobs(): Promise<void> {
 /** 启动自定义任务调度器 */
 export function startCustomJobScheduler(): void {
   registerCustomJobs().catch(err => {
-    console.error('[custom-job] 注册失败:', err);
+    logger.error({ job: 'custom-job', err }, '注册失败');
   });
 }

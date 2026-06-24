@@ -8,7 +8,8 @@ const QUERY_KEY = 'costs';
 export interface CostRecord {
   id: string;
   amount: number;
-  category: 'LABOR' | 'MATERIAL' | 'OVERHEAD' | 'OTHER' | string;
+  direction?: 'INCOME' | 'EXPENSE';
+  category: string;
   description: string;
   date: string;
   projectId: string;
@@ -31,10 +32,12 @@ export interface CostSummary {
 
 export interface CreateCostInput {
   amount: number;
+  direction?: 'INCOME' | 'EXPENSE';
   category: string;
   description: string;
   date: string;
   taskId?: string;
+  note?: string;
 }
 
 export function useCosts(projectId: string) {
@@ -61,6 +64,8 @@ export function useCreateCost(projectId: string) {
       qc.invalidateQueries({ queryKey: [QUERY_KEY, projectId] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['reports'] });
+      // 同步刷新记账中心数据
+      qc.invalidateQueries({ queryKey: ['transactions'] });
     },
   });
 }
@@ -71,6 +76,21 @@ export function useDeleteCost(projectId: string) {
     mutationFn: (id: string) => api.delete(`/costs/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [QUERY_KEY, projectId] });
+      qc.invalidateQueries({ queryKey: ['projects'] });
+      qc.invalidateQueries({ queryKey: ['reports'] });
+      qc.invalidateQueries({ queryKey: ['transactions'] });
+    },
+  });
+}
+
+/** 批量同步任务中心已有成本到记账中心 */
+export function useSyncTaskCosts() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (projectId?: string) => api.post('/costs/sync-task-costs', { projectId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QUERY_KEY] });
+      qc.invalidateQueries({ queryKey: ['transactions'] });
       qc.invalidateQueries({ queryKey: ['projects'] });
       qc.invalidateQueries({ queryKey: ['reports'] });
     },

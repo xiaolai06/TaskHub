@@ -264,7 +264,7 @@ export function AiPanel({ open, onClose }: { open: boolean; onClose: () => void 
 
       <div
         data-ai-panel
-        className="fixed right-0 top-0 z-50 flex h-screen w-[1060px] flex-col bg-card shadow-2xl transition-transform duration-300 ease-in-out"
+        className="fixed right-0 top-0 z-50 flex h-screen w-full flex-col bg-card shadow-2xl transition-transform duration-300 ease-in-out lg:w-[1060px]"
         style={{ transform: open ? 'translateX(0)' : 'translateX(100%)' }}
       >
         {/* 顶部栏 */}

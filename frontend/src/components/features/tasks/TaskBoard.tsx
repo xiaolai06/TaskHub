@@ -169,7 +169,7 @@ export function TaskBoard({ tasks, onStatusChange, onEdit, onDelete, onClick }: 
 
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {columns.map((col) => (
           <DroppableColumnWrapper
             key={col.key}

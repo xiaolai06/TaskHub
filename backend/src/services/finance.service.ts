@@ -105,11 +105,12 @@ export async function getFinancialSummary(
       },
       _sum: { cost: true },
     }),
-    // 支出2：非项目支出（Transaction EXPENSE）
+    // 支出2：非项目支出（Transaction EXPENSE，排除 CostRecord 同步的避免双重计数）
     prisma.transaction.aggregate({
       where: {
         userId,
         direction: 'EXPENSE',
+        source: { not: 'COST_RECORD_SYNC' },
         date: { gte: start, lte: end },
       },
       _sum: { amount: true },

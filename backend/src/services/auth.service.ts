@@ -6,6 +6,7 @@ import { AppError } from '../utils/errors';
 import { verifyCaptcha } from '../utils/captcha-store';
 import { createResetCode, verifyResetCode } from '../utils/reset-store';
 import { sendResetCode as sendResetEmail } from '../utils/email';
+import logger from '../utils/logger';
 
 /** JWT 有效期：7 天（毫秒） */
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
@@ -31,7 +32,7 @@ async function createSession(userId: string, email: string, role: string, req: R
   prisma.session.deleteMany({
     where: { expiresAt: { lt: new Date() } },
   }).catch((e) => {
-    console.warn('[Session] 过期会话清理失败:', (e as Error).message);
+    logger.warn({ err: e }, '过期会话清理失败');
   });
 
   return token;

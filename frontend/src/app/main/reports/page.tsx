@@ -1,14 +1,16 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState, useCallback } from 'react';
 import { TrendingUp, FolderKanban, CheckSquare, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { FinanceTab } from '@/components/features/reports/FinanceTab';
-import { ProjectTab } from '@/components/features/reports/ProjectTab';
-import { TaskTab } from '@/components/features/reports/TaskTab';
-import { CustomerTab } from '@/components/features/reports/CustomerTab';
 import { DateFilter, createDefaultDateFilter } from '@/components/features/reports/DateFilter';
 import type { DateFilterValue } from '@/components/features/reports/DateFilter';
+
+const FinanceTab = dynamic(() => import('@/components/features/reports/FinanceTab').then(m => m.FinanceTab), { ssr: false });
+const ProjectTab = dynamic(() => import('@/components/features/reports/ProjectTab').then(m => m.ProjectTab), { ssr: false });
+const TaskTab = dynamic(() => import('@/components/features/reports/TaskTab').then(m => m.TaskTab), { ssr: false });
+const CustomerTab = dynamic(() => import('@/components/features/reports/CustomerTab').then(m => m.CustomerTab), { ssr: false });
 
 const TABS = [
   { key: 'finance', label: '财务总览', icon: TrendingUp },

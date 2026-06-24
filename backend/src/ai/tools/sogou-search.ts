@@ -1,6 +1,7 @@
 import { ToolDefinition } from './types';
 import { fetchWithTimeout } from './fetch-with-timeout';
 import { applySearchQualityGate, type RawSearchResult } from './search-quality';
+import logger from '../../utils/logger';
 
 // ═══ 搜狗搜索工具 ═══
 // 国内直连，免费，无需 API Key
@@ -164,7 +165,7 @@ AI 自适应提示: 国内直连免费搜索，零配置。适合中文搜索场
     const cacheKey = query.trim().toLowerCase();
     const cached = getCached(cacheKey);
     if (cached) {
-      console.log(`[Sogou] 缓存命中: "${query.slice(0, 30)}..."`);
+      logger.debug({ query: query.slice(0, 30) }, 'Sogou 缓存命中');
       return cached;
     }
 
@@ -213,7 +214,7 @@ AI 自适应提示: 国内直连免费搜索，零配置。适合中文搜索场
       return result;
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : '搜狗搜索失败';
-      console.warn(`[Sogou] failed: ${message}`);
+      logger.warn({ error: message }, 'Sogou failed');
       return { error: message };
     }
   },

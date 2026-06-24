@@ -5,6 +5,7 @@ import { pushReport } from '../utils/push-helper';
 import * as dashboardService from '../services/dashboard.service';
 import { loadPrompt } from '../utils/prompt-loader';
 import { logExecution } from '../utils/job-logger';
+import logger from '../utils/logger';
 const PROMPT = loadPrompt('health-check.txt', '你是项目健康度检查助手，请分析项目状态。');
 
 export async function runHealthCheck(userId: string): Promise<string> {
@@ -52,7 +53,7 @@ export async function runHealthCheck(userId: string): Promise<string> {
 }
 
 cron.schedule('0 10 * * 0', async () => {
-  console.log('[health-check] 开始...');
+  logger.info({ job: 'health-check' }, '开始');
   try {
     const users = await prisma.user.findMany({
       where: { projects: { some: {} } },
@@ -68,10 +69,10 @@ cron.schedule('0 10 * * 0', async () => {
         await runHealthCheck(user.id);
         await logExecution({ jobSlug: 'health-check', userId: user.id, status: 'success', durationMs: Date.now() - userStart });
       } catch (e) {
-        console.error(`[health-check] 用户 ${user.id} 失败:`, e);
+        logger.error({ job: 'health-check', userId: user.id, err: e }, '用户失败');
         await logExecution({ jobSlug: 'health-check', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
       }
     }
-    console.log(`[health-check] 完成`);
-  } catch (e) { console.error('[health-check] 失败:', e); }
+    logger.info({ job: 'health-check' }, '完成');
+  } catch (e) { logger.error({ job: 'health-check', err: e }, '失败'); }
 }, { timezone: 'Asia/Shanghai' });

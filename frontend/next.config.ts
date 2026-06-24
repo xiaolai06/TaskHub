@@ -6,6 +6,21 @@ const nextConfig: NextConfig = {
   // 隐藏 X-Powered-By: Next.js 头
   poweredByHeader: false,
 
+  // 生产环境输出 standalone（Docker 友好）
+  output: 'standalone',
+
+  // 压缩
+  compress: true,
+
+  // 严格模式
+  reactStrictMode: true,
+
+  // 图片优化
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24, // 24h
+  },
+
   // 仅开发环境使用 rewrite 代理 API（生产环境由 Nginx 处理）
   ...(isDev && {
     async rewrites() {

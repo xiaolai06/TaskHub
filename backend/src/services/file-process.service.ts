@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import { AppError } from '../utils/errors';
+import logger from '../utils/logger';
 
 /**
  * 文件预处理层
@@ -176,14 +177,14 @@ async function compressImage(
       .toBuffer();
 
     const ratio = ((1 - compressed.length / originalSize) * 100).toFixed(0);
-    console.log(`[FileProcess] 图片压缩: ${(originalSize / 1024).toFixed(0)}KB → ${(compressed.length / 1024).toFixed(0)}KB (压缩 ${ratio}%)`);
+    logger.info({ originalKB: (originalSize / 1024).toFixed(0), compressedKB: (compressed.length / 1024).toFixed(0), ratio }, 'FileProcess 图片压缩');
 
     return {
       base64: compressed.toString('base64'),
       compressedSize: compressed.length,
     };
   } catch (err) {
-    console.warn('[FileProcess] 图片压缩失败，使用原图:', err);
+    logger.warn({ err }, 'FileProcess 图片压缩失败，使用原图');
     return {
       base64: buffer.toString('base64'),
       compressedSize: originalSize,
@@ -214,7 +215,7 @@ async function extractPdfText(buffer: Buffer): Promise<string> {
 
     return truncateText(text, numpages, 'PDF');
   } catch (err) {
-    console.error('[FileProcess] PDF 解析失败:', err);
+    logger.error({ err }, 'FileProcess PDF 解析失败');
     return '[PDF 解析失败，请确认文件未损坏或不是扫描型 PDF]';
   }
 }
@@ -228,7 +229,7 @@ async function extractDocxText(buffer: Buffer): Promise<string> {
     const text = result.value;
 
     if (result.messages.length > 0) {
-      console.warn('[FileProcess] Word 解析警告:', result.messages.slice(0, 3));
+      logger.warn({ messages: result.messages.slice(0, 3) }, 'FileProcess Word 解析警告');
     }
 
     if (!text || text.trim().length < 10) {
@@ -237,7 +238,7 @@ async function extractDocxText(buffer: Buffer): Promise<string> {
 
     return truncateText(text, 1, 'Word');
   } catch (err) {
-    console.error('[FileProcess] Word 解析失败:', err);
+    logger.error({ err }, 'FileProcess Word 解析失败');
     return '[Word 解析失败，请确认文件未损坏且为 .docx 格式]';
   }
 }
@@ -295,7 +296,7 @@ async function extractExcelText(buffer: Buffer): Promise<string> {
     const fullText = parts.join('\n');
     return truncateText(fullText, workbook.SheetNames.length, 'Excel');
   } catch (err) {
-    console.error('[FileProcess] Excel 解析失败:', err);
+    logger.error({ err }, 'FileProcess Excel 解析失败');
     return '[Excel 解析失败，请确认文件未损坏且为 .xlsx 格式]';
   }
 }
@@ -312,7 +313,7 @@ function extractPlainText(buffer: Buffer): string {
 
     return truncateText(text, 1, 'TXT');
   } catch (err) {
-    console.error('[FileProcess] 文本读取失败:', err);
+    logger.error({ err }, 'FileProcess 文本读取失败');
     return '[文本文件读取失败，请确认文件编码为 UTF-8]';
   }
 }

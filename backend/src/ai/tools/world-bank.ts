@@ -95,13 +95,13 @@ AI 自适应提示: 宏观经济数据专用工具。问"GDP/人口/失业率/�
       const res = await fetchWithTimeout(url, {}, 15_000);
 
       if (!res.ok) throw new Error(`World Bank API HTTP ${res.status}`);
-      const json = await res.json() as any;
+      const json = await res.json() as [{ total: number; page: number; per_page: number }, Array<{ value: number | null; date: string; country?: { value: string } }>] | [];
 
       if (!json || json.length < 2 || !json[1]) {
         return { error: '未找到数据', country, indicator };
       }
 
-      const records = json[1] as any[];
+      const records = json[1];
       const countryName = records[0]?.country?.value || country;
 
       const data = records

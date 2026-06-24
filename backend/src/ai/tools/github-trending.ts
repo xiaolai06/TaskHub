@@ -22,6 +22,11 @@ interface GitHubRepo {
   owner: { login: string; avatar_url: string };
 }
 
+interface GitHubSearchResponse {
+  items: GitHubRepo[];
+  total_count: number;
+}
+
 async function fetchTrending(params: {
   language?: string;
   since?: 'daily' | 'weekly' | 'monthly';
@@ -55,7 +60,7 @@ async function fetchTrending(params: {
     throw new Error(`GitHub API HTTP ${res.status}`);
   }
 
-  const data = await res.json() as any;
+  const data = await res.json() as GitHubSearchResponse;
   const items: GitHubRepo[] = data.items || [];
 
   return {

@@ -1,10 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import pinoHttp from 'pino-http';
+import { randomUUID } from 'node:crypto';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import routes from './routes';
+import logger from './utils/logger';
 
 const app = express();
 
@@ -22,7 +26,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-// ============ 中间件 ============
+// ============ 跨域 ============
 app.use(cors({
   origin: (origin, callback) => {
     // 无 origin（同源请求/服务端调用/curl）→ 放行
@@ -48,13 +52,57 @@ app.use(cors({
     if (allowed) {
       callback(null, origin);
     } else {
-      console.warn(`[CORS] 拒绝来源: ${origin}`);
+      logger.warn({ origin }, 'CORS 拒绝来源');
       callback(null, false);
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// ============ 请求日志（安全头和 CORS 之后、路由之前） ============
+app.use(pinoHttp({
+  logger,
+  genReqId: (req) => (req.headers['x-request-id'] as string) || randomUUID(),
+  // 304 缓存命中不记录（减少噪音）
+  autoLogging: {
+    ignore: (req) => req.url === '/api/health',
+  },
+  // 自定义成功日志格式：只显示路径（不含查询参数）
+  customSuccessMessage: (req, res) => {
+    const path = req.url?.split('?')[0] || req.url;
+    return `${req.method} ${path} ${res.statusCode}`;
+  },
+  customErrorMessage: (req, res) => {
+    const path = req.url?.split('?')[0] || req.url;
+    return `${req.method} ${path} ${res.statusCode}`;
+  },
+  // 只记录关键字段，去掉 headers 噪音
+  serializers: {
+    req: (req) => ({
+      method: req.method,
+      url: req.url,
+      id: req.id,
+      ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip,
+    }),
+    res: (res) => ({ statusCode: res.statusCode }),
+  },
+  // 304 不记录响应体
+  customLogLevel: (_req, res, err) => {
+    if (res.statusCode >= 400 || err) return 'error';
+    if (res.statusCode >= 300) return 'silent'; // 304 等不记录
+    return 'info';
+  },
+}));
+
+// ============ 响应压缩 ============
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+  threshold: 1024, // only compress responses > 1KB
 }));
 
 // ============ 请求体解析 ============

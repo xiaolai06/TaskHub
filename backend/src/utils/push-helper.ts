@@ -1,6 +1,7 @@
 import * as notificationService from '../services/notification.service';
 import type { NotificationType, EmailSummaryInput } from '../services/notification.service';
 import { prisma } from '../server';
+import logger from './logger';
 
 /**
  * 统一推送：站内通知 + 邮件 + Webhook
@@ -29,7 +30,7 @@ export async function pushReport(params: {
     try {
       await notificationService.sendSummaryEmail(user.email, title, emailSummary, userId);
     } catch (err) {
-      console.warn(`[pushReport] 邮件发送失败 (${userId}):`, err instanceof Error ? err.message : err);
+      logger.warn({ userId, err }, 'pushReport 邮件发送失败');
     }
   }
 
@@ -46,12 +47,12 @@ export async function pushReport(params: {
           try {
             await notificationService.sendWebhook(wh.channel, { title, content }, wh.url);
           } catch (err) {
-            console.warn(`[pushReport] ${wh.name}(${wh.channel}) 推送失败:`, err instanceof Error ? err.message : err);
+            logger.warn({ webhook: wh.name, channel: wh.channel, err }, 'pushReport 推送失败');
           }
         }
       }
     } catch (err) {
-      console.warn(`[pushReport] Webhook 推送异常 (${userId}):`, err instanceof Error ? err.message : err);
+      logger.warn({ userId, err }, 'pushReport Webhook 推送异常');
     }
   }
 }

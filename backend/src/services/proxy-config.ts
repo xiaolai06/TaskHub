@@ -1,4 +1,5 @@
 import { prisma } from '../server';
+import logger from '../utils/logger';
 
 // ═══ 代理配置（数据库优先，环境变量兜底）═══
 // 存储: Setting 表, category=NETWORK, key=proxy_url
@@ -62,15 +63,15 @@ async function checkProxyHealth(proxyUrl: string): Promise<boolean> {
 function updateCache(userId: string, url: string, healthy: boolean, prevFailCount: number): void {
   if (healthy) {
     _cache.set(userId, { url, healthy: true, checkedAt: Date.now(), failCount: 0 });
-    console.log(`[Proxy] ✅ 代理可用: ${url}`);
+    logger.info({ url }, 'Proxy 代理可用');
   } else {
     const newFailCount = prevFailCount + 1;
     const stillHealthy = newFailCount < FAIL_THRESHOLD;
     _cache.set(userId, { url, healthy: stillHealthy, checkedAt: Date.now(), failCount: newFailCount });
     if (stillHealthy) {
-      console.warn(`[Proxy] ⚠️ 检查失败 ${newFailCount}/${FAIL_THRESHOLD}，暂保持可用: ${url}`);
+      logger.warn({ failCount: newFailCount, threshold: FAIL_THRESHOLD, url }, 'Proxy 检查失败，暂保持可用');
     } else {
-      console.warn(`[Proxy] ❌ 连续失败 ${newFailCount} 次，标记不可用: ${url}`);
+      logger.warn({ failCount: newFailCount, url }, 'Proxy 连续失败，标记不可用');
     }
   }
 }

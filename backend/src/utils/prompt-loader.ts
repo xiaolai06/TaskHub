@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import logger from './logger';
 
 /**
  * 提示词文件加载器
@@ -31,8 +32,8 @@ for (const dir of CANDIDATE_DIRS) {
 }
 
 if (!resolved) {
-  console.warn(`[prompt-loader] ⚠️ 提示词目录未找到，已尝试: ${CANDIDATE_DIRS.join(', ')}`);
-  console.warn('[prompt-loader] 将使用内联兜底提示词');
+  logger.warn({ dirs: CANDIDATE_DIRS }, 'prompt-loader 提示词目录未找到');
+  logger.warn('prompt-loader 将使用内联兜底提示词');
 }
 
 const promptCache = new Map<string, string>();
@@ -233,7 +234,7 @@ export function loadPrompt(filename: string, fallback = ''): string {
   // 3. 内联兜底
   const inline = INLINE_FALLBACKS[filename];
   if (inline) {
-    console.log(`[prompt-loader] 📄 ${filename} 使用内联兜底版本`);
+    logger.debug({ filename }, 'prompt-loader 使用内联兜底版本');
     promptCache.set(filename, inline);
     return inline;
   }
@@ -242,6 +243,6 @@ export function loadPrompt(filename: string, fallback = ''): string {
   if (fallback) return fallback;
 
   // 5. 最终空字符串
-  console.warn(`[prompt-loader] ⚠️ ${filename} 无可用内容`);
+  logger.warn({ filename }, 'prompt-loader 无可用内容');
   return '';
 }

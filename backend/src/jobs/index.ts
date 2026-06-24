@@ -4,6 +4,7 @@
 
 import cron from 'node-cron';
 import { startCustomJobScheduler } from './custom-job.executor';
+import logger from '../utils/logger';
 
 export function startAllCronJobs(): void {
   // 动态 require 确保依赖已加载
@@ -15,7 +16,7 @@ export function startAllCronJobs(): void {
   require('./weekly-report.job');
   require('./weekly-memory.job');
   require('./health-check.job');
-  console.log('⏰ 定时任务已全部注册 (8 个 Job)');
+  logger.info({ count: 8 }, '定时任务已全部注册');
 
   // 注册自定义任务
   startCustomJobScheduler();

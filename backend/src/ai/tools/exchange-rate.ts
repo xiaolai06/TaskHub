@@ -5,6 +5,12 @@ import { fetchWithTimeout } from './fetch-with-timeout';
 // open.er-api.com — 免费无限制，无需 Key
 // 数据源: 欧洲央行，每日更新
 
+interface ExchangeRateResponse {
+  result: string;
+  rates: Record<string, number>;
+  time_last_update_utc: string;
+}
+
 const ER_API = 'https://open.er-api.com/v6';
 
 const POPULAR_CURRENCIES: Record<string, string> = {
@@ -64,7 +70,7 @@ export const exchangeRateTool: ToolDefinition = {
     try {
       const res = await fetchWithTimeout(`${ER_API}/latest/${from}`);
       if (!res.ok) throw new Error(`汇率 API HTTP ${res.status}`);
-      const data = await res.json() as any;
+      const data = await res.json() as ExchangeRateResponse;
 
       if (data.result !== 'success') {
         return { error: `不支持的货币: ${from}` };

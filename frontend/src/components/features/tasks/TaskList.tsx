@@ -259,8 +259,8 @@ export function TaskList({ tasks, onEdit, onDelete, onStatusChange }: TaskListPr
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/60 bg-card">
-      <table className="w-full">
+    <div className="overflow-x-auto rounded-xl border border-border/60 bg-card">
+      <table className="w-full min-w-[640px]">
         <thead>
           <tr className="border-b-2 border-border bg-muted/80">
             <th className="w-8 pl-4" />

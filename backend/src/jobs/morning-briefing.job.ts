@@ -6,6 +6,7 @@ import * as dashboardService from '../services/dashboard.service';
 import { pushReport } from '../utils/push-helper';
 import { loadPrompt } from '../utils/prompt-loader';
 import { logExecution } from '../utils/job-logger';
+import logger from '../utils/logger';
 
 function briefBullets(text: string): string[] {
   const lines = text
@@ -70,7 +71,7 @@ export async function runMorningBriefing(userId: string): Promise<string> {
 }
 
 cron.schedule('0 8 * * *', async () => {
-  console.log('[morning-briefing] start');
+  logger.info({ job: 'morning-briefing' }, 'start');
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
     const users = await prisma.user.findMany({
@@ -126,7 +127,7 @@ cron.schedule('0 8 * * *', async () => {
 
         const ai = new AIService(user.id);
         if (!await ai.init()) {
-          console.log(`[morning-briefing] user ${user.id} has no AI config`);
+          logger.info({ job: 'morning-briefing', userId: user.id }, 'user has no AI config');
           continue;
         }
 
@@ -157,12 +158,12 @@ cron.schedule('0 8 * * *', async () => {
         }
         await logExecution({ jobSlug: 'morning-briefing', userId: user.id, status: 'success', result: result?.slice(0, 200), durationMs: Date.now() - userStart });
       } catch (e) {
-        console.error(`[morning-briefing] user ${user.id} failed:`, e);
+        logger.error({ job: 'morning-briefing', userId: user.id, err: e }, 'user failed');
         await logExecution({ jobSlug: 'morning-briefing', userId: user.id, status: 'error', error: e instanceof Error ? e.message : String(e), durationMs: Date.now() - userStart });
       }
     }
-    console.log(`[morning-briefing] done, users=${users.length}`);
+    logger.info({ job: 'morning-briefing', userCount: users.length }, 'done');
   } catch (e) {
-    console.error('[morning-briefing] failed:', e);
+    logger.error({ job: 'morning-briefing', err: e }, 'failed');
   }
 }, { timezone: 'Asia/Shanghai' });

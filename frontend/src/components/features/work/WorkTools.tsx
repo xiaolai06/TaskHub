@@ -174,21 +174,27 @@ function TodoPanel({ onClose }: { onClose: () => void }) {
       const todo = await api.post<TodayTodoItem>('/work/todos', { content: input.trim() });
       setTodos((prev) => [todo, ...prev]);
       setInput('');
-    } catch {}
+    } catch (err) {
+      console.error('[WorkTools] Failed to add todo:', err);
+    }
   }
 
   async function handleToggle(id: string, completed: boolean) {
     try {
       await api.patch(`/work/todos/${id}`);
       setTodos((prev) => prev.map((i) => i.id === id ? { ...i, completed: !completed } : i));
-    } catch {}
+    } catch (err) {
+      console.error('[WorkTools] Failed to toggle todo:', err);
+    }
   }
 
   async function handleDelete(id: string) {
     try {
       await api.delete(`/work/todos/${id}`);
       setTodos((prev) => prev.filter((i) => i.id !== id));
-    } catch {}
+    } catch (err) {
+      console.error('[WorkTools] Failed to delete todo:', err);
+    }
   }
 
   const doneCount = todos.filter((t) => t.completed).length;

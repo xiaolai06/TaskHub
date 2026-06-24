@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../utils/errors';
 import { error } from '../utils/response';
+import logger from '../utils/logger';
 
 interface PrismaError extends Error {
   code: string;
@@ -10,6 +11,7 @@ interface PrismaError extends Error {
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): void {
   // 已知业务错误
   if (err instanceof AppError) {
+    logger.debug({ code: err.code, statusCode: err.statusCode, path: _req.path }, err.message);
     error(res, err.code, err.message, err.statusCode);
     return;
   }
@@ -34,6 +36,6 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
   }
 
   // 未知错误
-  console.error('[ErrorHandler] 未捕获错误:', err.message);
+  logger.error({ err }, '未捕获错误');
   error(res, 'INTERNAL_ERROR', '服务器内部错误', 500);
 }

@@ -38,4 +38,13 @@ router.get('/summary', async (req: Request, res: Response, next) => {
   } catch (err) { next(err); }
 });
 
+// 批量同步任务成本到记账中心
+router.post('/sync-task-costs', async (req: Request, res: Response, next) => {
+  try {
+    const projectId = typeof req.body?.projectId === 'string' ? req.body.projectId : undefined;
+    const result = await costService.syncTaskCostsToTransactions(req.userId!, projectId);
+    success(res, result, `已同步 ${result.synced} 条记录`);
+  } catch (err) { next(err); }
+});
+
 export default router;

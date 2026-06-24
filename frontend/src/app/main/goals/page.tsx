@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { Loader2, AlertTriangle, Target, Plus, Sparkles, LayoutList, Columns3, Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -17,7 +18,8 @@ import type { Goal, MetricCategory } from '@/hooks/useGoals';
 import { GoalCard, METRIC_CATEGORIES } from '@/components/features/goals/GoalCard';
 import { GoalForm } from '@/components/features/goals/GoalForm';
 import { GoalFilter } from '@/components/features/goals/GoalFilter';
-import { GoalBoard } from '@/components/features/goals/GoalBoard';
+
+const GoalBoard = dynamic(() => import('@/components/features/goals/GoalBoard').then(m => m.GoalBoard), { ssr: false });
 
 const categoryMetricMap: Record<MetricCategory, string[]> = Object.fromEntries(
   METRIC_CATEGORIES.map(c => [c.key, c.metrics])

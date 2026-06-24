@@ -10,6 +10,8 @@ import {
   createCheckinSchema,
 } from '../validators/goal.schema';
 import * as goalService from '../services/goal.service';
+import * as goalProgressService from '../services/goal-progress.service';
+import * as goalMilestoneService from '../services/goal-milestone.service';
 import { success, error } from '../utils/response';
 import { AppError } from '../utils/errors';
 
@@ -106,7 +108,7 @@ router.delete('/:id', async (req: Request, res: Response, next: NextFunction) =>
 // PATCH /:id/progress - 手动更新进度
 router.patch('/:id/progress', validate(updateProgressSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.updateProgress(req.userId!, String(req.params.id), req.body);
+    const data = await goalProgressService.updateProgress(req.userId!, String(req.params.id), req.body);
     success(res, data, '进度更新成功');
   } catch (err) {
     if (err instanceof AppError) {
@@ -120,7 +122,7 @@ router.patch('/:id/progress', validate(updateProgressSchema), async (req: Reques
 // POST /:id/calculate - 自动计算进度
 router.post('/:id/calculate', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await goalService.calculateAutoProgress(req.userId!, String(req.params.id));
+    const result = await goalProgressService.calculateAutoProgress(req.userId!, String(req.params.id));
     success(res, result, result.message);
   } catch (err) {
     if (err instanceof AppError) {
@@ -136,7 +138,7 @@ router.post('/:id/calculate', async (req: Request, res: Response, next: NextFunc
 // GET /:id/logs - 获取进度日记列表
 router.get('/:id/logs', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.getProgressLogs(req.userId!, String(req.params.id));
+    const data = await goalProgressService.getProgressLogs(req.userId!, String(req.params.id));
     success(res, data);
   } catch (err) {
     if (err instanceof AppError) {
@@ -150,7 +152,7 @@ router.get('/:id/logs', async (req: Request, res: Response, next: NextFunction) 
 // POST /:id/logs - 添加进度日记
 router.post('/:id/logs', validate(createProgressLogSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.addProgressLog(req.userId!, String(req.params.id), req.body);
+    const data = await goalProgressService.addProgressLog(req.userId!, String(req.params.id), req.body);
     success(res, data, '进度记录成功', 201);
   } catch (err) {
     if (err instanceof AppError) {
@@ -164,7 +166,7 @@ router.post('/:id/logs', validate(createProgressLogSchema), async (req: Request,
 // DELETE /:id/logs/:logId - 删除进度日记
 router.delete('/:id/logs/:logId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.deleteProgressLog(
+    const data = await goalProgressService.deleteProgressLog(
       req.userId!,
       String(req.params.id),
       String(req.params.logId),
@@ -184,7 +186,7 @@ router.delete('/:id/logs/:logId', async (req: Request, res: Response, next: Next
 // GET /:id/milestones - 获取里程碑列表
 router.get('/:id/milestones', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.getMilestones(req.userId!, String(req.params.id));
+    const data = await goalMilestoneService.getMilestones(req.userId!, String(req.params.id));
     success(res, data);
   } catch (err) {
     if (err instanceof AppError) {
@@ -198,7 +200,7 @@ router.get('/:id/milestones', async (req: Request, res: Response, next: NextFunc
 // POST /:id/milestones - 添加里程碑
 router.post('/:id/milestones', validate(createMilestoneSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.createMilestone(req.userId!, String(req.params.id), req.body);
+    const data = await goalMilestoneService.createMilestone(req.userId!, String(req.params.id), req.body);
     success(res, data, '里程碑添加成功', 201);
   } catch (err) {
     if (err instanceof AppError) {
@@ -212,7 +214,7 @@ router.post('/:id/milestones', validate(createMilestoneSchema), async (req: Requ
 // PATCH /:id/milestones/:milestoneId - 更新里程碑状态
 router.patch('/:id/milestones/:milestoneId', validate(updateMilestoneSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.updateMilestone(
+    const data = await goalMilestoneService.updateMilestone(
       req.userId!,
       String(req.params.id),
       String(req.params.milestoneId),
@@ -231,7 +233,7 @@ router.patch('/:id/milestones/:milestoneId', validate(updateMilestoneSchema), as
 // DELETE /:id/milestones/:milestoneId - 删除里程碑
 router.delete('/:id/milestones/:milestoneId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await goalService.deleteMilestone(req.userId!, String(req.params.id), String(req.params.milestoneId));
+    await goalMilestoneService.deleteMilestone(req.userId!, String(req.params.id), String(req.params.milestoneId));
     success(res, null, '里程碑删除成功');
   } catch (err) {
     if (err instanceof AppError) {
@@ -248,7 +250,7 @@ router.delete('/:id/milestones/:milestoneId', async (req: Request, res: Response
 router.get('/:id/checkins', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const month = typeof req.query.month === 'string' ? req.query.month : undefined;
-    const data = await goalService.getCheckins(req.userId!, String(req.params.id), month);
+    const data = await goalMilestoneService.getCheckins(req.userId!, String(req.params.id), month);
     success(res, data);
   } catch (err) {
     if (err instanceof AppError) { error(res, err.code, err.message, err.statusCode); return; }
@@ -259,7 +261,7 @@ router.get('/:id/checkins', async (req: Request, res: Response, next: NextFuncti
 // POST /:id/checkin - 打卡
 router.post('/:id/checkin', validate(createCheckinSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.checkin(req.userId!, String(req.params.id), req.body);
+    const data = await goalMilestoneService.checkin(req.userId!, String(req.params.id), req.body);
     success(res, data, '打卡成功', 201);
   } catch (err) {
     if (err instanceof AppError) { error(res, err.code, err.message, err.statusCode); return; }
@@ -270,7 +272,7 @@ router.post('/:id/checkin', validate(createCheckinSchema), async (req: Request, 
 // DELETE /:id/checkin/:date - 取消打卡
 router.delete('/:id/checkin/:date', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = await goalService.uncheckin(req.userId!, String(req.params.id), String(req.params.date));
+    const data = await goalMilestoneService.uncheckin(req.userId!, String(req.params.id), String(req.params.date));
     success(res, data, '已取消打卡');
   } catch (err) {
     if (err instanceof AppError) { error(res, err.code, err.message, err.statusCode); return; }
